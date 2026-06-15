@@ -167,6 +167,7 @@ export const operatorDraftSchema = z.object({
   business_type: z.enum(BUSINESS_TYPES).nullable().optional(),
   display_name: z.string().trim().max(120).optional().nullable(),
   location: z.string().trim().max(200).optional().nullable(),
+  about: z.string().trim().max(1000).optional().nullable(),
   booking_type: z.enum(BOOKING_TYPES).nullable().optional(),
   advance_notice_hours: z
     .union([z.literal(6), z.literal(12), z.literal(24), z.literal(48)])
