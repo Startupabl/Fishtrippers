@@ -11,6 +11,8 @@ interface LogoProps {
   as?: "link" | "static";
   /** Render the brand tagline beneath the wordmark. */
   showTagline?: boolean;
+  /** Show the circular fish mark next to the wordmark (default true). */
+  showMark?: boolean;
   /** Center the wordmark/tagline lockup. */
   align?: "start" | "center";
   /** Force wordmark color (e.g. white over hero). */
@@ -45,11 +47,13 @@ const TAGLINE_CLASSES: Record<LogoSize, string> = {
 function Lockup({
   size,
   showTagline,
+  showMark,
   align,
   tone,
 }: {
   size: LogoSize;
   showTagline?: boolean;
+  showMark: boolean;
   align: "start" | "center";
   tone: "default" | "light";
 }) {
@@ -63,14 +67,16 @@ function Lockup({
         align === "center" ? "justify-center" : "justify-start",
       )}
     >
-      <img
-        src={logoMark}
-        alt=""
-        aria-hidden="true"
-        className={cn("shrink-0 object-contain", MARK_SIZE[size])}
-        width={64}
-        height={64}
-      />
+      {showMark && (
+        <img
+          src={logoMark}
+          alt=""
+          aria-hidden="true"
+          className={cn("shrink-0 object-contain", MARK_SIZE[size])}
+          width={64}
+          height={64}
+        />
+      )}
       <span
         className={cn(
           "inline-flex flex-col leading-none",
