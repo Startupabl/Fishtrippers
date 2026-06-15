@@ -1,15 +1,12 @@
 ## Plan
 
-Replace the hero background and the wordmark logo with the two uploaded files.
+Revert headers to the original text-only wordmark and make the entire wordmark gold.
 
 ### Steps
 
-1. **Hero image** — upload `openart-...upscaled.jpg` to Lovable Assets as `hero-fishing.jpg` and write the pointer to `src/assets/hero-fishing.jpg.asset.json`. Update `src/routes/index.tsx` to import the pointer and use `asset.url` instead of the current bundled JPG. Delete the old `src/assets/hero-fishing.jpg`.
-
-2. **Logo** — upload `openart-dda7db71...png` to Lovable Assets as `fishtrippers-logo.png` and write the pointer to `src/assets/fishtrippers-logo.png.asset.json`. Update `src/components/brand/Logo.tsx` so when `showMark={false}` is **not** set, it renders this PNG (full lockup: mascot + wordmark) via `<img>` instead of the current SVG mark + text. When `showMark={false}` (used by the transparent home header), keep the current white text-only wordmark — the uploaded logo has a dark mascot that won't read over the hero.
-
-3. Delete the old `src/assets/fishtrippers-logo.png` if present.
+1. **`src/components/brand/Logo.tsx`** — remove the PNG-lockup branch added last turn. `Lockup` returns the text wordmark in all cases. Change the trailing nameParts color from `wordColor` (white/ocean-deep) to the gold accent so the whole word renders in gold. The `tone` prop still controls the tagline color; the wordmark itself is always gold.
+2. **Delete the unused PNG asset** — remove `src/assets/fishtrippers-logo.png.asset.json` (and its CDN copy via `delete_asset`) plus the now-unused `logoMark` / `logoAsset` import. Hero image stays as-is.
+3. No header/footer call-site changes needed — `showMark` becomes a no-op visually, but kept in the prop signature to avoid breaking imports.
 
 ### Out of scope
-- No layout, header, or hero-height changes.
-- Home header stays text-only white wordmark (mascot logo is used on inner pages / footer where background is light).
+- Hero image, header layout, fonts, sizing.
