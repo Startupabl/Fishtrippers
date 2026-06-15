@@ -141,6 +141,7 @@ export const useOperatorOnboardingStore = create<OperatorOnboardingState>()(
           business_type: null,
           display_name: "",
           location: "",
+          about: "",
           booking_type: null,
           advance_notice_hours: null,
           cancellation_policy: null,
