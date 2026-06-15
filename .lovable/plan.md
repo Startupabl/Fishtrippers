@@ -1,43 +1,59 @@
-## Goal
-Temporarily hide every Stripe / payment UI surface so the project can be remixed cleanly. **No Stripe code, server functions, webhook, or DB schema is removed** — re-enabling later is just reverting these UI changes.
+# FishTrippers Rebrand — Phase 1
 
-A single feature flag drives every hide so reverting is a one-line change.
+## Scope
+Pivot the site identity from Lemonaidely to **FishTrippers** (p2p fishing trips marketplace). Replace logo, header brand, hero section. Keep existing routes, business logic, and downstream sections untouched in this pass.
 
-## Approach
-Add `src/config/payments.ts` exporting `export const PAYMENTS_ENABLED = false;` and gate the UI on it.
+## 1. Logo (generate options)
+Generate 2–3 logo concepts as transparent PNGs in `src/assets/`:
+- **A.** Wordmark "FishTrippers" with stylized fish hook tail, navy blue + gold.
+- **B.** Circular badge with fish silhouette + wordmark beside it (FishingBooker-style).
+- **C.** Minimal modern mark: stylized fish forming an "F", wordmark beside.
 
-## Changes
+After generation, present them and let you pick one. Rewrite `src/components/brand/Logo.tsx` to render the chosen mark (image + wordmark lockup) instead of the current tri-color text.
 
-**1. Feature flag**
-- New file `src/config/payments.ts` — exports `PAYMENTS_ENABLED = false`.
+## 2. Brand tokens & color system
+Update `src/lib/brand.ts` and `src/styles.css`:
+- `BRAND.name` → "FishTrippers", `nameParts` → `Fish` / `Trippers`, new tagline → *"Book your next fishing trip."*
+- New palette (blue + gold, harmonized with hero image):
+  - `--ocean-deep` `#0A2540` (primary navy)
+  - `--ocean` `#1E4D7B` (header bg / secondary)
+  - `--sky` `#3B82F6` (links/accents)
+  - `--gold` `#E8B547` (primary CTA)
+  - `--gold-deep` `#C8941F` (CTA hover)
+  - `--paper` `#FAFBFC` (surfaces)
+- Map shadcn semantic tokens (`--primary`, `--accent`, `--ring`, button variants) to the new palette so existing buttons inherit blue/gold without per-component edits.
 
-**2. Admin nav (hide Stripe entry)**
-- `src/routes/_admin/admin.settings.tsx` — remove the "Master Stripe Integration" card from `CARDS` (leaves 3 cards: Categories/Page Settings/Platform Communications + Inbox). Route files for `admin.settings.stripe.tsx` and `admin.settings.payments.tsx` stay on disk, just unlinked.
+## 3. Hero image
+Generate a wide cinematic photo for `src/assets/hero-fishing.jpg` — anglers on a boat holding a large fish, deep blue ocean, golden hour light (matches palette).
 
-**3. Buyer-side payment buttons → disabled stub**
-For each, when `!PAYMENTS_ENABLED`, render a disabled button with text "Payments temporarily disabled" (keeps layout intact):
-- `src/components/checkout/PaymentPanel.tsx` — disable the "Pay & Reserve" button.
-- `src/components/gift/GiftCheckoutDialog.tsx` — disable the "Pay & Send Gift" button.
-- `src/components/layout/CartDrawer.tsx` — disable the "Checkout" button.
-- `src/components/chat/CustomOfferCard.tsx` — disable the offer "Pay" button.
-- `src/routes/checkout.tsx` — short-circuit `handlePay` to a toast "Payments disabled" instead of running the mock booking flow (optional safety; the underlying flow is already local-state).
+## 4. Site header
+Edit `src/components/layout/SiteHeader.tsx`:
+- New logo lockup on left.
+- Right side: **List Your Trip** (gold pill button, replaces existing "List Your Boat"-equivalent CTA), then Log in / Sign up.
+- Header background switches to translucent navy over the hero on the home route, solid white elsewhere.
+- Remove/hide the "Search AI courses" bar (the hero owns search now).
 
-**4. Mentor / payout-onboarding CTAs (hide Stripe Connect surfaces)**
-Wrap the existing Stripe Connect blocks in `PAYMENTS_ENABLED` checks so they render nothing:
-- `src/routes/_authenticated/settings.billing.tsx` — hide Connect onboarding card; show a short notice "Payouts are temporarily disabled."
-- `src/routes/_authenticated/dashboard.aide.courses.tsx` — hide "Connect Stripe Account" banner and the checklist row that flags missing Stripe.
-- `src/routes/_authenticated/dashboard.tsx` — hide the "Stripe not connected" alert.
-- `src/routes/mentor.create-path.tsx` — remove the Stripe payout-readiness gating (treat as ready) and trim the "Don't have a Stripe account?" copy.
+## 5. Hero section (replaces current hero in `src/routes/index.tsx`)
+Full-width hero using the new image with a navy gradient overlay:
+- H1: **Book your next fishing trip**
+- Sub: *Discover top-rated fishing charters and guides*
+- Full booking bar (white card, rounded, drop shadow), 4 fields:
+  1. Location — text input ("Fishing near me") with pin icon
+  2. Date — shadcn date picker
+  3. Guests — popover stepper for adults + children
+  4. **Check availability** — gold CTA button
+- Submitting routes to `/search` with the entered query (wire location → `?q=`; date/guests held in local state for now, ready for later filter integration).
 
-**5. Gift route**
-- `src/routes/gift.tsx` — disable "Gift This" tier buttons with the same stub label.
+## 6. Global name swap
+Because `BRAND.name` / `BRAND.nameParts` / `BRAND.tagline` are the source of truth, the change propagates to: header logo, footer, auth pages, tab title fallback. Sweep `src/` for hardcoded "Lemonaidely" / "Aide" strings in the header, footer, root meta, and `index.tsx` hero copy; replace with FishTrippers equivalents. Leave deeper page copy (how-it-works, mentor pages, etc.) alone for a follow-up pass.
 
-## Out of scope (intentionally untouched)
-- `src/lib/stripe.server.ts`, `src/lib/platform-stripe.functions.ts`, `src/lib/payouts.functions.ts`, `src/lib/checkout.functions.ts`
-- `src/routes/api/public/stripe/webhook.ts`
-- `src/routes/_admin/admin.settings.stripe.tsx`, `admin.settings.payments.tsx`
-- Database tables, RLS, Stripe-related columns
-- The `@stripe/*` npm packages
+## Out of scope (next passes)
+- Renaming routes like `/become-a-mentor`, `/become-an-aide` to fishing equivalents.
+- Rewriting how-it-works / FAQ / mentor pages.
+- Wiring date + guests into the search backend.
 
-## Re-enabling after remix
-Flip `PAYMENTS_ENABLED` to `true` and re-add the Stripe card to `CARDS` in `admin.settings.tsx`. Everything else lights back up automatically.
+## Technical notes
+- New colors defined as CSS vars in `src/styles.css` and exposed via `@theme inline` so Tailwind utilities (`bg-gold`, `text-ocean-deep`) work.
+- Logo image imported via standard ES6 import (no `lovable-assets` externalization needed; assets are small).
+- Hero booking bar is a new component `src/components/layout/HeroBookingBar.tsx` to keep `index.tsx` lean.
+- Date picker uses existing shadcn `Calendar` in a `Popover` with `pointer-events-auto`.
