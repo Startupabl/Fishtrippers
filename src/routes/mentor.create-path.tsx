@@ -9,6 +9,7 @@ import {
   useOperatorOnboardingStore,
   isProfileValid,
   isBoatDetailsValid,
+  isFishingFocusValid,
   isBookingRulesValid,
   type StepId,
 } from "@/stores/useOperatorOnboardingStore";
@@ -40,6 +41,7 @@ const STEP_ORDER: StepId[] = [
   "business_type",
   "profile",
   "boat_details",
+  "fishing_focus",
   "booking_rules",
   "review",
 ];
@@ -77,6 +79,7 @@ function CreatePathPage() {
   const steps: SidebarStep[] = useMemo(() => {
     const profileOk = isProfileValid(state);
     const boatOk = isBoatDetailsValid(state);
+    const focusOk = isFishingFocusValid(state);
     const rulesOk = isBookingRulesValid(state);
     const isGuide = state.business_type === "guide";
 
@@ -88,6 +91,7 @@ function CreatePathPage() {
         if (isGuide) return "skipped";
         return boatOk ? "complete" : "upcoming";
       }
+      if (id === "fishing_focus") return focusOk ? "complete" : "upcoming";
       if (id === "booking_rules") return rulesOk ? "complete" : "upcoming";
       if (id === "review") return "upcoming";
       return "upcoming";
@@ -97,6 +101,7 @@ function CreatePathPage() {
       { id: "business_type", label: "Business type", status: status("business_type") },
       { id: "profile", label: "Profile", status: status("profile") },
       { id: "boat_details", label: "Boat details", status: status("boat_details") },
+      { id: "fishing_focus", label: "Fishing focus", status: status("fishing_focus") },
       { id: "booking_rules", label: "Booking rules", status: status("booking_rules") },
       { id: "review", label: "Review & submit", status: status("review") },
     ];
@@ -198,6 +203,9 @@ function CreatePathPage() {
             )}
             {state.currentStep === "boat_details" && (
               <BoatDetailsStep onBack={back} onNext={advance} />
+            )}
+            {state.currentStep === "fishing_focus" && (
+              <FishingFocusStep onBack={back} onNext={advance} />
             )}
             {state.currentStep === "booking_rules" && (
               <BookingRulesStep onBack={back} onNext={advance} />

@@ -6,6 +6,8 @@ import { Badge } from "@/components/ui/badge";
 import {
   BOAT_FEATURE_GROUPS,
   CANCELLATION_POLICY_DETAILS,
+  PRIMARY_CATEGORY_DETAILS,
+  speciesLabel,
   submitOperatorSchema,
 } from "@/lib/operators.shared";
 import { submitOperatorForReview } from "@/lib/operators.functions";
@@ -44,6 +46,8 @@ export function ReviewSubmitStep({ onBack }: Props) {
         booking_type: state.booking_type,
         advance_notice_hours: state.advance_notice_hours,
         cancellation_policy: state.cancellation_policy,
+        primary_category: state.primary_category,
+        target_species: state.target_species,
         vessel:
           state.business_type === "charter"
             ? {
