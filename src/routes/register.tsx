@@ -144,6 +144,8 @@ function RegisterPage() {
   }
 
   async function verifyHuman(): Promise<boolean> {
+    // No site key configured → bot-check is disabled; allow signup through.
+    if (!SITE_KEY) return true;
     const token = await getTurnstileToken();
     if (!token) return false;
     try {
