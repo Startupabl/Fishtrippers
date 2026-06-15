@@ -74,9 +74,6 @@ function LearnerPurchases() {
     );
   }, [data]);
 
-  function launchClassroom(orderId: string) {
-    navigate({ to: "/classroom/$orderId", params: { orderId } });
-  }
 
   if (!user) return null;
 
@@ -88,7 +85,7 @@ function LearnerPurchases() {
         Purchase History
       </h1>
       <p className="mt-2 text-muted-foreground">
-        Every booking and receipt — sorted newest to oldest. Expand any row to view sessions, add them to your calendar, or launch the classroom.
+        Every booking and receipt — sorted newest to oldest. Expand any row to view sessions and add them to your calendar.
       </p>
 
       <div className="mt-6 w-full overflow-x-auto rounded-md border border-border">
@@ -184,10 +181,7 @@ function LearnerPurchases() {
                     {expanded && (
                       <TableRow>
                         <TableCell colSpan={7} className="bg-muted/30 p-0">
-                          <OrderSchedulePanel
-                            order={o}
-                            onLaunch={() => launchClassroom(o.id)}
-                          />
+                          <OrderSchedulePanel order={o} />
                         </TableCell>
                       </TableRow>
                     )}
