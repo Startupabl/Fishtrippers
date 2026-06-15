@@ -1,0 +1,1 @@
+ALTER TABLE public.message_threads ADD COLUMN IF NOT EXISTS notified_at TIMESTAMPTZ;

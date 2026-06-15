@@ -1,0 +1,1 @@
+CREATE POLICY "Users delete own alerts" ON public.user_alerts FOR DELETE TO authenticated USING (auth.uid() = user_id);

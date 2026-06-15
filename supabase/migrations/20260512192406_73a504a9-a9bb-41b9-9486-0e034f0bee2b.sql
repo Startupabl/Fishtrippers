@@ -1,0 +1,1 @@
+GRANT EXECUTE ON FUNCTION public.contains_forbidden_keyword(text) TO authenticated, anon;

@@ -1,0 +1,1 @@
+ALTER TYPE public.user_status_t ADD VALUE IF NOT EXISTS 'archived';

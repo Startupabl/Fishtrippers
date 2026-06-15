@@ -1,0 +1,18 @@
+User-agent: *
+Allow: /
+Disallow: /admin
+Disallow: /dashboard
+Disallow: /settings
+Disallow: /checkout
+Disallow: /messages
+Disallow: /my-learning
+Disallow: /onboarding
+Disallow: /booking-review
+Disallow: /certificate
+Disallow: /classroom
+Disallow: /gift
+Disallow: /forgot-password
+Disallow: /reset-password
+Disallow: /api/
+
+Sitemap: https://lemonaidely.com/sitemap.xml

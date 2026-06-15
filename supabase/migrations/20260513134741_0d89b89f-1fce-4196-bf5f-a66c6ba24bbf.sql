@@ -1,0 +1,1 @@
+ALTER TABLE public.journeys ADD COLUMN IF NOT EXISTS session_titles text[] NOT NULL DEFAULT '{}';

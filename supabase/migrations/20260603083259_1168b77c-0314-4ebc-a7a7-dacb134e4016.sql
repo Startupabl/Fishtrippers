@@ -1,0 +1,1 @@
+ALTER TABLE public.journeys ADD COLUMN IF NOT EXISTS moderation_note text;
