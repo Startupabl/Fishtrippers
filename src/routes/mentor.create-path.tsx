@@ -23,9 +23,12 @@ import { ProfileStep } from "@/components/operator-onboarding/steps/ProfileStep"
 import { BoatDetailsStep } from "@/components/operator-onboarding/steps/BoatDetailsStep";
 import { FishingFocusStep } from "@/components/operator-onboarding/steps/FishingFocusStep";
 import { BookingRulesStep } from "@/components/operator-onboarding/steps/BookingRulesStep";
+import { TripCatalogStep } from "@/components/operator-onboarding/steps/TripCatalogStep";
 import { ReviewSubmitStep } from "@/components/operator-onboarding/steps/ReviewSubmitStep";
 import { SubmittedScreen } from "@/components/operator-onboarding/SubmittedScreen";
 import { Logo } from "@/components/brand/Logo";
+import { upsertOperatorDraft } from "@/lib/operators.functions";
+import { toast } from "sonner";
 
 export const Route = createFileRoute("/mentor/create-path")({
   validateSearch: (search) =>
@@ -42,6 +45,7 @@ const STEP_ORDER: StepId[] = [
   "profile",
   "boat_details",
   "fishing_focus",
+  "trip_catalog",
   "booking_rules",
   "review",
 ];
@@ -102,22 +106,69 @@ function CreatePathPage() {
       { id: "profile", label: "Profile", status: status("profile") },
       { id: "boat_details", label: "Boat details", status: status("boat_details") },
       { id: "fishing_focus", label: "Fishing focus", status: status("fishing_focus") },
+      { id: "trip_catalog", label: "Trip catalog", status: status("trip_catalog") },
       { id: "booking_rules", label: "Booking rules", status: status("booking_rules") },
       { id: "review", label: "Review & submit", status: status("review") },
     ];
   }, [state]);
 
   const goTo = (id: StepId) => state.setStep(id);
+  const saveDraft = useServerFn(upsertOperatorDraft);
 
-  const advance = () => {
+  const persistCurrentStep = async (): Promise<boolean> => {
+    try {
+      await saveDraft({
+        data: {
+          operator: {
+            business_type: state.business_type ?? null,
+            display_name: state.display_name || null,
+            location: state.location || null,
+            booking_type: state.booking_type ?? null,
+            advance_notice_hours: state.advance_notice_hours ?? null,
+            cancellation_policy: state.cancellation_policy ?? null,
+            primary_category: state.primary_category ?? null,
+            target_species: state.target_species ?? [],
+          },
+          vessel:
+            state.business_type === "charter"
+              ? {
+                  manufacturer: state.vessel.manufacturer || null,
+                  model: state.vessel.model || null,
+                  year: state.vessel.year ? Number(state.vessel.year) : null,
+                  length_ft: state.vessel.length_ft
+                    ? Number(state.vessel.length_ft)
+                    : null,
+                  engine_type: state.vessel.engine_type || null,
+                  engine_size: state.vessel.engine_size || null,
+                  max_passenger_capacity: state.vessel.max_passenger_capacity
+                    ? Number(state.vessel.max_passenger_capacity)
+                    : null,
+                  features: state.vessel.features ?? [],
+                }
+              : null,
+        },
+      } as any);
+      return true;
+    } catch (e: any) {
+      toast.error(e?.message ?? "Could not save progress");
+      return false;
+    }
+  };
+
+  const advance = async () => {
     const idx = STEP_ORDER.indexOf(state.currentStep);
     let nextIdx = idx + 1;
-    // Skip boat_details for guides
     if (
       state.business_type === "guide" &&
       STEP_ORDER[nextIdx] === "boat_details"
     ) {
       nextIdx += 1;
+    }
+    // Persist operator-shaped steps before moving forward. Trip catalog
+    // persists per-trip inside its own modal so we just navigate.
+    if (state.currentStep !== "trip_catalog") {
+      const ok = await persistCurrentStep();
+      if (!ok) return;
     }
     if (nextIdx < STEP_ORDER.length) goTo(STEP_ORDER[nextIdx]);
   };
@@ -206,6 +257,9 @@ function CreatePathPage() {
             )}
             {state.currentStep === "fishing_focus" && (
               <FishingFocusStep onBack={back} onNext={advance} />
+            )}
+            {state.currentStep === "trip_catalog" && (
+              <TripCatalogStep onBack={back} onNext={advance} />
             )}
             {state.currentStep === "booking_rules" && (
               <BookingRulesStep onBack={back} onNext={advance} />

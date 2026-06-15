@@ -14,6 +14,7 @@ export type StepId =
   | "profile"
   | "boat_details"
   | "fishing_focus"
+  | "trip_catalog"
   | "booking_rules"
   | "review";
 

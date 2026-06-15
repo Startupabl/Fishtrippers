@@ -1404,6 +1404,10 @@ export type Database = {
         Row: {
           created_at: string
           currency: string
+          departure_address: string | null
+          departure_lat: number | null
+          departure_lng: number | null
+          departure_place_id: string | null
           description: string | null
           duration_minutes: number
           id: string
@@ -1411,6 +1415,7 @@ export type Database = {
           operator_id: string
           price_minor: number
           status: Database["public"]["Enums"]["trip_package_status"]
+          template_key: string | null
           title: string
           updated_at: string
           vessel_id: string | null
@@ -1418,6 +1423,10 @@ export type Database = {
         Insert: {
           created_at?: string
           currency?: string
+          departure_address?: string | null
+          departure_lat?: number | null
+          departure_lng?: number | null
+          departure_place_id?: string | null
           description?: string | null
           duration_minutes: number
           id?: string
@@ -1425,6 +1434,7 @@ export type Database = {
           operator_id: string
           price_minor?: number
           status?: Database["public"]["Enums"]["trip_package_status"]
+          template_key?: string | null
           title: string
           updated_at?: string
           vessel_id?: string | null
@@ -1432,6 +1442,10 @@ export type Database = {
         Update: {
           created_at?: string
           currency?: string
+          departure_address?: string | null
+          departure_lat?: number | null
+          departure_lng?: number | null
+          departure_place_id?: string | null
           description?: string | null
           duration_minutes?: number
           id?: string
@@ -1439,6 +1453,7 @@ export type Database = {
           operator_id?: string
           price_minor?: number
           status?: Database["public"]["Enums"]["trip_package_status"]
+          template_key?: string | null
           title?: string
           updated_at?: string
           vessel_id?: string | null
