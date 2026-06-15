@@ -23,9 +23,12 @@ import { ProfileStep } from "@/components/operator-onboarding/steps/ProfileStep"
 import { BoatDetailsStep } from "@/components/operator-onboarding/steps/BoatDetailsStep";
 import { FishingFocusStep } from "@/components/operator-onboarding/steps/FishingFocusStep";
 import { BookingRulesStep } from "@/components/operator-onboarding/steps/BookingRulesStep";
+import { TripCatalogStep } from "@/components/operator-onboarding/steps/TripCatalogStep";
 import { ReviewSubmitStep } from "@/components/operator-onboarding/steps/ReviewSubmitStep";
 import { SubmittedScreen } from "@/components/operator-onboarding/SubmittedScreen";
 import { Logo } from "@/components/brand/Logo";
+import { upsertOperatorDraft } from "@/lib/operators.functions";
+import { toast } from "sonner";
 
 export const Route = createFileRoute("/mentor/create-path")({
   validateSearch: (search) =>
@@ -42,6 +45,7 @@ const STEP_ORDER: StepId[] = [
   "profile",
   "boat_details",
   "fishing_focus",
+  "trip_catalog",
   "booking_rules",
   "review",
 ];
