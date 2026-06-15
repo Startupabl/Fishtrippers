@@ -1,10 +1,13 @@
-## Goal
-Make `cruz.collective.llc@gmail.com` a working admin user.
+## Problem
+Sign-in submits with empty email/password → Supabase returns "missing email or phone". Cause is React state desync on the auth forms: a hydration mismatch (Google Tag Manager browser extension adds `data-gtm-form-interact-id` attrs to the form/inputs) leaves the controlled inputs in an inconsistent state, so `onChange` doesn't update `email` / `password` reliably and the submit handler sees `""`.
 
-## Steps
-1. Insert a `public.profiles` row for user id `62980201-9c67-4a81-a92c-87f2bece2677` (email, verified status, auto-generated `user_number_id`).
-2. Insert `('admin')` into `public.user_roles` for the same user id (also keep `'learner'` so they have full app access too).
-3. Verify with a SELECT that both rows exist and `has_role(uid, 'admin')` returns true.
+## Fix
+Switch the login and register forms from controlled `useState` inputs to reading values from the submitted form via `FormData` on submit. This sidesteps hydration/autofill/extension interference entirely — submit always sees what's actually in the DOM at click time.
 
-## Out of scope
-- Not fixing the missing `on_auth_user_created` trigger right now (separate issue — future signups won't auto-create profiles until it's added). Happy to do that next if you want.
+Files:
+- `src/routes/login.tsx` — drop `email`/`password` state; read both from `new FormData(e.currentTarget)` in `onSubmit`; add `name="email"` / `name="password"` to the inputs; keep `defaultValue=""`.
+- `src/routes/register.tsx` — same pattern for `firstName`, `email`, `password`.
+
+## Verify
+- Sign in with `cruz.collective.llc@gmail.com` → lands on `/` (admin).
+- Create another test user via `/register` → still works.
