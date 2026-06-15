@@ -1,8 +1,16 @@
 import { useEffect, useMemo, useState } from "react";
+import { Info } from "lucide-react";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { Textarea } from "@/components/ui/textarea";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { AvatarCropperDialog } from "@/components/settings/AvatarCropperDialog";
 import { validateUpload } from "@/lib/image-crop";
@@ -20,11 +28,43 @@ interface Props {
   onNext: () => void;
 }
 
+const ABOUT_MIN = 150;
+const ABOUT_MAX = 1000;
+
+const ABOUT_COPY = {
+  charter: {
+    title: "About Our Charter Business",
+    placeholder:
+      "Our fleet has been serving the area for over a decade. We pride ourselves on safety, top-tier equipment, and our team of expert captains…",
+    tips: [
+      "Mention fleet size, vessels, and signature equipment.",
+      "Call out safety credentials (USCG licensed, first-aid certified).",
+      "Highlight your captains' and crew's expertise.",
+    ],
+  },
+  guide: {
+    title: "About You & Your Experience",
+    placeholder:
+      "I've been fishing these waters for over 20 years. I love helping families and beginners learn the ropes…",
+    tips: [
+      "Share how many years you've been guiding these waters.",
+      "Describe your teaching style and who you love taking out.",
+      "Mention a signature technique or unique local knowledge.",
+    ],
+  },
+} as const;
+
 export function ProfileStep({ onBack, onNext }: Props) {
+  const business_type = useOperatorOnboardingStore((s) => s.business_type);
   const display_name = useOperatorOnboardingStore((s) => s.display_name);
   const location = useOperatorOnboardingStore((s) => s.location);
+  const about = useOperatorOnboardingStore((s) => s.about);
   const setProfile = useOperatorOnboardingStore((s) => s.setProfile);
   const valid = useOperatorOnboardingStore(isProfileValid);
+
+  const aboutCopy = ABOUT_COPY[business_type === "charter" ? "charter" : "guide"];
+  const aboutLen = about.length;
+  const aboutTooShort = aboutLen > 0 && aboutLen < ABOUT_MIN;
 
   const user = useAuthStore((s) => s.user);
   const storedAvatar = useProfileStore((s) => s.avatarUrl);
@@ -185,7 +225,58 @@ export function ProfileStep({ onBack, onNext }: Props) {
             City and state, marina name, or general region.
           </p>
         </div>
+
+        <div className="space-y-2">
+          <div className="flex items-center gap-2">
+            <Label htmlFor="about" className="text-base font-semibold">
+              {aboutCopy.title}
+            </Label>
+            <TooltipProvider delayDuration={150}>
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <button
+                    type="button"
+                    aria-label="Helpful tips"
+                    className="inline-flex h-5 w-5 items-center justify-center rounded-full text-muted-foreground hover:text-foreground"
+                  >
+                    <Info className="h-4 w-4" />
+                  </button>
+                </TooltipTrigger>
+                <TooltipContent side="right" className="max-w-xs">
+                  <p className="mb-1 font-medium">Helpful tips</p>
+                  <ul className="list-disc space-y-1 pl-4 text-xs">
+                    {aboutCopy.tips.map((t) => (
+                      <li key={t}>{t}</li>
+                    ))}
+                  </ul>
+                </TooltipContent>
+              </Tooltip>
+            </TooltipProvider>
+          </div>
+          <Textarea
+            id="about"
+            value={about}
+            onChange={(e) => setProfile({ about: e.target.value })}
+            placeholder={aboutCopy.placeholder}
+            rows={5}
+            maxLength={ABOUT_MAX}
+            className="min-h-[140px] resize-y"
+          />
+          <div className="flex items-center justify-between gap-2">
+            <p className="text-xs text-muted-foreground">
+              Minimum {ABOUT_MIN} characters — aim for 2–3 strong sentences.
+            </p>
+            <p
+              className={`text-xs tabular-nums ${
+                aboutTooShort ? "text-destructive" : "text-muted-foreground"
+              }`}
+            >
+              {aboutLen} / {ABOUT_MAX}
+            </p>
+          </div>
+        </div>
       </div>
+
 
       <div className="flex justify-between pt-2">
         <Button variant="ghost" onClick={onBack}>

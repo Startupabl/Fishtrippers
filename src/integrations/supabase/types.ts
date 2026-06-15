@@ -771,6 +771,7 @@ export type Database = {
       }
       operators: {
         Row: {
+          about: string | null
           advance_notice_hours: number | null
           booking_type:
             | Database["public"]["Enums"]["operator_booking_type"]
@@ -796,6 +797,7 @@ export type Database = {
           updated_at: string
         }
         Insert: {
+          about?: string | null
           advance_notice_hours?: number | null
           booking_type?:
             | Database["public"]["Enums"]["operator_booking_type"]
@@ -821,6 +823,7 @@ export type Database = {
           updated_at?: string
         }
         Update: {
+          about?: string | null
           advance_notice_hours?: number | null
           booking_type?:
             | Database["public"]["Enums"]["operator_booking_type"]

@@ -43,6 +43,7 @@ export function ReviewSubmitStep({ onBack }: Props) {
         business_type: state.business_type,
         display_name: state.display_name.trim(),
         location: state.location.trim(),
+        about: state.about.trim(),
         booking_type: state.booking_type,
         advance_notice_hours: state.advance_notice_hours,
         cancellation_policy: state.cancellation_policy,
@@ -97,6 +98,12 @@ export function ReviewSubmitStep({ onBack }: Props) {
             <dt className="text-xs uppercase text-muted-foreground">Location</dt>
             <dd className="font-medium">{state.location}</dd>
           </div>
+          {state.about?.trim() ? (
+            <div className="sm:col-span-2">
+              <dt className="text-xs uppercase text-muted-foreground">About</dt>
+              <dd className="whitespace-pre-wrap text-sm">{state.about}</dd>
+            </div>
+          ) : null}
         </dl>
       </section>
 

@@ -38,6 +38,7 @@ export interface OperatorOnboardingState {
   business_type: BusinessType | null;
   display_name: string;
   location: string;
+  about: string;
   booking_type: BookingType | null;
   advance_notice_hours: AdvanceNoticeHours | null;
   cancellation_policy: CancellationPolicy | null;
@@ -50,7 +51,7 @@ export interface OperatorOnboardingState {
 
   // setters
   setBusinessType: (t: BusinessType) => void;
-  setProfile: (p: { display_name?: string; location?: string }) => void;
+  setProfile: (p: { display_name?: string; location?: string; about?: string }) => void;
   setVessel: (v: Partial<VesselDraftState>) => void;
   toggleFeature: (id: string) => void;
   setBookingRules: (r: {
@@ -88,6 +89,7 @@ export const useOperatorOnboardingStore = create<OperatorOnboardingState>()(
       business_type: null,
       display_name: "",
       location: "",
+      about: "",
       booking_type: null,
       advance_notice_hours: null,
       cancellation_policy: null,
@@ -101,6 +103,7 @@ export const useOperatorOnboardingStore = create<OperatorOnboardingState>()(
         set((s) => ({
           display_name: p.display_name ?? s.display_name,
           location: p.location ?? s.location,
+          about: p.about ?? s.about,
         })),
       setVessel: (v) => set((s) => ({ vessel: { ...s.vessel, ...v } })),
       toggleFeature: (id) =>
@@ -138,6 +141,7 @@ export const useOperatorOnboardingStore = create<OperatorOnboardingState>()(
           business_type: null,
           display_name: "",
           location: "",
+          about: "",
           booking_type: null,
           advance_notice_hours: null,
           cancellation_policy: null,
@@ -152,6 +156,7 @@ export const useOperatorOnboardingStore = create<OperatorOnboardingState>()(
           business_type: operator.business_type ?? null,
           display_name: operator.display_name ?? "",
           location: operator.location ?? "",
+          about: operator.about ?? "",
           booking_type: operator.booking_type ?? null,
           advance_notice_hours: operator.advance_notice_hours ?? null,
           cancellation_policy: operator.cancellation_policy ?? null,
@@ -187,7 +192,13 @@ export const useOperatorOnboardingStore = create<OperatorOnboardingState>()(
 
 // ----- Validity helpers -----
 export function isProfileValid(s: OperatorOnboardingState): boolean {
-  return s.display_name.trim().length >= 2 && s.location.trim().length >= 2;
+  const aboutLen = s.about.trim().length;
+  return (
+    s.display_name.trim().length >= 2 &&
+    s.location.trim().length >= 2 &&
+    aboutLen >= 150 &&
+    aboutLen <= 1000
+  );
 }
 
 export function isBoatDetailsValid(s: OperatorOnboardingState): boolean {
