@@ -1,8 +1,16 @@
 import { useEffect, useMemo, useState } from "react";
+import { Info } from "lucide-react";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { Textarea } from "@/components/ui/textarea";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { AvatarCropperDialog } from "@/components/settings/AvatarCropperDialog";
 import { validateUpload } from "@/lib/image-crop";
@@ -19,6 +27,32 @@ interface Props {
   onBack: () => void;
   onNext: () => void;
 }
+
+const ABOUT_MIN = 150;
+const ABOUT_MAX = 1000;
+
+const ABOUT_COPY = {
+  charter: {
+    title: "About Our Charter Business",
+    placeholder:
+      "Our fleet has been serving the area for over a decade. We pride ourselves on safety, top-tier equipment, and our team of expert captains…",
+    tips: [
+      "Mention fleet size, vessels, and signature equipment.",
+      "Call out safety credentials (USCG licensed, first-aid certified).",
+      "Highlight your captains' and crew's expertise.",
+    ],
+  },
+  guide: {
+    title: "About You & Your Experience",
+    placeholder:
+      "I've been fishing these waters for over 20 years. I love helping families and beginners learn the ropes…",
+    tips: [
+      "Share how many years you've been guiding these waters.",
+      "Describe your teaching style and who you love taking out.",
+      "Mention a signature technique or unique local knowledge.",
+    ],
+  },
+} as const;
 
 export function ProfileStep({ onBack, onNext }: Props) {
   const display_name = useOperatorOnboardingStore((s) => s.display_name);
