@@ -113,6 +113,7 @@ export function Logo({
   size = "md",
   as,
   showTagline = false,
+  showMark = true,
   align = "start",
   tone = "default",
   className,
@@ -126,7 +127,7 @@ export function Logo({
         aria-label={BRAND.name}
         className={cn("inline-flex cursor-default select-none", className)}
       >
-        <Lockup size={size} showTagline={showTagline} align={align} tone={tone} />
+        <Lockup size={size} showTagline={showTagline} showMark={showMark} align={align} tone={tone} />
       </span>
     );
   }
@@ -140,7 +141,7 @@ export function Logo({
         className,
       )}
     >
-      <Lockup size={size} showTagline={showTagline} align={align} tone={tone} />
+      <Lockup size={size} showTagline={showTagline} showMark={showMark} align={align} tone={tone} />
     </Link>
   );
 }
