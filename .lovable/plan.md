@@ -1,12 +1,21 @@
-## Plan
+## Goal
+Let you create your first account right now without the Turnstile bot-check blocking signup, while keeping the option to re-enable it later for production.
 
-Revert headers to the original text-only wordmark and make the entire wordmark gold.
+## Changes
 
-### Steps
+1. **Clear the stale Turnstile site key**
+   - Remove `VITE_TURNSTILE_SITE_KEY` from `.env` (the key copied from the previous project is invalid for this preview domain and is causing error 110200).
 
-1. **`src/components/brand/Logo.tsx`** — remove the PNG-lockup branch added last turn. `Lockup` returns the text wordmark in all cases. Change the trailing nameParts color from `wordColor` (white/ocean-deep) to the gold accent so the whole word renders in gold. The `tone` prop still controls the tagline color; the wordmark itself is always gold.
-2. **Delete the unused PNG asset** — remove `src/assets/fishtrippers-logo.png.asset.json` (and its CDN copy via `delete_asset`) plus the now-unused `logoMark` / `logoAsset` import. Hero image stays as-is.
-3. No header/footer call-site changes needed — `showMark` becomes a no-op visually, but kept in the prop signature to avoid breaking imports.
+2. **Make Turnstile optional in the code**
+   - Update the signup and login forms (and any shared Turnstile wrapper) so that when `VITE_TURNSTILE_SITE_KEY` is empty/undefined:
+     - The Turnstile widget is not rendered.
+     - The submit handler skips the token check and proceeds straight to Supabase auth.
+   - When the key IS set, behavior is unchanged — widget renders and token is required.
 
-### Out of scope
-- Hero image, header layout, fonts, sizing.
+3. **Verify**
+   - Reload `/register`, confirm no Turnstile widget appears and no 110200 error in console.
+   - Create a test account end-to-end and confirm the user lands signed in (profile row auto-created by existing `handle_new_user` trigger).
+
+## Out of scope
+- No changes to auth providers, RLS, profile schema, or any other feature.
+- Re-enabling Turnstile later for the production domain is a one-line env change (add a fresh key) — no code work needed.
