@@ -28,7 +28,7 @@ export function AddToCalendarMenu({
     : undefined;
   const event = {
     title: `${booking.pathTitle} with ${displayMentorName(booking.mentorName)}`,
-    details: `Your Lemonaidely lesson. Enter the classroom: ${typeof window !== "undefined" ? window.location.origin : ""}/classroom/${booking.sessionId}`,
+    details: `Your Lemonaidely lesson with ${displayMentorName(booking.mentorName)}.`,
     startIso,
     endIso,
   };
