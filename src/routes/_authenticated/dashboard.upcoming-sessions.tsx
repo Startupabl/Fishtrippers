@@ -563,11 +563,6 @@ function ScheduleTableRow({
             )}
             {(row.status === "booked" || row.status === "pending_reschedule") && (
               <>
-                {joinOrderId && (
-                  <Button size="sm" onClick={onJoin}>
-                    Join Classroom
-                  </Button>
-                )}
                 <DropdownMenu>
                   <DropdownMenuTrigger asChild>
                     <Button
