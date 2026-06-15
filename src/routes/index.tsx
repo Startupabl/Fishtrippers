@@ -20,7 +20,8 @@ import { getCategoryPlaceholder } from "@/lib/category-placeholders";
 import type { JourneyCategory } from "@/data/lesson-paths";
 import { LiveJourneyCard } from "@/components/listings/LiveJourneyCard";
 import { DESIGN_SYSTEM } from "@/lib/brand";
-import heroAide from "@/assets/hero-aide.jpg";
+import heroFishing from "@/assets/hero-fishing.jpg";
+import { HeroBookingBar } from "@/components/layout/HeroBookingBar";
 
 import {
   Dialog,
