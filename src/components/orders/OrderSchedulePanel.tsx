@@ -1,4 +1,4 @@
-import { CalendarPlus, Flag, Rocket } from "lucide-react";
+import { CalendarPlus, Flag } from "lucide-react";
 import { toast } from "sonner";
 import { useServerFn } from "@tanstack/react-start";
 import { useQuery } from "@tanstack/react-query";
@@ -21,11 +21,9 @@ interface UnifiedSession {
 
 export function OrderSchedulePanel({
   order,
-  onLaunch,
   onMarkComplete,
 }: {
   order: OrderSummary;
-  onLaunch: () => void;
   onMarkComplete?: () => void;
 }) {
   const fetchCohort = useServerFn(getClassSessionForOrder);
@@ -152,32 +150,21 @@ export function OrderSchedulePanel({
                   />
                 </div>
                 {future ? (
-                  <>
-                    <Button
-                      size="icon"
-                      variant="ghost"
-                      className="size-7 shrink-0"
-                      title="Add this session to Google Calendar"
-                      onClick={() =>
-                        window.open(
-                          buildUrlFor(s),
-                          "_blank",
-                          "noopener,noreferrer",
-                        )
-                      }
-                    >
-                      <CalendarPlus className="size-4" />
-                    </Button>
-                    <Button
-                      size="sm"
-                      variant="outline"
-                      className="h-7 shrink-0 px-2"
-                      onClick={onLaunch}
-                      title="Launch classroom"
-                    >
-                      <Rocket className="mr-1 size-3" /> Launch
-                    </Button>
-                  </>
+                  <Button
+                    size="icon"
+                    variant="ghost"
+                    className="size-7 shrink-0"
+                    title="Add this session to Google Calendar"
+                    onClick={() =>
+                      window.open(
+                        buildUrlFor(s),
+                        "_blank",
+                        "noopener,noreferrer",
+                      )
+                    }
+                  >
+                    <CalendarPlus className="size-4" />
+                  </Button>
                 ) : isFinal && showMarkComplete ? (
                   <Button
                     size="sm"
