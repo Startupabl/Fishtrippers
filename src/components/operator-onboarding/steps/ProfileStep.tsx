@@ -28,7 +28,7 @@ export function ProfileStep({ onBack, onNext }: Props) {
 
   const user = useAuthStore((s) => s.user);
   const storedAvatar = useProfileStore((s) => s.avatarUrl);
-  const displayNameFromAuth = useAuthStore((s) => s.displayName) ?? "";
+  const displayNameFromAuth = user?.displayName ?? "";
   const lastName = useProfileStore((s) => s.lastName) ?? "";
 
   const [avatarUrl, setAvatarUrl] = useState<string | null>(storedAvatar ?? null);
