@@ -352,114 +352,73 @@ function Index() {
 
   return (
     <div className="min-h-screen bg-background">
-      {/* HERO — Fiverr-style search */}
-      <section
-        className="relative overflow-hidden border-b border-border"
-        style={{
-          backgroundImage:
-            "radial-gradient(circle at 1px 1px, rgba(120,90,60,0.05) 1px, transparent 0), linear-gradient(160deg, #F2E6D2 0%, #FBF4E8 55%, #FFFBF3 100%)",
-          backgroundSize: "18px 18px, auto",
-        }}
-      >
-        {/* Background photo — desktop/tablet (wide) */}
+      {/* HERO — FishTrippers */}
+      <section className="relative overflow-hidden">
         <img
-          src={heroAide}
-          alt="A LemonAIdely Aide ready to guide your AI course"
-          width={1536}
-          height={1024}
+          src={heroFishing}
+          alt="Anglers on a boat holding a large fish at sunset"
+          width={1920}
+          height={1080}
           loading="eager"
           fetchPriority="high"
-          className="absolute inset-0 hidden h-full w-full object-cover md:block md:object-[72%_center] lg:object-right"
+          className="absolute inset-0 h-full w-full object-cover"
         />
-        {/* Cream gradient overlay — desktop/tablet: horizontal (clears left for text) */}
+        {/* Navy gradient overlay for legibility */}
         <div
-          className="pointer-events-none absolute inset-0 hidden md:block"
           aria-hidden
+          className="absolute inset-0"
           style={{
             background:
-              "linear-gradient(95deg, #FBF4E8 0%, #FBF4E8 30%, rgba(251,244,232,0.9) 45%, rgba(251,244,232,0.4) 62%, rgba(251,244,232,0) 78%)",
+              "linear-gradient(180deg, rgba(10,37,64,0.55) 0%, rgba(10,37,64,0.30) 40%, rgba(10,37,64,0.70) 100%)",
           }}
         />
-        <div className="relative z-10 mx-auto max-w-[1400px] px-4 text-center md:px-8 md:min-h-[560px] md:pt-24 md:pb-24 pt-16 pb-12">
-          <div className="mx-auto max-w-xl md:mx-0 md:max-w-[58%] md:text-left">
+
+        <div className="relative z-10 mx-auto flex max-w-[1400px] flex-col justify-center px-4 pb-10 pt-20 md:min-h-[600px] md:px-8 md:pb-16 md:pt-28">
+          {showGreeting && (
             <p
-              aria-hidden={!showGreeting}
-              className="mb-4 text-2xl md:text-4xl"
-              style={{
-                fontFamily: "Lora, ui-serif, Georgia, serif",
-                color: "#3DA35D",
-                visibility: showGreeting ? "visible" : "hidden",
-              }}
-            >
-              {showGreeting ? `Welcome back, ${greetingName}` : "\u00A0"}
-            </p>
-            <h1
-              className="text-3xl text-foreground md:text-5xl"
+              className="mb-3 text-lg text-white/90 md:text-xl"
               style={{ fontFamily: "Lora, ui-serif, Georgia, serif" }}
             >
-              Fresh AI skills. Hand-delivered.
-            </h1>
-            <p className="mt-4 text-lg text-muted-foreground">
-              Whether you're mastering basic prompts or building complex AI-driven data pipelines, learn at your level. Choose from personalized 1-on-1 sessions or dynamic group courses to launch your next big project.
+              Welcome back, {greetingName}
             </p>
+          )}
+          <h1
+            className="max-w-3xl text-4xl font-extrabold text-white drop-shadow-md md:text-6xl"
+            style={{ fontFamily: DESIGN_SYSTEM.fonts.serif, lineHeight: 1.05 }}
+          >
+            Book your next fishing trip
+          </h1>
+          <p className="mt-4 max-w-2xl text-lg text-white/90 md:text-xl">
+            Discover top-rated fishing charters and guides.
+          </p>
 
+          <div className="mt-8 md:mt-12">
+            <HeroBookingBar />
+          </div>
 
-            {/* Watch link */}
-            <div className="mt-4">
-              <button
-                type="button"
-                onClick={() => setVideoOpen(true)}
-                className="inline-flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground hover:underline"
-              >
-                <span className="inline-flex size-6 items-center justify-center rounded-full bg-info/10 text-info">
-                  <Play className="size-3 fill-current" />
-                </span>
-                What is Lemonaidely?
-              </button>
-            </div>
-
-            <form onSubmit={handleHeroSubmit} className="relative mt-6 max-w-xl">
-              <TagSuggestInput
-                value={heroQuery}
-                onChange={setHeroQuery}
-                onSubmit={(v) => {
-                  setHeroQuery("");
-                  const q = v.trim();
-                  navigate({ to: "/search", search: q ? { q } : undefined } as never);
-                }}
-                placeholder={isDesktop ? "What AI tools would you like to learn today?" : "Search AI courses..."}
-                ariaLabel="Search AI courses"
-                inputClassName="h-14 w-full rounded-full border border-border bg-white pl-6 pr-28 sm:pr-36 text-base text-foreground shadow-md placeholder:text-muted-foreground focus:border-info focus:outline-none focus:ring-2 focus:ring-info/30"
-                inputStyle={{ fontFamily: "Inter, ui-sans-serif, system-ui, sans-serif" }}
-                rightSlot={
-                  <button
-                    type="submit"
-                    aria-label="Search"
-                    className="absolute right-1.5 top-1/2 inline-flex h-11 -translate-y-1/2 items-center justify-center rounded-full px-4 sm:px-6 text-base font-semibold text-white shadow-sm transition-opacity hover:opacity-90"
-                    style={{
-                      backgroundColor: DESIGN_SYSTEM.colors.accentGreen,
-                      fontFamily: "Inter, ui-sans-serif, system-ui, sans-serif",
-                    }}
-                  >
-                    Squeeze
-                  </button>
-                }
-              />
-            </form>
-
-            <div className="mt-4">
-              <button
-                type="button"
-                onClick={() => setQuizOpen(true)}
-                className="inline-flex items-center gap-1 rounded-full bg-info/10 px-3 py-1 text-xs font-semibold text-info hover:bg-info/15"
-              >
-                <Sparkles className="size-3" />
-                Meet Your Perfect AIde
-              </button>
-            </div>
+          <div className="mt-6 flex flex-wrap items-center gap-3">
+            <button
+              type="button"
+              onClick={() => setQuizOpen(true)}
+              className="inline-flex items-center gap-1 rounded-full bg-white/15 px-3 py-1.5 text-xs font-semibold text-white backdrop-blur hover:bg-white/25"
+            >
+              <Sparkles className="size-3" />
+              Find your perfect guide
+            </button>
+            <button
+              type="button"
+              onClick={() => setVideoOpen(true)}
+              className="inline-flex items-center gap-2 text-sm text-white/85 hover:text-white hover:underline"
+            >
+              <span className="inline-flex size-6 items-center justify-center rounded-full bg-white/20 text-white">
+                <Play className="size-3 fill-current" />
+              </span>
+              How FishTrippers works
+            </button>
           </div>
         </div>
       </section>
+
 
       {/* FEATURED COURSES */}
       {(featuredQuery.isLoading || featured.length > 0) && (
