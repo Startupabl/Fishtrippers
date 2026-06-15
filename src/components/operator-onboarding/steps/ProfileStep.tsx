@@ -55,10 +55,16 @@ const ABOUT_COPY = {
 } as const;
 
 export function ProfileStep({ onBack, onNext }: Props) {
+  const business_type = useOperatorOnboardingStore((s) => s.business_type);
   const display_name = useOperatorOnboardingStore((s) => s.display_name);
   const location = useOperatorOnboardingStore((s) => s.location);
+  const about = useOperatorOnboardingStore((s) => s.about);
   const setProfile = useOperatorOnboardingStore((s) => s.setProfile);
   const valid = useOperatorOnboardingStore(isProfileValid);
+
+  const aboutCopy = ABOUT_COPY[business_type === "charter" ? "charter" : "guide"];
+  const aboutLen = about.length;
+  const aboutTooShort = aboutLen > 0 && aboutLen < ABOUT_MIN;
 
   const user = useAuthStore((s) => s.user);
   const storedAvatar = useProfileStore((s) => s.avatarUrl);
