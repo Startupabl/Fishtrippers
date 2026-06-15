@@ -20,6 +20,7 @@ import {
 import { BusinessTypeStep } from "@/components/operator-onboarding/steps/BusinessTypeStep";
 import { ProfileStep } from "@/components/operator-onboarding/steps/ProfileStep";
 import { BoatDetailsStep } from "@/components/operator-onboarding/steps/BoatDetailsStep";
+import { FishingFocusStep } from "@/components/operator-onboarding/steps/FishingFocusStep";
 import { BookingRulesStep } from "@/components/operator-onboarding/steps/BookingRulesStep";
 import { ReviewSubmitStep } from "@/components/operator-onboarding/steps/ReviewSubmitStep";
 import { SubmittedScreen } from "@/components/operator-onboarding/SubmittedScreen";

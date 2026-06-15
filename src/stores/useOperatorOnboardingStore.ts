@@ -6,12 +6,14 @@ import type {
   BookingType,
   AdvanceNoticeHours,
   CancellationPolicy,
+  PrimaryCategory,
 } from "@/lib/operators.shared";
 
 export type StepId =
   | "business_type"
   | "profile"
   | "boat_details"
+  | "fishing_focus"
   | "booking_rules"
   | "review";
 
@@ -38,6 +40,8 @@ export interface OperatorOnboardingState {
   booking_type: BookingType | null;
   advance_notice_hours: AdvanceNoticeHours | null;
   cancellation_policy: CancellationPolicy | null;
+  primary_category: PrimaryCategory | null;
+  target_species: string[];
   vessel: VesselDraftState;
 
   // post-submit
@@ -53,6 +57,8 @@ export interface OperatorOnboardingState {
     advance_notice_hours?: AdvanceNoticeHours;
     cancellation_policy?: CancellationPolicy;
   }) => void;
+  setPrimaryCategory: (c: PrimaryCategory) => void;
+  toggleSpecies: (id: string) => void;
   setSubmitted: (v: boolean) => void;
   reset: () => void;
   hydrateFromServer: (input: {
@@ -84,6 +90,8 @@ export const useOperatorOnboardingStore = create<OperatorOnboardingState>()(
       booking_type: null,
       advance_notice_hours: null,
       cancellation_policy: null,
+      primary_category: null,
+      target_species: [],
       vessel: emptyVessel(),
       submitted: false,
 
@@ -112,6 +120,16 @@ export const useOperatorOnboardingStore = create<OperatorOnboardingState>()(
           advance_notice_hours: r.advance_notice_hours ?? s.advance_notice_hours,
           cancellation_policy: r.cancellation_policy ?? s.cancellation_policy,
         })),
+      setPrimaryCategory: (c) => set({ primary_category: c }),
+      toggleSpecies: (id) =>
+        set((s) => {
+          const has = s.target_species.includes(id);
+          return {
+            target_species: has
+              ? s.target_species.filter((x) => x !== id)
+              : [...s.target_species, id],
+          };
+        }),
       setSubmitted: (v) => set({ submitted: v }),
       reset: () =>
         set({
@@ -122,6 +140,8 @@ export const useOperatorOnboardingStore = create<OperatorOnboardingState>()(
           booking_type: null,
           advance_notice_hours: null,
           cancellation_policy: null,
+          primary_category: null,
+          target_species: [],
           vessel: emptyVessel(),
           submitted: false,
         }),
@@ -134,6 +154,10 @@ export const useOperatorOnboardingStore = create<OperatorOnboardingState>()(
           booking_type: operator.booking_type ?? null,
           advance_notice_hours: operator.advance_notice_hours ?? null,
           cancellation_policy: operator.cancellation_policy ?? null,
+          primary_category: operator.primary_category ?? null,
+          target_species: Array.isArray(operator.target_species)
+            ? operator.target_species
+            : [],
           submitted: !!operator.submitted_at,
           vessel: vessel
             ? {
@@ -183,6 +207,10 @@ export function isBoatDetailsValid(s: OperatorOnboardingState): boolean {
   );
 }
 
+export function isFishingFocusValid(s: OperatorOnboardingState): boolean {
+  return !!s.primary_category && s.target_species.length >= 1;
+}
+
 export function isBookingRulesValid(s: OperatorOnboardingState): boolean {
   return !!s.booking_type && !!s.advance_notice_hours && !!s.cancellation_policy;
 }
@@ -192,6 +220,7 @@ export function isReadyToSubmit(s: OperatorOnboardingState): boolean {
     !!s.business_type &&
     isProfileValid(s) &&
     isBoatDetailsValid(s) &&
+    isFishingFocusValid(s) &&
     isBookingRulesValid(s)
   );
 }
