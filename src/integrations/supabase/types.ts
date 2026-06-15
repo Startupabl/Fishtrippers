@@ -788,7 +788,11 @@ export type Database = {
           moderation_note: string | null
           moderation_status: Database["public"]["Enums"]["journey_moderation_status"]
           owner_id: string
+          primary_category:
+            | Database["public"]["Enums"]["operator_primary_category"]
+            | null
           submitted_at: string | null
+          target_species: string[]
           updated_at: string
         }
         Insert: {
@@ -809,7 +813,11 @@ export type Database = {
           moderation_note?: string | null
           moderation_status?: Database["public"]["Enums"]["journey_moderation_status"]
           owner_id: string
+          primary_category?:
+            | Database["public"]["Enums"]["operator_primary_category"]
+            | null
           submitted_at?: string | null
+          target_species?: string[]
           updated_at?: string
         }
         Update: {
@@ -830,7 +838,11 @@ export type Database = {
           moderation_note?: string | null
           moderation_status?: Database["public"]["Enums"]["journey_moderation_status"]
           owner_id?: string
+          primary_category?:
+            | Database["public"]["Enums"]["operator_primary_category"]
+            | null
           submitted_at?: string | null
+          target_species?: string[]
           updated_at?: string
         }
         Relationships: []
@@ -1619,6 +1631,7 @@ export type Database = {
       operator_booking_type: "instant" | "inquiry"
       operator_business_type: "charter" | "guide"
       operator_cancellation_policy: "flexible" | "moderate" | "strict"
+      operator_primary_category: "offshore" | "inshore" | "freshwater" | "fly"
       order_status_t: "active" | "completed" | "refunded" | "paid"
       site_page_category: "learning_teaching" | "support_safety" | "legal"
       site_page_status: "live" | "draft"
@@ -1774,6 +1787,7 @@ export const Constants = {
       operator_booking_type: ["instant", "inquiry"],
       operator_business_type: ["charter", "guide"],
       operator_cancellation_policy: ["flexible", "moderate", "strict"],
+      operator_primary_category: ["offshore", "inshore", "freshwater", "fly"],
       order_status_t: ["active", "completed", "refunded", "paid"],
       site_page_category: ["learning_teaching", "support_safety", "legal"],
       site_page_status: ["live", "draft"],

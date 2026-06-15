@@ -7,11 +7,110 @@ export const BUSINESS_TYPES = ["charter", "guide"] as const;
 export const BOOKING_TYPES = ["instant", "inquiry"] as const;
 export const ADVANCE_NOTICE_OPTIONS = [6, 12, 24, 48] as const;
 export const CANCELLATION_POLICIES = ["flexible", "moderate", "strict"] as const;
+export const PRIMARY_CATEGORIES = ["offshore", "inshore", "freshwater", "fly"] as const;
 
 export type BusinessType = (typeof BUSINESS_TYPES)[number];
 export type BookingType = (typeof BOOKING_TYPES)[number];
 export type AdvanceNoticeHours = (typeof ADVANCE_NOTICE_OPTIONS)[number];
 export type CancellationPolicy = (typeof CANCELLATION_POLICIES)[number];
+export type PrimaryCategory = (typeof PRIMARY_CATEGORIES)[number];
+
+export const PRIMARY_CATEGORY_DETAILS: Record<
+  PrimaryCategory,
+  { title: string; description: string }
+> = {
+  offshore: {
+    title: "Offshore",
+    description: "Big water, big game — tuna, marlin, mahi, deep sea trolling.",
+  },
+  inshore: {
+    title: "Inshore",
+    description: "Bays, flats and estuaries — redfish, snook, tarpon, trout.",
+  },
+  freshwater: {
+    title: "Freshwater",
+    description: "Lakes and rivers — bass, trout, walleye, pike, salmon.",
+  },
+  fly: {
+    title: "Fly Fishing",
+    description: "Fly rod specialist — trout streams, bonefish flats, permit.",
+  },
+};
+
+export interface SpeciesItem {
+  id: string;
+  label: string;
+}
+export interface SpeciesGroup {
+  category: PrimaryCategory;
+  label: string;
+  items: SpeciesItem[];
+}
+
+export const SPECIES_CATALOG: SpeciesGroup[] = [
+  {
+    category: "offshore",
+    label: "Offshore",
+    items: [
+      { id: "tuna", label: "Tuna" },
+      { id: "marlin", label: "Marlin" },
+      { id: "mahi", label: "Mahi-Mahi" },
+      { id: "wahoo", label: "Wahoo" },
+      { id: "sailfish", label: "Sailfish" },
+      { id: "snapper", label: "Snapper" },
+      { id: "grouper", label: "Grouper" },
+      { id: "kingfish", label: "Kingfish" },
+    ],
+  },
+  {
+    category: "inshore",
+    label: "Inshore",
+    items: [
+      { id: "redfish", label: "Redfish" },
+      { id: "snook", label: "Snook" },
+      { id: "tarpon", label: "Tarpon" },
+      { id: "sea_trout", label: "Sea Trout" },
+      { id: "flounder", label: "Flounder" },
+    ],
+  },
+  {
+    category: "freshwater",
+    label: "Freshwater",
+    items: [
+      { id: "largemouth_bass", label: "Largemouth Bass" },
+      { id: "smallmouth_bass", label: "Smallmouth Bass" },
+      { id: "rainbow_trout", label: "Rainbow Trout" },
+      { id: "walleye", label: "Walleye" },
+      { id: "northern_pike", label: "Northern Pike" },
+      { id: "musky", label: "Musky" },
+      { id: "catfish", label: "Catfish" },
+      { id: "crappie", label: "Crappie" },
+      { id: "salmon", label: "Salmon" },
+    ],
+  },
+  {
+    category: "fly",
+    label: "Fly",
+    items: [
+      { id: "trout_fly", label: "Trout (Fly)" },
+      { id: "bonefish", label: "Bonefish" },
+      { id: "permit", label: "Permit" },
+      { id: "tarpon_fly", label: "Tarpon (Fly)" },
+    ],
+  },
+];
+
+export const ALL_SPECIES_IDS: string[] = SPECIES_CATALOG.flatMap((g) =>
+  g.items.map((i) => i.id),
+);
+
+export function speciesLabel(id: string): string {
+  for (const g of SPECIES_CATALOG) {
+    const m = g.items.find((i) => i.id === id);
+    if (m) return m.label;
+  }
+  return id;
+}
 
 // Feature catalog used by the boat features checklist.
 export interface FeatureItem {
@@ -74,6 +173,8 @@ export const operatorDraftSchema = z.object({
     .nullable()
     .optional(),
   cancellation_policy: z.enum(CANCELLATION_POLICIES).nullable().optional(),
+  primary_category: z.enum(PRIMARY_CATEGORIES).nullable().optional(),
+  target_species: z.array(z.string()).optional().nullable(),
 });
 
 export const vesselDraftSchema = z.object({
@@ -104,6 +205,8 @@ export const submitOperatorSchema = z.object({
   booking_type: z.enum(BOOKING_TYPES),
   advance_notice_hours: z.union([z.literal(6), z.literal(12), z.literal(24), z.literal(48)]),
   cancellation_policy: z.enum(CANCELLATION_POLICIES),
+  primary_category: z.enum(PRIMARY_CATEGORIES),
+  target_species: z.array(z.string()).min(1).max(50),
   vessel: z
     .object({
       manufacturer: z.string().trim().min(1).max(120),

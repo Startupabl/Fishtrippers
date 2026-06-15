@@ -55,6 +55,8 @@ export const upsertOperatorDraft = createServerFn({ method: "POST" })
       booking_type: data.operator.booking_type ?? null,
       advance_notice_hours: data.operator.advance_notice_hours ?? null,
       cancellation_policy: data.operator.cancellation_policy ?? null,
+      primary_category: data.operator.primary_category ?? null,
+      target_species: data.operator.target_species ?? [],
     };
 
     const { data: upserted, error } = await supabase
@@ -123,6 +125,8 @@ export const submitOperatorForReview = createServerFn({ method: "POST" })
           booking_type: data.booking_type,
           advance_notice_hours: data.advance_notice_hours,
           cancellation_policy: data.cancellation_policy,
+          primary_category: data.primary_category,
+          target_species: data.target_species,
           moderation_status: "pending",
           submitted_at: new Date().toISOString(),
         },
