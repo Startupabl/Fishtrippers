@@ -38,6 +38,7 @@ export interface OperatorOnboardingState {
   business_type: BusinessType | null;
   display_name: string;
   location: string;
+  about: string;
   booking_type: BookingType | null;
   advance_notice_hours: AdvanceNoticeHours | null;
   cancellation_policy: CancellationPolicy | null;
@@ -50,7 +51,7 @@ export interface OperatorOnboardingState {
 
   // setters
   setBusinessType: (t: BusinessType) => void;
-  setProfile: (p: { display_name?: string; location?: string }) => void;
+  setProfile: (p: { display_name?: string; location?: string; about?: string }) => void;
   setVessel: (v: Partial<VesselDraftState>) => void;
   toggleFeature: (id: string) => void;
   setBookingRules: (r: {
