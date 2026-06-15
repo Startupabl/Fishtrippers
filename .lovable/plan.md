@@ -1,39 +1,43 @@
-# Remove video (Daily.co) integration
+## Goal
+Temporarily hide every Stripe / payment UI surface so the project can be remixed cleanly. **No Stripe code, server functions, webhook, or DB schema is removed** — re-enabling later is just reverting these UI changes.
 
-Since this project won't use video, strip out the Daily-powered live classroom flow end to end. Marketing copy and the underlying booking/cohort data stay intact — only the live-video room is removed.
+A single feature flag drives every hide so reverting is a one-line change.
 
-## What gets removed
+## Approach
+Add `src/config/payments.ts` exporting `export const PAYMENTS_ENABLED = false;` and gate the UI on it.
 
-1. **Daily SDK + server function**
-   - Delete `src/components/classroom/DailyEmbed.tsx` (and the empty `src/components/classroom/` folder).
-   - Delete `src/lib/classroom.functions.ts` (the `getDailyJoinInfo` server fn + Daily meeting-token minting).
-   - Delete the route `src/routes/_authenticated/classroom.$orderId.tsx`.
-   - Uninstall the `@daily-co/daily-js` npm dependency.
+## Changes
 
-2. **"Launch / Join classroom" UI**
-   - `src/routes/_authenticated/dashboard.learner.purchases.tsx` — remove `launchClassroom` and the Launch button wiring; update the page description to drop "or launch the classroom."
-   - `src/routes/_authenticated/dashboard.learner.schedule.tsx` — remove `launchClassroom` and any button that calls it.
-   - `src/routes/_authenticated/dashboard.upcoming-sessions.tsx` — remove the navigate-to-classroom handler and the button that triggers it.
-   - `src/components/orders/OrderSchedulePanel.tsx` — remove the "Launch" classroom button and its `onLaunch` prop; update call sites accordingly.
-   - `src/components/checkout/AddToCalendarMenu.tsx` — remove the `/classroom/{sessionId}` URL from the calendar event description (replace with a neutral lesson description).
+**1. Feature flag**
+- New file `src/config/payments.ts` — exports `PAYMENTS_ENABLED = false`.
 
-3. **Classroom-only server functions (no longer referenced)**
-   - In `src/lib/bookings.functions.ts`, remove `startClassSession` and `endClassSession` (they only existed to flip `class_sessions.is_live` for the Daily room). The `class_sessions` table itself, cohort scheduling, bookings, and orders all stay.
+**2. Admin nav (hide Stripe entry)**
+- `src/routes/_admin/admin.settings.tsx` — remove the "Master Stripe Integration" card from `CARDS` (leaves 3 cards: Categories/Page Settings/Platform Communications + Inbox). Route files for `admin.settings.stripe.tsx` and `admin.settings.payments.tsx` stay on disk, just unlinked.
 
-4. **Secrets**
-   - Delete `DAILY_API_KEY` and `DAILY_OWNER_TOKEN` from project secrets.
-   - Leave `CRON_SECRET`, `RESEND_API_KEY`, and `TURNSTILE_SECRET_KEY` untouched — you'll update those when ready.
+**3. Buyer-side payment buttons → disabled stub**
+For each, when `!PAYMENTS_ENABLED`, render a disabled button with text "Payments temporarily disabled" (keeps layout intact):
+- `src/components/checkout/PaymentPanel.tsx` — disable the "Pay & Reserve" button.
+- `src/components/gift/GiftCheckoutDialog.tsx` — disable the "Pay & Send Gift" button.
+- `src/components/layout/CartDrawer.tsx` — disable the "Checkout" button.
+- `src/components/chat/CustomOfferCard.tsx` — disable the offer "Pay" button.
+- `src/routes/checkout.tsx` — short-circuit `handlePay` to a toast "Payments disabled" instead of running the mock booking flow (optional safety; the underlying flow is already local-state).
 
-## What stays
+**4. Mentor / payout-onboarding CTAs (hide Stripe Connect surfaces)**
+Wrap the existing Stripe Connect blocks in `PAYMENTS_ENABLED` checks so they render nothing:
+- `src/routes/_authenticated/settings.billing.tsx` — hide Connect onboarding card; show a short notice "Payouts are temporarily disabled."
+- `src/routes/_authenticated/dashboard.aide.courses.tsx` — hide "Connect Stripe Account" banner and the checklist row that flags missing Stripe.
+- `src/routes/_authenticated/dashboard.tsx` — hide the "Stripe not connected" alert.
+- `src/routes/mentor.create-path.tsx` — remove the Stripe payout-readiness gating (treat as ready) and trim the "Don't have a Stripe account?" copy.
 
-- All booking / cohort / scheduling logic, `class_sessions` table, calendar export (minus the classroom URL), messaging, orders, payouts.
-- Any UI text mentioning "daily" in an unrelated sense (e.g. "daily tasks", sitemap `changefreq: "daily"`) — those are not video-related.
+**5. Gift route**
+- `src/routes/gift.tsx` — disable "Gift This" tier buttons with the same stub label.
 
-## Verification
+## Out of scope (intentionally untouched)
+- `src/lib/stripe.server.ts`, `src/lib/platform-stripe.functions.ts`, `src/lib/payouts.functions.ts`, `src/lib/checkout.functions.ts`
+- `src/routes/api/public/stripe/webhook.ts`
+- `src/routes/_admin/admin.settings.stripe.tsx`, `admin.settings.payments.tsx`
+- Database tables, RLS, Stripe-related columns
+- The `@stripe/*` npm packages
 
-- After edits, the auto-generated `src/routeTree.gen.ts` will rebuild and the `/classroom/$orderId` route will be gone.
-- Confirm the build passes and no remaining import points at the deleted files (`rg "classroom.functions|DailyEmbed|/classroom/"`).
-
-## Out of scope
-
-- Replacing the live-class experience with something else (Zoom links, async video, etc.) — say the word if you want a follow-up plan for that.
+## Re-enabling after remix
+Flip `PAYMENTS_ENABLED` to `true` and re-add the Stripe card to `CARDS` in `admin.settings.tsx`. Everything else lights back up automatically.

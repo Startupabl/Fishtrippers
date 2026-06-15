@@ -459,6 +459,7 @@ function ScheduleTableRow({
     endIso,
   });
   const studentCount = row.students.length;
+  const joinOrderId = row.students.find((s) => s.orderId)?.orderId ?? null;
   const sessionIndex = row.slotIndex + 1;
   const studentOrderIds = row.students
     .map((s) => s.orderId)
@@ -466,6 +467,11 @@ function ScheduleTableRow({
   const allCompleted =
     studentOrderIds.length > 0 &&
     studentOrderIds.every((id) => completedSet.has(`${id}:${sessionIndex}`));
+  const onJoin = () => {
+    if (joinOrderId) {
+      navigate({ to: "/classroom/$orderId", params: { orderId: joinOrderId } });
+    }
+  };
 
 
   return (
@@ -563,6 +569,11 @@ function ScheduleTableRow({
             )}
             {(row.status === "booked" || row.status === "pending_reschedule") && (
               <>
+                {joinOrderId && (
+                  <Button size="sm" onClick={onJoin}>
+                    Join Classroom
+                  </Button>
+                )}
                 <DropdownMenu>
                   <DropdownMenuTrigger asChild>
                     <Button

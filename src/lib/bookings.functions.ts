@@ -336,7 +336,8 @@ export const listPublicUpcomingCohorts = createServerFn({ method: "POST" })
 
 
 // Look up the schedule for the class session linked to a given booking
-// (or order, via its booking_id).
+// (or order, via its booking_id). Live-classroom join info now comes from
+// `getDailyJoinInfo` in `src/lib/classroom.functions.ts`.
 export interface ClassSessionInfo {
   class_session_id: string;
   listing_title: string;
@@ -390,6 +391,53 @@ export const getClassSessionForOrder = createServerFn({ method: "POST" })
     };
   });
 
+const ClassSessionIdInput = z.object({ class_session_id: z.string().uuid() });
+
+export const startClassSession = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((i: unknown) => ClassSessionIdInput.parse(i))
+  .handler(async ({ data, context }) => {
+    const { userId } = context;
+    const { data: cs } = await supabaseAdmin
+      .from("class_sessions")
+      .select("aide_id")
+      .eq("id", data.class_session_id)
+      .maybeSingle();
+    if (!cs) throw new Error("Class session not found.");
+    if (cs.aide_id !== userId)
+      throw new Error("Only the Aide can start this session.");
+    const { error } = await supabaseAdmin
+      .from("class_sessions")
+      .update({
+        is_live: true,
+        live_started_at: new Date().toISOString(),
+        live_ended_at: null,
+      })
+      .eq("id", data.class_session_id);
+    if (error) throw new Error(error.message);
+    return { ok: true };
+  });
+
+export const endClassSession = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((i: unknown) => ClassSessionIdInput.parse(i))
+  .handler(async ({ data, context }) => {
+    const { userId } = context;
+    const { data: cs } = await supabaseAdmin
+      .from("class_sessions")
+      .select("aide_id")
+      .eq("id", data.class_session_id)
+      .maybeSingle();
+    if (!cs) throw new Error("Class session not found.");
+    if (cs.aide_id !== userId)
+      throw new Error("Only the Aide can end this session.");
+    const { error } = await supabaseAdmin
+      .from("class_sessions")
+      .update({ is_live: false, live_ended_at: new Date().toISOString() })
+      .eq("id", data.class_session_id);
+    if (error) throw new Error(error.message);
+    return { ok: true };
+  });
 
 const BookingIdInput = z.object({ booking_id: z.string().uuid() });
 
