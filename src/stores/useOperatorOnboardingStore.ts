@@ -192,7 +192,13 @@ export const useOperatorOnboardingStore = create<OperatorOnboardingState>()(
 
 // ----- Validity helpers -----
 export function isProfileValid(s: OperatorOnboardingState): boolean {
-  return s.display_name.trim().length >= 2 && s.location.trim().length >= 2;
+  const aboutLen = s.about.trim().length;
+  return (
+    s.display_name.trim().length >= 2 &&
+    s.location.trim().length >= 2 &&
+    aboutLen >= 150 &&
+    aboutLen <= 1000
+  );
 }
 
 export function isBoatDetailsValid(s: OperatorOnboardingState): boolean {
