@@ -146,7 +146,7 @@ export function SiteFooter() {
 
         <div className="border-t border-border/60 pt-6">
           <p className="text-sm text-muted-foreground">
-            © {new Date().getFullYear()} Lemonaidely
+            © {new Date().getFullYear()} FishTrippers
           </p>
         </div>
       </div>

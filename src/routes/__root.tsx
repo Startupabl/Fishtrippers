@@ -78,27 +78,27 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
     meta: [
       { charSet: "utf-8" },
       { name: "viewport", content: "width=device-width, initial-scale=1" },
-      { title: "Lemonaidely™ — Master AI tools with an expert Aide" },
+      { title: "FishTrippers — Book your next fishing trip" },
       {
         name: "description",
         content:
-          "Lemonaidely™ is the creative marketplace where learners are paired with expert Aides to master AI tools, hands-on. AI Made Refreshing™.",
+          "FishTrippers is the marketplace for booking top-rated fishing charters and guides. Find your next trip or list your boat in minutes.",
       },
-      { name: "author", content: "Lemonaidely" },
-      { property: "og:title", content: "Lemonaidely™ — Master AI tools with an expert Aide" },
+      { name: "author", content: "FishTrippers" },
+      { property: "og:title", content: "FishTrippers — Book your next fishing trip" },
       {
         property: "og:description",
         content:
-          "Master AI tools with an expert Aide to guide your Course — Lemonaidely™. AI Made Refreshing™.",
+          "Discover top-rated fishing charters and guides. Book your next trip with FishTrippers.",
       },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary" },
-      { name: "twitter:site", content: "@Lemonaidely" },
-      { name: "twitter:title", content: "Lemonaidely™ — Master AI tools with an expert Aide" },
+      { name: "twitter:site", content: "@FishTrippers" },
+      { name: "twitter:title", content: "FishTrippers — Book your next fishing trip" },
       {
         name: "twitter:description",
         content:
-          "Master AI tools with an expert Aide to guide your Course — Lemonaidely™. AI Made Refreshing™.",
+          "Discover top-rated fishing charters and guides. Book your next trip with FishTrippers.",
       },
     ],
     scripts: [
