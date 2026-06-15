@@ -258,6 +258,9 @@ function CreatePathPage() {
             {state.currentStep === "fishing_focus" && (
               <FishingFocusStep onBack={back} onNext={advance} />
             )}
+            {state.currentStep === "trip_catalog" && (
+              <TripCatalogStep onBack={back} onNext={advance} />
+            )}
             {state.currentStep === "booking_rules" && (
               <BookingRulesStep onBack={back} onNext={advance} />
             )}
