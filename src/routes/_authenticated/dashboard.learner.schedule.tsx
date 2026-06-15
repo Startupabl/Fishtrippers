@@ -420,9 +420,7 @@ function ScheduleRow({
       </TableCell>
       <TableCell>
         {mode === "enrolled" ? (
-          <Button size="sm" onClick={onLaunch}>
-            Join Classroom
-          </Button>
+          <span className="text-xs text-muted-foreground">—</span>
         ) : isFinal && isCourseComplete ? (
           <div className="flex items-center gap-2">
             <Button
