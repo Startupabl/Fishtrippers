@@ -43,6 +43,7 @@ export function ReviewSubmitStep({ onBack }: Props) {
         business_type: state.business_type,
         display_name: state.display_name.trim(),
         location: state.location.trim(),
+        about: state.about.trim(),
         booking_type: state.booking_type,
         advance_notice_hours: state.advance_notice_hours,
         cancellation_policy: state.cancellation_policy,
