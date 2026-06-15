@@ -219,9 +219,6 @@ function LearnerSchedule() {
       );
   }, [rows, completedSet, fullyDoneOrderIds]);
 
-  function launchClassroom(orderId: string) {
-    navigate({ to: "/classroom/$orderId", params: { orderId } });
-  }
 
   if (!user) return null;
 
@@ -256,7 +253,6 @@ function LearnerSchedule() {
             rows={enrolled}
             loading={loading}
             mode="enrolled"
-            onLaunch={launchClassroom}
             reviewedSet={reviewedSet}
             fullyDoneOrderIds={fullyDoneOrderIds}
           />
@@ -266,7 +262,6 @@ function LearnerSchedule() {
             rows={completed}
             loading={loading}
             mode="completed"
-            onLaunch={launchClassroom}
             reviewedSet={reviewedSet}
             fullyDoneOrderIds={fullyDoneOrderIds}
           />
@@ -280,14 +275,12 @@ function ScheduleTable({
   rows,
   loading,
   mode,
-  onLaunch,
   reviewedSet,
   fullyDoneOrderIds,
 }: {
   rows: SessionRow[];
   loading: boolean;
   mode: "enrolled" | "completed";
-  onLaunch: (orderId: string) => void;
   reviewedSet: Set<string>;
   fullyDoneOrderIds: Set<string>;
 }) {
@@ -323,7 +316,6 @@ function ScheduleTable({
                 key={`${r.orderId}-${r.sessionNumber}`}
                 row={r}
                 mode={mode}
-                onLaunch={() => onLaunch(r.orderId)}
                 alreadyReviewed={reviewedSet.has(r.orderId)}
                 courseFullyDone={fullyDoneOrderIds.has(r.orderId)}
               />
@@ -338,13 +330,11 @@ function ScheduleTable({
 function ScheduleRow({
   row,
   mode,
-  onLaunch,
   alreadyReviewed,
   courseFullyDone,
 }: {
   row: SessionRow;
   mode: "enrolled" | "completed";
-  onLaunch: () => void;
   alreadyReviewed: boolean;
   courseFullyDone: boolean;
 }) {
