@@ -300,18 +300,17 @@ function CategoryGrid() {
 }
 
 function Index() {
-  const navigate = useNavigate();
+  const _navigate = useNavigate();
+  void _navigate;
 
   const [videoOpen, setVideoOpen] = useState(false);
   const [quizOpen, setQuizOpen] = useState(false);
-  const [heroQuery, setHeroQuery] = useState("");
-  const [isDesktop, setIsDesktop] = useState(false);
   const authInitialized = useAuthStore((s) => s.initialized);
   const authUser = useAuthStore((s) => s.user);
   const greetingName =
     authUser?.displayName && authUser.displayName.trim().length > 0
       ? authUser.displayName
-      : "Future Alchemist";
+      : "Angler";
   const showGreeting = authInitialized && !!authUser;
 
   const fetchFeatured = useServerFn(listFeaturedJourneys);
@@ -321,20 +320,6 @@ function Index() {
   });
   const featured = featuredQuery.data ?? [];
 
-  useEffect(() => {
-    const mq = window.matchMedia("(min-width: 1024px)");
-    const update = () => setIsDesktop(mq.matches);
-    update();
-    mq.addEventListener("change", update);
-    return () => mq.removeEventListener("change", update);
-  }, []);
-
-  const handleHeroSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    const q = heroQuery.trim();
-    setHeroQuery("");
-    navigate({ to: "/search", search: q ? { q } : undefined } as never);
-  };
 
   useEffect(() => {
     try {
