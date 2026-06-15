@@ -130,6 +130,32 @@ export function ReviewSubmitStep({ onBack }: Props) {
       )}
 
       <section className="space-y-4 rounded-2xl border bg-card p-6">
+        <h2 className="text-lg font-semibold">Fishing focus</h2>
+        <dl className="grid gap-3 sm:grid-cols-2">
+          <Field label="Primary category">
+            {state.primary_category
+              ? PRIMARY_CATEGORY_DETAILS[state.primary_category].title
+              : "—"}
+          </Field>
+          <div className="sm:col-span-2">
+            <dt className="text-xs uppercase text-muted-foreground">Target species</dt>
+            {state.target_species.length === 0 ? (
+              <p className="mt-1 text-sm text-muted-foreground">None selected</p>
+            ) : (
+              <div className="mt-2 flex flex-wrap gap-2">
+                {state.target_species.map((s) => (
+                  <Badge key={s} variant="secondary">
+                    {speciesLabel(s)}
+                  </Badge>
+                ))}
+              </div>
+            )}
+          </div>
+        </dl>
+      </section>
+
+      <section className="space-y-4 rounded-2xl border bg-card p-6">
+
         <h2 className="text-lg font-semibold">Booking rules</h2>
         <dl className="grid gap-3 sm:grid-cols-2">
           <Field label="Booking type">
