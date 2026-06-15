@@ -30,8 +30,8 @@ const TRACKING_ID = import.meta.env.VITE_LOVABLE_CONNECTOR_GOOGLE_MAPS_TRACKING_
   | string
   | undefined;
 
-let mapsLoader: Promise<typeof google> | null = null;
-function loadMapsApi(): Promise<typeof google> {
+let mapsLoader: Promise<any> | null = null;
+function loadMapsApi(): Promise<any> {
   if (typeof window === "undefined") return Promise.reject(new Error("ssr"));
   if ((window as any).google?.maps) return Promise.resolve((window as any).google);
   if (mapsLoader) return mapsLoader;
