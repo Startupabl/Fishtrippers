@@ -89,6 +89,7 @@ export const useOperatorOnboardingStore = create<OperatorOnboardingState>()(
       business_type: null,
       display_name: "",
       location: "",
+      about: "",
       booking_type: null,
       advance_notice_hours: null,
       cancellation_policy: null,
@@ -102,6 +103,7 @@ export const useOperatorOnboardingStore = create<OperatorOnboardingState>()(
         set((s) => ({
           display_name: p.display_name ?? s.display_name,
           location: p.location ?? s.location,
+          about: p.about ?? s.about,
         })),
       setVessel: (v) => set((s) => ({ vessel: { ...s.vessel, ...v } })),
       toggleFeature: (id) =>
