@@ -1,7 +1,8 @@
 import { Link } from "@tanstack/react-router";
 import { cn } from "@/lib/utils";
 import { BRAND, DESIGN_SYSTEM } from "@/lib/brand";
-import logoMark from "@/assets/fishtrippers-logo.png";
+import logoAsset from "@/assets/fishtrippers-logo.png.asset.json";
+const logoMark = logoAsset.url;
 
 export type LogoSize = "sm" | "md" | "lg" | "xl" | "2xl";
 
@@ -29,11 +30,11 @@ const SIZE_CLASSES: Record<LogoSize, string> = {
 };
 
 const MARK_SIZE: Record<LogoSize, string> = {
-  sm: "h-7 w-7",
-  md: "h-9 w-9",
-  lg: "h-11 w-11",
-  xl: "h-14 w-14",
-  "2xl": "h-16 w-16",
+  sm: "h-8",
+  md: "h-10",
+  lg: "h-12",
+  xl: "h-16",
+  "2xl": "h-20",
 };
 
 const TAGLINE_CLASSES: Record<LogoSize, string> = {
@@ -60,6 +61,35 @@ function Lockup({
   const wordColor = tone === "light" ? "#FFFFFF" : DESIGN_SYSTEM.colors.oceanDeep;
   const accentColor = DESIGN_SYSTEM.colors.gold;
   const taglineColor = tone === "light" ? "rgba(255,255,255,0.8)" : undefined;
+  // When showMark, render the full lockup PNG (mascot + wordmark baked in).
+  if (showMark) {
+    return (
+      <span
+        className={cn(
+          "inline-flex items-center",
+          align === "center" ? "justify-center" : "justify-start",
+        )}
+      >
+        <img
+          src={logoMark}
+          alt={BRAND.name}
+          className={cn("w-auto object-contain", MARK_SIZE[size])}
+        />
+        {showTagline && (
+          <span
+            className={cn("ml-3 font-normal", TAGLINE_CLASSES[size])}
+            style={{
+              fontFamily: DESIGN_SYSTEM.fonts.sansSerif,
+              color: taglineColor ?? "var(--muted-foreground)",
+            }}
+          >
+            {BRAND.tagline}
+          </span>
+        )}
+      </span>
+    );
+  }
+
   return (
     <span
       className={cn(
@@ -67,16 +97,6 @@ function Lockup({
         align === "center" ? "justify-center" : "justify-start",
       )}
     >
-      {showMark && (
-        <img
-          src={logoMark}
-          alt=""
-          aria-hidden="true"
-          className={cn("shrink-0 object-contain", MARK_SIZE[size])}
-          width={64}
-          height={64}
-        />
-      )}
       <span
         className={cn(
           "inline-flex flex-col leading-none",
