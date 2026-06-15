@@ -225,7 +225,58 @@ export function ProfileStep({ onBack, onNext }: Props) {
             City and state, marina name, or general region.
           </p>
         </div>
+
+        <div className="space-y-2">
+          <div className="flex items-center gap-2">
+            <Label htmlFor="about" className="text-base font-semibold">
+              {aboutCopy.title}
+            </Label>
+            <TooltipProvider delayDuration={150}>
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <button
+                    type="button"
+                    aria-label="Helpful tips"
+                    className="inline-flex h-5 w-5 items-center justify-center rounded-full text-muted-foreground hover:text-foreground"
+                  >
+                    <Info className="h-4 w-4" />
+                  </button>
+                </TooltipTrigger>
+                <TooltipContent side="right" className="max-w-xs">
+                  <p className="mb-1 font-medium">Helpful tips</p>
+                  <ul className="list-disc space-y-1 pl-4 text-xs">
+                    {aboutCopy.tips.map((t) => (
+                      <li key={t}>{t}</li>
+                    ))}
+                  </ul>
+                </TooltipContent>
+              </Tooltip>
+            </TooltipProvider>
+          </div>
+          <Textarea
+            id="about"
+            value={about}
+            onChange={(e) => setProfile({ about: e.target.value })}
+            placeholder={aboutCopy.placeholder}
+            rows={5}
+            maxLength={ABOUT_MAX}
+            className="min-h-[140px] resize-y"
+          />
+          <div className="flex items-center justify-between gap-2">
+            <p className="text-xs text-muted-foreground">
+              Minimum {ABOUT_MIN} characters — aim for 2–3 strong sentences.
+            </p>
+            <p
+              className={`text-xs tabular-nums ${
+                aboutTooShort ? "text-destructive" : "text-muted-foreground"
+              }`}
+            >
+              {aboutLen} / {ABOUT_MAX}
+            </p>
+          </div>
+        </div>
       </div>
+
 
       <div className="flex justify-between pt-2">
         <Button variant="ghost" onClick={onBack}>
