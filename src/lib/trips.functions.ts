@@ -46,7 +46,7 @@ export const upsertTrip = createServerFn({ method: "POST" })
     const { supabase, userId } = context;
     const operatorId = await resolveOperatorId(supabase, userId);
 
-    const payload: Record<string, any> = {
+    const payload = {
       operator_id: operatorId,
       title: data.title,
       description: data.description,
@@ -58,7 +58,7 @@ export const upsertTrip = createServerFn({ method: "POST" })
       departure_lat: data.departure_lat ?? null,
       departure_lng: data.departure_lng ?? null,
       departure_place_id: data.departure_place_id ?? null,
-    };
+    } as any;
 
     if (data.id) {
       const { data: row, error } = await supabase
