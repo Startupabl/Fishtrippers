@@ -769,6 +769,72 @@ export type Database = {
         }
         Relationships: []
       }
+      operators: {
+        Row: {
+          advance_notice_hours: number | null
+          booking_type:
+            | Database["public"]["Enums"]["operator_booking_type"]
+            | null
+          business_type:
+            | Database["public"]["Enums"]["operator_business_type"]
+            | null
+          cancellation_policy:
+            | Database["public"]["Enums"]["operator_cancellation_policy"]
+            | null
+          created_at: string
+          display_name: string | null
+          id: string
+          location: string | null
+          moderation_note: string | null
+          moderation_status: Database["public"]["Enums"]["journey_moderation_status"]
+          owner_id: string
+          submitted_at: string | null
+          updated_at: string
+        }
+        Insert: {
+          advance_notice_hours?: number | null
+          booking_type?:
+            | Database["public"]["Enums"]["operator_booking_type"]
+            | null
+          business_type?:
+            | Database["public"]["Enums"]["operator_business_type"]
+            | null
+          cancellation_policy?:
+            | Database["public"]["Enums"]["operator_cancellation_policy"]
+            | null
+          created_at?: string
+          display_name?: string | null
+          id?: string
+          location?: string | null
+          moderation_note?: string | null
+          moderation_status?: Database["public"]["Enums"]["journey_moderation_status"]
+          owner_id: string
+          submitted_at?: string | null
+          updated_at?: string
+        }
+        Update: {
+          advance_notice_hours?: number | null
+          booking_type?:
+            | Database["public"]["Enums"]["operator_booking_type"]
+            | null
+          business_type?:
+            | Database["public"]["Enums"]["operator_business_type"]
+            | null
+          cancellation_policy?:
+            | Database["public"]["Enums"]["operator_cancellation_policy"]
+            | null
+          created_at?: string
+          display_name?: string | null
+          id?: string
+          location?: string | null
+          moderation_note?: string | null
+          moderation_status?: Database["public"]["Enums"]["journey_moderation_status"]
+          owner_id?: string
+          submitted_at?: string | null
+          updated_at?: string
+        }
+        Relationships: []
+      }
       order_session_completions: {
         Row: {
           completed_at: string
@@ -1322,6 +1388,66 @@ export type Database = {
         }
         Relationships: []
       }
+      trip_packages: {
+        Row: {
+          created_at: string
+          currency: string
+          description: string | null
+          duration_minutes: number
+          id: string
+          max_party_size: number | null
+          operator_id: string
+          price_minor: number
+          status: Database["public"]["Enums"]["trip_package_status"]
+          title: string
+          updated_at: string
+          vessel_id: string | null
+        }
+        Insert: {
+          created_at?: string
+          currency?: string
+          description?: string | null
+          duration_minutes: number
+          id?: string
+          max_party_size?: number | null
+          operator_id: string
+          price_minor?: number
+          status?: Database["public"]["Enums"]["trip_package_status"]
+          title: string
+          updated_at?: string
+          vessel_id?: string | null
+        }
+        Update: {
+          created_at?: string
+          currency?: string
+          description?: string | null
+          duration_minutes?: number
+          id?: string
+          max_party_size?: number | null
+          operator_id?: string
+          price_minor?: number
+          status?: Database["public"]["Enums"]["trip_package_status"]
+          title?: string
+          updated_at?: string
+          vessel_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "trip_packages_operator_id_fkey"
+            columns: ["operator_id"]
+            isOneToOne: false
+            referencedRelation: "operators"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "trip_packages_vessel_id_fkey"
+            columns: ["vessel_id"]
+            isOneToOne: false
+            referencedRelation: "vessels"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       user_alerts: {
         Row: {
           created_at: string
@@ -1391,6 +1517,59 @@ export type Database = {
         }
         Relationships: []
       }
+      vessels: {
+        Row: {
+          created_at: string
+          engine_size: string | null
+          engine_type: string | null
+          features: Json
+          id: string
+          length_ft: number | null
+          manufacturer: string | null
+          max_passenger_capacity: number
+          model: string | null
+          operator_id: string
+          updated_at: string
+          year: number | null
+        }
+        Insert: {
+          created_at?: string
+          engine_size?: string | null
+          engine_type?: string | null
+          features?: Json
+          id?: string
+          length_ft?: number | null
+          manufacturer?: string | null
+          max_passenger_capacity: number
+          model?: string | null
+          operator_id: string
+          updated_at?: string
+          year?: number | null
+        }
+        Update: {
+          created_at?: string
+          engine_size?: string | null
+          engine_type?: string | null
+          features?: Json
+          id?: string
+          length_ft?: number | null
+          manufacturer?: string | null
+          max_passenger_capacity?: number
+          model?: string | null
+          operator_id?: string
+          updated_at?: string
+          year?: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "vessels_operator_id_fkey"
+            columns: ["operator_id"]
+            isOneToOne: true
+            referencedRelation: "operators"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
     }
     Views: {
       [_ in never]: never
@@ -1437,9 +1616,13 @@ export type Database = {
       journey_moderation_status: "pending" | "approved" | "declined"
       journey_status: "draft" | "published" | "archived"
       offer_status_t: "pending" | "accepted" | "declined"
+      operator_booking_type: "instant" | "inquiry"
+      operator_business_type: "charter" | "guide"
+      operator_cancellation_policy: "flexible" | "moderate" | "strict"
       order_status_t: "active" | "completed" | "refunded" | "paid"
       site_page_category: "learning_teaching" | "support_safety" | "legal"
       site_page_status: "live" | "draft"
+      trip_package_status: "draft" | "active" | "archived"
       user_alert_kind:
         | "listing_pending"
         | "listing_live"
@@ -1588,9 +1771,13 @@ export const Constants = {
       journey_moderation_status: ["pending", "approved", "declined"],
       journey_status: ["draft", "published", "archived"],
       offer_status_t: ["pending", "accepted", "declined"],
+      operator_booking_type: ["instant", "inquiry"],
+      operator_business_type: ["charter", "guide"],
+      operator_cancellation_policy: ["flexible", "moderate", "strict"],
       order_status_t: ["active", "completed", "refunded", "paid"],
       site_page_category: ["learning_teaching", "support_safety", "legal"],
       site_page_status: ["live", "draft"],
+      trip_package_status: ["draft", "active", "archived"],
       user_alert_kind: [
         "listing_pending",
         "listing_live",
