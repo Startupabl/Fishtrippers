@@ -9,6 +9,7 @@ import { validateUpload } from "@/lib/image-crop";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuthStore } from "@/stores/useAuthStore";
 import { useProfileStore } from "@/stores/useProfileStore";
+// Local helper: derive initials from a name string.
 import {
   isProfileValid,
   useOperatorOnboardingStore,
@@ -27,7 +28,7 @@ export function ProfileStep({ onBack, onNext }: Props) {
 
   const user = useAuthStore((s) => s.user);
   const storedAvatar = useProfileStore((s) => s.avatarUrl);
-  const firstName = useProfileStore((s) => s.firstName) ?? "";
+  const displayNameFromAuth = useAuthStore((s) => s.displayName) ?? "";
   const lastName = useProfileStore((s) => s.lastName) ?? "";
 
   const [avatarUrl, setAvatarUrl] = useState<string | null>(storedAvatar ?? null);
@@ -58,9 +59,12 @@ export function ProfileStep({ onBack, onNext }: Props) {
   }, [user?.id, storedAvatar]);
 
   const initials = useMemo(() => {
-    const base = `${firstName[0] ?? ""}${lastName[0] ?? ""}`.toUpperCase();
+    const parts = displayNameFromAuth.trim().split(/\s+/).filter(Boolean);
+    const first = parts[0]?.[0] ?? "";
+    const last = (parts[1]?.[0] ?? lastName[0] ?? "");
+    const base = `${first}${last}`.toUpperCase();
     return base || (user?.email?.[0] ?? "?").toUpperCase();
-  }, [firstName, lastName, user?.email]);
+  }, [displayNameFromAuth, lastName, user?.email]);
 
   const handleFileSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
