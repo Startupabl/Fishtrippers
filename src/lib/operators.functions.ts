@@ -52,6 +52,7 @@ export const upsertOperatorDraft = createServerFn({ method: "POST" })
       business_type: data.operator.business_type ?? null,
       display_name: data.operator.display_name ?? null,
       location: data.operator.location ?? null,
+      about: data.operator.about ?? null,
       booking_type: data.operator.booking_type ?? null,
       advance_notice_hours: data.operator.advance_notice_hours ?? null,
       cancellation_policy: data.operator.cancellation_policy ?? null,
