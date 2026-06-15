@@ -123,6 +123,7 @@ export const submitOperatorForReview = createServerFn({ method: "POST" })
           business_type: data.business_type,
           display_name: data.display_name,
           location: data.location,
+          about: data.about,
           booking_type: data.booking_type,
           advance_notice_hours: data.advance_notice_hours,
           cancellation_policy: data.cancellation_policy,
