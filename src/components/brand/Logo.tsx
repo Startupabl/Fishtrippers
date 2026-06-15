@@ -1,87 +1,104 @@
 import { Link } from "@tanstack/react-router";
 import { cn } from "@/lib/utils";
 import { BRAND, DESIGN_SYSTEM } from "@/lib/brand";
+import logoMark from "@/assets/fishtrippers-logo.png";
 
 export type LogoSize = "sm" | "md" | "lg" | "xl" | "2xl";
 
 interface LogoProps {
   size?: LogoSize;
-  /** Force render mode. Defaults to "link" but auto-locks when onboarding is incomplete. */
+  /** Force render mode. Defaults to "link". */
   as?: "link" | "static";
   /** Render the brand tagline beneath the wordmark. */
   showTagline?: boolean;
-  /** Center the wordmark/tagline lockup (e.g. for auth pages). */
+  /** Center the wordmark/tagline lockup. */
   align?: "start" | "center";
+  /** Force wordmark color (e.g. white over hero). */
+  tone?: "default" | "light";
   className?: string;
 }
 
 const SIZE_CLASSES: Record<LogoSize, string> = {
-  sm: "text-lg",
-  md: "text-2xl",
-  lg: "text-3xl",
-  xl: "text-4xl",
-  "2xl": "text-5xl md:text-6xl",
+  sm: "text-base",
+  md: "text-xl",
+  lg: "text-2xl",
+  xl: "text-3xl",
+  "2xl": "text-4xl md:text-5xl",
+};
+
+const MARK_SIZE: Record<LogoSize, string> = {
+  sm: "h-7 w-7",
+  md: "h-9 w-9",
+  lg: "h-11 w-11",
+  xl: "h-14 w-14",
+  "2xl": "h-16 w-16",
 };
 
 const TAGLINE_CLASSES: Record<LogoSize, string> = {
   sm: "text-[10px]",
   md: "text-xs",
-  lg: "text-sm",
+  lg: "text-xs",
   xl: "text-sm",
-  "2xl": "text-base",
+  "2xl": "text-sm",
 };
 
 function Lockup({
   size,
   showTagline,
   align,
+  tone,
 }: {
   size: LogoSize;
   showTagline?: boolean;
   align: "start" | "center";
+  tone: "default" | "light";
 }) {
+  const wordColor = tone === "light" ? "#FFFFFF" : DESIGN_SYSTEM.colors.oceanDeep;
+  const accentColor = DESIGN_SYSTEM.colors.gold;
+  const taglineColor = tone === "light" ? "rgba(255,255,255,0.8)" : undefined;
   return (
     <span
       className={cn(
-        "inline-flex flex-col leading-none",
-        align === "center" ? "items-center text-center" : "items-start text-left",
+        "inline-flex items-center gap-2.5",
+        align === "center" ? "justify-center" : "justify-start",
       )}
     >
+      <img
+        src={logoMark}
+        alt=""
+        aria-hidden="true"
+        className={cn("shrink-0 object-contain", MARK_SIZE[size])}
+        width={64}
+        height={64}
+      />
       <span
-        className={cn("tracking-tight", SIZE_CLASSES[size])}
-        style={{
-          fontFamily: DESIGN_SYSTEM.fonts.sansSerif,
-          fontWeight: 800,
-        }}
+        className={cn(
+          "inline-flex flex-col leading-none",
+          align === "center" ? "items-center text-center" : "items-start text-left",
+        )}
       >
-        <span style={{ color: DESIGN_SYSTEM.colors.sunnyYellow }}>
-          {BRAND.nameParts.leading}
-        </span>
-        <span style={{ color: DESIGN_SYSTEM.colors.leafGreen }}>
-          {BRAND.nameParts.middle}
-        </span>
-        <span style={{ color: DESIGN_SYSTEM.colors.sunnyYellow }}>
-          {BRAND.nameParts.trailing}
-        </span>
         <span
-          aria-hidden="true"
-          className="ml-0.5 align-super text-[0.5em] font-semibold"
-          style={{ color: DESIGN_SYSTEM.colors.leafGreen }}
+          className={cn("tracking-tight", SIZE_CLASSES[size])}
+          style={{
+            fontFamily: DESIGN_SYSTEM.fonts.sansSerif,
+            fontWeight: 800,
+          }}
         >
-          ™
+          <span style={{ color: accentColor }}>{BRAND.nameParts.leading}</span>
+          <span style={{ color: wordColor }}>{BRAND.nameParts.trailing}</span>
         </span>
+        {showTagline && (
+          <span
+            className={cn("mt-1 font-normal", TAGLINE_CLASSES[size])}
+            style={{
+              fontFamily: DESIGN_SYSTEM.fonts.sansSerif,
+              color: taglineColor ?? "var(--muted-foreground)",
+            }}
+          >
+            {BRAND.tagline}
+          </span>
+        )}
       </span>
-      {showTagline && (
-        <span
-          className={cn(
-            "mt-1 font-normal text-muted-foreground",
-            TAGLINE_CLASSES[size],
-          )}
-          style={{ fontFamily: DESIGN_SYSTEM.fonts.sansSerif }}
-        >
-          {BRAND.tagline}
-        </span>
-      )}
     </span>
   );
 }
@@ -91,6 +108,7 @@ export function Logo({
   as,
   showTagline = false,
   align = "start",
+  tone = "default",
   className,
 }: LogoProps) {
   const locked = as === "static";
@@ -102,7 +120,7 @@ export function Logo({
         aria-label={BRAND.name}
         className={cn("inline-flex cursor-default select-none", className)}
       >
-        <Lockup size={size} showTagline={showTagline} align={align} />
+        <Lockup size={size} showTagline={showTagline} align={align} tone={tone} />
       </span>
     );
   }
@@ -116,7 +134,7 @@ export function Logo({
         className,
       )}
     >
-      <Lockup size={size} showTagline={showTagline} align={align} />
+      <Lockup size={size} showTagline={showTagline} align={align} tone={tone} />
     </Link>
   );
 }
