@@ -98,6 +98,12 @@ export function ReviewSubmitStep({ onBack }: Props) {
             <dt className="text-xs uppercase text-muted-foreground">Location</dt>
             <dd className="font-medium">{state.location}</dd>
           </div>
+          {state.about?.trim() ? (
+            <div className="sm:col-span-2">
+              <dt className="text-xs uppercase text-muted-foreground">About</dt>
+              <dd className="whitespace-pre-wrap text-sm">{state.about}</dd>
+            </div>
+          ) : null}
         </dl>
       </section>
 
