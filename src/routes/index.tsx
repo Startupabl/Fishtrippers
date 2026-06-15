@@ -347,7 +347,7 @@ function Index() {
           height={1080}
           loading="eager"
           fetchPriority="high"
-          className="absolute inset-0 h-full w-full object-cover"
+          className="absolute inset-0 h-full w-full object-cover object-top"
         />
         {/* Navy gradient overlay for legibility */}
         <div
@@ -359,7 +359,7 @@ function Index() {
           }}
         />
 
-        <div className="relative z-10 mx-auto flex max-w-[1400px] flex-col justify-center px-4 pb-10 pt-20 md:min-h-[600px] md:px-8 md:pb-16 md:pt-28">
+        <div className="relative z-10 mx-auto flex max-w-[1400px] flex-col justify-center px-4 pb-10 pt-20 md:min-h-[760px] md:px-8 md:pb-16 md:pt-28">
           {showGreeting && (
             <p
               className="mb-3 text-lg text-white/90 md:text-xl"
