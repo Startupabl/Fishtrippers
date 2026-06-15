@@ -1,21 +1,10 @@
 ## Goal
-Let you create your first account right now without the Turnstile bot-check blocking signup, while keeping the option to re-enable it later for production.
+Make `cruz.collective.llc@gmail.com` a working admin user.
 
-## Changes
-
-1. **Clear the stale Turnstile site key**
-   - Remove `VITE_TURNSTILE_SITE_KEY` from `.env` (the key copied from the previous project is invalid for this preview domain and is causing error 110200).
-
-2. **Make Turnstile optional in the code**
-   - Update the signup and login forms (and any shared Turnstile wrapper) so that when `VITE_TURNSTILE_SITE_KEY` is empty/undefined:
-     - The Turnstile widget is not rendered.
-     - The submit handler skips the token check and proceeds straight to Supabase auth.
-   - When the key IS set, behavior is unchanged — widget renders and token is required.
-
-3. **Verify**
-   - Reload `/register`, confirm no Turnstile widget appears and no 110200 error in console.
-   - Create a test account end-to-end and confirm the user lands signed in (profile row auto-created by existing `handle_new_user` trigger).
+## Steps
+1. Insert a `public.profiles` row for user id `62980201-9c67-4a81-a92c-87f2bece2677` (email, verified status, auto-generated `user_number_id`).
+2. Insert `('admin')` into `public.user_roles` for the same user id (also keep `'learner'` so they have full app access too).
+3. Verify with a SELECT that both rows exist and `has_role(uid, 'admin')` returns true.
 
 ## Out of scope
-- No changes to auth providers, RLS, profile schema, or any other feature.
-- Re-enabling Turnstile later for the production domain is a one-line env change (add a fresh key) — no code work needed.
+- Not fixing the missing `on_auth_user_created` trigger right now (separate issue — future signups won't auto-create profiles until it's added). Happy to do that next if you want.
