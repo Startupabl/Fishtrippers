@@ -439,7 +439,7 @@ function Index() {
       {/* CATEGORY QUICK-LINKS */}
       <CategoryGrid />
 
-      {/* THE LEMONAIDELY PROCESS */}
+      {/* THE FISHTRIPPERS PROCESS */}
       <FishTrippersProcess />
 
 

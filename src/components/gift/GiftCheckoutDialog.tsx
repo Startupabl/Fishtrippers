@@ -243,7 +243,7 @@ function PaymentStep({
       >
         <span className="inline-flex items-center gap-2 font-semibold">
           <Sparkles className="size-4 text-info" />
-          Your LemonAIdely Gift Code is ready to send
+          Your FishTrippers Gift Code is ready to send
         </span>
         <p className="mt-1 text-muted-foreground">
           Delivered instantly via email — like a digital invite to a mission.

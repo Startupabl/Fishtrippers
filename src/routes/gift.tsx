@@ -8,13 +8,13 @@ import { GiftCheckoutDialog } from "@/components/gift/GiftCheckoutDialog";
 export const Route = createFileRoute("/gift")({
   head: () => ({
     meta: [
-      { title: "LemonAIdely Gift Cards — FishTrippers" },
+      { title: "FishTrippers Gift Cards — FishTrippers" },
       {
         name: "description",
         content:
-          "Give the gift of a guided AI Course. LemonAIdely Gift Cards from $60 to $500 — redeemable for any 1-on-1 guided AI Course.",
+          "Give the gift of a guided AI Course. FishTrippers Gift Cards from $60 to $500 — redeemable for any 1-on-1 guided AI Course.",
       },
-      { property: "og:title", content: "LemonAIdely Gift Cards — FishTrippers" },
+      { property: "og:title", content: "FishTrippers Gift Cards — FishTrippers" },
       {
         property: "og:description",
         content:
@@ -179,7 +179,7 @@ function GiftPage() {
         <div className="flex items-center gap-3 text-info">
           <Gift className="size-6" />
           <span className="text-xs font-semibold uppercase tracking-wide">
-            LemonAIdely Gift Cards
+            FishTrippers Gift Cards
           </span>
         </div>
 
