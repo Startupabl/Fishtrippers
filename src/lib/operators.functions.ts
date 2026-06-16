@@ -167,3 +167,28 @@ export const submitOperatorForReview = createServerFn({ method: "POST" })
 
     return { operator: op };
   });
+
+export const saveDefaultDeparture = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((input: {
+    address: string;
+    lat: number | null;
+    lng: number | null;
+    place_id: string | null;
+  }) => input)
+  .handler(async ({ data, context }) => {
+    const { supabase, userId } = context;
+    const { data: row, error } = await supabase
+      .from("operators")
+      .update({
+        default_departure_address: data.address || null,
+        default_departure_lat: data.lat,
+        default_departure_lng: data.lng,
+        default_departure_place_id: data.place_id,
+      } as any)
+      .eq("owner_id", userId)
+      .select("*")
+      .maybeSingle();
+    if (error) throw new Error(error.message);
+    return { operator: row };
+  });
