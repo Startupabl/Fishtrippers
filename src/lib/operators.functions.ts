@@ -130,11 +130,11 @@ export const submitOperatorForReview = createServerFn({ method: "POST" })
           booking_type: data.booking_type,
           advance_notice_hours: data.advance_notice_hours,
           cancellation_policy: data.cancellation_policy,
-          primary_category: data.primary_category,
+          primary_category: data.primary_category as any,
           target_species: data.target_species,
           moderation_status: "pending",
           submitted_at: new Date().toISOString(),
-        },
+        } as any,
         { onConflict: "owner_id" },
       )
       .select("*")
@@ -142,19 +142,22 @@ export const submitOperatorForReview = createServerFn({ method: "POST" })
     if (opErr) throw new Error(opErr.message);
 
     if (data.business_type === "charter" && data.vessel) {
-      const v = data.vessel;
+      const v: any = data.vessel;
       const { error: vErr } = await supabase.from("vessels").upsert(
         {
           operator_id: op.id,
-          manufacturer: v.manufacturer,
-          model: v.model,
-          year: v.year,
-          length_ft: v.length_ft,
-          engine_type: v.engine_type,
-          engine_size: v.engine_size,
+          boat_type_id: v.boat_type_id ?? null,
+          manufacturer: v.manufacturer ?? null,
+          model: v.model ?? null,
+          year: v.year ?? null,
+          length_ft: v.length_ft ?? null,
+          restored: v.restored ?? false,
+          num_engines: v.num_engines ?? null,
+          horsepower_per_engine: v.horsepower_per_engine ?? null,
+          max_cruising_speed_knots: v.max_cruising_speed_knots ?? null,
           max_passenger_capacity: v.max_passenger_capacity,
-          features: v.features ?? [],
-        },
+          features: v.features ?? {},
+        } as any,
         { onConflict: "operator_id" },
       );
       if (vErr) throw new Error(vErr.message);
