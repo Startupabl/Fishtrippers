@@ -320,7 +320,7 @@ export function TripFormDialog({ open, onOpenChange, initial }: Props) {
                     onOpenChange(false);
                   }}
                 >
-                  Edit capabilities
+                  Edit Target Fish Options
                 </button>
               </div>
               {captainSpecies.length === 0 ? (
