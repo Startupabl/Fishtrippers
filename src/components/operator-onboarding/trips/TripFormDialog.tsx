@@ -89,7 +89,7 @@ export function TripFormDialog({ open, onOpenChange, initial }: Props) {
         throw new Error("Description is too short");
       if (!form.departure_address.trim())
         throw new Error("Pick a departure point");
-      return upsertFn({
+      const result = await upsertFn({
         data: {
           id: form.id ?? null,
           title: form.title.trim(),
@@ -104,6 +104,28 @@ export function TripFormDialog({ open, onOpenChange, initial }: Props) {
           departure_place_id: form.departure_place_id,
         },
       });
+      if (saveAsDefault) {
+        try {
+          await saveDefaultFn({
+            data: {
+              address: form.departure_address.trim(),
+              lat: form.departure_lat,
+              lng: form.departure_lng,
+              place_id: form.departure_place_id,
+            },
+          });
+          setDefaultDeparture({
+            address: form.departure_address.trim(),
+            lat: form.departure_lat,
+            lng: form.departure_lng,
+            place_id: form.departure_place_id,
+          });
+        } catch (e) {
+          // Non-fatal: don't block trip save if default save fails.
+          console.warn("Could not save default departure", e);
+        }
+      }
+      return result;
     },
     onSuccess: () => {
       toast.success(form.id ? "Trip updated" : "Trip added");
