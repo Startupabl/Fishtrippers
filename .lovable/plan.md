@@ -1,20 +1,33 @@
-## Match Preview banner & submit button to header gold
+## Fix preview-page button colors and fish icon alignment
 
-The preview page uses Tailwind's `amber-*` palette, which renders orange next to the header's brand gold (`--gold: #E8B547`, `--gold-deep: #C8941F`). Swap to the site's gold tokens.
+### 1. Brand-gold buttons on `/operator/preview`
 
-### Changes — `src/components/operator-listing/PreviewBanner.tsx`
+Replace the amber Tailwind classes on the two CTAs with the existing gold tokens already used by the header.
 
-1. Banner wrapper: replace `border-amber-500/40 bg-amber-50 text-amber-950 dark:bg-amber-950/40 dark:text-amber-100` with the gold tokens — `border-gold/40`, a soft gold tint background using `color-mix(in oklab, var(--gold) 12%, white)` (via an inline style or a new `bg-gold-soft` utility in `src/styles.css`), and `text-ocean-deep` for legible body copy.
-2. Status `<Badge>`: use `border-gold-deep/50`, white background, `text-gold-deep` so it reads as gold, not amber.
-3. "Submit for approval" `<Button>`: force gold via `className="bg-gold text-ocean-deep hover:bg-gold-deep"` so it visually matches header gold CTAs instead of using the default primary.
-4. "Edit Listing" outline button: add `border-gold text-gold-deep hover:bg-gold/10` so the pair reads as one gold set.
+- `src/components/operator-listing/HeaderGallery.tsx` (line 41) — "Select your trip" button:
+  - From: `className="bg-amber-500 text-black hover:bg-amber-600"`
+  - To: `className="bg-gold text-ocean-deep hover:bg-gold-deep"`
+- `src/components/operator-listing/TripsBlock.tsx` (line 80) — "View availability" button:
+  - Same swap as above.
 
-### Optional token addition — `src/styles.css`
+These match the gold used in the header and the recently updated PreviewBanner buttons, so the entire preview page reads as one gold set.
 
-Add a single helper used by the banner background so we don't inline color-mix in JSX:
-```
-.bg-gold-soft { background-color: color-mix(in oklab, var(--gold) 14%, #ffffff); }
-```
+### 2. Fish icons "zigzagging" — align the row
 
-### Out of scope
-No other pages audited this turn. If you'd like, I can do a follow-up sweep for any other `amber-*` / `orange-*` usages across the app and convert them to the gold tokens.
+Each species PNG has a different intrinsic aspect ratio / content placement, and the current container is `h-20 w-20` with `object-contain`. Because the labels sit below and cards stretch, icons appear to drift up/down across the row.
+
+Fix in `src/components/operator-listing/SpeciesGrid.tsx`:
+
+- Replace the per-card `flex flex-col items-center gap-3` with a layout that anchors the image area to a fixed centered box and the label to a fixed baseline:
+  - Card: keep `flex flex-col items-center` but use a fixed image slot `h-24 w-24` with `flex items-center justify-center` (already there) and add `shrink-0`.
+  - Image: keep `object-contain` and add `object-center` explicitly, plus `mx-auto block` to guarantee horizontal centering regardless of intrinsic width.
+  - Wrap the label in a fixed-height row (`h-5 leading-5`) so cards of varying icon heights don't shift the label baseline.
+- Add `items-stretch` on the grid so all cards share equal height; this removes the visible zigzag along the row.
+
+No asset changes — purely CSS centering and consistent slot heights.
+
+### Files touched
+
+- `src/components/operator-listing/HeaderGallery.tsx`
+- `src/components/operator-listing/TripsBlock.tsx`
+- `src/components/operator-listing/SpeciesGrid.tsx`

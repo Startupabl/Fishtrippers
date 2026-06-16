@@ -38,7 +38,7 @@ export function HeaderGallery({ title, location, verified }: Props) {
           <Button variant="outline" size="icon" aria-label="Share">
             <Share2 className="h-4 w-4" />
           </Button>
-          <Button asChild className="bg-amber-500 text-black hover:bg-amber-600">
+          <Button asChild className="bg-gold text-ocean-deep hover:bg-gold-deep">
             <a href="#trips">Select your trip</a>
           </Button>
         </div>
