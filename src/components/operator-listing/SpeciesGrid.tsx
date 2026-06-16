@@ -17,9 +17,9 @@ export function SpeciesGrid({ species }: Props) {
           return (
             <div
               key={id}
-              className="flex h-full flex-col items-center justify-between gap-3 rounded-2xl border bg-card/60 p-5 text-center transition-shadow hover:shadow-sm"
+              className="flex h-full flex-col items-center justify-start gap-3 rounded-2xl border bg-card/60 p-5 text-center transition-shadow hover:shadow-sm"
             >
-              <div className="flex h-24 w-24 shrink-0 items-center justify-center">
+              <div className="flex h-24 w-24 shrink-0 items-center justify-center rounded-full bg-muted/70 ring-1 ring-border/60">
                 {icon ? (
                   <img
                     src={icon}
@@ -27,10 +27,10 @@ export function SpeciesGrid({ species }: Props) {
                     loading="lazy"
                     width={512}
                     height={512}
-                    className="mx-auto block h-full w-full object-contain object-center"
+                    className="mx-auto block h-16 w-16 object-contain object-center"
                   />
                 ) : (
-                  <Fish className="h-10 w-10 text-foreground/70" />
+                  <Fish className="h-9 w-9 text-foreground/70" />
                 )}
               </div>
               <span className="block h-5 text-sm font-medium leading-5">{speciesLabel(id)}</span>
