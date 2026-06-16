@@ -95,9 +95,9 @@ export function FishingFocusStep({ onBack, onNext }: Props) {
       <section className="space-y-4 rounded-2xl border bg-card p-6">
         <div className="flex flex-wrap items-end justify-between gap-3">
           <div>
-            <h2 className="text-lg font-semibold">Target species</h2>
+            <h2 className="text-lg font-semibold">Targeted Species</h2>
             <p className="text-sm text-muted-foreground">
-              Pick every species you regularly target. At least one is required.
+              Start typing to find a species, then click to add it. At least one is required.
             </p>
           </div>
           <div className="text-sm text-muted-foreground">
@@ -105,50 +105,8 @@ export function FishingFocusStep({ onBack, onNext }: Props) {
           </div>
         </div>
 
-        <div className="relative max-w-sm">
-          <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
-          <Input
-            value={query}
-            onChange={(e) => setQuery(e.target.value)}
-            placeholder="Search species…"
-            className="pl-9"
-            aria-label="Search species"
-          />
-        </div>
+        <SpeciesMultiSelect selected={target_species} onToggle={toggleSpecies} />
 
-        <div className="space-y-5">
-          {filteredGroups.length === 0 && (
-            <p className="text-sm text-muted-foreground">No species match “{query}”.</p>
-          )}
-          {filteredGroups.map((group) => (
-            <div key={group.category}>
-              <div className="mb-2 text-xs font-semibold uppercase tracking-wider text-muted-foreground">
-                {group.label}
-              </div>
-              <div className="flex flex-wrap gap-2">
-                {group.items.map((item) => {
-                  const selected = target_species.includes(item.id);
-                  return (
-                    <button
-                      key={item.id}
-                      type="button"
-                      onClick={() => toggleSpecies(item.id)}
-                      aria-pressed={selected}
-                      className={cn(
-                        "rounded-full border px-3 py-1.5 text-sm transition-colors",
-                        selected
-                          ? "border-primary bg-primary text-primary-foreground"
-                          : "border-border bg-background hover:border-primary/40",
-                      )}
-                    >
-                      {item.label}
-                    </button>
-                  );
-                })}
-              </div>
-            </div>
-          ))}
-        </div>
       </section>
 
       <div className="flex justify-between pt-2">
