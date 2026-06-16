@@ -58,6 +58,8 @@ export const upsertOperatorDraft = createServerFn({ method: "POST" })
       cancellation_policy: data.operator.cancellation_policy ?? null,
       primary_category: (data.operator.primary_category ?? null) as any,
       target_species: data.operator.target_species ?? [],
+      fishing_environments: data.operator.fishing_environments ?? [],
+      base_currency: data.operator.base_currency ?? "USD",
     };
 
     const { data: upserted, error } = await supabase
@@ -132,6 +134,8 @@ export const submitOperatorForReview = createServerFn({ method: "POST" })
           cancellation_policy: data.cancellation_policy,
           primary_category: data.primary_category as any,
           target_species: data.target_species,
+          fishing_environments: data.fishing_environments,
+          base_currency: data.base_currency ?? "USD",
           moderation_status: "pending",
           submitted_at: new Date().toISOString(),
         } as any,

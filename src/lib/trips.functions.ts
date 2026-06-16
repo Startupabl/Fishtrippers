@@ -39,6 +39,23 @@ export const listMyTrips = createServerFn({ method: "GET" })
     return { trips: data ?? [] };
   });
 
+export const getMyCapabilities = createServerFn({ method: "GET" })
+  .middleware([requireSupabaseAuth])
+  .handler(async ({ context }) => {
+    const { supabase, userId } = context;
+    const { data, error } = await supabase
+      .from("operators")
+      .select("target_species, fishing_environments, base_currency")
+      .eq("owner_id", userId)
+      .maybeSingle();
+    if (error) throw new Error(error.message);
+    return {
+      target_species: (data?.target_species as string[]) ?? [],
+      fishing_environments: (data?.fishing_environments as string[]) ?? [],
+      base_currency: (data?.base_currency as string) ?? "USD",
+    };
+  });
+
 export const upsertTrip = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .inputValidator((input: TripInput) => tripInputSchema.parse(input))
@@ -50,10 +67,17 @@ export const upsertTrip = createServerFn({ method: "POST" })
       operator_id: operatorId,
       title: data.title,
       description: data.description,
+      itinerary: data.itinerary ?? null,
+      start_time: data.start_time ?? null,
       duration_minutes: data.duration_minutes,
       price_minor: data.price_minor,
+      per_extra_minor: data.per_extra_minor ?? 0,
+      max_party_size: data.max_party_size,
       currency: data.currency ?? "USD",
       template_key: data.template_key ?? null,
+      target_species: data.target_species,
+      environments: data.environments,
+      techniques: data.techniques,
       departure_address: data.departure_address,
       departure_lat: data.departure_lat ?? null,
       departure_lng: data.departure_lng ?? null,

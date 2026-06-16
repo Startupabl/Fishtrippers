@@ -14,6 +14,7 @@ import { SiteHeader } from "@/components/layout/SiteHeader";
 import { SiteFooter } from "@/components/layout/SiteFooter";
 import { BottomNav } from "@/components/layout/BottomNav";
 import { useAuthListener } from "@/hooks/useAuthListener";
+import { useFxRates } from "@/hooks/useFxRates";
 import { ProfileCompletionRedirector } from "@/components/auth/ProfileCompletionRedirector";
 
 function NotFoundComponent() {
@@ -148,6 +149,7 @@ function RootShell({ children }: { children: React.ReactNode }) {
 function RootComponent() {
   const { queryClient } = Route.useRouteContext();
   useAuthListener();
+  useFxRates();
   const router = useRouter();
   const pathname = router.state.location.pathname;
   const isAdminRoute = pathname === "/admin" || pathname.startsWith("/admin/");

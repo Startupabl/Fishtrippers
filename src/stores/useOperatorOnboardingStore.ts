@@ -55,6 +55,8 @@ export interface OperatorOnboardingState {
   cancellation_policy: CancellationPolicy | null;
   primary_category: PrimaryCategory | null;
   target_species: string[];
+  fishing_environments: string[];
+  base_currency: string;
   vessel: VesselDraftState;
   default_departure: DefaultDeparture;
 
@@ -72,6 +74,8 @@ export interface OperatorOnboardingState {
   }) => void;
   setPrimaryCategory: (c: PrimaryCategory) => void;
   toggleSpecies: (id: string) => void;
+  toggleEnvironment: (id: string) => void;
+  setBaseCurrency: (c: string) => void;
   setDefaultDeparture: (d: DefaultDeparture) => void;
   setSubmitted: (v: boolean) => void;
   reset: () => void;
@@ -107,6 +111,8 @@ export const useOperatorOnboardingStore = create<OperatorOnboardingState>()(
       cancellation_policy: null,
       primary_category: null,
       target_species: [],
+      fishing_environments: [],
+      base_currency: "USD",
       vessel: emptyVessel(),
       default_departure: { address: "", lat: null, lng: null, place_id: null, city: null, state: null, country: null },
       submitted: false,
@@ -152,6 +158,16 @@ export const useOperatorOnboardingStore = create<OperatorOnboardingState>()(
               : [...s.target_species, id],
           };
         }),
+      toggleEnvironment: (id) =>
+        set((s) => {
+          const has = s.fishing_environments.includes(id);
+          return {
+            fishing_environments: has
+              ? s.fishing_environments.filter((x) => x !== id)
+              : [...s.fishing_environments, id],
+          };
+        }),
+      setBaseCurrency: (c) => set({ base_currency: c }),
       setDefaultDeparture: (d) => set({ default_departure: d }),
       setSubmitted: (v) => set({ submitted: v }),
       reset: () =>
@@ -166,6 +182,8 @@ export const useOperatorOnboardingStore = create<OperatorOnboardingState>()(
           cancellation_policy: null,
           primary_category: null,
           target_species: [],
+          fishing_environments: [],
+          base_currency: "USD",
           vessel: emptyVessel(),
           default_departure: { address: "", lat: null, lng: null, place_id: null, city: null, state: null, country: null },
           submitted: false,
@@ -196,6 +214,10 @@ export const useOperatorOnboardingStore = create<OperatorOnboardingState>()(
           target_species: Array.isArray(operator.target_species)
             ? operator.target_species
             : [],
+          fishing_environments: Array.isArray(operator.fishing_environments)
+            ? operator.fishing_environments
+            : [],
+          base_currency: operator.base_currency ?? "USD",
           submitted: !!operator.submitted_at,
           default_departure: {
             address: operator.default_departure_address ?? "",
@@ -263,7 +285,11 @@ export function isBoatDetailsValid(s: OperatorOnboardingState): boolean {
 }
 
 export function isFishingFocusValid(s: OperatorOnboardingState): boolean {
-  return !!s.primary_category && s.target_species.length >= 1;
+  return (
+    !!s.primary_category &&
+    s.target_species.length >= 1 &&
+    s.fishing_environments.length >= 1
+  );
 }
 
 export function isBookingRulesValid(s: OperatorOnboardingState): boolean {

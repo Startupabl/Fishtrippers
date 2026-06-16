@@ -3,14 +3,10 @@ import { z } from "zod";
 import type { PrimaryCategory } from "./operators.shared";
 
 export const DURATION_OPTIONS = [
-  { value: 120, label: "2 hours" },
-  { value: 180, label: "3 hours" },
   { value: 240, label: "4 hours" },
   { value: 360, label: "6 hours" },
   { value: 480, label: "8 hours" },
-  { value: 600, label: "10 hours" },
   { value: 720, label: "12 hours" },
-  { value: 960, label: "Overnight (16h)" },
 ] as const;
 
 export interface TripTemplate {
@@ -22,109 +18,49 @@ export interface TripTemplate {
 
 export const TRIP_TEMPLATES: Record<PrimaryCategory, TripTemplate[]> = {
   offshore: [
-    {
-      key: "offshore_half_day",
-      title: "Half-Day Deep Sea",
-      defaultDurationMinutes: 240,
-      blurb: "4-hour offshore run targeting pelagics close to the shelf.",
-    },
-    {
-      key: "offshore_full_day",
-      title: "Full-Day Big Game",
-      defaultDurationMinutes: 480,
-      blurb: "Full day chasing tuna, marlin and other trophy species.",
-    },
-    {
-      key: "offshore_overnight_sword",
-      title: "Overnight Swordfish Trip",
-      defaultDurationMinutes: 960,
-      blurb: "Overnight deep-drop trip targeting swordfish.",
-    },
+    { key: "offshore_half_day", title: "Half-Day Deep Sea", defaultDurationMinutes: 240, blurb: "4-hour offshore run targeting pelagics close to the shelf." },
+    { key: "offshore_full_day", title: "Full-Day Big Game", defaultDurationMinutes: 480, blurb: "Full day chasing tuna, marlin and other trophy species." },
   ],
   inshore: [
-    {
-      key: "inshore_flats_4h",
-      title: "4-Hour Flats Trip",
-      defaultDurationMinutes: 240,
-      blurb: "Half-day flats fishing for redfish, trout and snook.",
-    },
-    {
-      key: "inshore_bay_6h",
-      title: "6-Hour Bay Exploration",
-      defaultDurationMinutes: 360,
-      blurb: "Extended inshore run exploring bays and back-country.",
-    },
-    {
-      key: "inshore_sight_cast",
-      title: "Sight Casting Specialist",
-      defaultDurationMinutes: 360,
-      blurb: "Poling the flats for tailing fish — light tackle, eyes-on.",
-    },
+    { key: "inshore_flats_4h", title: "4-Hour Flats Trip", defaultDurationMinutes: 240, blurb: "Half-day flats fishing for redfish, trout and snook." },
+    { key: "inshore_bay_6h", title: "6-Hour Bay Exploration", defaultDurationMinutes: 360, blurb: "Extended inshore run exploring bays and back-country." },
   ],
   freshwater: [
-    {
-      key: "fresh_morning_bass",
-      title: "Morning Bass Run",
-      defaultDurationMinutes: 240,
-      blurb: "Early-morning bass session on prime lake structure.",
-    },
-    {
-      key: "fresh_full_day_lake",
-      title: "Full-Day Lake Tournament",
-      defaultDurationMinutes: 480,
-      blurb: "Tournament-style full day on the lake.",
-    },
-    {
-      key: "fresh_river_float",
-      title: "River Float Trip",
-      defaultDurationMinutes: 360,
-      blurb: "Drift-boat or raft float, working seams and pools.",
-    },
+    { key: "fresh_morning_bass", title: "Morning Bass Run", defaultDurationMinutes: 240, blurb: "Early-morning bass session on prime lake structure." },
+    { key: "fresh_full_day_lake", title: "Full-Day Lake Tournament", defaultDurationMinutes: 480, blurb: "Tournament-style full day on the lake." },
   ],
   fly_fishing: [
-    {
-      key: "fly_fundamentals",
-      title: "Fly Fishing Fundamentals",
-      defaultDurationMinutes: 240,
-      blurb: "Beginner-friendly intro to fly fishing — casting + reading water.",
-    },
-    {
-      key: "fly_salt_sight",
-      title: "Saltwater Fly Sight-Casting",
-      defaultDurationMinutes: 480,
-      blurb: "Bonefish, permit, tarpon — sight-casting on the flats.",
-    },
-    {
-      key: "fly_trout_stream",
-      title: "Trout Stream Expedition",
-      defaultDurationMinutes: 480,
-      blurb: "Walk-and-wade trout fishing on a classic stream.",
-    },
+    { key: "fly_fundamentals", title: "Fly Fishing Fundamentals", defaultDurationMinutes: 240, blurb: "Beginner-friendly intro to fly fishing — casting + reading water." },
+    { key: "fly_trout_stream", title: "Trout Stream Expedition", defaultDurationMinutes: 480, blurb: "Walk-and-wade trout fishing on a classic stream." },
   ],
   spearfishing: [
-    {
-      key: "spear_reef_day",
-      title: "Reef Spearfishing Day",
-      defaultDurationMinutes: 360,
-      blurb: "Free-dive spearfishing on inshore reefs.",
-    },
-    {
-      key: "spear_blue_water",
-      title: "Blue Water Spearfishing",
-      defaultDurationMinutes: 480,
-      blurb: "Open-water spearfishing for pelagic species.",
-    },
+    { key: "spear_reef_day", title: "Reef Spearfishing Day", defaultDurationMinutes: 360, blurb: "Free-dive spearfishing on inshore reefs." },
+    { key: "spear_blue_water", title: "Blue Water Spearfishing", defaultDurationMinutes: 480, blurb: "Open-water spearfishing for pelagic species." },
   ],
 };
+
+// HH:MM 24-hour clock
+const timeStringSchema = z
+  .string()
+  .regex(/^([01]\d|2[0-3]):[0-5]\d$/, "Use HH:MM (24h)")
+  .nullable()
+  .optional();
 
 export const tripInputSchema = z.object({
   id: z.string().uuid().nullable().optional(),
   title: z.string().trim().min(2, "Trip name is required").max(120),
   description: z.string().trim().min(10, "Add a short description").max(2000),
+  itinerary: z.string().trim().max(4000).nullable().optional(),
+  start_time: timeStringSchema,
   duration_minutes: z.number().int().positive(),
   price_minor: z.number().int().min(0),
+  per_extra_minor: z.number().int().min(0).default(0),
+  max_party_size: z.number().int().min(1).max(50),
   currency: z.string().default("USD"),
   template_key: z.string().nullable().optional(),
+  target_species: z.array(z.string()).min(1, "Pick at least one target fish").max(50),
+  environments: z.array(z.string()).min(1, "Pick at least one environment").max(2, "Max 2 environments per trip"),
+  techniques: z.array(z.string()).min(1, "Pick at least one technique").max(10),
   departure_address: z.string().trim().min(2, "Pick a departure point"),
   departure_lat: z.number().nullable().optional(),
   departure_lng: z.number().nullable().optional(),
