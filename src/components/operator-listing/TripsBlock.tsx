@@ -1,15 +1,42 @@
-import { Clock, Info, Plus, CheckCircle2 } from "lucide-react";
+import { useState } from "react";
+import {
+  Clock,
+  Plus,
+  CheckCircle2,
+  MapPin,
+  Minus,
+  ChevronDown,
+  Fish,
+} from "lucide-react";
 import { Link } from "@tanstack/react-router";
 import { Button } from "@/components/ui/button";
 import { formatCurrency } from "@/lib/format-currency";
+import { convertMinor } from "@/lib/currency";
+import {
+  useCurrencyStore,
+  type CurrencyCode,
+} from "@/stores/useCurrencyStore";
+import {
+  speciesLabel,
+  fishingEnvironmentLabel,
+} from "@/lib/operators.shared";
+import { CurrencyDisclaimer } from "./CurrencyDisclaimer";
 
 interface Trip {
   id: string;
   title: string;
   description?: string | null;
+  itinerary?: string | null;
+  start_time?: string | null;
   duration_minutes: number;
   price_minor: number;
+  per_extra_minor?: number | null;
+  max_party_size?: number | null;
   currency: string;
+  target_species?: string[] | null;
+  environments?: string[] | null;
+  techniques?: string[] | null;
+  departure_address?: string | null;
 }
 
 interface Props {
@@ -17,20 +44,222 @@ interface Props {
 }
 
 function formatDuration(mins: number) {
+  if (!mins) return "";
   if (mins >= 60 * 12) return "Overnight";
   const h = Math.round(mins / 60);
-  return `${h} hour trip`;
+  return `${h}h trip`;
+}
+
+function formatStartTime(t?: string | null) {
+  if (!t) return null;
+  const [hh, mm] = t.split(":");
+  const h = Number(hh);
+  if (Number.isNaN(h)) return null;
+  const period = h >= 12 ? "PM" : "AM";
+  const hr = h % 12 === 0 ? 12 : h % 12;
+  return `${hr}:${mm ?? "00"} ${period}`;
+}
+
+function Chip({ children }: { children: React.ReactNode }) {
+  return (
+    <span className="rounded-full border bg-muted/40 px-2.5 py-0.5 text-xs text-muted-foreground">
+      {children}
+    </span>
+  );
+}
+
+function TripCard({ trip }: { trip: Trip }) {
+  const [guests, setGuests] = useState(1);
+  const [showItinerary, setShowItinerary] = useState(false);
+
+  const display = useCurrencyStore((s) => s.currency);
+  const base = ((trip.currency || "USD").toUpperCase()) as CurrencyCode;
+  const maxParty = trip.max_party_size ?? 1;
+  const perExtra = trip.per_extra_minor ?? 0;
+  const totalMinorBase =
+    trip.price_minor + perExtra * Math.max(0, guests - 1);
+  const totalDisplay = convertMinor(totalMinorBase, base, display);
+  const baseDisplay = convertMinor(trip.price_minor, base, display);
+  const extraDisplay = convertMinor(perExtra, base, display);
+
+  const startLabel = formatStartTime(trip.start_time);
+  const envs = trip.environments ?? [];
+  const techs = trip.techniques ?? [];
+  const species = trip.target_species ?? [];
+
+  return (
+    <article className="rounded-2xl border bg-card p-5">
+      <div className="grid gap-5 lg:grid-cols-[minmax(0,1fr)_260px]">
+        {/* LEFT: trip content */}
+        <div className="min-w-0 space-y-3">
+          <div>
+            <h3 className="text-lg font-semibold">{trip.title}</h3>
+            <div className="mt-1 flex flex-wrap items-center gap-x-3 gap-y-1 text-sm text-muted-foreground">
+              {startLabel && (
+                <span className="flex items-center gap-1">
+                  <Clock className="h-3.5 w-3.5" />
+                  Departs {startLabel}
+                </span>
+              )}
+              {trip.duration_minutes ? (
+                <span>· {formatDuration(trip.duration_minutes)}</span>
+              ) : null}
+              {maxParty ? <span>· Up to {maxParty} guests</span> : null}
+            </div>
+          </div>
+
+          {(envs.length > 0 || techs.length > 0) && (
+            <div className="flex flex-wrap gap-1.5">
+              {envs.map((e) => (
+                <Chip key={`e-${e}`}>{fishingEnvironmentLabel(e)}</Chip>
+              ))}
+              {techs.map((t) => (
+                <Chip key={`t-${t}`}>{t}</Chip>
+              ))}
+            </div>
+          )}
+
+          {trip.description && (
+            <p className="whitespace-pre-line text-sm text-foreground/80">
+              {trip.description}
+            </p>
+          )}
+
+          {species.length > 0 && (
+            <div className="flex flex-wrap items-center gap-1.5 text-sm">
+              <Fish className="h-3.5 w-3.5 text-muted-foreground" />
+              <span className="text-muted-foreground">Targeting:</span>
+              {species.slice(0, 8).map((s) => (
+                <Chip key={`s-${s}`}>{speciesLabel(s)}</Chip>
+              ))}
+              {species.length > 8 && (
+                <span className="text-xs text-muted-foreground">
+                  +{species.length - 8} more
+                </span>
+              )}
+            </div>
+          )}
+
+          {trip.departure_address && (
+            <div className="flex items-start gap-1.5 text-sm text-muted-foreground">
+              <MapPin className="mt-0.5 h-3.5 w-3.5 shrink-0" />
+              <span className="line-clamp-2">{trip.departure_address}</span>
+            </div>
+          )}
+
+          {trip.itinerary && (
+            <div className="pt-1">
+              <button
+                type="button"
+                onClick={() => setShowItinerary((v) => !v)}
+                className="flex items-center gap-1 text-sm font-medium text-primary hover:underline"
+              >
+                Trip itinerary
+                <ChevronDown
+                  className={`h-3.5 w-3.5 transition-transform ${
+                    showItinerary ? "rotate-180" : ""
+                  }`}
+                />
+              </button>
+              {showItinerary && (
+                <p className="mt-2 whitespace-pre-line rounded-lg bg-muted/40 p-3 text-sm">
+                  {trip.itinerary}
+                </p>
+              )}
+            </div>
+          )}
+        </div>
+
+        {/* RIGHT: price + guests selector */}
+        <aside className="rounded-xl border bg-muted/20 p-4">
+          <div className="text-xs uppercase tracking-wide text-muted-foreground">
+            From
+          </div>
+          <div className="text-2xl font-bold text-emerald-700">
+            {formatCurrency(baseDisplay, display)}
+          </div>
+          <div className="text-xs text-muted-foreground">
+            base · 1 guest
+          </div>
+
+          {perExtra > 0 && (
+            <div className="mt-1 text-xs text-muted-foreground">
+              + {formatCurrency(extraDisplay, display)} per extra guest
+            </div>
+          )}
+
+          {/* Guests stepper */}
+          <div className="mt-4">
+            <div className="mb-1 text-xs font-medium">Guests</div>
+            <div className="flex items-center gap-2">
+              <Button
+                type="button"
+                size="icon"
+                variant="outline"
+                className="h-8 w-8"
+                disabled={guests <= 1}
+                onClick={() => setGuests((g) => Math.max(1, g - 1))}
+                aria-label="Decrease guests"
+              >
+                <Minus className="h-3.5 w-3.5" />
+              </Button>
+              <span className="min-w-[2ch] text-center text-sm font-medium">
+                {guests}
+              </span>
+              <Button
+                type="button"
+                size="icon"
+                variant="outline"
+                className="h-8 w-8"
+                disabled={guests >= maxParty}
+                onClick={() => setGuests((g) => Math.min(maxParty, g + 1))}
+                aria-label="Increase guests"
+              >
+                <Plus className="h-3.5 w-3.5" />
+              </Button>
+              <span className="ml-1 text-xs text-muted-foreground">
+                of {maxParty}
+              </span>
+            </div>
+          </div>
+
+          <div className="mt-4 border-t pt-3">
+            <div className="flex items-baseline justify-between">
+              <span className="text-xs text-muted-foreground">
+                Total for {guests} {guests === 1 ? "guest" : "guests"}
+              </span>
+              <span className="text-lg font-bold">
+                {formatCurrency(totalDisplay, display)}
+              </span>
+            </div>
+            <CurrencyDisclaimer
+              baseCurrency={base}
+              displayCurrency={display}
+              className="mt-1"
+            />
+          </div>
+
+          <Button className="mt-3 w-full bg-gold text-ocean-deep hover:bg-gold-deep">
+            Request to book
+          </Button>
+        </aside>
+      </div>
+    </article>
+  );
 }
 
 export function TripsBlock({ trips }: Props) {
   return (
     <section id="trips" className="scroll-mt-32 space-y-4">
-      <h2 className="text-2xl font-bold tracking-tight">Trip availability and prices</h2>
+      <h2 className="text-2xl font-bold tracking-tight">
+        Trip availability and prices
+      </h2>
 
       <div className="flex items-center gap-2 rounded-xl border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm text-emerald-900 dark:border-emerald-900 dark:bg-emerald-950/40 dark:text-emerald-200">
         <CheckCircle2 className="h-4 w-4" />
         <span>
-          <span className="font-semibold underline">Free cancellation</span> per captain&apos;s policy.
+          <span className="font-semibold underline">Free cancellation</span> per
+          captain&apos;s policy.
         </span>
       </div>
 
@@ -41,47 +270,15 @@ export function TripsBlock({ trips }: Props) {
             Add your first trip so guests can book.
           </p>
           <Button asChild className="mt-4">
-            <Link to="/mentor/create-path">
+            <Link to="/dashboard/my-listing">
               <Plus className="mr-1 h-4 w-4" /> Add a trip
             </Link>
           </Button>
         </div>
       ) : (
-        <div className="space-y-3">
+        <div className="space-y-4">
           {trips.map((t) => (
-            <div
-              key={t.id}
-              className="flex flex-col gap-4 rounded-2xl border bg-card p-5 sm:flex-row sm:items-center sm:justify-between"
-            >
-              <div className="min-w-0 space-y-2">
-                <div className="flex items-center gap-1.5">
-                  <h3 className="text-lg font-semibold underline-offset-2 hover:underline">
-                    {t.title}
-                  </h3>
-                  <Info className="h-4 w-4 text-muted-foreground" />
-                </div>
-                <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                  <Clock className="h-4 w-4" />
-                  <span>
-                    {formatDuration(t.duration_minutes)}
-                  </span>
-                </div>
-                {t.description && (
-                  <p className="line-clamp-2 text-sm text-muted-foreground">{t.description}</p>
-                )}
-              </div>
-              <div className="flex items-center gap-3">
-                <div className="text-right">
-                  <div className="text-lg font-bold text-emerald-700">
-                    {formatCurrency(t.price_minor, (t.currency as any) || "USD")}
-                  </div>
-                  <div className="text-xs text-muted-foreground">per group</div>
-                </div>
-                <Button className="bg-gold text-ocean-deep hover:bg-gold-deep">
-                  View availability
-                </Button>
-              </div>
-            </div>
+            <TripCard key={t.id} trip={t} />
           ))}
         </div>
       )}
