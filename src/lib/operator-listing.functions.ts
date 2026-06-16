@@ -51,15 +51,23 @@ export const getMyOperatorListing = createServerFn({ method: "GET" })
 
     const { data: prof } = await supabase
       .from("profiles")
-      .select("full_name, avatar_url")
+      .select("first_name, last_name, display_name, avatar_url")
       .eq("id", userId)
       .maybeSingle();
+
+    const fullName = prof
+      ? (prof.display_name ||
+          [prof.first_name, prof.last_name].filter(Boolean).join(" ") ||
+          null)
+      : null;
 
     return {
       operator,
       vessel,
       boatType,
       trips,
-      ownerProfile: prof ?? null,
+      ownerProfile: prof
+        ? { full_name: fullName, avatar_url: prof.avatar_url ?? null }
+        : null,
     };
   });
