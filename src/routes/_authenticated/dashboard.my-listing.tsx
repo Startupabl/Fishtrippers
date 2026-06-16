@@ -7,13 +7,12 @@ import {
   Plus,
   ExternalLink,
   Eye,
-  MapPin,
-  Anchor,
-  Ship,
   CheckCircle2,
   AlertTriangle,
   Clock,
   Trash2,
+  MoreHorizontal,
+  Banknote,
 } from "lucide-react";
 import { toast } from "sonner";
 
@@ -37,13 +36,22 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 import { DESIGN_SYSTEM } from "@/lib/brand";
 import { getMyOperator } from "@/lib/operators.functions";
 import { listMyTrips, deleteTrip } from "@/lib/trips.functions";
+import { getMyStripeIds } from "@/lib/payouts.functions";
 import {
   TripFormDialog,
   type TripEditorState,
 } from "@/components/operator-onboarding/trips/TripFormDialog";
+import { ConnectPayoutsDialog } from "@/components/operator-onboarding/ConnectPayoutsDialog";
 import { useOperatorRoleLabel } from "@/hooks/useHasActiveListing";
 import { formatCurrency } from "@/lib/format-currency";
 
@@ -64,47 +72,65 @@ export const Route = createFileRoute("/_authenticated/dashboard/my-listing")({
   component: MyListingPage,
 });
 
-function ModerationBadge({
+function StatusBadge({
+  status,
   moderation,
-  note,
+  moderationNote,
 }: {
+  status: string | null;
   moderation: string | null;
-  note: string | null;
+  moderationNote?: string | null;
 }) {
-  if (moderation === "approved")
-    return (
-      <span className="inline-flex items-center gap-1 rounded-full bg-emerald-100 px-2.5 py-1 text-xs font-medium text-emerald-900">
-        <CheckCircle2 className="size-3.5" /> Approved
-      </span>
-    );
-  if (moderation === "rejected" || (note && note.trim().length > 0))
-    return (
-      <span className="inline-flex items-center gap-1 rounded-full bg-amber-100 px-2.5 py-1 text-xs font-medium text-amber-900">
-        <AlertTriangle className="size-3.5" /> Action Needed
-      </span>
-    );
+  let label = "Draft";
+  let cls = "text-yellow-900";
+  let inlineStyle: React.CSSProperties | undefined = {
+    backgroundColor: `${YELLOW}66`,
+  };
+  let Icon: any = Clock;
+
+  if (moderationNote && moderationNote.trim().length > 0 && moderation !== "approved") {
+    label = "Action Needed";
+    cls = "bg-amber-100 text-amber-900";
+    inlineStyle = undefined;
+    Icon = AlertTriangle;
+  } else if (status === "archived") {
+    label = "Archived";
+    cls = "bg-zinc-200 text-zinc-700";
+    inlineStyle = undefined;
+  } else if (moderation === "approved") {
+    label = "Live";
+    cls = "bg-emerald-100 text-emerald-800";
+    inlineStyle = undefined;
+    Icon = CheckCircle2;
+  } else if (moderation === "rejected" || moderation === "declined") {
+    label = "Declined";
+    cls = "bg-red-100 text-red-700";
+    inlineStyle = undefined;
+    Icon = AlertTriangle;
+  } else if (moderation === "pending") {
+    label = "Pending Review";
+  }
+
   return (
     <span
-      className="inline-flex items-center gap-1 rounded-full px-2.5 py-1 text-xs font-medium text-yellow-900"
-      style={{ backgroundColor: `${YELLOW}66` }}
+      className={`inline-flex items-center gap-1 rounded-full px-2.5 py-1 text-xs font-semibold ${cls}`}
+      style={inlineStyle}
     >
-      <Clock className="size-3.5" /> Pending Review
+      <Icon className="size-3" />
+      {label}
     </span>
   );
 }
 
-function StatusPill({ status }: { status: string | null }) {
-  const map: Record<string, { label: string; cls: string }> = {
-    published: { label: "Published", cls: "bg-emerald-100 text-emerald-900" },
-    draft: { label: "Draft", cls: "bg-slate-200 text-slate-800" },
-    archived: { label: "Archived", cls: "bg-zinc-200 text-zinc-700" },
-  };
-  const m = map[status ?? "draft"] ?? map.draft;
-  return (
-    <span className={`inline-flex rounded-full px-2.5 py-1 text-xs font-medium ${m.cls}`}>
-      {m.label}
-    </span>
-  );
+function computeStrength(op: any, tripsCount: number, isPayoutReady: boolean) {
+  const hasCover = !!op?.cover_image_url;
+  const hasTrips = tripsCount > 0;
+  const score =
+    40 +
+    (hasCover ? 15 : 0) +
+    (hasTrips ? 25 : 0) +
+    (isPayoutReady ? 20 : 0);
+  return { score, hasCover, hasTrips, stripe: isPayoutReady };
 }
 
 function MyListingPage() {
@@ -113,6 +139,7 @@ function MyListingPage() {
 
   const fetchOperator = useServerFn(getMyOperator);
   const fetchTrips = useServerFn(listMyTrips);
+  const fetchStripeIds = useServerFn(getMyStripeIds);
   const removeTrip = useServerFn(deleteTrip);
 
   const operatorQ = useQuery({
@@ -125,13 +152,19 @@ function MyListingPage() {
     queryFn: () => fetchTrips(),
   });
 
+  const stripeQ = useQuery({
+    queryKey: ["my-stripe-ids"],
+    queryFn: () => fetchStripeIds(),
+  });
+
   const operator = operatorQ.data?.operator ?? null;
-  const vessel = operatorQ.data?.vessel ?? null;
   const trips = tripsQ.data?.trips ?? [];
+  const isPayoutReady = !!stripeQ.data?.is_payout_ready;
 
   const [editing, setEditing] = useState<TripEditorState | null>(null);
   const [dialogOpen, setDialogOpen] = useState(false);
   const [pendingDelete, setPendingDelete] = useState<string | null>(null);
+  const [payoutsOpen, setPayoutsOpen] = useState(false);
 
   const deleteMut = useMutation({
     mutationFn: (id: string) => removeTrip({ data: { id } }),
@@ -161,7 +194,7 @@ function MyListingPage() {
     return (
       <div className="mx-auto w-full max-w-[1200px] px-4 md:px-8 py-16 text-center">
         <h1 className="text-3xl text-foreground" style={lora}>
-          You don't have a listing yet
+          You don&apos;t have a listing yet
         </h1>
         <p className="mt-2 text-sm text-muted-foreground">
           Create your first listing to start accepting bookings.
@@ -180,6 +213,10 @@ function MyListingPage() {
   }
 
   const op: any = operator;
+  const strength = computeStrength(op, trips.length, isPayoutReady);
+  const showStripeBanner =
+    !isPayoutReady &&
+    (op.moderation_status === "pending" || op.moderation_status === "approved");
 
   return (
     <div className="mx-auto w-full max-w-[1200px] px-4 md:px-8 py-8 md:py-10">
@@ -198,13 +235,6 @@ function MyListingPage() {
               <Eye className="size-4" /> Preview
             </Link>
           </Button>
-          {publicHref ? (
-            <Button asChild variant="outline" className="gap-2 rounded-2xl">
-              <a href={publicHref} target="_blank" rel="noreferrer">
-                <ExternalLink className="size-4" /> View public page
-              </a>
-            </Button>
-          ) : null}
           <Button
             asChild
             className="gap-2 rounded-2xl text-white hover:opacity-90"
@@ -217,79 +247,161 @@ function MyListingPage() {
         </div>
       </div>
 
-      {/* Listing summary card */}
-      <Card className="mt-6 overflow-hidden rounded-2xl border-border/60">
-        <div className="grid grid-cols-1 md:grid-cols-[260px_1fr]">
-          <div
-            className="aspect-video w-full bg-muted md:aspect-auto md:h-full"
-            style={
-              op.cover_image_url
-                ? {
-                    backgroundImage: `url(${op.cover_image_url})`,
-                    backgroundSize: "cover",
-                    backgroundPosition: "center",
-                  }
-                : { background: `linear-gradient(135deg, ${LEAF}22, ${YELLOW}44)` }
-            }
-          />
-          <div className="p-5">
-            <div className="flex flex-wrap items-center gap-2">
-              <h2 className="text-xl font-semibold text-foreground" style={lora}>
-                {op.display_name ?? "Untitled listing"}
-              </h2>
-              <StatusPill status={op.status} />
-              <ModerationBadge
-                moderation={op.moderation_status}
-                note={op.moderation_note}
-              />
+      {showStripeBanner ? (
+        <Card className="mt-6 rounded-2xl border-amber-200 bg-amber-50/60 p-4">
+          <div className="flex flex-wrap items-center justify-between gap-3">
+            <div className="flex items-start gap-3">
+              <div className="mt-0.5 flex h-9 w-9 items-center justify-center rounded-full bg-amber-100">
+                <Banknote className="size-4 text-amber-900" />
+              </div>
+              <div>
+                <p className="text-sm font-semibold text-amber-900">
+                  Connect Stripe to enable payouts
+                </p>
+                <p className="text-xs text-amber-900/80">
+                  Without payouts connected we can&apos;t approve your listing or process bookings.
+                </p>
+              </div>
             </div>
-            <div className="mt-2 flex flex-wrap items-center gap-x-4 gap-y-1 text-xs text-muted-foreground">
-              {op.listing_number ? <span>#{op.listing_number}</span> : null}
-              {op.location ? (
-                <span className="inline-flex items-center gap-1">
-                  <MapPin className="size-3" />
-                  {op.location}
-                </span>
-              ) : null}
-              <span className="inline-flex items-center gap-1">
-                <Anchor className="size-3" />
-                {op.business_type === "guide" ? "Guide" : "Captain / Charter"}
-              </span>
+            <div className="flex gap-2">
+              <Button
+                size="sm"
+                variant="ghost"
+                className="text-amber-900 hover:bg-amber-100"
+                onClick={() => setPayoutsOpen(true)}
+              >
+                I&apos;ll do this later
+              </Button>
+              <Button size="sm" onClick={() => setPayoutsOpen(true)}>
+                Connect Stripe
+              </Button>
             </div>
-            {op.moderation_note ? (
-              <p className="mt-3 rounded-md bg-amber-50 px-3 py-2 text-sm text-amber-900">
-                <strong>Reviewer note:</strong> {op.moderation_note}
-              </p>
-            ) : null}
-            {op.about ? (
-              <p className="mt-3 line-clamp-3 text-sm text-muted-foreground">
-                {op.about}
-              </p>
-            ) : null}
           </div>
-        </div>
-      </Card>
-
-      {/* Vessel */}
-      {vessel ? (
-        <Card className="mt-6 rounded-2xl border-border/60 p-5">
-          <div className="flex items-center gap-2">
-            <Ship className="size-4 text-muted-foreground" />
-            <h3 className="text-sm font-semibold uppercase tracking-wide text-muted-foreground">
-              Vessel
-            </h3>
-          </div>
-          <p className="mt-2 text-sm text-foreground">
-            {[vessel.manufacturer, vessel.model, vessel.year]
-              .filter(Boolean)
-              .join(" ") || "Vessel details on file"}
-            {vessel.length_ft ? ` · ${vessel.length_ft} ft` : ""}
-            {vessel.max_passenger_capacity
-              ? ` · up to ${vessel.max_passenger_capacity} guests`
-              : ""}
-          </p>
         </Card>
       ) : null}
+
+      {/* Listing table */}
+      <section className="mt-6">
+        <h2 className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
+          Your Listing
+        </h2>
+        <Card className="mt-3 overflow-hidden rounded-2xl border-border/60">
+          <Table>
+            <TableHeader>
+              <TableRow>
+                <TableHead>Listing</TableHead>
+                <TableHead>Status</TableHead>
+                <TableHead className="text-right">Bookings</TableHead>
+                <TableHead className="text-right">Earnings</TableHead>
+                <TableHead className="text-right">Strength</TableHead>
+                <TableHead className="text-right">Actions</TableHead>
+              </TableRow>
+            </TableHeader>
+            <TableBody>
+              <TableRow>
+                <TableCell>
+                  <div className="flex items-center gap-3">
+                    <div
+                      className="h-12 w-16 shrink-0 rounded-md bg-muted"
+                      style={
+                        op.cover_image_url
+                          ? {
+                              backgroundImage: `url(${op.cover_image_url})`,
+                              backgroundSize: "cover",
+                              backgroundPosition: "center",
+                            }
+                          : {
+                              background: `linear-gradient(135deg, ${LEAF}22, ${YELLOW}44)`,
+                            }
+                      }
+                    />
+                    <div className="min-w-0">
+                      <div className="truncate text-sm font-semibold text-foreground">
+                        {op.display_name ?? "Untitled listing"}
+                      </div>
+                      <div className="text-xs text-muted-foreground">
+                        {op.listing_number ? `#${op.listing_number} · ` : ""}
+                        {op.business_type === "guide" ? "Guide" : "Captain / Charter"}
+                      </div>
+                    </div>
+                  </div>
+                </TableCell>
+                <TableCell>
+                  <StatusBadge
+                    status={op.status}
+                    moderation={op.moderation_status}
+                    moderationNote={op.moderation_note}
+                  />
+                </TableCell>
+                <TableCell className="text-right text-sm tabular-nums">0</TableCell>
+                <TableCell className="text-right text-sm tabular-nums">
+                  {formatCurrency(0, "USD")}
+                </TableCell>
+                <TableCell className="text-right text-sm tabular-nums">
+                  {strength.score}%
+                </TableCell>
+                <TableCell className="text-right">
+                  <div className="flex justify-end gap-1">
+                    <Button
+                      size="icon"
+                      variant="ghost"
+                      asChild
+                      title="Edit listing"
+                    >
+                      <Link to="/mentor/create-path">
+                        <Pencil className="size-4" />
+                      </Link>
+                    </Button>
+                    <Button
+                      size="icon"
+                      variant="ghost"
+                      asChild
+                      title="Preview"
+                    >
+                      <Link to="/operator/preview">
+                        <Eye className="size-4" />
+                      </Link>
+                    </Button>
+                    <DropdownMenu>
+                      <DropdownMenuTrigger asChild>
+                        <Button size="icon" variant="ghost" title="More">
+                          <MoreHorizontal className="size-4" />
+                        </Button>
+                      </DropdownMenuTrigger>
+                      <DropdownMenuContent align="end">
+                        {publicHref ? (
+                          <DropdownMenuItem asChild>
+                            <a href={publicHref} target="_blank" rel="noreferrer">
+                              <ExternalLink className="mr-2 size-4" />
+                              View public page
+                            </a>
+                          </DropdownMenuItem>
+                        ) : null}
+                        <DropdownMenuItem onClick={() => setPayoutsOpen(true)}>
+                          <Banknote className="mr-2 size-4" />
+                          {isPayoutReady ? "Manage payouts" : "Connect Stripe"}
+                        </DropdownMenuItem>
+                        <DropdownMenuSeparator />
+                        <DropdownMenuItem asChild>
+                          <Link to="/mentor/create-path">
+                            <Pencil className="mr-2 size-4" />
+                            Edit listing
+                          </Link>
+                        </DropdownMenuItem>
+                      </DropdownMenuContent>
+                    </DropdownMenu>
+                  </div>
+                </TableCell>
+              </TableRow>
+            </TableBody>
+          </Table>
+        </Card>
+        {op.moderation_note ? (
+          <p className="mt-3 rounded-md bg-amber-50 px-3 py-2 text-sm text-amber-900">
+            <strong>Reviewer note:</strong> {op.moderation_note}
+          </p>
+        ) : null}
+      </section>
 
       {/* Trips */}
       <section className="mt-8">
@@ -385,6 +497,11 @@ function MyListingPage() {
         open={dialogOpen}
         onOpenChange={setDialogOpen}
         initial={editing}
+      />
+
+      <ConnectPayoutsDialog
+        open={payoutsOpen}
+        onOpenChange={setPayoutsOpen}
       />
 
       <AlertDialog
