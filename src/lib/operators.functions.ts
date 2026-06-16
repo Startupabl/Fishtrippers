@@ -56,13 +56,13 @@ export const upsertOperatorDraft = createServerFn({ method: "POST" })
       booking_type: data.operator.booking_type ?? null,
       advance_notice_hours: data.operator.advance_notice_hours ?? null,
       cancellation_policy: data.operator.cancellation_policy ?? null,
-      primary_category: data.operator.primary_category ?? null,
+      primary_category: (data.operator.primary_category ?? null) as any,
       target_species: data.operator.target_species ?? [],
     };
 
     const { data: upserted, error } = await supabase
       .from("operators")
-      .upsert(operatorPayload, { onConflict: "owner_id" })
+      .upsert(operatorPayload as any, { onConflict: "owner_id" })
       .select("*")
       .single();
     if (error) throw new Error(error.message);
@@ -70,28 +70,31 @@ export const upsertOperatorDraft = createServerFn({ method: "POST" })
     let vesselRow = null;
     if (data.operator.business_type === "charter" && data.vessel) {
       const vp = data.vessel;
-      const vesselPayload = {
+      const featuresObj = (vp.features ?? {}) as Record<string, string>;
+      const vesselPayload: any = {
         operator_id: upserted.id,
+        boat_type_id: vp.boat_type_id ?? null,
         manufacturer: vp.manufacturer ?? null,
         model: vp.model ?? null,
         year: vp.year ?? null,
         length_ft: vp.length_ft ?? null,
         engine_type: vp.engine_type ?? null,
         engine_size: vp.engine_size ?? null,
-        // capacity is NOT NULL on the table; only write the row once we have one
+        restored: vp.restored ?? false,
+        num_engines: vp.num_engines ?? null,
+        horsepower_per_engine: vp.horsepower_per_engine ?? null,
+        max_cruising_speed_knots: vp.max_cruising_speed_knots ?? null,
         max_passenger_capacity: vp.max_passenger_capacity ?? 1,
-        features: vp.features ?? [],
+        features: featuresObj,
       };
-      // Only insert/update if user has provided at least capacity OR another non-null field
       const hasAny =
         vp.max_passenger_capacity != null ||
+        vp.boat_type_id ||
         vp.manufacturer ||
         vp.model ||
         vp.year != null ||
         vp.length_ft != null ||
-        vp.engine_type ||
-        vp.engine_size ||
-        (vp.features && vp.features.length > 0);
+        Object.keys(featuresObj).length > 0;
       if (hasAny) {
         const { data: v, error: vErr } = await supabase
           .from("vessels")
@@ -127,11 +130,11 @@ export const submitOperatorForReview = createServerFn({ method: "POST" })
           booking_type: data.booking_type,
           advance_notice_hours: data.advance_notice_hours,
           cancellation_policy: data.cancellation_policy,
-          primary_category: data.primary_category,
+          primary_category: data.primary_category as any,
           target_species: data.target_species,
           moderation_status: "pending",
           submitted_at: new Date().toISOString(),
-        },
+        } as any,
         { onConflict: "owner_id" },
       )
       .select("*")
@@ -139,19 +142,22 @@ export const submitOperatorForReview = createServerFn({ method: "POST" })
     if (opErr) throw new Error(opErr.message);
 
     if (data.business_type === "charter" && data.vessel) {
-      const v = data.vessel;
+      const v: any = data.vessel;
       const { error: vErr } = await supabase.from("vessels").upsert(
         {
           operator_id: op.id,
-          manufacturer: v.manufacturer,
-          model: v.model,
-          year: v.year,
-          length_ft: v.length_ft,
-          engine_type: v.engine_type,
-          engine_size: v.engine_size,
+          boat_type_id: v.boat_type_id ?? null,
+          manufacturer: v.manufacturer ?? null,
+          model: v.model ?? null,
+          year: v.year ?? null,
+          length_ft: v.length_ft ?? null,
+          restored: v.restored ?? false,
+          num_engines: v.num_engines ?? null,
+          horsepower_per_engine: v.horsepower_per_engine ?? null,
+          max_cruising_speed_knots: v.max_cruising_speed_knots ?? null,
           max_passenger_capacity: v.max_passenger_capacity,
-          features: v.features ?? [],
-        },
+          features: v.features ?? {},
+        } as any,
         { onConflict: "operator_id" },
       );
       if (vErr) throw new Error(vErr.message);
