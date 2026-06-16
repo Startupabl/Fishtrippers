@@ -1,12 +1,7 @@
-import { Waves, Fish, Trees, Feather, Anchor, CheckCircle2 } from "lucide-react";
+import { CheckCircle2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
-import {
-  PRIMARY_CATEGORIES,
-  PRIMARY_CATEGORY_DETAILS,
-  FISHING_ENVIRONMENTS,
-  type PrimaryCategory,
-} from "@/lib/operators.shared";
+import { FISHING_ENVIRONMENTS } from "@/lib/operators.shared";
 import {
   isFishingFocusValid,
   useOperatorOnboardingStore,
@@ -18,23 +13,12 @@ interface Props {
   onNext: () => void;
 }
 
-const CATEGORY_ICON: Record<PrimaryCategory, typeof Waves> = {
-  offshore: Waves,
-  inshore: Fish,
-  freshwater: Trees,
-  fly_fishing: Feather,
-  spearfishing: Anchor,
-};
-
 export function FishingFocusStep({ onBack, onNext }: Props) {
-  const primary_category = useOperatorOnboardingStore((s) => s.primary_category);
   const target_species = useOperatorOnboardingStore((s) => s.target_species);
   const fishing_environments = useOperatorOnboardingStore((s) => s.fishing_environments);
-  const setPrimaryCategory = useOperatorOnboardingStore((s) => s.setPrimaryCategory);
   const toggleSpecies = useOperatorOnboardingStore((s) => s.toggleSpecies);
   const toggleEnvironment = useOperatorOnboardingStore((s) => s.toggleEnvironment);
   const valid = useOperatorOnboardingStore(isFishingFocusValid);
-
 
   return (
     <div className="space-y-8">
@@ -45,54 +29,6 @@ export function FishingFocusStep({ onBack, onNext }: Props) {
           templates we suggest next.
         </p>
       </header>
-
-      {/* Primary Category */}
-      <section className="space-y-4 rounded-2xl border bg-card p-6">
-        <div>
-          <h2 className="text-lg font-semibold">Primary category</h2>
-          <p className="text-sm text-muted-foreground">Pick the one that best describes your operation.</p>
-        </div>
-        <div
-          role="radiogroup"
-          aria-label="Primary fishing category"
-          className="grid gap-3 sm:grid-cols-2"
-        >
-          {PRIMARY_CATEGORIES.map((id) => {
-            const Icon = CATEGORY_ICON[id];
-            const details = PRIMARY_CATEGORY_DETAILS[id];
-            const selected = primary_category === id;
-            return (
-              <button
-                key={id}
-                type="button"
-                role="radio"
-                aria-checked={selected}
-                onClick={() => setPrimaryCategory(id)}
-                className={cn(
-                  "relative flex items-start gap-3 rounded-xl border-2 p-4 text-left transition-all",
-                  selected
-                    ? "border-primary bg-primary/5"
-                    : "border-border hover:border-primary/40",
-                )}
-              >
-                {selected && (
-                  <CheckCircle2 className="absolute right-3 top-3 h-5 w-5 text-primary" />
-                )}
-                <Icon
-                  className={cn(
-                    "mt-1 h-5 w-5 shrink-0",
-                    selected ? "text-primary" : "text-muted-foreground",
-                  )}
-                />
-                <div className="min-w-0">
-                  <div className="font-semibold">{details.title}</div>
-                  <p className="mt-1 text-sm text-muted-foreground">{details.description}</p>
-                </div>
-              </button>
-            );
-          })}
-        </div>
-      </section>
 
       {/* Fishing Environments */}
       <section className="space-y-4 rounded-2xl border bg-card p-6">
@@ -107,8 +43,13 @@ export function FishingFocusStep({ onBack, onNext }: Props) {
             <span className="font-semibold text-foreground">{fishing_environments.length}</span> selected
           </div>
         </div>
-        <div className="grid gap-3 sm:grid-cols-2">
+        <div
+          role="group"
+          aria-label="Fishing environments"
+          className="grid gap-3 sm:grid-cols-2"
+        >
           {FISHING_ENVIRONMENTS.map((env) => {
+            const Icon = env.icon;
             const selected = fishing_environments.includes(env.id);
             return (
               <button
@@ -126,6 +67,12 @@ export function FishingFocusStep({ onBack, onNext }: Props) {
                 {selected && (
                   <CheckCircle2 className="absolute right-3 top-3 h-5 w-5 text-primary" />
                 )}
+                <Icon
+                  className={cn(
+                    "mt-1 h-5 w-5 shrink-0",
+                    selected ? "text-primary" : "text-muted-foreground",
+                  )}
+                />
                 <div className="min-w-0">
                   <div className="font-semibold">{env.label}</div>
                   <p className="mt-1 text-sm text-muted-foreground">{env.description}</p>
@@ -151,7 +98,6 @@ export function FishingFocusStep({ onBack, onNext }: Props) {
         </div>
 
         <SpeciesMultiSelect selected={target_species} onToggle={toggleSpecies} />
-
       </section>
 
       <div className="flex justify-between pt-2">

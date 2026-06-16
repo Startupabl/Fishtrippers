@@ -1,5 +1,7 @@
 // Shared types, constants & Zod schemas used by both client and server functions.
 import { z } from "zod";
+import { Fish, Sailboat, Waves, Sun, Trees, Mountain, TreePine, type LucideIcon } from "lucide-react";
+
 
 // ---------- Business / category enums ----------
 
@@ -134,14 +136,21 @@ export function speciesLabel(id: string): string {
 }
 
 // ---------- Fishing environments (multi-select on operator profile) ----------
-export const FISHING_ENVIRONMENTS = [
-  { id: "inshore", label: "Inshore", description: "Shallow, sheltered waters (bays, estuaries, marshes)." },
-  { id: "nearshore", label: "Nearshore", description: "Coastal waters, typically 1–10 miles from land." },
-  { id: "offshore", label: "Offshore / Deep Sea", description: "The open ocean, far from land." },
-  { id: "flats", label: "Flats", description: "Shallow, clear, sight-fishing waters." },
-  { id: "freshwater", label: "Freshwater", description: "Lakes, ponds, and reservoirs." },
-  { id: "rivers_streams", label: "Rivers & Streams", description: "Running water systems." },
-  { id: "backcountry", label: "Backcountry", description: "Remote, narrow waterways, mangroves, or swamp-like environments." },
+export interface FishingEnvironment {
+  id: string;
+  label: string;
+  description: string;
+  icon: LucideIcon;
+}
+
+export const FISHING_ENVIRONMENTS: readonly FishingEnvironment[] = [
+  { id: "inshore", label: "Inshore", description: "Shallow, sheltered waters (bays, estuaries, marshes).", icon: Fish },
+  { id: "nearshore", label: "Nearshore", description: "Coastal waters, typically 1–10 miles from land.", icon: Sailboat },
+  { id: "offshore", label: "Offshore / Deep Sea", description: "The open ocean, far from land.", icon: Waves },
+  { id: "flats", label: "Flats", description: "Shallow, clear, sight-fishing waters.", icon: Sun },
+  { id: "freshwater", label: "Freshwater", description: "Lakes, ponds, and reservoirs.", icon: Trees },
+  { id: "rivers_streams", label: "Rivers & Streams", description: "Running water systems.", icon: Mountain },
+  { id: "backcountry", label: "Backcountry", description: "Remote, narrow waterways, mangroves, or swamp-like environments.", icon: TreePine },
 ] as const;
 export type FishingEnvironmentId = (typeof FISHING_ENVIRONMENTS)[number]["id"];
 export const FISHING_ENVIRONMENT_IDS: string[] = FISHING_ENVIRONMENTS.map((e) => e.id);
@@ -149,6 +158,26 @@ export const FISHING_ENVIRONMENT_IDS: string[] = FISHING_ENVIRONMENTS.map((e) =>
 export function fishingEnvironmentLabel(id: string): string {
   return FISHING_ENVIRONMENTS.find((e) => e.id === id)?.label ?? id;
 }
+
+// Map a fishing environment selection to a legacy PrimaryCategory (DB column still requires it).
+const ENV_TO_PRIMARY: Record<string, PrimaryCategory> = {
+  inshore: "inshore",
+  nearshore: "inshore",
+  flats: "inshore",
+  backcountry: "inshore",
+  offshore: "offshore",
+  freshwater: "freshwater",
+  rivers_streams: "freshwater",
+};
+
+export function primaryCategoryFromEnvironments(envs: string[]): PrimaryCategory {
+  for (const e of envs) {
+    const m = ENV_TO_PRIMARY[e];
+    if (m) return m;
+  }
+  return "inshore";
+}
+
 
 // ---------- Fishing techniques (per-trip; not stored on operator profile) ----------
 export const FISHING_TECHNIQUES = [

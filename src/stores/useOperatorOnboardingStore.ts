@@ -1,13 +1,15 @@
 // Persisted draft for the operator/captain onboarding flow.
 import { create } from "zustand";
 import { persist, createJSONStorage } from "zustand/middleware";
-import type {
-  BusinessType,
-  BookingType,
-  AdvanceNoticeHours,
-  CancellationPolicy,
-  PrimaryCategory,
+import {
+  primaryCategoryFromEnvironments,
+  type BusinessType,
+  type BookingType,
+  type AdvanceNoticeHours,
+  type CancellationPolicy,
+  type PrimaryCategory,
 } from "@/lib/operators.shared";
+
 
 export type StepId =
   | "business_type"
@@ -161,12 +163,15 @@ export const useOperatorOnboardingStore = create<OperatorOnboardingState>()(
       toggleEnvironment: (id) =>
         set((s) => {
           const has = s.fishing_environments.includes(id);
+          const next = has
+            ? s.fishing_environments.filter((x) => x !== id)
+            : [...s.fishing_environments, id];
           return {
-            fishing_environments: has
-              ? s.fishing_environments.filter((x) => x !== id)
-              : [...s.fishing_environments, id],
+            fishing_environments: next,
+            primary_category: primaryCategoryFromEnvironments(next),
           };
         }),
+
       setBaseCurrency: (c) => set({ base_currency: c }),
       setDefaultDeparture: (d) => set({ default_departure: d }),
       setSubmitted: (v) => set({ submitted: v }),
@@ -285,12 +290,9 @@ export function isBoatDetailsValid(s: OperatorOnboardingState): boolean {
 }
 
 export function isFishingFocusValid(s: OperatorOnboardingState): boolean {
-  return (
-    !!s.primary_category &&
-    s.target_species.length >= 1 &&
-    s.fishing_environments.length >= 1
-  );
+  return s.target_species.length >= 1 && s.fishing_environments.length >= 1;
 }
+
 
 export function isBookingRulesValid(s: OperatorOnboardingState): boolean {
   return !!s.booking_type && !!s.advance_notice_hours && !!s.cancellation_policy;
