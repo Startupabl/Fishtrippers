@@ -73,7 +73,7 @@ function OperatorPreviewPage() {
         <div className="pt-6">
           <HeaderGallery
             title={op?.display_name ?? ""}
-            location={op?.location ?? ""}
+            location={(op as any)?.default_departure_address || op?.location || ""}
             verified={approved}
           />
         </div>
