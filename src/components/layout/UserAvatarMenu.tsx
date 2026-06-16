@@ -18,7 +18,7 @@ import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuthStore } from "@/stores/useAuthStore";
 import { useProfileStore } from "@/stores/useProfileStore";
-import { useHasActiveListing } from "@/hooks/useHasActiveListing";
+import { useHasActiveListing, useOperatorRoleLabel } from "@/hooks/useHasActiveListing";
 import { useHasLearnerOrders } from "@/hooks/useHasLearnerOrders";
 import { useCurrencyStore, type CurrencyCode } from "@/stores/useCurrencyStore";
 import { SUPPORTED_CURRENCIES, getCurrencyMeta } from "@/lib/currency";
