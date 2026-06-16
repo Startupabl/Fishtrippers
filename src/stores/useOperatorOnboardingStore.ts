@@ -111,6 +111,8 @@ export const useOperatorOnboardingStore = create<OperatorOnboardingState>()(
       cancellation_policy: null,
       primary_category: null,
       target_species: [],
+      fishing_environments: [],
+      base_currency: "USD",
       vessel: emptyVessel(),
       default_departure: { address: "", lat: null, lng: null, place_id: null, city: null, state: null, country: null },
       submitted: false,
