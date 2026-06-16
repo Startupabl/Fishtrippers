@@ -799,6 +799,59 @@ export type Database = {
         }
         Relationships: []
       }
+      operator_photos: {
+        Row: {
+          bytes: number | null
+          created_at: string
+          gallery_url: string
+          height: number | null
+          hero_url: string
+          id: string
+          is_cover: boolean
+          operator_id: string
+          position: number
+          storage_path: string
+          thumb_url: string
+          width: number | null
+        }
+        Insert: {
+          bytes?: number | null
+          created_at?: string
+          gallery_url: string
+          height?: number | null
+          hero_url: string
+          id?: string
+          is_cover?: boolean
+          operator_id: string
+          position?: number
+          storage_path: string
+          thumb_url: string
+          width?: number | null
+        }
+        Update: {
+          bytes?: number | null
+          created_at?: string
+          gallery_url?: string
+          height?: number | null
+          hero_url?: string
+          id?: string
+          is_cover?: boolean
+          operator_id?: string
+          position?: number
+          storage_path?: string
+          thumb_url?: string
+          width?: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "operator_photos_operator_id_fkey"
+            columns: ["operator_id"]
+            isOneToOne: false
+            referencedRelation: "operators"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       operators: {
         Row: {
           about: string | null
