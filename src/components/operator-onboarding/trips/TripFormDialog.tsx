@@ -62,16 +62,22 @@ const empty: TripEditorState = {
 export function TripFormDialog({ open, onOpenChange, initial }: Props) {
   const [form, setForm] = useState<TripEditorState>(initial ?? empty);
   const [priceInput, setPriceInput] = useState("");
+  const defaultDeparture = useOperatorOnboardingStore((s) => s.default_departure);
+  const setDefaultDeparture = useOperatorOnboardingStore((s) => s.setDefaultDeparture);
+  const hasDefault = !!defaultDeparture.address;
+  const [saveAsDefault, setSaveAsDefault] = useState(!hasDefault);
   const qc = useQueryClient();
   const upsertFn = useServerFn(upsertTrip);
+  const saveDefaultFn = useServerFn(saveDefaultDeparture);
 
   useEffect(() => {
     if (open) {
       const next = initial ?? empty;
       setForm(next);
       setPriceInput(next.price_minor != null ? (next.price_minor / 100).toString() : "");
+      setSaveAsDefault(!hasDefault);
     }
-  }, [open, initial]);
+  }, [open, initial, hasDefault]);
 
   const mutation = useMutation({
     mutationFn: async () => {
