@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import { useServerFn } from "@tanstack/react-start";
+import { useNavigate } from "@tanstack/react-router";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -34,6 +35,7 @@ export function ReviewSubmitStep({ onBack }: Props) {
   const ready = useOperatorOnboardingStore(isReadyToSubmit);
   const setSubmitted = useOperatorOnboardingStore((s) => s.setSubmitted);
   const submit = useServerFn(submitOperatorForReview);
+  const navigate = useNavigate();
   const [submitting, setSubmitting] = useState(false);
   const [boatTypeName, setBoatTypeName] = useState<string>("");
 
@@ -95,6 +97,7 @@ export function ReviewSubmitStep({ onBack }: Props) {
       await submit({ data: payload });
       setSubmitted(true);
       toast.success("Listing submitted for review");
+      navigate({ to: "/operator/preview" });
     } catch (e: any) {
       toast.error(e?.message || "Submission failed");
     } finally {
