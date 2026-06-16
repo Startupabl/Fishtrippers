@@ -17,6 +17,7 @@ import {
   isReadyToSubmit,
   useOperatorOnboardingStore,
 } from "@/stores/useOperatorOnboardingStore";
+import { ConnectPayoutsDialog } from "@/components/operator-onboarding/ConnectPayoutsDialog";
 
 interface Props {
   onBack: () => void;
