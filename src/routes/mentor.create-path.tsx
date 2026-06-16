@@ -123,6 +123,7 @@ function CreatePathPage() {
             business_type: state.business_type ?? null,
             display_name: state.display_name || null,
             location: state.location || null,
+            about: state.about || null,
             booking_type: state.booking_type ?? null,
             advance_notice_hours: state.advance_notice_hours ?? null,
             cancellation_policy: state.cancellation_policy ?? null,
