@@ -119,6 +119,9 @@ export function TripFormDialog({ open, onOpenChange, initial }: Props) {
             lat: form.departure_lat,
             lng: form.departure_lng,
             place_id: form.departure_place_id,
+            city: null,
+            state: null,
+            country: null,
           });
         } catch (e) {
           // Non-fatal: don't block trip save if default save fails.

@@ -38,6 +38,9 @@ export interface DefaultDeparture {
   lat: number | null;
   lng: number | null;
   place_id: string | null;
+  city: string | null;
+  state: string | null;
+  country: string | null;
 }
 
 export interface OperatorOnboardingState {
@@ -106,7 +109,7 @@ export const useOperatorOnboardingStore = create<OperatorOnboardingState>()(
       primary_category: null,
       target_species: [],
       vessel: emptyVessel(),
-      default_departure: { address: "", lat: null, lng: null, place_id: null },
+      default_departure: { address: "", lat: null, lng: null, place_id: null, city: null, state: null, country: null },
       submitted: false,
 
       setBusinessType: (t) => set({ business_type: t }),
@@ -165,7 +168,7 @@ export const useOperatorOnboardingStore = create<OperatorOnboardingState>()(
           primary_category: null,
           target_species: [],
           vessel: emptyVessel(),
-          default_departure: { address: "", lat: null, lng: null, place_id: null },
+          default_departure: { address: "", lat: null, lng: null, place_id: null, city: null, state: null, country: null },
           submitted: false,
         }),
       hydrateFromServer: ({ operator, vessel }) => {
@@ -197,6 +200,9 @@ export const useOperatorOnboardingStore = create<OperatorOnboardingState>()(
             lat: operator.default_departure_lat ?? null,
             lng: operator.default_departure_lng ?? null,
             place_id: operator.default_departure_place_id ?? null,
+            city: operator.default_departure_city ?? null,
+            state: operator.default_departure_state ?? null,
+            country: operator.default_departure_country ?? null,
           },
           vessel: vessel
             ? {
@@ -237,7 +243,7 @@ export function isProfileValid(s: OperatorOnboardingState): boolean {
   const aboutLen = s.about.trim().length;
   return (
     s.display_name.trim().length >= 2 &&
-    s.location.trim().length >= 2 &&
+    s.default_departure.address.trim().length >= 2 &&
     aboutLen >= 150 &&
     aboutLen <= 1000
   );

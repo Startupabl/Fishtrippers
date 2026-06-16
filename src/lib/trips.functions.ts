@@ -112,7 +112,7 @@ export const resolvePlace = createServerFn({ method: "POST" })
         headers: {
           Authorization: `Bearer ${lovableKey}`,
           "X-Connection-Api-Key": mapsKey,
-          "X-Goog-FieldMask": "id,displayName,formattedAddress,location",
+          "X-Goog-FieldMask": "id,displayName,formattedAddress,location,addressComponents",
         },
       },
     );
@@ -121,11 +121,30 @@ export const resolvePlace = createServerFn({ method: "POST" })
       throw new Error(`Place lookup failed (${res.status}): ${text.slice(0, 200)}`);
     }
     const json: any = await res.json();
+    const components: any[] = Array.isArray(json.addressComponents)
+      ? json.addressComponents
+      : [];
+    const findComp = (type: string, short = false): string | null => {
+      const c = components.find((x) => Array.isArray(x.types) && x.types.includes(type));
+      if (!c) return null;
+      return (short ? c.shortText : c.longText) ?? c.longText ?? c.shortText ?? null;
+    };
+    const city =
+      findComp("locality") ||
+      findComp("postal_town") ||
+      findComp("sublocality") ||
+      findComp("administrative_area_level_2") ||
+      null;
+    const state = findComp("administrative_area_level_1", true);
+    const country = findComp("country", true);
     return {
       placeId: json.id as string,
       address: (json.formattedAddress as string) ?? "",
       name: (json.displayName?.text as string) ?? "",
       lat: (json.location?.latitude as number) ?? null,
       lng: (json.location?.longitude as number) ?? null,
+      city,
+      state,
+      country,
     };
   });
