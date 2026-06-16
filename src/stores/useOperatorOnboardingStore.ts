@@ -165,6 +165,7 @@ export const useOperatorOnboardingStore = create<OperatorOnboardingState>()(
           primary_category: null,
           target_species: [],
           vessel: emptyVessel(),
+          default_departure: { address: "", lat: null, lng: null, place_id: null },
           submitted: false,
         }),
       hydrateFromServer: ({ operator, vessel }) => {
