@@ -4,14 +4,14 @@ import { useServerFn } from "@tanstack/react-start";
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { toast } from "sonner";
 import {
-  archiveJourney,
-  hardDeleteJourney,
-  listAdminJourneys,
-  restoreJourney,
-  setJourneyFeatured,
-  setJourneyModeration,
-  setJourneyPriority,
-} from "@/lib/admin.functions";
+  archiveListing,
+  hardDeleteListing,
+  listAdminListings,
+  restoreListing,
+  setListingFeatured,
+  setListingModeration,
+  setListingPriority,
+} from "@/lib/admin-listings.functions";
 import { cn } from "@/lib/utils";
 import { Switch } from "@/components/ui/switch";
 import { DESIGN_SYSTEM } from "@/lib/brand";
