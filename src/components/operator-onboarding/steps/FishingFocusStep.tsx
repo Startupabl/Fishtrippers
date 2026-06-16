@@ -94,6 +94,48 @@ export function FishingFocusStep({ onBack, onNext }: Props) {
         </div>
       </section>
 
+      {/* Fishing Environments */}
+      <section className="space-y-4 rounded-2xl border bg-card p-6">
+        <div className="flex flex-wrap items-end justify-between gap-3">
+          <div>
+            <h2 className="text-lg font-semibold">Fishing environments</h2>
+            <p className="text-sm text-muted-foreground">
+              Pick every environment you fish. Captains can serve multiple. At least one is required.
+            </p>
+          </div>
+          <div className="text-sm text-muted-foreground">
+            <span className="font-semibold text-foreground">{fishing_environments.length}</span> selected
+          </div>
+        </div>
+        <div className="grid gap-3 sm:grid-cols-2">
+          {FISHING_ENVIRONMENTS.map((env) => {
+            const selected = fishing_environments.includes(env.id);
+            return (
+              <button
+                key={env.id}
+                type="button"
+                onClick={() => toggleEnvironment(env.id)}
+                aria-pressed={selected}
+                className={cn(
+                  "relative flex items-start gap-3 rounded-xl border-2 p-4 text-left transition-all",
+                  selected
+                    ? "border-primary bg-primary/5"
+                    : "border-border hover:border-primary/40",
+                )}
+              >
+                {selected && (
+                  <CheckCircle2 className="absolute right-3 top-3 h-5 w-5 text-primary" />
+                )}
+                <div className="min-w-0">
+                  <div className="font-semibold">{env.label}</div>
+                  <p className="mt-1 text-sm text-muted-foreground">{env.description}</p>
+                </div>
+              </button>
+            );
+          })}
+        </div>
+      </section>
+
       {/* Target Species */}
       <section className="space-y-4 rounded-2xl border bg-card p-6">
         <div className="flex flex-wrap items-end justify-between gap-3">
