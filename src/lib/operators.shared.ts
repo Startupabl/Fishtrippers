@@ -93,13 +93,44 @@ export const SPECIES_CATALOG: SpeciesItem[] = [
   { id: "lobster", label: "Lobster", categories: ["spearfishing"] },
 ];
 
+/** @deprecated retained for backwards compatibility; species are no longer scoped by category. */
 export function speciesForCategory(c: PrimaryCategory | null): SpeciesItem[] {
   if (!c) return [];
   return SPECIES_CATALOG.filter((s) => s.categories.includes(c));
 }
 
+// ---------- Flat alphabetical species catalog ----------
+export const SPECIES_LIST: string[] = [
+  "African Pompano","Albacore","Alligator Gar","Amberjack","Arapaima","Arctic Char",
+  "Atlantic Cod","Atlantic Salmon","Atlantic Sturgeon","Barracuda (Great)","Barramundi",
+  "Bass (Largemouth)","Bass (Peacock)","Bass (Smallmouth)","Bass (Striped)","Black Drum",
+  "Black Grouper","Blue Crab","Bluefish","Bluegill","Blue Marlin","Bluefin Tuna","Bonefish",
+  "Bowfin","Brown Trout","Carp","Catfish (Blue)","Catfish (Channel)","Catfish (Flathead)",
+  "Chinook Salmon","Clams","Cobia","Coho Salmon","Crappie","Crayfish","Cutthroat Trout",
+  "Dorado (Mahi-Mahi)","Drum","Dungeness Crab","Eel","Flathead","Flounder","Flying Fish",
+  "Gar","Goliath Grouper","Gray Snapper","Grouper (Black)","Grouper (Red)","Haddock",
+  "Halibut","Herring","Hogfish","Icefish","Jack Crevalle","Kingfish (King Mackerel)",
+  "Kokanee","Lake Trout","Lingcod","Lionfish","Lobster (Maine)","Lobster (Spiny)",
+  "Longnose Gar","Mangrove Snapper","Marlin (Black)","Marlin (Blue)","Marlin (Striped)",
+  "Marlin (White)","Musky (Muskellunge)","Northern Pike","Octopus","Oysters","Paddlefish",
+  "Panfish","Permit","Pickerel","Pompano","Queenfish","Rainbow Trout","Redfish (Red Drum)",
+  "Rockfish","Sailfish","Salmon (Atlantic)","Salmon (Coho)","Scallops","Sea Bass",
+  "Sea Trout (Speckled)","Shark","Shrimp","Smelt","Snook","Swordfish","Tarpon","Tilapia",
+  "Tuna (Bigeye)","Tuna (Yellowfin)","Wahoo","Walleye","Whitefish","Yellow Perch","Yellowtail",
+];
+
+export function speciesIdFromLabel(label: string): string {
+  return label.toLowerCase().replace(/[^a-z0-9]+/g, "_").replace(/^_+|_+$/g, "");
+}
+
+const SPECIES_ID_TO_LABEL: Record<string, string> = Object.fromEntries(
+  SPECIES_LIST.map((l) => [speciesIdFromLabel(l), l]),
+);
+
 export function speciesLabel(id: string): string {
-  return SPECIES_CATALOG.find((s) => s.id === id)?.label ?? id;
+  if (SPECIES_ID_TO_LABEL[id]) return SPECIES_ID_TO_LABEL[id];
+  const legacy = SPECIES_CATALOG.find((s) => s.id === id)?.label;
+  return legacy ?? id;
 }
 
 // ---------- Boat feature catalog (with optional per-item comments) ----------
