@@ -126,16 +126,17 @@ export function BoatDetailsStep({ onBack, onNext }: Props) {
                 <SelectGroup key={group}>
                   <SelectLabel>{group}</SelectLabel>
                   {items.map((bt) => (
-                    <SelectItem key={bt.id} value={bt.id} className="pl-8">
-                      <span className="flex items-center gap-2">
+                    <SelectItem key={bt.id} value={bt.id} className="pl-8 py-2">
+                      <span className="flex items-center gap-3">
                         {bt.icon_url ? (
                           <img
                             src={bt.icon_url}
                             alt=""
-                            className="h-5 w-5 object-contain"
+                            loading="lazy"
+                            className="h-7 w-12 object-contain shrink-0"
                           />
                         ) : null}
-                        {bt.subcategory_name}
+                        <span>{bt.subcategory_name}</span>
                       </span>
                     </SelectItem>
                   ))}
