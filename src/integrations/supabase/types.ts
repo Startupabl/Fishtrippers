@@ -812,13 +812,16 @@ export type Database = {
           cancellation_policy:
             | Database["public"]["Enums"]["operator_cancellation_policy"]
             | null
+          cover_image_url: string | null
           created_at: string
           default_departure_address: string | null
           default_departure_lat: number | null
           default_departure_lng: number | null
           default_departure_place_id: string | null
           display_name: string | null
+          featured: boolean
           id: string
+          listing_number: string | null
           location: string | null
           moderation_note: string | null
           moderation_status: Database["public"]["Enums"]["journey_moderation_status"]
@@ -826,6 +829,9 @@ export type Database = {
           primary_category:
             | Database["public"]["Enums"]["operator_primary_category"]
             | null
+          priority_order: number
+          slug: string | null
+          status: string
           submitted_at: string | null
           target_species: string[]
           updated_at: string
@@ -842,13 +848,16 @@ export type Database = {
           cancellation_policy?:
             | Database["public"]["Enums"]["operator_cancellation_policy"]
             | null
+          cover_image_url?: string | null
           created_at?: string
           default_departure_address?: string | null
           default_departure_lat?: number | null
           default_departure_lng?: number | null
           default_departure_place_id?: string | null
           display_name?: string | null
+          featured?: boolean
           id?: string
+          listing_number?: string | null
           location?: string | null
           moderation_note?: string | null
           moderation_status?: Database["public"]["Enums"]["journey_moderation_status"]
@@ -856,6 +865,9 @@ export type Database = {
           primary_category?:
             | Database["public"]["Enums"]["operator_primary_category"]
             | null
+          priority_order?: number
+          slug?: string | null
+          status?: string
           submitted_at?: string | null
           target_species?: string[]
           updated_at?: string
@@ -872,13 +884,16 @@ export type Database = {
           cancellation_policy?:
             | Database["public"]["Enums"]["operator_cancellation_policy"]
             | null
+          cover_image_url?: string | null
           created_at?: string
           default_departure_address?: string | null
           default_departure_lat?: number | null
           default_departure_lng?: number | null
           default_departure_place_id?: string | null
           display_name?: string | null
+          featured?: boolean
           id?: string
+          listing_number?: string | null
           location?: string | null
           moderation_note?: string | null
           moderation_status?: Database["public"]["Enums"]["journey_moderation_status"]
@@ -886,6 +901,9 @@ export type Database = {
           primary_category?:
             | Database["public"]["Enums"]["operator_primary_category"]
             | null
+          priority_order?: number
+          slug?: string | null
+          status?: string
           submitted_at?: string | null
           target_species?: string[]
           updated_at?: string
@@ -1671,6 +1689,7 @@ export type Database = {
     Functions: {
       contains_forbidden_keyword: { Args: { _input: string }; Returns: boolean }
       generate_unique_cert_number: { Args: never; Returns: string }
+      generate_unique_listing_number: { Args: never; Returns: string }
       generate_unique_order_number: { Args: never; Returns: string }
       generate_unique_user_number_id: { Args: never; Returns: string }
       has_role: {

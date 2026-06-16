@@ -4,14 +4,14 @@ import { useServerFn } from "@tanstack/react-start";
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { toast } from "sonner";
 import {
-  archiveJourney,
-  hardDeleteJourney,
-  listAdminJourneys,
-  restoreJourney,
-  setJourneyFeatured,
-  setJourneyModeration,
-  setJourneyPriority,
-} from "@/lib/admin.functions";
+  archiveListing,
+  hardDeleteListing,
+  listAdminListings,
+  restoreListing,
+  setListingFeatured,
+  setListingModeration,
+  setListingPriority,
+} from "@/lib/admin-listings.functions";
 import { cn } from "@/lib/utils";
 import { Switch } from "@/components/ui/switch";
 import { DESIGN_SYSTEM } from "@/lib/brand";
@@ -39,7 +39,7 @@ function statusStyle(s: string): React.CSSProperties {
   return {};
 }
 
-type ListingRow = Awaited<ReturnType<typeof listAdminJourneys>>[number];
+type ListingRow = Awaited<ReturnType<typeof listAdminListings>>[number];
 
 function ListingsPage() {
   const [filter, setFilter] = useState<Filter>("all");
@@ -65,13 +65,13 @@ function ListingsPage() {
     setSortBy("priority");
   };
 
-  const fetchListings = useServerFn(listAdminJourneys);
-  const setFeaturedFn = useServerFn(setJourneyFeatured);
-  const setModerationFn = useServerFn(setJourneyModeration);
-  const setPriorityFn = useServerFn(setJourneyPriority);
-  const archiveFn = useServerFn(archiveJourney);
-  const restoreFn = useServerFn(restoreJourney);
-  const hardDeleteFn = useServerFn(hardDeleteJourney);
+  const fetchListings = useServerFn(listAdminListings);
+  const setFeaturedFn = useServerFn(setListingFeatured);
+  const setModerationFn = useServerFn(setListingModeration);
+  const setPriorityFn = useServerFn(setListingPriority);
+  const archiveFn = useServerFn(archiveListing);
+  const restoreFn = useServerFn(restoreListing);
+  const hardDeleteFn = useServerFn(hardDeleteListing);
   const qc = useQueryClient();
 
   const queryKey = ["admin", "listings", filter] as const;
@@ -85,9 +85,9 @@ function ListingsPage() {
       setFeaturedFn({ data: vars }),
     onMutate: async (vars) => {
       await qc.cancelQueries({ queryKey });
-      const prev = qc.getQueryData<typeof data>(queryKey);
-      qc.setQueryData<typeof data>(queryKey, (old) =>
-        (old ?? []).map((r) =>
+      const prev = qc.getQueryData<ListingRow[]>(queryKey);
+      qc.setQueryData<ListingRow[]>(queryKey, (old: ListingRow[] | undefined) =>
+        (old ?? []).map((r: ListingRow) =>
           r.id === vars.journeyId ? { ...r, featured: vars.featured } : r,
         ),
       );
@@ -105,9 +105,9 @@ function ListingsPage() {
       setPriorityFn({ data: vars }),
     onMutate: async (vars) => {
       await qc.cancelQueries({ queryKey });
-      const prev = qc.getQueryData<typeof data>(queryKey);
-      qc.setQueryData<typeof data>(queryKey, (old) =>
-        (old ?? []).map((r) =>
+      const prev = qc.getQueryData<ListingRow[]>(queryKey);
+      qc.setQueryData<ListingRow[]>(queryKey, (old: ListingRow[] | undefined) =>
+        (old ?? []).map((r: ListingRow) =>
           r.id === vars.journeyId ? { ...r, priority_order: vars.priority } : r,
         ),
       );
@@ -160,9 +160,9 @@ function ListingsPage() {
       setModerationFn({ data: vars }),
     onMutate: async (vars) => {
       await qc.cancelQueries({ queryKey });
-      const prev = qc.getQueryData<typeof data>(queryKey);
-      qc.setQueryData<typeof data>(queryKey, (old) =>
-        (old ?? []).map((r) =>
+      const prev = qc.getQueryData<ListingRow[]>(queryKey);
+      qc.setQueryData<ListingRow[]>(queryKey, (old: ListingRow[] | undefined) =>
+        (old ?? []).map((r: ListingRow) =>
           r.id === vars.journeyId ? { ...r, moderation_status: vars.moderation } : r,
         ),
       );
@@ -184,12 +184,12 @@ function ListingsPage() {
 
   const categories = useMemo(() => {
     const set = new Set<string>();
-    for (const r of data ?? []) if (r.category) set.add(r.category);
+    for (const r of (data ?? []) as ListingRow[]) if (r.category) set.add(r.category);
     return Array.from(set).sort();
   }, [data]);
 
   const rows = useMemo(() => {
-    const all = (data ?? []).filter((r) => {
+    const all = (data ?? []).filter((r: ListingRow) => {
       if (titleQ && !r.title.toLowerCase().includes(titleQ.toLowerCase())) return false;
       if (aideQ) {
         const aide = `${r.mentor_name ?? ""} ${r.mentor_email ?? ""}`.toLowerCase();
@@ -344,7 +344,7 @@ function ListingsPage() {
               <th className="px-2 py-2 font-semibold">Listing #</th>
               <th className="px-2 py-2 font-semibold">Listing</th>
               <th className="px-2 py-2 font-semibold">Category</th>
-              <th className="px-2 py-2 font-semibold">Aide (User)</th>
+              <th className="px-2 py-2 font-semibold">Captain/Guide</th>
               <th className="px-2 py-2 font-semibold">Status</th>
               <th className="px-2 py-2 font-semibold">Stripe Payout Status</th>
               <th className="px-2 py-2 font-semibold">Featured</th>
