@@ -38,6 +38,9 @@ export interface DefaultDeparture {
   lat: number | null;
   lng: number | null;
   place_id: string | null;
+  city: string | null;
+  state: string | null;
+  country: string | null;
 }
 
 export interface OperatorOnboardingState {
