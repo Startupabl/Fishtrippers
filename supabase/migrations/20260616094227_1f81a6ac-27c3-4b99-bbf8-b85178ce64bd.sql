@@ -1,0 +1,12 @@
+UPDATE public.boat_types SET icon_url='/__l5e/assets-v1/c046288f-18fe-4f48-91b8-803f623f198c/airboat.png' WHERE subcategory_name='Airboat';
+UPDATE public.boat_types SET icon_url='/__l5e/assets-v1/7fc914a3-1c78-4d38-a24c-b1f1a13a9a39/bass-boat.png' WHERE subcategory_name='Bass Boat';
+UPDATE public.boat_types SET icon_url='/__l5e/assets-v1/81f65fba-11e8-4f4a-88ba-dc7c6a835281/downeast.png' WHERE subcategory_name='Downeast';
+UPDATE public.boat_types SET icon_url='/__l5e/assets-v1/506b41ed-0590-4d86-862b-ac5efb4d9138/driftboat.png' WHERE subcategory_name='Driftboat';
+UPDATE public.boat_types SET icon_url='/__l5e/assets-v1/78312876-eedc-4fa2-bee8-15df40d5c174/dual-console.png' WHERE subcategory_name='Dual Console';
+UPDATE public.boat_types SET icon_url='/__l5e/assets-v1/ae186ff2-70b6-48c6-b391-1d422f5ed28a/inflatable-onboard.png' WHERE subcategory_name='Inflatable Onboard';
+UPDATE public.boat_types SET icon_url='/__l5e/assets-v1/124c18cd-b048-4a26-9cb9-9a4efdef706b/john-boat.png' WHERE subcategory_name='John Boat';
+UPDATE public.boat_types SET icon_url='/__l5e/assets-v1/751f0e9a-17e8-4b6e-947f-36c347dad897/motor-yacht.png' WHERE subcategory_name='Motor Yacht';
+UPDATE public.boat_types SET icon_url='/__l5e/assets-v1/063a1b5d-ea21-4beb-9543-2798ae660681/pilot-house.png' WHERE subcategory_name='Pilot House';
+UPDATE public.boat_types SET icon_url='/__l5e/assets-v1/28eddb23-ea94-4575-8bc1-2f36a166df01/pontoon.png' WHERE subcategory_name='Pontoon';
+UPDATE public.boat_types SET icon_url='/__l5e/assets-v1/64e702dd-06c5-4abb-9890-aec7da19e00f/runabout.png' WHERE subcategory_name='Runabout';
+UPDATE public.boat_types SET icon_url='/__l5e/assets-v1/4c3decb1-2e57-4fd3-8d60-b00d8c1da0b0/sports-fishing.png' WHERE subcategory_name='Sports Fishing';

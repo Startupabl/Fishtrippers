@@ -1,22 +1,27 @@
-## Boat icon restyle + sizing fix
+## Goal
+Ensure all 30 boat-type silhouette icons face the **same direction (right)** so the dropdown, listing cards, and future search cards look consistent — not sloppy.
 
-### 1. Regenerate the 30 boat-type icons
-- Switch from gold (#D4AF37) line-art to **solid black silhouette** style matching the reference card (filled black boat profile, side-view, no outline strokes, transparent PNG on white background).
-- Re-run `imagegen` (fast tier, transparent background) for all subcategories under `src/assets/boat-icons/` — overwrite the existing files so `boat_types.icon_url` rows don't need to change.
-- Prompt template per icon: "Minimalist solid black silhouette of a [boat subtype], side profile view, filled flat shape, no outline, no text, no background, centered, on a clean white background."
+## Approach
+Rather than regenerating icons (which risks style drift and would require re-uploading + re-mapping URLs in the DB), simply **horizontally flip** the icons that currently face left. This preserves the exact silhouette style we already approved and keeps `boat_types.icon_url` rows unchanged.
 
-### 2. Fix rendering size in the Boat Type dropdown
-Current: `BoatDetailsStep.tsx` renders the icon at ~20px which makes it look like a thin horizontal sliver because the source PNGs are square but the boat shape only occupies the middle band.
+## Steps
+1. **Audit** — produce a fresh montage of all 30 icons and confirm which face left. From the current check, these face left and need flipping:
+   - `catamaran.png`
+   - `cuddy-cabin.png`
+   - `downeast.png`
+   - `headboat.png`
+   - `sports-fishing.png`
+   - Re-verify ambiguous ones (`cruiser`, `convertible`) up close and include if needed.
 
-Changes in `BoatDetailsStep.tsx`:
-- Bump dropdown icon size to **40×24** (`h-6 w-10`), `object-contain`, so the silhouette has room to breathe and matches the proportions in the reference card.
-- Same treatment in the selected-value display (trigger).
+2. **Flip in place** using ImageMagick (`magick <file> -flop <file>`) on each mis-aligned PNG in `src/assets/boat-icons/`. Transparency is preserved.
 
-### 3. Out of scope (deferred to search-card step)
-- Adding the icon + "X ft / Up to Y people" block to public search/listing cards — we'll wire that in when we build the search results UI. This task only adjusts the onboarding dropdown preview and the source asset style/color.
+3. **Re-upload to CDN** — each PNG was externalized via `lovable-assets`, so flipped files need to be re-uploaded and the corresponding `.asset.json` pointer overwritten (the `boat_types.icon_url` DB column references the asset URL, which contains the asset UUID — so a new asset ID will be issued and we'll patch the DB rows for just the flipped icons).
 
-### Files touched
-- `src/assets/boat-icons/*.png` (regenerated, ~30 files)
-- `src/components/operator-onboarding/steps/BoatDetailsStep.tsx` (icon sizing)
+   Alternative (simpler): if the icons in the dropdown are imported as static module assets from `src/assets/boat-icons/*.png` rather than via CDN URLs, we skip the upload step entirely — the flipped file is picked up on next build. I'll confirm which path is used in `BoatDetailsStep.tsx` before executing.
 
-No DB migration, no schema change.
+4. **Verify** — regenerate the montage post-flip; all 30 should face right. Spot-check the dropdown in the live preview.
+
+## Out of scope
+- No regeneration of icons.
+- No DB schema changes.
+- No changes to dropdown sizing (already settled at `h-7 w-12`).
