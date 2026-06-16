@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useServerFn } from "@tanstack/react-start";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
@@ -11,6 +11,7 @@ import {
   submitOperatorSchema,
 } from "@/lib/operators.shared";
 import { submitOperatorForReview } from "@/lib/operators.functions";
+import { supabase } from "@/integrations/supabase/client";
 import {
   isReadyToSubmit,
   useOperatorOnboardingStore,
@@ -34,6 +35,24 @@ export function ReviewSubmitStep({ onBack }: Props) {
   const setSubmitted = useOperatorOnboardingStore((s) => s.setSubmitted);
   const submit = useServerFn(submitOperatorForReview);
   const [submitting, setSubmitting] = useState(false);
+  const [boatTypeName, setBoatTypeName] = useState<string>("");
+
+  useEffect(() => {
+    let cancelled = false;
+    const id = state.vessel.boat_type_id;
+    if (!id) return;
+    (async () => {
+      const { data } = await supabase
+        .from("boat_types" as any)
+        .select("subcategory_name")
+        .eq("id", id)
+        .maybeSingle();
+      if (!cancelled && data) setBoatTypeName((data as any).subcategory_name);
+    })();
+    return () => {
+      cancelled = true;
+    };
+  }, [state.vessel.boat_type_id]);
 
   const handleSubmit = async () => {
     if (!ready) return;
@@ -52,12 +71,22 @@ export function ReviewSubmitStep({ onBack }: Props) {
         vessel:
           state.business_type === "charter"
             ? {
-                manufacturer: state.vessel.manufacturer.trim(),
-                model: state.vessel.model.trim(),
-                year: Number(state.vessel.year),
-                length_ft: Number(state.vessel.length_ft),
-                engine_type: state.vessel.engine_type.trim(),
-                engine_size: state.vessel.engine_size.trim(),
+                boat_type_id: state.vessel.boat_type_id,
+                manufacturer: state.vessel.manufacturer.trim() || null,
+                year: state.vessel.year ? Number(state.vessel.year) : null,
+                length_ft: state.vessel.length_ft
+                  ? Number(state.vessel.length_ft)
+                  : null,
+                restored: state.vessel.restored,
+                num_engines: state.vessel.num_engines
+                  ? Number(state.vessel.num_engines)
+                  : null,
+                horsepower_per_engine: state.vessel.horsepower_per_engine
+                  ? Number(state.vessel.horsepower_per_engine)
+                  : null,
+                max_cruising_speed_knots: state.vessel.max_cruising_speed_knots
+                  ? Number(state.vessel.max_cruising_speed_knots)
+                  : null,
                 max_passenger_capacity: Number(state.vessel.max_passenger_capacity),
                 features: state.vessel.features,
               }
@@ -73,6 +102,8 @@ export function ReviewSubmitStep({ onBack }: Props) {
     }
   };
 
+  const featureEntries = Object.entries(state.vessel.features);
+
   return (
     <div className="space-y-8">
       <header>
@@ -86,14 +117,10 @@ export function ReviewSubmitStep({ onBack }: Props) {
       <section className="space-y-4 rounded-2xl border bg-card p-6">
         <h2 className="text-lg font-semibold">Business</h2>
         <dl className="grid gap-3 sm:grid-cols-2">
-          <div>
-            <dt className="text-xs uppercase text-muted-foreground">Type</dt>
-            <dd className="font-medium capitalize">{state.business_type}</dd>
-          </div>
-          <div>
-            <dt className="text-xs uppercase text-muted-foreground">Display name</dt>
-            <dd className="font-medium">{state.display_name}</dd>
-          </div>
+          <Field label="Type">
+            <span className="capitalize">{state.business_type}</span>
+          </Field>
+          <Field label="Display name">{state.display_name}</Field>
           <div className="sm:col-span-2">
             <dt className="text-xs uppercase text-muted-foreground">Location</dt>
             <dd className="font-medium">{state.location}</dd>
@@ -111,23 +138,37 @@ export function ReviewSubmitStep({ onBack }: Props) {
         <section className="space-y-4 rounded-2xl border bg-card p-6">
           <h2 className="text-lg font-semibold">Vessel</h2>
           <dl className="grid gap-3 sm:grid-cols-2">
-            <Field label="Make">{state.vessel.manufacturer}</Field>
-            <Field label="Model">{state.vessel.model}</Field>
-            <Field label="Year">{state.vessel.year}</Field>
-            <Field label="Length">{state.vessel.length_ft} ft</Field>
-            <Field label="Engine type">{state.vessel.engine_type}</Field>
-            <Field label="Engine size">{state.vessel.engine_size}</Field>
+            <Field label="Boat type">{boatTypeName || state.vessel.boat_type_id || "—"}</Field>
+            <Field label="Manufacturer">{state.vessel.manufacturer || "—"}</Field>
+            <Field label="Length">
+              {state.vessel.length_ft ? `${state.vessel.length_ft} ft` : "—"}
+            </Field>
+            <Field label="Year">{state.vessel.year || "—"}</Field>
+            <Field label="Restored">{state.vessel.restored ? "Yes" : "No"}</Field>
+            <Field label="Engine manufacturer">
+              {state.vessel.engine_manufacturer || "—"}
+            </Field>
+            <Field label="# Engines">{state.vessel.num_engines || "—"}</Field>
+            <Field label="HP per engine">{state.vessel.horsepower_per_engine || "—"}</Field>
+            <Field label="Max cruising speed">
+              {state.vessel.max_cruising_speed_knots
+                ? `${state.vessel.max_cruising_speed_knots} kn`
+                : "—"}
+            </Field>
             <Field label="Max passengers">{state.vessel.max_passenger_capacity}</Field>
           </dl>
           <div>
             <div className="mb-2 text-xs uppercase text-muted-foreground">Features</div>
-            {state.vessel.features.length === 0 ? (
+            {featureEntries.length === 0 ? (
               <p className="text-sm text-muted-foreground">None selected</p>
             ) : (
               <div className="flex flex-wrap gap-2">
-                {state.vessel.features.map((f) => (
-                  <Badge key={f} variant="secondary">
-                    {findLabel(f)}
+                {featureEntries.map(([id, comment]) => (
+                  <Badge key={id} variant="secondary" className="font-normal">
+                    {findLabel(id)}
+                    {comment ? (
+                      <span className="ml-1 text-muted-foreground">— {comment}</span>
+                    ) : null}
                   </Badge>
                 ))}
               </div>
@@ -162,7 +203,6 @@ export function ReviewSubmitStep({ onBack }: Props) {
       </section>
 
       <section className="space-y-4 rounded-2xl border bg-card p-6">
-
         <h2 className="text-lg font-semibold">Booking rules</h2>
         <dl className="grid gap-3 sm:grid-cols-2">
           <Field label="Booking type">

@@ -1,5 +1,5 @@
 import { useMemo, useState } from "react";
-import { Search, CheckCircle2, Waves, Fish, Trees, Feather } from "lucide-react";
+import { Search, CheckCircle2, Waves, Fish, Trees, Feather, Anchor } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { cn } from "@/lib/utils";
@@ -8,6 +8,7 @@ import {
   PRIMARY_CATEGORY_DETAILS,
   SPECIES_CATALOG,
   type PrimaryCategory,
+  type SpeciesItem,
 } from "@/lib/operators.shared";
 import {
   isFishingFocusValid,
@@ -23,8 +24,15 @@ const CATEGORY_ICON: Record<PrimaryCategory, typeof Waves> = {
   offshore: Waves,
   inshore: Fish,
   freshwater: Trees,
-  fly: Feather,
+  fly_fishing: Feather,
+  spearfishing: Anchor,
 };
+
+interface SpeciesGroup {
+  category: PrimaryCategory;
+  label: string;
+  items: SpeciesItem[];
+}
 
 export function FishingFocusStep({ onBack, onNext }: Props) {
   const primary_category = useOperatorOnboardingStore((s) => s.primary_category);
@@ -35,10 +43,14 @@ export function FishingFocusStep({ onBack, onNext }: Props) {
 
   const [query, setQuery] = useState("");
 
-  const groups = useMemo(() => {
-    // Re-order groups so the selected category comes first.
-    if (!primary_category) return SPECIES_CATALOG;
-    return [...SPECIES_CATALOG].sort((a, b) =>
+  const groups: SpeciesGroup[] = useMemo(() => {
+    const base: SpeciesGroup[] = PRIMARY_CATEGORIES.map((c) => ({
+      category: c,
+      label: PRIMARY_CATEGORY_DETAILS[c].title,
+      items: SPECIES_CATALOG.filter((s) => s.categories.includes(c)),
+    })).filter((g) => g.items.length > 0);
+    if (!primary_category) return base;
+    return [...base].sort((a, b) =>
       a.category === primary_category ? -1 : b.category === primary_category ? 1 : 0,
     );
   }, [primary_category]);
@@ -49,7 +61,7 @@ export function FishingFocusStep({ onBack, onNext }: Props) {
     return groups
       .map((g) => ({
         ...g,
-        items: g.items.filter((i) => i.label.toLowerCase().includes(q)),
+        items: g.items.filter((i: SpeciesItem) => i.label.toLowerCase().includes(q)),
       }))
       .filter((g) => g.items.length > 0);
   }, [groups, q]);

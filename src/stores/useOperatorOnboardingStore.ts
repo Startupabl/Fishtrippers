@@ -19,22 +19,24 @@ export type StepId =
   | "review";
 
 export interface VesselDraftState {
+  boat_type_id: string;
   manufacturer: string;
-  model: string;
-  year: string; // string while typing
   length_ft: string;
-  engine_type: string;
-  engine_size: string;
+  year: string;
+  restored: boolean;
+  engine_manufacturer: string;
+  num_engines: string;
+  horsepower_per_engine: string;
+  max_cruising_speed_knots: string;
   max_passenger_capacity: string;
-  features: string[];
+  /** featureId -> optional 50-char comment (empty string allowed) */
+  features: Record<string, string>;
 }
 
 export interface OperatorOnboardingState {
-  // step navigation
   currentStep: StepId;
   setStep: (s: StepId) => void;
 
-  // form data
   business_type: BusinessType | null;
   display_name: string;
   location: string;
@@ -46,14 +48,13 @@ export interface OperatorOnboardingState {
   target_species: string[];
   vessel: VesselDraftState;
 
-  // post-submit
   submitted: boolean;
 
-  // setters
   setBusinessType: (t: BusinessType) => void;
   setProfile: (p: { display_name?: string; location?: string; about?: string }) => void;
   setVessel: (v: Partial<VesselDraftState>) => void;
   toggleFeature: (id: string) => void;
+  setFeatureComment: (id: string, comment: string) => void;
   setBookingRules: (r: {
     booking_type?: BookingType;
     advance_notice_hours?: AdvanceNoticeHours;
@@ -63,26 +64,26 @@ export interface OperatorOnboardingState {
   toggleSpecies: (id: string) => void;
   setSubmitted: (v: boolean) => void;
   reset: () => void;
-  hydrateFromServer: (input: {
-    operator: any | null;
-    vessel: any | null;
-  }) => void;
+  hydrateFromServer: (input: { operator: any | null; vessel: any | null }) => void;
 }
 
 const emptyVessel = (): VesselDraftState => ({
+  boat_type_id: "",
   manufacturer: "",
-  model: "",
-  year: "",
   length_ft: "",
-  engine_type: "",
-  engine_size: "",
+  year: "",
+  restored: false,
+  engine_manufacturer: "",
+  num_engines: "",
+  horsepower_per_engine: "",
+  max_cruising_speed_knots: "",
   max_passenger_capacity: "",
-  features: [],
+  features: {},
 });
 
 export const useOperatorOnboardingStore = create<OperatorOnboardingState>()(
   persist(
-    (set, get) => ({
+    (set) => ({
       currentStep: "business_type",
       setStep: (s) => set({ currentStep: s }),
 
@@ -108,13 +109,18 @@ export const useOperatorOnboardingStore = create<OperatorOnboardingState>()(
       setVessel: (v) => set((s) => ({ vessel: { ...s.vessel, ...v } })),
       toggleFeature: (id) =>
         set((s) => {
-          const has = s.vessel.features.includes(id);
+          const next = { ...s.vessel.features };
+          if (id in next) delete next[id];
+          else next[id] = "";
+          return { vessel: { ...s.vessel, features: next } };
+        }),
+      setFeatureComment: (id, comment) =>
+        set((s) => {
+          if (!(id in s.vessel.features)) return {} as any;
           return {
             vessel: {
               ...s.vessel,
-              features: has
-                ? s.vessel.features.filter((f) => f !== id)
-                : [...s.vessel.features, id],
+              features: { ...s.vessel.features, [id]: comment.slice(0, 50) },
             },
           };
         }),
@@ -152,6 +158,15 @@ export const useOperatorOnboardingStore = create<OperatorOnboardingState>()(
         }),
       hydrateFromServer: ({ operator, vessel }) => {
         if (!operator) return;
+        const rawFeatures = vessel?.features;
+        let featuresMap: Record<string, string> = {};
+        if (Array.isArray(rawFeatures)) {
+          for (const id of rawFeatures) featuresMap[String(id)] = "";
+        } else if (rawFeatures && typeof rawFeatures === "object") {
+          for (const [k, v] of Object.entries(rawFeatures)) {
+            featuresMap[k] = typeof v === "string" ? v : "";
+          }
+        }
         set({
           business_type: operator.business_type ?? null,
           display_name: operator.display_name ?? "",
@@ -167,24 +182,33 @@ export const useOperatorOnboardingStore = create<OperatorOnboardingState>()(
           submitted: !!operator.submitted_at,
           vessel: vessel
             ? {
+                boat_type_id: vessel.boat_type_id ?? "",
                 manufacturer: vessel.manufacturer ?? "",
-                model: vessel.model ?? "",
-                year: vessel.year != null ? String(vessel.year) : "",
                 length_ft: vessel.length_ft != null ? String(vessel.length_ft) : "",
-                engine_type: vessel.engine_type ?? "",
-                engine_size: vessel.engine_size ?? "",
+                year: vessel.year != null ? String(vessel.year) : "",
+                restored: !!vessel.restored,
+                engine_manufacturer: vessel.engine_type ?? "",
+                num_engines: vessel.num_engines != null ? String(vessel.num_engines) : "",
+                horsepower_per_engine:
+                  vessel.horsepower_per_engine != null
+                    ? String(vessel.horsepower_per_engine)
+                    : "",
+                max_cruising_speed_knots:
+                  vessel.max_cruising_speed_knots != null
+                    ? String(vessel.max_cruising_speed_knots)
+                    : "",
                 max_passenger_capacity:
                   vessel.max_passenger_capacity != null
                     ? String(vessel.max_passenger_capacity)
                     : "",
-                features: Array.isArray(vessel.features) ? vessel.features : [],
+                features: featuresMap,
               }
             : emptyVessel(),
         });
       },
     }),
     {
-      name: "operator-onboarding-draft-v1",
+      name: "operator-onboarding-draft-v2",
       storage: createJSONStorage(() => localStorage),
     },
   ),
@@ -205,16 +229,9 @@ export function isBoatDetailsValid(s: OperatorOnboardingState): boolean {
   if (s.business_type === "guide") return true;
   if (s.business_type !== "charter") return false;
   const v = s.vessel;
-  const year = Number(v.year);
-  const len = Number(v.length_ft);
   const cap = Number(v.max_passenger_capacity);
   return (
-    v.manufacturer.trim().length > 0 &&
-    v.model.trim().length > 0 &&
-    Number.isFinite(year) && year >= 1900 && year <= 2100 &&
-    Number.isFinite(len) && len > 0 &&
-    v.engine_type.trim().length > 0 &&
-    v.engine_size.trim().length > 0 &&
+    v.boat_type_id.trim().length > 0 &&
     Number.isInteger(cap) && cap >= 1 && cap <= 200
   );
 }
