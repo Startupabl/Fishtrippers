@@ -149,6 +149,7 @@ function RootShell({ children }: { children: React.ReactNode }) {
 function RootComponent() {
   const { queryClient } = Route.useRouteContext();
   useAuthListener();
+  useFxRates();
   const router = useRouter();
   const pathname = router.state.location.pathname;
   const isAdminRoute = pathname === "/admin" || pathname.startsWith("/admin/");
