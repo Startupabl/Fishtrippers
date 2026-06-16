@@ -1,100 +1,61 @@
-# Captain/Guide Dashboard — wire to operator listings
-
 ## Goal
 
-1. In the avatar dropdown, rename "Become an Aide" → **List Your Trip**, and when the user has an operator listing show **Captain Dashboard** (business) or **Guide Dashboard** (individual/guide) instead of "Go to Aide Dashboard".
-2. Apply the same Captain/Guide labelling across the workspace sidebar and dashboard header.
-3. Make the dashboard actually work for users who submitted an operator listing — the listing they just created should be visible and manageable from the front-end captain/guide dashboard.
+Lock in the FishTrippers visual identity everywhere: **deep ocean blue as the primary brand color**, **gold as the accent only**, and the **FishTrippers wordmark** replacing every "Lemonaidely" reference in UI, metadata, emails, and seeded backend content.
 
-## Source of the Captain vs Guide label
+## What's already in place
 
-The onboarding wizard stores `operators.business_type`:
-- `"charter"` (or any business type) → **Captain**
-- `"guide"` → **Guide**
-- fallback when unknown → **Captain**
+- `src/styles.css` already defines `--primary` as ocean navy and `--accent` as gold.
+- `src/lib/brand.ts` already exports `BRAND.name = "FishTrippers"` and the ocean/gold palette.
+- `src/components/brand/Logo.tsx` already renders the "Fish" + "Trippers" wordmark (gold).
 
-A new hook `useOperatorRoleLabel()` returns `{ role: "captain" | "guide", titleCase: "Captain" | "Guide" }` by reading the signed‑in user's `operators` row.
+The work below enforces those tokens consistently and scrubs leftover "Lemonaidely" strings from 58 files.
 
-## 1. Detect "has a listing" from operators, not journeys
+## 1. Color enforcement (frontend)
 
-`src/hooks/useHasActiveListing.ts` currently counts rows in `journeys`. Replace its query with a count of `operators` rows for the signed‑in user where `status in ('draft','published')`. Return the same `{ hasListing, isLoaded }` shape so existing callers keep working.
+- Sample the hero image's deep water and the existing gold CTA, then nudge `--primary` and `--accent` in `src/styles.css` (light + dark) so they match precisely. Keep oklch format.
+- Audit components for hardcoded color classes that bypass tokens:
+  - `bg-yellow-*`, `text-yellow-*`, `border-yellow-*`, `bg-amber-*` → reserve only for true accent/CTA highlights; everything else (sidebars, nav, page chrome, section backgrounds, info pills, focus rings) routes to `primary`/`secondary`/`muted`.
+  - `bg-blue-*`, `bg-sky-*`, hardcoded hex colors → swap to `bg-primary`, `text-primary`, `bg-primary/10`, etc.
+- Sidebar tokens (`--sidebar`, `--sidebar-primary`, `--sidebar-ring`) get a blue-leaning treatment; gold is used only for the active-state indicator/highlight, not as the sidebar fill.
+- Components touched (representative, not exhaustive): `WorkspaceSidebar`, `SiteHeader`, `SiteFooter`, `AuthLayout`, dashboard cards, status badges, admin queue/listings chrome, marketing hero CTAs, pricing/upsell blocks.
+- Buttons: confirm the shadcn `Button` `default` variant resolves to `bg-primary` (blue) and add/keep a `gold`/`accent` variant for the small set of conversion CTAs ("Book now", "List your trip"). Remove ad-hoc gold styling on non-CTA buttons.
 
-Add the new `useOperatorRoleLabel()` hook in the same file (single query, cached by `["my-operator", userId]`).
+## 2. Logo + brand-name swap (UI strings)
 
-## 2. Dropdown menu (`src/components/layout/UserAvatarMenu.tsx`)
+Every user-visible "Lemonaidely" → "FishTrippers", and every wordmark spot uses `<Logo />`:
 
-- Section label: when `hasListing` show `"{Role} Zone"` (Captain Zone / Guide Zone), otherwise keep "Earn".
-- With listing → link label becomes `"{Role} Dashboard"` and points to `/dashboard`.
-- Without listing → label becomes **List Your Trip**, link target stays `/mentor/create-path?new=true`.
-- Sprout/LayoutDashboard icons preserved.
+- Route `head()` titles, meta descriptions, og:title/og:description, og:url, canonical links (`index.tsx`, `search.tsx`, `register.tsx`, `login.tsx`, `forgot-password.tsx`, `reset-password.tsx`, `journey-welcome.tsx`, `gift.tsx`, `pages.$slug.tsx`, `onboarding.*`, `messages.*`, all `_authenticated/*` routes, `_admin/admin.queue.tsx`, etc.). URLs change `lemonaidely.com` → `fishtrippers.com`.
+- `src/routes/sitemap[.]xml.ts` BASE_URL.
+- `src/lib/content.ts` (footer labels, About/Manifesto/Privacy/Terms copy, social links). Rewrite the lemon/juice metaphors into fishing-trip language while keeping section structure intact.
+- `src/lib/email-templates.defaults.ts` and `src/lib/email-sender.server.ts` (`FROM_ADDRESS`, subject lines, body copy).
+- Component-level strings: `SiteFooter`, `AuthLayout`, `ProfileCompletionRedirector`, `ListingLiveCelebrationDialog`, `RejectListingDialog`, `ReceiptDialog`, `AddToCalendarMenu`, `SharePath`, share/og copy in `c.$categorySlug.$listingSlug.tsx` and `m.$mentorSlug.tsx`.
+- The `localStorage` key `lemonaidely_quiz_open` in `index.tsx` → `fishtrippers_quiz_open`.
+- `index.tsx` hero section: rename `LemonaidelyProcess` component and the visible "What is Lemonaidely?" heading/video title.
 
-## 3. Workspace sidebar (`src/components/dashboard/WorkspaceSidebar.tsx`)
+Anywhere a text wordmark is currently rendered inline, replace with `<Logo />` for consistency.
 
-- `useWorkspaceMode()` returns `title: "{Role} Workspace"` when `hasListing`.
-- Sidebar group label: `"{Role} Workspace"`.
-- "Become an Aide" item (shown when no listing) → **List Your Trip**.
-- "My Listings" stays as the entry to the listing manager but points to a new route (see step 5).
+## 3. Backend content (Supabase)
 
-## 4. Dashboard shell (`src/routes/_authenticated/dashboard.tsx`)
+Two seed migrations contain Lemonaidely copy: `20260515184833_*.sql` (site_pages seed) and `20260603084741_*.sql` (email_templates seed). Old migration files are immutable history — instead, add **one new migration** that updates the currently-seeded rows in place:
 
-- `head().title` → `"{Role} Dashboard — Lemonaidely"` (derived from the hook; default Captain on first paint to avoid SSR jitter).
-- Inline "Aide Dashboard" heading inside `AideDashboardHome` → `"{Role} Dashboard"`.
-- Rename internal helper variable `atAideRoot` → `atOperatorRoot` (cosmetic, keeps grep clean). No URL changes — `/dashboard` stays the same so existing links keep working.
+- `UPDATE public.site_pages SET title=..., description=..., body=... WHERE slug IN (...)` to rewrite About / Privacy / Terms / Safety / FAQ / Contact pages with FishTrippers language.
+- `UPDATE public.email_templates SET subject=..., body=... WHERE ...` to scrub Lemonaidely from subject lines and bodies.
+- No schema changes, no new tables, no RLS edits.
 
-## 5. Operator listing manager — new route `/dashboard/my-listing`
+## 4. Verification
 
-Replace the legacy journey-based "My Listings" page (`dashboard.aide.courses.tsx`) with a new operator-centric page. We keep the file so the route id stays stable but rewrite the body.
-
-What it shows for the signed‑in operator:
-
-- Hero card: cover image (from `operators.cover_image_url`), display name, listing number, moderation badge (Pending / Approved / Action Needed with note), status pill (Draft / Published / Archived), payout-ready indicator.
-- Primary actions: **Edit listing** (→ `/mentor/create-path`, resumes the wizard from the stored draft), **Preview** (→ `/operator/preview`), **View public page** (when published, → `/c/<category>/<slug>`).
-- **Trip catalog** table: rows from `trip_packages` for this operator, with title, price, duration, status, and an Edit button that opens the existing `TripFormDialog` (reuse the component already used by the wizard).
-- **Vessels** mini-list from `vessels` (read‑only summary; edit links into the wizard step).
-- Empty state when no operator row exists yet: CTA "List Your Trip".
-
-Sidebar item label changes from "My Listings" to **My Listing** (singular) and `to` becomes `/dashboard/my-listing`. The old `/dashboard/aide/courses` route file is deleted along with the legacy "Courses" sidebar entry.
-
-## 6. Bookings / Earnings / Messages on the operator data model
-
-Per your "Full rebuild" choice, rewire these existing dashboard pages to operator listings instead of journeys.
-
-### 6a. Server functions (`src/lib/operator-dashboard.functions.ts`, new)
-
-All authenticated via `requireSupabaseAuth` and scoped to `operators.user_id = auth.uid()`:
-
-- `getMyOperator()` → `operators` row + business_type, status, moderation, cover, slug, payout flags.
-- `listMyTripPackages()` → trips for the operator.
-- `listMyBookings({ status?, range? })` → joins `bookings` with `trip_packages` filtered to this operator (resolving via `course_id`/`trip_package_id` — we'll add the resolver in this fn rather than schema changes).
-- `getMyEarningsSummary({ range })` → sums `bookings.aide_earnings`, payout status from `getMyStripeIds()`, grouped by trip.
-- `listMyMessageThreads()` → existing `message_threads` already keyed to mentor_id = user_id; just relabel the UI.
-
-No DB migration required for this pass — bookings/messages already reference the signed-in user via `aide_id`/`mentor_id`, which equals `operators.user_id`. We're swapping the *labels* and the *filter source* (trip catalog instead of journey catalog) but keeping the underlying rows.
-
-### 6b. Page wiring
-
-- `dashboard.bookings.tsx`: swap `listMyJourneysWithStats` filter dropdown for `listMyTripPackages`; columns unchanged.
-- `dashboard.earnings.tsx` + `dashboard.earnings-bookings.tsx`: same swap — group by trip package title; per-listing breakdown reads from the operator's trips.
-- `dashboard.messages.*`: header copy "Conversations with your learners" → "Conversations with your guests"; data fetch unchanged.
-- `dashboard.upcoming-sessions.tsx`: filter via `trip_packages` instead of `journeys`.
-
-Each page keeps its current URL and layout — only the data source and a few labels change.
-
-## 7. Cleanup
-
-- Remove the legacy `/dashboard/aide/courses` route file once `/dashboard/my-listing` is in place; remove `aideItems` entry pointing at it.
-- Strip "Aide" terminology from user‑visible strings in the dashboard (kept only as internal variable names where rename is risky).
-- No changes to admin pages, onboarding wizard, or public listing pages.
+- `rg -i "lemonaidely" src supabase` returns zero hits after the pass (allowing only historical migration files, which we leave untouched).
+- `browser--screenshot` the home page, an auth page, the dashboard, the admin listings page, and one marketing/legal page to confirm: blue dominates, gold appears only on CTAs/accents, the FishTrippers wordmark renders everywhere a logo is shown.
+- Spot-check dark mode for the same pages.
 
 ## Out of scope
 
-- Renaming database tables or columns (e.g. `aide_earnings`, `mentor_id`) — internal only.
-- Re-architecting the legacy `journeys` system itself; we just stop surfacing it in the operator dashboard.
-- Notifications, reviews, or coupon tooling for trip packages (can follow up).
+- No new features, no route restructuring, no database schema changes.
+- No new domain registration — URL string change only; actual DNS/hosting is a deploy-time concern.
+- Hero image is not regenerated; we sample its blue, we don't replace it.
 
 ## Technical notes
 
-- `useHasActiveListing` change is a one-file swap; existing call sites keep their boolean contract.
-- `useOperatorRoleLabel()` defaults to `"captain"` while loading so the dropdown/sidebar never flashes "Guide" for charter operators.
-- Trip edit reuses the existing `TripFormDialog` component (already standalone — just needs the operator id passed in).
-- All new server functions go in `src/lib/operator-dashboard.functions.ts` and use `requireSupabaseAuth`; no edits to `client.ts`/`auth-middleware.ts`.
+- All color edits go through CSS tokens in `src/styles.css` and the shadcn `Button` variants. No raw hex values land in components.
+- Brand strings continue to flow through `src/lib/brand.ts` where possible; for route `head()` titles (which are static strings) we update the literals directly.
+- The new SQL migration follows the existing GRANT pattern — but since it only UPDATEs existing rows in `public.site_pages` / `public.email_templates`, no new GRANT/RLS work is needed.
