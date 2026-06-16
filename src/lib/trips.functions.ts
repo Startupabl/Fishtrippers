@@ -39,6 +39,23 @@ export const listMyTrips = createServerFn({ method: "GET" })
     return { trips: data ?? [] };
   });
 
+export const getMyCapabilities = createServerFn({ method: "GET" })
+  .middleware([requireSupabaseAuth])
+  .handler(async ({ context }) => {
+    const { supabase, userId } = context;
+    const { data, error } = await supabase
+      .from("operators")
+      .select("target_species, fishing_environments, base_currency")
+      .eq("owner_id", userId)
+      .maybeSingle();
+    if (error) throw new Error(error.message);
+    return {
+      target_species: (data?.target_species as string[]) ?? [],
+      fishing_environments: (data?.fishing_environments as string[]) ?? [],
+      base_currency: (data?.base_currency as string) ?? "USD",
+    };
+  });
+
 export const upsertTrip = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .inputValidator((input: TripInput) => tripInputSchema.parse(input))
