@@ -25,11 +25,11 @@ interface Trip {
   id: string;
   title: string;
   description?: string | null;
-  itinerary?: string | null;
   start_time?: string | null;
   duration_minutes: number;
   price_minor: number;
   per_extra_minor?: number | null;
+  min_party_size?: number | null;
   max_party_size?: number | null;
   currency: string;
   target_species?: string[] | null;
