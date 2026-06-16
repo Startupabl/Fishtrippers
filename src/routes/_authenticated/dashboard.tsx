@@ -108,10 +108,10 @@ function AideDashboardHome() {
       <div className="flex flex-wrap items-end justify-between gap-3">
         <div>
           <h1 className="text-3xl text-foreground md:text-4xl" style={lora}>
-            Aide Dashboard
+            {roleLabel} Dashboard
           </h1>
           <p className="mt-1 text-sm text-muted-foreground">
-            Your hub for managing Courses, availability, and earnings.
+            Your hub for managing your listing, schedule, and earnings.
           </p>
         </div>
         <Button
