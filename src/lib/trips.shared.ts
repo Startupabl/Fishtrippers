@@ -46,26 +46,31 @@ const timeStringSchema = z
   .nullable()
   .optional();
 
-export const tripInputSchema = z.object({
-  id: z.string().uuid().nullable().optional(),
-  title: z.string().trim().min(2, "Trip name is required").max(120),
-  description: z.string().trim().min(10, "Add a short description").max(2000),
-  itinerary: z.string().trim().max(4000).nullable().optional(),
-  start_time: timeStringSchema,
-  duration_minutes: z.number().int().positive(),
-  price_minor: z.number().int().min(0),
-  per_extra_minor: z.number().int().min(0).default(0),
-  max_party_size: z.number().int().min(1).max(50),
-  currency: z.string().default("USD"),
-  template_key: z.string().nullable().optional(),
-  target_species: z.array(z.string()).min(1, "Pick at least one target fish").max(50),
-  environments: z.array(z.string()).min(1, "Pick at least one environment").max(2, "Max 2 environments per trip"),
-  techniques: z.array(z.string()).min(1, "Pick at least one technique").max(10),
-  departure_address: z.string().trim().min(2, "Pick a departure point"),
-  departure_lat: z.number().nullable().optional(),
-  departure_lng: z.number().nullable().optional(),
-  departure_place_id: z.string().nullable().optional(),
-});
+export const tripInputSchema = z
+  .object({
+    id: z.string().uuid().nullable().optional(),
+    title: z.string().trim().min(2, "Trip name is required").max(120),
+    description: z.string().trim().min(10, "Add a short description").max(2000),
+    start_time: timeStringSchema,
+    duration_minutes: z.number().int().positive(),
+    price_minor: z.number().int().min(0),
+    per_extra_minor: z.number().int().min(0).default(0),
+    min_party_size: z.number().int().min(1).max(50).default(1),
+    max_party_size: z.number().int().min(1).max(50),
+    currency: z.string().default("USD"),
+    template_key: z.string().nullable().optional(),
+    target_species: z.array(z.string()).min(1, "Pick at least one target fish").max(50),
+    environments: z.array(z.string()).min(1, "Pick at least one environment").max(2, "Max 2 environments per trip"),
+    techniques: z.array(z.string()).min(1, "Pick at least one technique").max(10),
+    departure_address: z.string().trim().min(2, "Pick a departure point"),
+    departure_lat: z.number().nullable().optional(),
+    departure_lng: z.number().nullable().optional(),
+    departure_place_id: z.string().nullable().optional(),
+  })
+  .refine((d) => d.min_party_size <= d.max_party_size, {
+    message: "Min trip size must be less than or equal to max trip size",
+    path: ["min_party_size"],
+  });
 
 export type TripInput = z.infer<typeof tripInputSchema>;
 

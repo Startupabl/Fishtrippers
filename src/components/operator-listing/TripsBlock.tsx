@@ -5,7 +5,6 @@ import {
   CheckCircle2,
   MapPin,
   Minus,
-  ChevronDown,
   Fish,
 } from "lucide-react";
 import { Link } from "@tanstack/react-router";
@@ -26,11 +25,11 @@ interface Trip {
   id: string;
   title: string;
   description?: string | null;
-  itinerary?: string | null;
   start_time?: string | null;
   duration_minutes: number;
   price_minor: number;
   per_extra_minor?: number | null;
+  min_party_size?: number | null;
   max_party_size?: number | null;
   currency: string;
   target_species?: string[] | null;
@@ -69,12 +68,12 @@ function Chip({ children }: { children: React.ReactNode }) {
 }
 
 function TripCard({ trip }: { trip: Trip }) {
-  const [guests, setGuests] = useState(1);
-  const [showItinerary, setShowItinerary] = useState(false);
+  const minParty = Math.max(1, trip.min_party_size ?? 1);
+  const maxParty = Math.max(minParty, trip.max_party_size ?? 1);
+  const [guests, setGuests] = useState(minParty);
 
   const display = useCurrencyStore((s) => s.currency);
   const base = ((trip.currency || "USD").toUpperCase()) as CurrencyCode;
-  const maxParty = trip.max_party_size ?? 1;
   const perExtra = trip.per_extra_minor ?? 0;
   const totalMinorBase =
     trip.price_minor + perExtra * Math.max(0, guests - 1);
@@ -146,28 +145,6 @@ function TripCard({ trip }: { trip: Trip }) {
               <span className="line-clamp-2">{trip.departure_address}</span>
             </div>
           )}
-
-          {trip.itinerary && (
-            <div className="pt-1">
-              <button
-                type="button"
-                onClick={() => setShowItinerary((v) => !v)}
-                className="flex items-center gap-1 text-sm font-medium text-primary hover:underline"
-              >
-                Trip itinerary
-                <ChevronDown
-                  className={`h-3.5 w-3.5 transition-transform ${
-                    showItinerary ? "rotate-180" : ""
-                  }`}
-                />
-              </button>
-              {showItinerary && (
-                <p className="mt-2 whitespace-pre-line rounded-lg bg-muted/40 p-3 text-sm">
-                  {trip.itinerary}
-                </p>
-              )}
-            </div>
-          )}
         </div>
 
         {/* RIGHT: price + guests selector */}
@@ -183,9 +160,16 @@ function TripCard({ trip }: { trip: Trip }) {
           </div>
 
           {perExtra > 0 && (
-            <div className="mt-1 text-xs text-muted-foreground">
-              + {formatCurrency(extraDisplay, display)} per extra guest
-            </div>
+            <p className="mt-2 text-xs text-muted-foreground">
+              The base price is for 1 person. After that it&apos;s{" "}
+              {formatCurrency(extraDisplay, display)} per each additional person per day.
+            </p>
+          )}
+
+          {minParty > 1 && (
+            <p className="mt-2 text-xs font-medium text-foreground">
+              This trip requires a minimum of {minParty} people.
+            </p>
           )}
 
           {/* Guests stepper */}
@@ -197,8 +181,8 @@ function TripCard({ trip }: { trip: Trip }) {
                 size="icon"
                 variant="outline"
                 className="h-8 w-8"
-                disabled={guests <= 1}
-                onClick={() => setGuests((g) => Math.max(1, g - 1))}
+                disabled={guests <= minParty}
+                onClick={() => setGuests((g) => Math.max(minParty, g - 1))}
                 aria-label="Decrease guests"
               >
                 <Minus className="h-3.5 w-3.5" />

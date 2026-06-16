@@ -52,11 +52,11 @@ export interface TripEditorState {
   id?: string | null;
   title: string;
   description: string;
-  itinerary: string;
   start_time: string;
   duration_minutes: number | null;
   price_minor: number | null;
   per_extra_minor: number | null;
+  min_party_size: number | null;
   max_party_size: number | null;
   template_key?: string | null;
   target_species: string[];
@@ -78,11 +78,11 @@ const empty: TripEditorState = {
   id: null,
   title: "",
   description: "",
-  itinerary: "",
   start_time: "",
   duration_minutes: null,
   price_minor: null,
   per_extra_minor: 0,
+  min_party_size: 1,
   max_party_size: null,
   template_key: null,
   target_species: [],
@@ -163,11 +163,11 @@ export function TripFormDialog({ open, onOpenChange, initial }: Props) {
           id: form.id ?? null,
           title: form.title.trim(),
           description: form.description.trim(),
-          itinerary: form.itinerary.trim() || null,
           start_time: form.start_time || null,
           duration_minutes: form.duration_minutes!,
           price_minor: form.price_minor!,
           per_extra_minor: form.per_extra_minor ?? 0,
+          min_party_size: form.min_party_size ?? 1,
           max_party_size: form.max_party_size!,
           currency: captainCurrency,
           template_key: form.template_key ?? null,
@@ -273,7 +273,7 @@ export function TripFormDialog({ open, onOpenChange, initial }: Props) {
             </div>
           </section>
 
-          {/* 3. Description & Itinerary */}
+          {/* 3. Description */}
           <section className="space-y-4">
             <div className="space-y-2">
               <Label htmlFor="trip-desc">Trip description</Label>
@@ -285,20 +285,6 @@ export function TripFormDialog({ open, onOpenChange, initial }: Props) {
                 onChange={(e) => setForm({ ...form, description: e.target.value })}
                 placeholder="What's included, the experience, what to bring…"
               />
-            </div>
-            <div className="space-y-2">
-              <Label htmlFor="trip-itin">Itinerary</Label>
-              <Textarea
-                id="trip-itin"
-                rows={4}
-                maxLength={4000}
-                value={form.itinerary}
-                onChange={(e) => setForm({ ...form, itinerary: e.target.value })}
-                placeholder={"6:00 — Depart marina\n7:00 — First drift\n…"}
-              />
-              <p className="text-xs text-muted-foreground">
-                For reference only. Itineraries are subject to change due to weather conditions.
-              </p>
             </div>
           </section>
 
@@ -436,7 +422,7 @@ export function TripFormDialog({ open, onOpenChange, initial }: Props) {
                 </div>
               </div>
               <div className="space-y-2">
-                <Label htmlFor="trip-party">Max party size</Label>
+                <Label htmlFor="trip-party">Max trip size</Label>
                 <Input
                   id="trip-party"
                   type="number"
@@ -451,6 +437,25 @@ export function TripFormDialog({ open, onOpenChange, initial }: Props) {
                   placeholder="e.g. 6"
                 />
               </div>
+            </div>
+            <div className="space-y-2 max-w-[50%] pr-1.5">
+              <Label htmlFor="trip-min-party">Min trip size</Label>
+              <Input
+                id="trip-min-party"
+                type="number"
+                min={1}
+                max={50}
+                step="1"
+                value={form.min_party_size ?? ""}
+                onChange={(e) => {
+                  const n = parseInt(e.target.value, 10);
+                  setForm({ ...form, min_party_size: Number.isFinite(n) ? n : 1 });
+                }}
+                placeholder="e.g. 2"
+              />
+              <p className="text-xs text-muted-foreground">
+                The trip requires at least this many guests to run.
+              </p>
             </div>
             <div className="space-y-2">
               <Label htmlFor="trip-extra">Price per additional angler</Label>
@@ -485,7 +490,7 @@ export function TripFormDialog({ open, onOpenChange, initial }: Props) {
               <div className="rounded-lg border bg-background p-3 text-sm">
                 <div className="flex items-center justify-between">
                   <span className="text-muted-foreground">
-                    Total at full party ({form.max_party_size} guests)
+                    Total at full trip ({form.max_party_size} guests)
                   </span>
                   <span className="font-semibold">
                     {formatMoney(totalPreview, captainCurrency)}

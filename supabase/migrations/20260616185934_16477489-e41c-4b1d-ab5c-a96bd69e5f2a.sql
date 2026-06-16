@@ -1,0 +1,1 @@
+ALTER TABLE public.trip_packages ADD COLUMN IF NOT EXISTS min_party_size INTEGER NOT NULL DEFAULT 1 CHECK (min_party_size >= 1);

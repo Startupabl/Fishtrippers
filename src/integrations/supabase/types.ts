@@ -1545,6 +1545,7 @@ export type Database = {
           id: string
           itinerary: string | null
           max_party_size: number | null
+          min_party_size: number
           operator_id: string
           per_extra_minor: number
           price_minor: number
@@ -1570,6 +1571,7 @@ export type Database = {
           id?: string
           itinerary?: string | null
           max_party_size?: number | null
+          min_party_size?: number
           operator_id: string
           per_extra_minor?: number
           price_minor?: number
@@ -1595,6 +1597,7 @@ export type Database = {
           id?: string
           itinerary?: string | null
           max_party_size?: number | null
+          min_party_size?: number
           operator_id?: string
           per_extra_minor?: number
           price_minor?: number
