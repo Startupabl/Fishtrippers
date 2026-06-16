@@ -454,7 +454,7 @@ function MyListingPage() {
                       {t.duration_minutes ? `${t.duration_minutes} min` : "—"}
                     </TableCell>
                     <TableCell className="text-muted-foreground">
-                      {t.max_party_size ? `1–${t.max_party_size}` : "—"}
+                      {t.max_party_size ? `${t.min_party_size ?? 1}–${t.max_party_size}` : "—"}
                       {perExtra > 0 && t.max_party_size ? (
                         <span className="ml-1 text-xs">
                           (+{formatCurrency(perExtra, t.currency ?? "USD")}/person)
