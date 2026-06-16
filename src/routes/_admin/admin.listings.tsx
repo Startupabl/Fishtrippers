@@ -453,7 +453,11 @@ function ListingRowView({
           />
           <div
             className="group relative h-10 w-10 shrink-0"
-            title={`Created: ${new Date(row.created_at).toLocaleDateString()}`}
+            title={
+              cover
+                ? `Cover photo — set in Gallery · Created ${new Date(row.created_at).toLocaleDateString()}`
+                : `No cover photo yet · Created ${new Date(row.created_at).toLocaleDateString()}`
+            }
           >
             <div className="h-10 w-10 overflow-hidden rounded-md bg-muted">
               {cover ? (
@@ -465,7 +469,9 @@ function ListingRowView({
                 />
               ) : (
                 <div className="flex h-full w-full items-center justify-center">
-                  <span className="text-[10px] text-muted-foreground/50">—</span>
+                  <span className="text-[9px] leading-tight text-muted-foreground/60">
+                    No cover
+                  </span>
                 </div>
               )}
             </div>
