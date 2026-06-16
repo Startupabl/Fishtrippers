@@ -23,7 +23,7 @@ import { startNewMentorExpressListing } from "@/stores/useMentorExpressStore";
 import { ListingLiveCelebrationDialog } from "@/components/dashboard/ListingLiveCelebrationDialog";
 import { useProfileGuard } from "@/components/onboarding/ProfileCompletionGuard";
 import { useAuthStore } from "@/stores/useAuthStore";
-import { useHasActiveListing } from "@/hooks/useHasActiveListing";
+import { useHasActiveListing, useOperatorRoleLabel } from "@/hooks/useHasActiveListing";
 import { getMyStripeIds } from "@/lib/payouts.functions";
 import { SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar";
 import { WorkspaceSidebar, useWorkspaceMode } from "@/components/dashboard/WorkspaceSidebar";
