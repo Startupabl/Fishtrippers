@@ -15,8 +15,7 @@ export type StepId =
   | "boat_details"
   | "fishing_focus"
   | "trip_catalog"
-  | "booking_rules"
-  | "review";
+  | "booking_rules";
 
 export interface VesselDraftState {
   boat_type_id: string;
@@ -182,6 +181,9 @@ export const useOperatorOnboardingStore = create<OperatorOnboardingState>()(
             featuresMap[k] = typeof v === "string" ? v : "";
           }
         }
+        // Migrate any persisted "review" step from older sessions.
+        const cur = (useOperatorOnboardingStore.getState() as any).currentStep;
+        if (cur === "review") set({ currentStep: "booking_rules" } as any);
         set({
           business_type: operator.business_type ?? null,
           display_name: operator.display_name ?? "",

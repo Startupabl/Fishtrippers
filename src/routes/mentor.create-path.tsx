@@ -25,7 +25,6 @@ import { BoatDetailsStep } from "@/components/operator-onboarding/steps/BoatDeta
 import { FishingFocusStep } from "@/components/operator-onboarding/steps/FishingFocusStep";
 import { BookingRulesStep } from "@/components/operator-onboarding/steps/BookingRulesStep";
 import { TripCatalogStep } from "@/components/operator-onboarding/steps/TripCatalogStep";
-import { ReviewSubmitStep } from "@/components/operator-onboarding/steps/ReviewSubmitStep";
 
 import { Logo } from "@/components/brand/Logo";
 import { upsertOperatorDraft } from "@/lib/operators.functions";
@@ -48,7 +47,6 @@ const STEP_ORDER: StepId[] = [
   "fishing_focus",
   "trip_catalog",
   "booking_rules",
-  "review",
 ];
 
 function CreatePathPage() {
@@ -107,7 +105,6 @@ function CreatePathPage() {
       if (id === "fishing_focus") return focusOk ? "complete" : "upcoming";
       if (id === "trip_catalog") return tripCount > 0 ? "complete" : "upcoming";
       if (id === "booking_rules") return rulesOk ? "complete" : "upcoming";
-      if (id === "review") return "upcoming";
       return "upcoming";
     };
 
@@ -118,7 +115,6 @@ function CreatePathPage() {
       { id: "fishing_focus", label: "Fishing focus", status: status("fishing_focus") },
       { id: "trip_catalog", label: "Trip catalog", status: status("trip_catalog") },
       { id: "booking_rules", label: "Booking rules", status: status("booking_rules") },
-      { id: "review", label: "Review & submit", status: status("review") },
     ];
   }, [state, tripCount]);
 
@@ -198,6 +194,10 @@ function CreatePathPage() {
     if (nextIdx < STEP_ORDER.length) {
       goTo(STEP_ORDER[nextIdx]);
       scrollFormToTop();
+    } else {
+      // Final step finished → go to the preview, where the operator
+      // uploads gallery photos and submits for admin approval.
+      navigate({ to: "/operator/preview" });
     }
   };
   const back = () => {
@@ -283,7 +283,6 @@ function CreatePathPage() {
             {state.currentStep === "booking_rules" && (
               <BookingRulesStep onBack={back} onNext={advance} />
             )}
-            {state.currentStep === "review" && <ReviewSubmitStep onBack={back} />}
           </div>
         </main>
       </div>

@@ -1,7 +1,11 @@
-import { createFileRoute } from "@tanstack/react-router";
+import { useEffect, useMemo, useState } from "react";
+import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useServerFn } from "@tanstack/react-start";
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
+import { toast } from "sonner";
+
 import { getMyOperatorListing } from "@/lib/operator-listing.functions";
+import { getMyOperator, submitOperatorForReview } from "@/lib/operators.functions";
 import { PreviewBanner } from "@/components/operator-listing/PreviewBanner";
 import { HeaderGallery } from "@/components/operator-listing/HeaderGallery";
 import { SectionNav } from "@/components/operator-listing/SectionNav";
@@ -14,6 +18,14 @@ import { BoatInfoBlock } from "@/components/operator-listing/BoatInfoBlock";
 import { AmenitiesGrid } from "@/components/operator-listing/AmenitiesGrid";
 import { PoliciesBlock } from "@/components/operator-listing/PoliciesBlock";
 import { WhatsBitingStub } from "@/components/operator-listing/WhatsBitingStub";
+import { Button } from "@/components/ui/button";
+import { Loader2 } from "lucide-react";
+import {
+  useOperatorOnboardingStore,
+  isReadyToSubmit,
+} from "@/stores/useOperatorOnboardingStore";
+import { submitOperatorSchema } from "@/lib/operators.shared";
+import { ConnectPayoutsDialog } from "@/components/operator-onboarding/ConnectPayoutsDialog";
 
 export const Route = createFileRoute("/_authenticated/operator/preview")({
   head: () => ({
@@ -38,10 +50,32 @@ export const Route = createFileRoute("/_authenticated/operator/preview")({
 
 function OperatorPreviewPage() {
   const fetcher = useServerFn(getMyOperatorListing);
+  const fetchMine = useServerFn(getMyOperator);
+  const submit = useServerFn(submitOperatorForReview);
+  const navigate = useNavigate();
+  const qc = useQueryClient();
+
   const { data, isLoading } = useQuery({
     queryKey: ["operator-listing-preview"],
     queryFn: () => fetcher(),
   });
+
+  // Hydrate the onboarding store so we can validate readiness against the
+  // same rules the wizard uses.
+  const { data: server } = useQuery({
+    queryKey: ["my-operator"],
+    queryFn: () => fetchMine(),
+    staleTime: 60_000,
+  });
+  useEffect(() => {
+    if (server) useOperatorOnboardingStore.getState().hydrateFromServer(server);
+  }, [server]);
+
+  const state = useOperatorOnboardingStore();
+  const ready = useMemo(() => isReadyToSubmit(state), [state]);
+
+  const [submitting, setSubmitting] = useState(false);
+  const [payoutsOpen, setPayoutsOpen] = useState(false);
 
   if (isLoading) {
     return (
@@ -64,10 +98,66 @@ function OperatorPreviewPage() {
   const status = op?.moderation_status ?? "draft";
   const approved = status === "approved";
   const captainName = owner?.full_name || op?.display_name || "Captain";
+  const canSubmit = ready && (status === "draft" || status === "rejected");
+
+  const handleSubmit = async () => {
+    if (!canSubmit) {
+      toast.error("Finish all onboarding steps before submitting");
+      return;
+    }
+    setSubmitting(true);
+    try {
+      const payload = submitOperatorSchema.parse({
+        business_type: state.business_type,
+        display_name: state.display_name.trim(),
+        location: state.location.trim(),
+        about: state.about.trim(),
+        booking_type: state.booking_type,
+        advance_notice_hours: state.advance_notice_hours,
+        cancellation_policy: state.cancellation_policy,
+        primary_category: state.primary_category,
+        target_species: state.target_species,
+        vessel:
+          state.business_type === "charter"
+            ? {
+                boat_type_id: state.vessel.boat_type_id,
+                manufacturer: state.vessel.manufacturer.trim() || null,
+                year: state.vessel.year ? Number(state.vessel.year) : null,
+                length_ft: state.vessel.length_ft ? Number(state.vessel.length_ft) : null,
+                restored: state.vessel.restored,
+                num_engines: state.vessel.num_engines ? Number(state.vessel.num_engines) : null,
+                horsepower_per_engine: state.vessel.horsepower_per_engine
+                  ? Number(state.vessel.horsepower_per_engine)
+                  : null,
+                max_cruising_speed_knots: state.vessel.max_cruising_speed_knots
+                  ? Number(state.vessel.max_cruising_speed_knots)
+                  : null,
+                max_passenger_capacity: Number(state.vessel.max_passenger_capacity),
+                features: state.vessel.features,
+              }
+            : null,
+      });
+      await submit({ data: payload });
+      useOperatorOnboardingStore.getState().setSubmitted(true);
+      await qc.invalidateQueries({ queryKey: ["operator-listing-preview"] });
+      await qc.invalidateQueries({ queryKey: ["my-operator"] });
+      toast.success("Listing submitted for review");
+      setPayoutsOpen(true);
+    } catch (e: any) {
+      toast.error(e?.message || "Submission failed");
+    } finally {
+      setSubmitting(false);
+    }
+  };
 
   return (
     <div className="min-h-screen bg-background">
-      <PreviewBanner status={status} />
+      <PreviewBanner
+        status={status}
+        canSubmit={canSubmit}
+        submitting={submitting}
+        onSubmit={handleSubmit}
+      />
 
       <main className="mx-auto max-w-6xl px-4 pb-24">
         <div className="pt-6">
@@ -81,8 +171,8 @@ function OperatorPreviewPage() {
         <SectionNav topOffset={56} />
 
         {/* About + side rail */}
-        <div className="mt-8 grid gap-8 lg:grid-cols-[1fr_320px]">
-          <div className="space-y-8">
+        <div className="mt-8 grid gap-8 lg:grid-cols-[minmax(0,1fr)_320px]">
+          <div className="min-w-0 space-y-8">
             <AboutBlock
               businessType={op?.business_type}
               about={op?.about}
@@ -107,7 +197,40 @@ function OperatorPreviewPage() {
             )}
           </aside>
         </div>
+
+        {(status === "draft" || status === "rejected") && (
+          <div className="mt-12 rounded-2xl border bg-card p-6 text-center">
+            <h2 className="text-xl font-bold">Ready to go live?</h2>
+            <p className="mx-auto mt-2 max-w-md text-sm text-muted-foreground">
+              Upload your gallery above, then submit your listing for admin
+              review. We&apos;ll get back to you within 24 hours.
+            </p>
+            <Button
+              size="lg"
+              className="mt-4"
+              onClick={handleSubmit}
+              disabled={!canSubmit || submitting}
+            >
+              {submitting ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : null}
+              Submit for approval
+            </Button>
+            {!ready && (
+              <p className="mt-2 text-xs text-muted-foreground">
+                Complete every onboarding step to enable submission.
+              </p>
+            )}
+          </div>
+        )}
       </main>
+
+      <ConnectPayoutsDialog
+        open={payoutsOpen}
+        onOpenChange={(o) => {
+          setPayoutsOpen(o);
+          if (!o) navigate({ to: "/operator/preview" });
+        }}
+        onLater={() => setPayoutsOpen(false)}
+      />
     </div>
   );
 }
