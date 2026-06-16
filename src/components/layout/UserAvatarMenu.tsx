@@ -164,16 +164,16 @@ export function UserAvatarMenuItems({
         </DropdownMenuItem>
       )}
 
-      {/* Section 2 — Aide Zone */}
+      {/* Section 2 — Operator Zone */}
       <DropdownMenuSeparator />
       <DropdownMenuLabel className="px-3 pb-1 pt-2 text-xs font-semibold uppercase tracking-wide text-muted-foreground">
-        {hasListing ? "Aide Zone" : "Earn"}
+        {hasListing ? `${roleLabel} Zone` : "Earn"}
       </DropdownMenuLabel>
       {hasListing ? (
         <DropdownMenuItem asChild>
           <Link to="/dashboard" className="flex w-full cursor-pointer items-center gap-2 px-3 py-2">
             <LayoutDashboard className="size-4" style={{ color: DESIGN_SYSTEM.colors.leafGreen }} />
-            Go to Aide Dashboard
+            {roleLabel} Dashboard
           </Link>
         </DropdownMenuItem>
       ) : (
@@ -185,7 +185,7 @@ export function UserAvatarMenuItems({
             className="flex w-full cursor-pointer items-center gap-2 px-3 py-2"
           >
             <Sprout className="size-4" style={{ color: DESIGN_SYSTEM.colors.leafGreen }} />
-            Become an Aide
+            List Your Trip
           </Link>
         </DropdownMenuItem>
       )}
