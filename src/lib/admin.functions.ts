@@ -765,7 +765,7 @@ export const getAdminUserDetail = createServerFn({ method: "POST" })
       auth: authInfo,
       roles: (roles ?? []).map((r) => r.role),
       ipHistory: ipRows ?? [],
-      listings: journeys ?? [],
+      listings: [...operatorListings, ...(journeys ?? [])],
       bookings: (bookings ?? []).map((b) => ({
         ...b,
         course_title: b.course_id ? courseTitleMap.get(b.course_id) ?? null : null,
