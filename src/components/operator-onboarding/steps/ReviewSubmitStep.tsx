@@ -239,6 +239,15 @@ export function ReviewSubmitStep({ onBack }: Props) {
           {submitting ? "Submitting…" : "Submit for approval"}
         </Button>
       </div>
+
+      <ConnectPayoutsDialog
+        open={payoutsOpen}
+        onOpenChange={(o) => {
+          setPayoutsOpen(o);
+          if (!o) navigate({ to: "/operator/preview" });
+        }}
+        onLater={() => navigate({ to: "/operator/preview" })}
+      />
     </div>
   );
 }
