@@ -56,12 +56,13 @@ export type WorkspaceMode = "aide" | "learner" | "both" | "none" | "loading";
 export function useWorkspaceMode(): { mode: WorkspaceMode; title: string } {
   const { hasListing, isLoaded: listingLoaded } = useHasActiveListingStatus();
   const { hasOrders, isLoaded: ordersLoaded } = useHasLearnerOrdersStatus();
+  const { titleCase: roleLabel } = useOperatorRoleLabel();
 
   if (!listingLoaded || !ordersLoaded) {
     return { mode: "loading", title: "Workspace" };
   }
   if (hasListing && hasOrders) return { mode: "both", title: "My Dashboard" };
-  if (hasListing) return { mode: "aide", title: "Aide Workspace" };
+  if (hasListing) return { mode: "aide", title: `${roleLabel} Workspace` };
   if (hasOrders) return { mode: "learner", title: "Learner Hub" };
   return { mode: "none", title: "Get Started" };
 }
