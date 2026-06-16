@@ -175,9 +175,18 @@ export const saveDefaultDeparture = createServerFn({ method: "POST" })
     lat: number | null;
     lng: number | null;
     place_id: string | null;
+    city?: string | null;
+    state?: string | null;
+    country?: string | null;
   }) => input)
   .handler(async ({ data, context }) => {
     const { supabase, userId } = context;
+    const city = data.city ?? null;
+    const state = data.state ?? null;
+    // Back-fill the legacy free-text `location` column as "City, ST" when we have
+    // structured parts; otherwise fall back to the full address.
+    const locationCompat =
+      city && state ? `${city}, ${state}` : data.address || null;
     const { data: row, error } = await supabase
       .from("operators")
       .update({
@@ -185,6 +194,10 @@ export const saveDefaultDeparture = createServerFn({ method: "POST" })
         default_departure_lat: data.lat,
         default_departure_lng: data.lng,
         default_departure_place_id: data.place_id,
+        default_departure_city: city,
+        default_departure_state: state,
+        default_departure_country: data.country ?? null,
+        location: locationCompat,
       } as any)
       .eq("owner_id", userId)
       .select("*")
