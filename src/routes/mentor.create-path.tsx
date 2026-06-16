@@ -25,7 +25,7 @@ import { FishingFocusStep } from "@/components/operator-onboarding/steps/Fishing
 import { BookingRulesStep } from "@/components/operator-onboarding/steps/BookingRulesStep";
 import { TripCatalogStep } from "@/components/operator-onboarding/steps/TripCatalogStep";
 import { ReviewSubmitStep } from "@/components/operator-onboarding/steps/ReviewSubmitStep";
-import { SubmittedScreen } from "@/components/operator-onboarding/SubmittedScreen";
+
 import { Logo } from "@/components/brand/Logo";
 import { upsertOperatorDraft } from "@/lib/operators.functions";
 import { toast } from "sonner";
