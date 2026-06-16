@@ -295,7 +295,7 @@ function OpenInquiries() {
       return;
     }
     setReplyingId(ticket.id);
-    setReplyText(`Hi ${ticket.full_name.split(" ")[0]},\n\nThanks for reaching out to Lemonaidely Support — `);
+    setReplyText(`Hi ${ticket.full_name.split(" ")[0]},\n\nThanks for reaching out to FishTrippers Support — `);
   }
 
   function sendReply(ticket: typeof rows[number]) {

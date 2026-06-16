@@ -24,7 +24,7 @@ export const Route = createFileRoute("/journey-welcome")({
   validateSearch: zodValidator(searchSchema),
   head: () => ({
     meta: [
-      { title: "Welcome to your Course — Lemonaidely" },
+      { title: "Welcome to your Course — FishTrippers" },
       {
         name: "description",
         content:

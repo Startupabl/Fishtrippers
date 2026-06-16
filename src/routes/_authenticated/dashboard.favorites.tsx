@@ -11,7 +11,7 @@ import { useFavoritesStore } from "@/stores/useFavoritesStore";
 import { cn } from "@/lib/utils";
 
 export const Route = createFileRoute("/_authenticated/dashboard/favorites")({
-  head: () => ({ meta: [{ title: "Favorites — Lemonaidely™" }] }),
+  head: () => ({ meta: [{ title: "Favorites — FishTrippers™" }] }),
   component: FavoritesPage,
 });
 

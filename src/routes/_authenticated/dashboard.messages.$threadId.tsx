@@ -33,7 +33,7 @@ import { cn } from "@/lib/utils";
 import { AvatarLargePopover } from "@/components/profile/AvatarLargePopover";
 
 export const Route = createFileRoute("/_authenticated/dashboard/messages/$threadId")({
-  head: () => ({ meta: [{ title: "Conversation — Lemonaidely" }] }),
+  head: () => ({ meta: [{ title: "Conversation — FishTrippers" }] }),
   component: ThreadPage,
 });
 

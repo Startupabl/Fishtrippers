@@ -7,7 +7,7 @@ VALUES (
   'listing_rejected_notification',
   'Listing Rejected (Notification)',
   'Sent to an instructor when their course listing is sent back to draft with admin feedback.',
-  'Update regarding your Lemonaidely listing: {{listing_title}}',
+  'Update regarding your FishTrippers listing: {{listing_title}}',
   E'Hi {{user_name}},\n\nThank you for submitting your listing, {{listing_title}}! Our team reviewed your submission and needs a quick update before it can go live:\n\n"{{review_notes}}"\n\nPlease log into your dashboard, click the ''⚠️ Action Needed'' row to address this feedback, and resubmit!',
   ARRAY['user_name','listing_title','review_notes','edit_url'],
   true

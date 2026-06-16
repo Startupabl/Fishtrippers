@@ -1,5 +1,5 @@
 // =============================================================================
-// Content Security Firewall — centralized blacklist for Lemonaidely.
+// Content Security Firewall — centralized blacklist for FishTrippers.
 //
 // Update the arrays below to extend coverage. Two tiers:
 //   - EXACT_BLOCK: matched as whole-token, case-insensitive (after normalization).

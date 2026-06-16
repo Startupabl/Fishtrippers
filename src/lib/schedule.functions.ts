@@ -485,9 +485,9 @@ Your Aide has proposed a new time for "${cs.listing_title}":
   Proposed time:  ${fmtWhen(data.proposed_starts_at)} (${data.proposed_duration_minutes} min)
 
 Please review and accept or decline from your dashboard:
-https://lemonaidely.com/dashboard/upcoming-sessions
+https://fishtrippers.com/dashboard/upcoming-sessions
 
-— Lemonaidely`,
+— FishTrippers`,
             }).catch((e) => console.error("[requestReschedule email]", e));
           }),
         );
@@ -516,9 +516,9 @@ function buildIcs(args: {
   return [
     "BEGIN:VCALENDAR",
     "VERSION:2.0",
-    "PRODID:-//Lemonaidely//Schedule//EN",
+    "PRODID:-//FishTrippers//Schedule//EN",
     "BEGIN:VEVENT",
-    `UID:${args.uid}@lemonaidely.com`,
+    `UID:${args.uid}@fishtrippers.com`,
     `DTSTAMP:${fmt(new Date().toISOString())}`,
     `DTSTART:${fmt(args.startIso)}`,
     `DTEND:${fmt(args.endIso)}`,
@@ -627,14 +627,14 @@ ${learnerName} accepted your reschedule request for "${cs.listing_title}".
   New time: ${fmtWhen(pending.proposed_starts_at)} (${pending.proposed_duration_minutes} min)
 
 Open your schedule:
-https://lemonaidely.com/dashboard/upcoming-sessions
+https://fishtrippers.com/dashboard/upcoming-sessions
 
-— Lemonaidely`,
+— FishTrippers`,
           }).catch((e) => console.error("[respond email aide accept]", e));
         } else {
           const chatLink = threadId
-            ? `https://lemonaidely.com/dashboard/messages/${threadId}`
-            : `https://lemonaidely.com/dashboard/messages`;
+            ? `https://fishtrippers.com/dashboard/messages/${threadId}`
+            : `https://fishtrippers.com/dashboard/messages`;
           await sendEmail({
             to: aide.email,
             subject: `Reschedule declined — "${cs.listing_title}"`,
@@ -645,7 +645,7 @@ ${learnerName} declined your reschedule request for "${cs.listing_title}".
 Please message them directly to coordinate a new time:
 ${chatLink}
 
-— Lemonaidely`,
+— FishTrippers`,
           }).catch((e) => console.error("[respond email aide decline]", e));
         }
       }
@@ -675,7 +675,7 @@ ${gcal}
 iCal / .ics:
 data:text/calendar;charset=utf-8,${encodeURIComponent(ics)}
 
-— Lemonaidely`,
+— FishTrippers`,
           }).catch((e) => console.error("[respond email learner accept]", e));
         }
       }

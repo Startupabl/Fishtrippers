@@ -37,21 +37,21 @@ import { MissionMatchQuiz } from "@/components/onboarding/MissionMatchQuiz";
 export const Route = createFileRoute("/")({
   head: () => ({
     meta: [
-      { title: "Lemonaidely™ — Learn AI Tools 1:1 with an Expert Aide" },
+      { title: "FishTrippers™ — Learn AI Tools 1:1 with an Expert Aide" },
       {
         name: "description",
         content:
           "Get paired with an expert Aide for live, 1:1 Courses on ChatGPT, Midjourney, and more. AI Made Refreshing™.",
       },
-      { property: "og:title", content: "Lemonaidely™ — Learn AI Tools 1:1 with an Expert Aide" },
+      { property: "og:title", content: "FishTrippers™ — Learn AI Tools 1:1 with an Expert Aide" },
       {
         property: "og:description",
         content:
           "Get paired with an expert Aide for live, 1:1 Courses on ChatGPT, Midjourney, and more.",
       },
-      { property: "og:url", content: "https://lemonaidely.com/" },
+      { property: "og:url", content: "https://fishtrippers.com/" },
     ],
-    links: [{ rel: "canonical", href: "https://lemonaidely.com/" }],
+    links: [{ rel: "canonical", href: "https://fishtrippers.com/" }],
   }),
   component: Index,
 });
@@ -86,7 +86,7 @@ const PROCESS_STEPS = [
   },
 ] as const;
 
-function LemonaidelyProcess() {
+function FishTrippersProcess() {
   const [revealed, setRevealed] = useState(0);
   const refs = useRef<Array<HTMLLIElement | null>>([]);
 
@@ -324,8 +324,8 @@ function Index() {
 
   useEffect(() => {
     try {
-      if (localStorage.getItem("lemonaidely_quiz_open") === "1") {
-        localStorage.removeItem("lemonaidely_quiz_open");
+      if (localStorage.getItem("fishtrippers_quiz_open") === "1") {
+        localStorage.removeItem("fishtrippers_quiz_open");
         setQuizOpen(true);
       }
     } catch {
@@ -440,7 +440,7 @@ function Index() {
       <CategoryGrid />
 
       {/* THE LEMONAIDELY PROCESS */}
-      <LemonaidelyProcess />
+      <FishTrippersProcess />
 
 
       <Dialog open={videoOpen} onOpenChange={setVideoOpen}>
@@ -460,10 +460,10 @@ function Index() {
                 color: "#3DA35D",
               }}
             >
-              What is Lemonaidely?
+              What is FishTrippers?
             </DialogTitle>
             <DialogDescription className="sr-only">
-              Intro video about Lemonaidely.
+              Intro video about FishTrippers.
             </DialogDescription>
           </DialogHeader>
           {videoOpen && (
@@ -479,7 +479,7 @@ function Index() {
               >
                 <iframe
                   src="https://iframe.mediadelivery.net/embed/683194/aa5f7090-2922-4ba8-a2c8-0d11de0d09f2?autoplay=true&loop=false&muted=true&color=FF5733"
-                  title="What is Lemonaidely?"
+                  title="What is FishTrippers?"
                   style={{
                     position: "absolute",
                     top: 0,

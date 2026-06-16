@@ -36,7 +36,7 @@ type Timeframe = "all" | "this_month" | "last_month" | "this_year";
 type SortDir = "asc" | "desc";
 
 export const Route = createFileRoute("/_authenticated/dashboard/earnings")({
-  head: () => ({ meta: [{ title: "My Earnings — Lemonaidely" }] }),
+  head: () => ({ meta: [{ title: "My Earnings — FishTrippers" }] }),
   component: EarningsPage,
 });
 

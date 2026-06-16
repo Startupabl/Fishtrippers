@@ -13,7 +13,7 @@ export const Route = createFileRoute("/onboarding/learner/device")({
   },
   head: () => ({
     meta: [
-      { title: "Your device — Lemonaidely" },
+      { title: "Your device — FishTrippers" },
       {
         name: "description",
         content:

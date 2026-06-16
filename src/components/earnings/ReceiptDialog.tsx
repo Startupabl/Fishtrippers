@@ -60,7 +60,7 @@ export function ReceiptDialog({ order, aideName, onOpenChange, viewerRole = "aid
                 {/* Header */}
                 <div className="border-b border-border pb-4 mb-4">
                   <div className="text-2xl font-bold text-foreground" style={display}>
-                    Lemonaidely
+                    FishTrippers
                   </div>
                   <div className="text-sm text-muted-foreground mt-1">
                     Transaction Receipt

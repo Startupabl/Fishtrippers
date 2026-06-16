@@ -185,7 +185,7 @@ function BillingPage() {
             <CheckCircle2 className="mt-0.5 size-5 text-emerald-700" />
             <div className="flex-1 text-sm">
               <p className="font-semibold text-emerald-900">
-                Success! Your payout account is connected. Lemonaidely is
+                Success! Your payout account is connected. FishTrippers is
                 reviewing your new listing and will send you a status update
                 within 2 business days.
               </p>

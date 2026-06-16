@@ -294,7 +294,7 @@ function ProfileSettingsPage() {
           style={{ backgroundColor: DESIGN_SYSTEM.colors.leafGreen }}
         />
         <AlertDescription className="text-foreground text-[15px] leading-relaxed">
-          👋 Welcome to Lemonaidely! Before continuing to your dashboard, let's finish setting up your account. Having your correct name, photo, and time zone ensures your scheduled sessions and interactions sync perfectly. Fill out the quick details below to unlock your workspace!
+          👋 Welcome to FishTrippers! Before continuing to your dashboard, let's finish setting up your account. Having your correct name, photo, and time zone ensures your scheduled sessions and interactions sync perfectly. Fill out the quick details below to unlock your workspace!
         </AlertDescription>
         <Button
           type="button"

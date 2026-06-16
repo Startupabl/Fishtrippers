@@ -29,7 +29,7 @@ function isAllowed(pathname: string): boolean {
   // (flagged in localStorage from /onboarding/choice).
   if (pathname === "/") {
     try {
-      return localStorage.getItem("lemonaidely_quiz_open") === "1";
+      return localStorage.getItem("fishtrippers_quiz_open") === "1";
     } catch {
       return false;
     }

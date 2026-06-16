@@ -18,7 +18,7 @@ export function AuthLayout({ children }: AuthLayoutProps) {
       <aside className="relative hidden lg:block lg:w-1/2">
         <img
           src={loginHero}
-          alt="A learner in a yellow t-shirt and wireless headphones attending a live Lemonaidely AI class on her laptop."
+          alt="A learner in a yellow t-shirt and wireless headphones attending a live FishTrippers AI class on her laptop."
           width={1024}
           height={1536}
           className="absolute inset-0 h-full w-full object-cover"

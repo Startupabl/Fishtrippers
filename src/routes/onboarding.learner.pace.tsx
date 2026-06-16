@@ -14,7 +14,7 @@ export const Route = createFileRoute("/onboarding/learner/pace")({
   },
   head: () => ({
     meta: [
-      { title: "Your learning style — Lemonaidely" },
+      { title: "Your learning style — FishTrippers" },
       {
         name: "description",
         content:

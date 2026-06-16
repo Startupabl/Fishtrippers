@@ -19,7 +19,7 @@ import {
 import { cn } from "@/lib/utils";
 
 export const Route = createFileRoute("/_authenticated/dashboard/messages")({
-  head: () => ({ meta: [{ title: "Messages — Lemonaidely" }] }),
+  head: () => ({ meta: [{ title: "Messages — FishTrippers" }] }),
   component: MessagesLayout,
 });
 

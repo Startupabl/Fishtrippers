@@ -18,7 +18,7 @@ const lora = { fontFamily: DESIGN_SYSTEM.fonts.serif };
 const LEAF = DESIGN_SYSTEM.colors.leafGreen;
 
 const SHARE_TEXT =
-  "Just launched my new AI course on Lemonaidely! Check it out here:";
+  "Just launched my new AI course on FishTrippers! Check it out here:";
 
 export function ListingLiveCelebrationDialog() {
   const fetchUnseen = useServerFn(getUnseenLiveListings);

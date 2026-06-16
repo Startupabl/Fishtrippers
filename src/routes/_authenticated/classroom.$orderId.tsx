@@ -14,7 +14,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { useAuthStore } from "@/stores/useAuthStore";
 
 export const Route = createFileRoute("/_authenticated/classroom/$orderId")({
-  head: () => ({ meta: [{ title: "Live Classroom — Lemonaidely" }] }),
+  head: () => ({ meta: [{ title: "Live Classroom — FishTrippers" }] }),
   component: ClassroomPage,
 });
 

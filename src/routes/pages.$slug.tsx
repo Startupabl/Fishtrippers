@@ -9,7 +9,7 @@ import { ContactSupportForm } from "@/components/contact/ContactSupportForm";
 export const Route = createFileRoute("/pages/$slug")({
   head: ({ params }) => {
     const fallback = INFO_PAGES[params.slug];
-    const title = fallback ? `${fallback.title} — Lemonaidely` : "Lemonaidely";
+    const title = fallback ? `${fallback.title} — FishTrippers` : "FishTrippers";
     const description = fallback?.description ?? "";
     return {
       meta: [

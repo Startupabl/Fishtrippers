@@ -42,7 +42,7 @@ export function buildShareText(opts: {
   discount: PromoDiscount;
   publicUrl: string;
 }): string {
-  return `Use code ${opts.code} for ${formatDiscountLabel(opts.discount)} my new Lemonaidely path 🎉 ${opts.publicUrl}`;
+  return `Use code ${opts.code} for ${formatDiscountLabel(opts.discount)} my new FishTrippers path 🎉 ${opts.publicUrl}`;
 }
 
 export function applyDiscount(priceMinor: number, d: PromoDiscount): number {

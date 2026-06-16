@@ -21,7 +21,7 @@ export const Route = createFileRoute("/onboarding/learner/results")({
   },
   head: () => ({
     meta: [
-      { title: "Your perfect AI guides — Lemonaidely" },
+      { title: "Your perfect AI guides — FishTrippers" },
       {
         name: "description",
         content: "Your top 3 Aide matches, hand-picked from your answers.",

@@ -8,7 +8,7 @@ import { stripeRequest } from "@/lib/stripe.server";
 // silently redirect users to an attacker domain after Stripe Connect onboarding).
 // Read the canonical app origin from a trusted server env var only.
 function resolveOrigin(): string {
-  return process.env.APP_URL ?? "https://lemonaidely.com";
+  return process.env.APP_URL ?? "https://fishtrippers.com";
 }
 
 export const startStripeConnectOnboarding = createServerFn({ method: "POST" })

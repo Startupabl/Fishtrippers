@@ -33,7 +33,7 @@ const REASONS: { key: ReasonKey; label: string; text: string }[] = [
   {
     key: "external_links",
     label: "External Booking Links",
-    text: "We noticed your listing contains external booking or payment links. To protect our community and ensure seamless scheduling, all classes, communication, and payments must happen entirely through Lemonaidely.",
+    text: "We noticed your listing contains external booking or payment links. To protect our community and ensure seamless scheduling, all classes, communication, and payments must happen entirely through FishTrippers.",
   },
   {
     key: "unreasonable_pricing",

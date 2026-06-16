@@ -2,7 +2,7 @@ import { createFileRoute, Link, Outlet, redirect, useRouterState } from "@tansta
 import { cn } from "@/lib/utils";
 
 export const Route = createFileRoute("/_authenticated/settings")({
-  head: () => ({ meta: [{ title: "Settings — Lemonaidely™" }] }),
+  head: () => ({ meta: [{ title: "Settings — FishTrippers™" }] }),
   beforeLoad: ({ location }) => {
     if (location.pathname === "/settings" || location.pathname === "/settings/") {
       throw redirect({ to: "/settings/profile" });

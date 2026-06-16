@@ -8,13 +8,13 @@ import { GiftCheckoutDialog } from "@/components/gift/GiftCheckoutDialog";
 export const Route = createFileRoute("/gift")({
   head: () => ({
     meta: [
-      { title: "LemonAIdely Gift Cards — Lemonaidely" },
+      { title: "LemonAIdely Gift Cards — FishTrippers" },
       {
         name: "description",
         content:
           "Give the gift of a guided AI Course. LemonAIdely Gift Cards from $60 to $500 — redeemable for any 1-on-1 guided AI Course.",
       },
-      { property: "og:title", content: "LemonAIdely Gift Cards — Lemonaidely" },
+      { property: "og:title", content: "LemonAIdely Gift Cards — FishTrippers" },
       {
         property: "og:description",
         content:
@@ -192,7 +192,7 @@ function GiftPage() {
         <p className="mt-3 max-w-2xl text-lg text-muted-foreground">
           Pick a course size for the curious friend, the career-switcher, or
           the creative who wants a real expert in their corner. Each gift is
-          redeemable for any 1-on-1 guided AI Course on Lemonaidely.
+          redeemable for any 1-on-1 guided AI Course on FishTrippers.
         </p>
         <p
           className="mt-4 inline-flex items-center gap-2 rounded-full bg-info px-4 py-1.5 text-sm font-semibold text-white"

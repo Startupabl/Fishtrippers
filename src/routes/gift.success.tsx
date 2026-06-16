@@ -17,7 +17,7 @@ const searchSchema = z.object({
 export const Route = createFileRoute("/gift/success")({
   validateSearch: zodValidator(searchSchema),
   head: () => ({
-    meta: [{ title: "Mission Briefing — Lemonaidely" }],
+    meta: [{ title: "Mission Briefing — FishTrippers" }],
   }),
   component: GiftSuccessPage,
 });
@@ -76,7 +76,7 @@ function GiftSuccessPage() {
         </h1>
         <p className="mt-3 text-lg text-muted-foreground">
           {card.fromName ? `${card.fromName} sent you ` : "You've received "}
-          an {amount} Lemonaidely gift to spark your next AI journey.
+          an {amount} FishTrippers gift to spark your next AI journey.
         </p>
 
         {card.message && (
