@@ -314,6 +314,8 @@ export const submitOperatorSchema = z.object({
   cancellation_policy: z.enum(CANCELLATION_POLICIES),
   primary_category: z.enum(PRIMARY_CATEGORIES),
   target_species: z.array(z.string()).min(1).max(50),
+  fishing_environments: z.array(z.string()).min(1).max(FISHING_ENVIRONMENTS.length),
+  base_currency: z.string().trim().length(3).default("USD"),
   vessel: z
     .object({
       boat_type_id: z.string().trim().min(1).max(64),
