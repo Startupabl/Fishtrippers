@@ -63,6 +63,9 @@ export function ProfileStep({ onBack, onNext }: Props) {
   const location = useOperatorOnboardingStore((s) => s.location);
   const about = useOperatorOnboardingStore((s) => s.about);
   const setProfile = useOperatorOnboardingStore((s) => s.setProfile);
+  const defaultDeparture = useOperatorOnboardingStore((s) => s.default_departure);
+  const setDefaultDeparture = useOperatorOnboardingStore((s) => s.setDefaultDeparture);
+  const saveDefault = useServerFn(saveDefaultDeparture);
   const valid = useOperatorOnboardingStore(isProfileValid);
 
   const aboutCopy = ABOUT_COPY[business_type === "charter" ? "charter" : "guide"];
