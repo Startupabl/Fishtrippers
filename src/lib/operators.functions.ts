@@ -134,6 +134,8 @@ export const submitOperatorForReview = createServerFn({ method: "POST" })
           cancellation_policy: data.cancellation_policy,
           primary_category: data.primary_category as any,
           target_species: data.target_species,
+          fishing_environments: data.fishing_environments,
+          base_currency: data.base_currency ?? "USD",
           moderation_status: "pending",
           submitted_at: new Date().toISOString(),
         } as any,
