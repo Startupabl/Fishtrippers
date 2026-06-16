@@ -21,8 +21,11 @@ import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
 import { toast } from "sonner";
 import { upsertTrip } from "@/lib/trips.functions";
+import { saveDefaultDeparture } from "@/lib/operators.functions";
 import { DURATION_OPTIONS } from "@/lib/trips.shared";
 import { DeparturePointPicker } from "./DeparturePointPicker";
+import { Checkbox } from "@/components/ui/checkbox";
+import { useOperatorOnboardingStore } from "@/stores/useOperatorOnboardingStore";
 
 export interface TripEditorState {
   id?: string | null;
