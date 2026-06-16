@@ -50,7 +50,12 @@ export const listAdminListings = createServerFn({ method: "POST" })
     const { data: profiles } = await supabaseAdmin
       .from("profiles")
       .select("id, email, first_name, last_name, stripe_connect_id, is_payout_ready")
-      .in("id", ownerIds.length ? ownerIds : ["00000000-0000-0000-0000-000000000000"]);
+      .in(
+        "id",
+        ownerIds.length
+          ? (ownerIds as string[])
+          : ["00000000-0000-0000-0000-000000000000"],
+      );
     const profileMap = new Map((profiles ?? []).map((p) => [p.id, p]));
 
     // Map operator rows into the row shape the admin listings table expects.
