@@ -212,18 +212,6 @@ function CreatePathPage() {
     );
   }
 
-  if (state.submitted) {
-    return (
-      <div className="min-h-screen bg-background">
-        <header className="border-b">
-          <div className="mx-auto flex h-14 max-w-6xl items-center px-4">
-            <Logo />
-          </div>
-        </header>
-        <SubmittedScreen />
-      </div>
-    );
-  }
 
   return (
     <div className="min-h-screen bg-background">
