@@ -273,7 +273,7 @@ export function TripFormDialog({ open, onOpenChange, initial }: Props) {
             </div>
           </section>
 
-          {/* 3. Description & Itinerary */}
+          {/* 3. Description */}
           <section className="space-y-4">
             <div className="space-y-2">
               <Label htmlFor="trip-desc">Trip description</Label>
@@ -285,20 +285,6 @@ export function TripFormDialog({ open, onOpenChange, initial }: Props) {
                 onChange={(e) => setForm({ ...form, description: e.target.value })}
                 placeholder="What's included, the experience, what to bring…"
               />
-            </div>
-            <div className="space-y-2">
-              <Label htmlFor="trip-itin">Itinerary</Label>
-              <Textarea
-                id="trip-itin"
-                rows={4}
-                maxLength={4000}
-                value={form.itinerary}
-                onChange={(e) => setForm({ ...form, itinerary: e.target.value })}
-                placeholder={"6:00 — Depart marina\n7:00 — First drift\n…"}
-              />
-              <p className="text-xs text-muted-foreground">
-                For reference only. Itineraries are subject to change due to weather conditions.
-              </p>
             </div>
           </section>
 
