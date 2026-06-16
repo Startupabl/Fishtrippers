@@ -1,41 +1,38 @@
 ## Goal
 
-Make the admin/listings thumbnail (column 2) reflect the operator's selected Cover Photo, use the same image on public search cards, and let the operator switch the main photo at any time.
-
-## Current state (already wired)
-
-- `operator_photos.is_cover` + the `sync_operator_cover` trigger mirror the chosen cover into `operators.cover_image_url` (falls back to the first photo when nothing is starred).
-- `admin/listings` column 2 already renders `row.cover_image_url` as the 40×40 thumbnail next to the date tooltip — so once the trigger fires, the admin row updates on the next fetch.
-- `GalleryManager` already exposes a star button per photo that calls `setOperatorCoverPhoto`, plus delete and reorder.
-
-So the data path is in place. This plan closes the remaining UX/wiring gaps.
+Decouple target species from primary category. Replace the grid-of-pills picker in onboarding with a single searchable multi-select that renders selections as removable pills. On the public listing, keep the existing card grid but show only the centered species name (no icons, no fish photos, no background image).
 
 ## Changes
 
-1. **Admin thumbnail freshness**
-   - In `src/routes/_admin/admin.listings.tsx`, invalidate the admin listings query after a cover change is broadcast (listen on the `operator-photos-mine` query key or just refetch on focus — current setup already refetches on focus, so only add a small "Cover" hint tooltip on the thumbnail: `Cover photo — set in Gallery`).
-   - Add an empty-state placeholder copy "No cover yet" so admins can spot listings missing a hero image.
+### 1. New flat species catalog — `src/lib/operators.shared.ts`
+- Add `SPECIES_LIST: string[]` — the 97 species you provided, alphabetical, exactly as written (parentheses preserved, e.g. `"Bass (Largemouth)"`).
+- Add helper `speciesIdFromLabel(label)` → slug (lowercase, non-alphanumerics → `_`) and `speciesLabelFromId(id)` that reverses via lookup. Stored value in `operators.target_species` stays an array of slugs (keeps existing DB rows valid; old slugs that don't match the new list just render as their slug string fallback, same behavior as today).
+- Keep `SPECIES_CATALOG` and `speciesForCategory` exported but mark deprecated; `speciesLabel(id)` now resolves against the new flat list first, then falls back to the legacy catalog, then to the raw id.
+- No change to `primary_category` — it stays as its own independent field/section.
 
-2. **GalleryManager clarity**
-   - Show a visible "Cover" pill on the starred photo (in addition to the star icon) so operators clearly see which photo is the main one.
-   - Add a small helper line at the top of the dialog: "The Cover Photo is shown on search results and in the admin dashboard. Click the star on any photo to make it the main image."
-   - Confirm the first uploaded photo auto-becomes cover (already handled by trigger fallback) and surface that via toast on first upload: "Set as your Cover Photo — you can change this anytime."
+### 2. New onboarding control — `FishingFocusStep.tsx`
+Replace the entire "Target species" section (the search input + grouped pill grid, lines ~127–185) with a `SpeciesMultiSelect` component:
 
-3. **Search card wiring**
-   - The public search page (`src/routes/search.tsx`) currently lists journeys. When the operator search/result card is built, it must read `operators.cover_image_url` (the same field that drives the admin thumbnail) and render the 4:3 thumbnail rendition.
-   - For now: add a small `getOperatorCardImage(operator)` helper in `src/lib/operators.functions.ts` that returns `cover_image_url` (which already points at the 1200×900 `thumb_url` written by the upload pipeline), so any future operator card uses one source of truth.
+- Single `Input` labeled "Targeted Species" with placeholder "Start typing a species…".
+- As the captain types, a dropdown (Popover/Command from shadcn `cmdk`) lists matching species alphabetically — case-insensitive substring match, capped at ~50 results, excludes already-selected.
+- Enter or click adds the species. Selected species render below the input as removable pills (`Badge` with an `X` button).
+- Counter "N selected" stays.
+- Primary-category section is untouched; the dropdown shows the full list regardless of category.
 
-4. **Cache invalidation**
-   - In `GalleryManager`, after `setOperatorCoverPhoto` / `deleteOperatorPhoto` / `addOperatorPhoto`, also invalidate the `["admin-listings"]` and `["my-listing"]` query keys so the admin table and the owner's dashboard refresh without a manual reload.
+### 3. Remove fish-icon visuals on the listing — `SpeciesGrid.tsx`
+- Drop the `Fish` icon, `getSpeciesIcon` import, and the circular muted thumbnail.
+- Keep the same card grid (2/3/4 columns) but each card becomes a square (`aspect-square`) with the species name centered (`flex items-center justify-center`, `text-center`, `font-medium`).
+- No background image, no photo, no icon — just the centered label on the card surface.
+- This also resolves the earlier "grey circles hide the fish" concern; the icon assets remain on disk but are no longer imported here.
+
+### 4. No DB migration
+`operators.target_species` is already `string[]`. The existing data continues to work; new selections just use the new slug set.
+
+## Technical notes
+- The dropdown uses `Command` + `Popover` (already in shadcn ui).
+- Zod schema `target_species: z.array(z.string()).min(1).max(50)` is unchanged.
+- `mentor.create-path.tsx` and `operators.functions.ts` continue to pass `target_species` through untouched.
 
 ## Out of scope
-
-- Building the operator search results page (journeys-vs-operators search is a separate task).
-- Re-encoding or resizing existing cover images — pipeline already emits the 4:3 thumb.
-- Editing image-pipeline output shapes.
-
-## Files touched
-
-- `src/routes/_admin/admin.listings.tsx` — tooltip + empty-state copy on thumbnail.
-- `src/components/operator-listing/GalleryManager.tsx` — "Cover" pill, helper text, broader cache invalidation, first-upload toast.
-- `src/lib/operators.functions.ts` — add `getOperatorCardImage` helper (used by future search card).
+- No changes to search cards yet (that comes when we wire species into the search filter UI).
+- Not deleting the species-icon asset files — leaving them in case you want them elsewhere later.
