@@ -213,18 +213,61 @@ export function ProfileStep({ onBack, onNext }: Props) {
           />
         </div>
         <div className="space-y-2">
-          <Label htmlFor="location">Location / Base of Operations</Label>
-          <Input
-            id="location"
-            value={location}
-            onChange={(e) => setProfile({ location: e.target.value })}
-            placeholder="e.g. Destin, FL"
-            maxLength={200}
+          <Label htmlFor="meeting-point">Primary meeting point</Label>
+          <DeparturePointPicker
+            value={{
+              address: defaultDeparture.address,
+              lat: defaultDeparture.lat,
+              lng: defaultDeparture.lng,
+              placeId: defaultDeparture.place_id,
+              city: defaultDeparture.city,
+              state: defaultDeparture.state,
+              country: defaultDeparture.country,
+            }}
+            onChange={(v) => {
+              const nextCity = v.city ?? null;
+              const nextState = v.state ?? null;
+              setDefaultDeparture({
+                address: v.address,
+                lat: v.lat,
+                lng: v.lng,
+                place_id: v.placeId,
+                city: nextCity,
+                state: nextState,
+                country: v.country ?? null,
+              });
+              // Mirror "City, ST" into the legacy free-text field so back-compat
+              // displays keep working.
+              setProfile({
+                location:
+                  nextCity && nextState
+                    ? `${nextCity}, ${nextState}`
+                    : v.address,
+              });
+              // Persist immediately so trips in Step 5 can prefill from it.
+              if (v.address) {
+                saveDefault({
+                  data: {
+                    address: v.address,
+                    lat: v.lat,
+                    lng: v.lng,
+                    place_id: v.placeId,
+                    city: nextCity,
+                    state: nextState,
+                    country: v.country ?? null,
+                  },
+                }).catch((e) => {
+                  console.warn("Could not save default departure", e);
+                });
+              }
+            }}
           />
           <p className="text-xs text-muted-foreground">
-            City and state, marina name, or general region.
+            Search a marina, ramp, or address. We'll show this at the top of
+            your listing and pre-fill it for every trip you create.
           </p>
         </div>
+
 
         <div className="space-y-2">
           <div className="flex items-center gap-2">
