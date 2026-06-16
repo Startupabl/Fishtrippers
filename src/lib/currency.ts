@@ -15,7 +15,8 @@ export const SUPPORTED_CURRENCIES: CurrencyMeta[] = [
   { code: "AUD", label: "Australian Dollar", symbol: "$", flag: "🇦🇺" },
 ];
 
-// TODO: replace with live FX. Static V1 rates, base = USD.
+// Live FX rates (base = USD). Hydrated by useFxRates() on app boot;
+// falls back to these static values when the API is unreachable.
 export const FX_RATES: Record<CurrencyCode, number> = {
   USD: 1,
   EUR: 0.92,
@@ -23,6 +24,13 @@ export const FX_RATES: Record<CurrencyCode, number> = {
   CAD: 1.37,
   AUD: 1.52,
 };
+
+export function setLiveFxRates(rates: Record<string, number>) {
+  for (const code of Object.keys(FX_RATES) as CurrencyCode[]) {
+    const v = rates[code];
+    if (typeof v === "number" && v > 0) FX_RATES[code] = v;
+  }
+}
 
 export function convertMinor(
   amountMinor: number,
