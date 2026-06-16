@@ -39,6 +39,7 @@ export function ReviewSubmitStep({ onBack }: Props) {
   const navigate = useNavigate();
   const [submitting, setSubmitting] = useState(false);
   const [boatTypeName, setBoatTypeName] = useState<string>("");
+  const [payoutsOpen, setPayoutsOpen] = useState(false);
 
   useEffect(() => {
     let cancelled = false;
