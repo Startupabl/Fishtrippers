@@ -10,6 +10,7 @@ export const BOOKING_TYPES = ["instant", "inquiry"] as const;
 export type BookingType = (typeof BOOKING_TYPES)[number];
 
 export type AdvanceNoticeHours = 6 | 12 | 24 | 48;
+export const ADVANCE_NOTICE_OPTIONS: AdvanceNoticeHours[] = [6, 12, 24, 48];
 
 export const CANCELLATION_POLICIES = ["flexible", "moderate", "strict"] as const;
 export type CancellationPolicy = (typeof CANCELLATION_POLICIES)[number];

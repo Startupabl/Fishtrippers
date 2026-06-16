@@ -81,7 +81,7 @@ export const TRIP_TEMPLATES: Record<PrimaryCategory, TripTemplate[]> = {
       blurb: "Drift-boat or raft float, working seams and pools.",
     },
   ],
-  fly: [
+  fly_fishing: [
     {
       key: "fly_fundamentals",
       title: "Fly Fishing Fundamentals",
@@ -99,6 +99,20 @@ export const TRIP_TEMPLATES: Record<PrimaryCategory, TripTemplate[]> = {
       title: "Trout Stream Expedition",
       defaultDurationMinutes: 480,
       blurb: "Walk-and-wade trout fishing on a classic stream.",
+    },
+  ],
+  spearfishing: [
+    {
+      key: "spear_reef_day",
+      title: "Reef Spearfishing Day",
+      defaultDurationMinutes: 360,
+      blurb: "Free-dive spearfishing on inshore reefs.",
+    },
+    {
+      key: "spear_blue_water",
+      title: "Blue Water Spearfishing",
+      defaultDurationMinutes: 480,
+      blurb: "Open-water spearfishing for pelagic species.",
     },
   ],
 };
