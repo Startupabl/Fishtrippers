@@ -99,7 +99,7 @@ export function ReviewSubmitStep({ onBack }: Props) {
       await submit({ data: payload });
       setSubmitted(true);
       toast.success("Listing submitted for review");
-      navigate({ to: "/operator/preview" });
+      setPayoutsOpen(true);
     } catch (e: any) {
       toast.error(e?.message || "Submission failed");
     } finally {
