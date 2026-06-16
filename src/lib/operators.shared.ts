@@ -1,118 +1,108 @@
-// Shared schemas and constants for the operator onboarding flow.
-// Imported by both client UI and server functions.
-
+// Shared types, constants & Zod schemas used by both client and server functions.
 import { z } from "zod";
 
-export const BUSINESS_TYPES = ["charter", "guide"] as const;
-export const BOOKING_TYPES = ["instant", "inquiry"] as const;
-export const ADVANCE_NOTICE_OPTIONS = [6, 12, 24, 48] as const;
-export const CANCELLATION_POLICIES = ["flexible", "moderate", "strict"] as const;
-export const PRIMARY_CATEGORIES = ["offshore", "inshore", "freshwater", "fly"] as const;
+// ---------- Business / category enums ----------
 
+export const BUSINESS_TYPES = ["charter", "guide"] as const;
 export type BusinessType = (typeof BUSINESS_TYPES)[number];
+
+export const BOOKING_TYPES = ["instant", "inquiry"] as const;
 export type BookingType = (typeof BOOKING_TYPES)[number];
-export type AdvanceNoticeHours = (typeof ADVANCE_NOTICE_OPTIONS)[number];
+
+export type AdvanceNoticeHours = 6 | 12 | 24 | 48;
+
+export const CANCELLATION_POLICIES = ["flexible", "moderate", "strict"] as const;
 export type CancellationPolicy = (typeof CANCELLATION_POLICIES)[number];
+
+export const PRIMARY_CATEGORIES = [
+  "inshore",
+  "offshore",
+  "freshwater",
+  "fly_fishing",
+  "spearfishing",
+] as const;
 export type PrimaryCategory = (typeof PRIMARY_CATEGORIES)[number];
 
 export const PRIMARY_CATEGORY_DETAILS: Record<
   PrimaryCategory,
   { title: string; description: string }
 > = {
-  offshore: {
-    title: "Offshore",
-    description: "Big water, big game — tuna, marlin, mahi, deep sea trolling.",
-  },
   inshore: {
     title: "Inshore",
-    description: "Bays, flats and estuaries — redfish, snook, tarpon, trout.",
+    description: "Bays, flats, mangroves, and coastal waters within 9 miles.",
+  },
+  offshore: {
+    title: "Offshore / Deep Sea",
+    description: "Blue-water trips targeting pelagics, wrecks and reefs.",
   },
   freshwater: {
     title: "Freshwater",
-    description: "Lakes and rivers — bass, trout, walleye, pike, salmon.",
+    description: "Lakes, rivers and reservoirs — bass, trout, walleye, pike.",
   },
-  fly: {
+  fly_fishing: {
     title: "Fly Fishing",
-    description: "Fly rod specialist — trout streams, bonefish flats, permit.",
+    description: "Salt or freshwater on the fly.",
+  },
+  spearfishing: {
+    title: "Spearfishing",
+    description: "Free-diving or scuba-assisted spearfishing trips.",
   },
 };
 
+// Curated catalog of species (id + label + which categories it commonly appears under).
 export interface SpeciesItem {
   id: string;
   label: string;
-}
-export interface SpeciesGroup {
-  category: PrimaryCategory;
-  label: string;
-  items: SpeciesItem[];
+  categories: PrimaryCategory[];
 }
 
-export const SPECIES_CATALOG: SpeciesGroup[] = [
-  {
-    category: "offshore",
-    label: "Offshore",
-    items: [
-      { id: "tuna", label: "Tuna" },
-      { id: "marlin", label: "Marlin" },
-      { id: "mahi", label: "Mahi-Mahi" },
-      { id: "wahoo", label: "Wahoo" },
-      { id: "sailfish", label: "Sailfish" },
-      { id: "snapper", label: "Snapper" },
-      { id: "grouper", label: "Grouper" },
-      { id: "kingfish", label: "Kingfish" },
-    ],
-  },
-  {
-    category: "inshore",
-    label: "Inshore",
-    items: [
-      { id: "redfish", label: "Redfish" },
-      { id: "snook", label: "Snook" },
-      { id: "tarpon", label: "Tarpon" },
-      { id: "sea_trout", label: "Sea Trout" },
-      { id: "flounder", label: "Flounder" },
-    ],
-  },
-  {
-    category: "freshwater",
-    label: "Freshwater",
-    items: [
-      { id: "largemouth_bass", label: "Largemouth Bass" },
-      { id: "smallmouth_bass", label: "Smallmouth Bass" },
-      { id: "rainbow_trout", label: "Rainbow Trout" },
-      { id: "walleye", label: "Walleye" },
-      { id: "northern_pike", label: "Northern Pike" },
-      { id: "musky", label: "Musky" },
-      { id: "catfish", label: "Catfish" },
-      { id: "crappie", label: "Crappie" },
-      { id: "salmon", label: "Salmon" },
-    ],
-  },
-  {
-    category: "fly",
-    label: "Fly",
-    items: [
-      { id: "trout_fly", label: "Trout (Fly)" },
-      { id: "bonefish", label: "Bonefish" },
-      { id: "permit", label: "Permit" },
-      { id: "tarpon_fly", label: "Tarpon (Fly)" },
-    ],
-  },
+export const SPECIES_CATALOG: SpeciesItem[] = [
+  // Inshore
+  { id: "redfish", label: "Redfish", categories: ["inshore", "fly_fishing"] },
+  { id: "snook", label: "Snook", categories: ["inshore", "fly_fishing"] },
+  { id: "tarpon", label: "Tarpon", categories: ["inshore", "fly_fishing"] },
+  { id: "speckled_trout", label: "Speckled Trout", categories: ["inshore"] },
+  { id: "flounder", label: "Flounder", categories: ["inshore"] },
+  { id: "permit", label: "Permit", categories: ["inshore", "fly_fishing"] },
+  { id: "bonefish", label: "Bonefish", categories: ["inshore", "fly_fishing"] },
+  // Offshore
+  { id: "mahi", label: "Mahi-Mahi", categories: ["offshore"] },
+  { id: "tuna", label: "Tuna", categories: ["offshore"] },
+  { id: "marlin", label: "Marlin", categories: ["offshore"] },
+  { id: "sailfish", label: "Sailfish", categories: ["offshore"] },
+  { id: "wahoo", label: "Wahoo", categories: ["offshore"] },
+  { id: "grouper", label: "Grouper", categories: ["offshore"] },
+  { id: "snapper", label: "Snapper", categories: ["offshore"] },
+  { id: "kingfish", label: "Kingfish", categories: ["offshore"] },
+  { id: "amberjack", label: "Amberjack", categories: ["offshore"] },
+  { id: "swordfish", label: "Swordfish", categories: ["offshore"] },
+  // Freshwater
+  { id: "largemouth_bass", label: "Largemouth Bass", categories: ["freshwater"] },
+  { id: "smallmouth_bass", label: "Smallmouth Bass", categories: ["freshwater"] },
+  { id: "trout", label: "Trout", categories: ["freshwater", "fly_fishing"] },
+  { id: "walleye", label: "Walleye", categories: ["freshwater"] },
+  { id: "pike", label: "Northern Pike", categories: ["freshwater"] },
+  { id: "musky", label: "Musky", categories: ["freshwater"] },
+  { id: "catfish", label: "Catfish", categories: ["freshwater"] },
+  { id: "salmon", label: "Salmon", categories: ["freshwater", "fly_fishing"] },
+  { id: "panfish", label: "Panfish", categories: ["freshwater"] },
+  // Spearfishing common targets
+  { id: "hogfish", label: "Hogfish", categories: ["spearfishing", "offshore"] },
+  { id: "lionfish", label: "Lionfish", categories: ["spearfishing"] },
+  { id: "lobster", label: "Lobster", categories: ["spearfishing"] },
 ];
 
-export const ALL_SPECIES_IDS: string[] = SPECIES_CATALOG.flatMap((g) =>
-  g.items.map((i) => i.id),
-);
-
-export function speciesLabel(id: string): string {
-  for (const g of SPECIES_CATALOG) {
-    const m = g.items.find((i) => i.id === id);
-    if (m) return m.label;
-  }
-  return id;
+export function speciesForCategory(c: PrimaryCategory | null): SpeciesItem[] {
+  if (!c) return [];
+  return SPECIES_CATALOG.filter((s) => s.categories.includes(c));
 }
 
-// Feature catalog used by the boat features checklist.
+export function speciesLabel(id: string): string {
+  return SPECIES_CATALOG.find((s) => s.id === id)?.label ?? id;
+}
+
+// ---------- Boat feature catalog (with optional per-item comments) ----------
+
 export interface FeatureItem {
   id: string;
   label: string;
@@ -120,39 +110,61 @@ export interface FeatureItem {
 export interface FeatureGroup {
   id: string;
   label: string;
+  helper?: string;
   items: FeatureItem[];
 }
 
 export const BOAT_FEATURE_GROUPS: FeatureGroup[] = [
   {
     id: "navigation",
-    label: "Navigation & Electronics",
+    label: "Navigation",
+    helper: "Tell us about your boat's navigation gear.",
     items: [
       { id: "gps", label: "GPS" },
-      { id: "fish_finder", label: "Fish Finder" },
-      { id: "radar", label: "Radar" },
+      { id: "fishfinder", label: "Fishfinder" },
       { id: "vhf_radio", label: "VHF Radio" },
+      { id: "radar", label: "Radar" },
     ],
   },
   {
-    id: "amenities",
-    label: "Amenities",
+    id: "facilities",
+    label: "Facilities",
+    helper: "Which of these facilities are available?",
     items: [
-      { id: "toilet", label: "Toilet / Restroom" },
-      { id: "ac", label: "Air Conditioning" },
-      { id: "canopy", label: "Canopy / Shade" },
-      { id: "cooler", label: "Cooler / Ice Box" },
-      { id: "stereo", label: "Stereo / Bluetooth" },
+      { id: "flybridge", label: "Flybridge" },
+      { id: "toilet", label: "Toilet" },
+      { id: "shower", label: "Shower" },
+      { id: "kitchen", label: "Kitchen" },
+      { id: "bed", label: "Bed" },
+      { id: "wheelchair_accessible", label: "Wheelchair Accessible" },
     ],
   },
   {
-    id: "fishing_gear",
-    label: "Fishing Gear",
+    id: "features",
+    label: "Features",
+    helper: "Tell us about any additional features.",
     items: [
-      { id: "rods_reels", label: "Rods & Reels Provided" },
-      { id: "live_bait_well", label: "Live Bait Well" },
-      { id: "tackle", label: "Tackle Provided" },
+      { id: "air_conditioning", label: "Air Conditioning" },
+      { id: "multimedia_system", label: "Multimedia System" },
+      { id: "tv", label: "TV" },
+      { id: "wireless_trolling_motor", label: "Wireless Trolling Motor" },
+      { id: "refrigerator", label: "Refrigerator" },
+      { id: "ice_box", label: "Ice-Box" },
+    ],
+  },
+  {
+    id: "gear_and_crew",
+    label: "Gear & Crew",
+    helper: "What fishing gear do you use?",
+    items: [
+      { id: "fighting_chair", label: "Fighting Chair" },
+      { id: "first_mate", label: "First Mate" },
+      { id: "livewell", label: "Livewell/Live Bait Tank" },
+      { id: "spearfishing_equipment", label: "Spearfishing Equipment" },
+      { id: "snorkeling_equipment", label: "Snorkeling Equipment" },
+      { id: "outriggers", label: "Outriggers" },
       { id: "downriggers", label: "Downriggers" },
+      { id: "tuna_tubes", label: "Tuna Tubes" },
     ],
   },
 ];
@@ -160,6 +172,14 @@ export const BOAT_FEATURE_GROUPS: FeatureGroup[] = [
 export const ALL_FEATURE_IDS: string[] = BOAT_FEATURE_GROUPS.flatMap((g) =>
   g.items.map((i) => i.id),
 );
+
+export function featureLabel(id: string): string {
+  for (const g of BOAT_FEATURE_GROUPS) {
+    const m = g.items.find((i) => i.id === id);
+    if (m) return m.label;
+  }
+  return id;
+}
 
 // ---------- Zod schemas ----------
 
@@ -178,15 +198,24 @@ export const operatorDraftSchema = z.object({
   target_species: z.array(z.string()).optional().nullable(),
 });
 
+// features: { [featureId]: comment } — comment may be ""
+const featuresMapSchema = z.record(z.string(), z.string().max(50));
+
 export const vesselDraftSchema = z.object({
+  boat_type_id: z.string().trim().min(1).max(64).optional().nullable(),
   manufacturer: z.string().trim().max(120).optional().nullable(),
   model: z.string().trim().max(120).optional().nullable(),
   year: z.number().int().min(1900).max(2100).optional().nullable(),
   length_ft: z.number().positive().max(500).optional().nullable(),
+  restored: z.boolean().optional().nullable(),
+  num_engines: z.number().int().min(0).max(20).optional().nullable(),
+  horsepower_per_engine: z.number().int().min(0).max(10000).optional().nullable(),
+  max_cruising_speed_knots: z.number().min(0).max(200).optional().nullable(),
+  max_passenger_capacity: z.number().int().min(1).max(200).optional().nullable(),
+  features: featuresMapSchema.default({}),
+  // kept for backwards compat but no longer surfaced in UI
   engine_type: z.string().trim().max(120).optional().nullable(),
   engine_size: z.string().trim().max(120).optional().nullable(),
-  max_passenger_capacity: z.number().int().min(1).max(200).optional().nullable(),
-  features: z.array(z.string()).default([]),
 });
 
 export const upsertDraftInputSchema = z.object({
@@ -211,14 +240,16 @@ export const submitOperatorSchema = z.object({
   target_species: z.array(z.string()).min(1).max(50),
   vessel: z
     .object({
-      manufacturer: z.string().trim().min(1).max(120),
-      model: z.string().trim().min(1).max(120),
-      year: z.number().int().min(1900).max(2100),
-      length_ft: z.number().positive().max(500),
-      engine_type: z.string().trim().min(1).max(120),
-      engine_size: z.string().trim().min(1).max(120),
+      boat_type_id: z.string().trim().min(1).max(64),
+      manufacturer: z.string().trim().max(120).optional().nullable(),
+      year: z.number().int().min(1900).max(2100).optional().nullable(),
+      length_ft: z.number().positive().max(500).optional().nullable(),
+      restored: z.boolean().default(false),
+      num_engines: z.number().int().min(0).max(20).optional().nullable(),
+      horsepower_per_engine: z.number().int().min(0).max(10000).optional().nullable(),
+      max_cruising_speed_knots: z.number().min(0).max(200).optional().nullable(),
       max_passenger_capacity: z.number().int().min(1).max(200),
-      features: z.array(z.string()).default([]),
+      features: featuresMapSchema.default({}),
     })
     .optional()
     .nullable(),
