@@ -145,28 +145,6 @@ function TripCard({ trip }: { trip: Trip }) {
               <span className="line-clamp-2">{trip.departure_address}</span>
             </div>
           )}
-
-          {trip.itinerary && (
-            <div className="pt-1">
-              <button
-                type="button"
-                onClick={() => setShowItinerary((v) => !v)}
-                className="flex items-center gap-1 text-sm font-medium text-primary hover:underline"
-              >
-                Trip itinerary
-                <ChevronDown
-                  className={`h-3.5 w-3.5 transition-transform ${
-                    showItinerary ? "rotate-180" : ""
-                  }`}
-                />
-              </button>
-              {showItinerary && (
-                <p className="mt-2 whitespace-pre-line rounded-lg bg-muted/40 p-3 text-sm">
-                  {trip.itinerary}
-                </p>
-              )}
-            </div>
-          )}
         </div>
 
         {/* RIGHT: price + guests selector */}
