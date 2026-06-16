@@ -160,9 +160,16 @@ function TripCard({ trip }: { trip: Trip }) {
           </div>
 
           {perExtra > 0 && (
-            <div className="mt-1 text-xs text-muted-foreground">
-              + {formatCurrency(extraDisplay, display)} per extra guest
-            </div>
+            <p className="mt-2 text-xs text-muted-foreground">
+              The base price is for 1 person. After that it&apos;s{" "}
+              {formatCurrency(extraDisplay, display)} per each additional person per day.
+            </p>
+          )}
+
+          {minParty > 1 && (
+            <p className="mt-2 text-xs font-medium text-foreground">
+              This trip requires a minimum of {minParty} people.
+            </p>
           )}
 
           {/* Guests stepper */}
@@ -174,8 +181,8 @@ function TripCard({ trip }: { trip: Trip }) {
                 size="icon"
                 variant="outline"
                 className="h-8 w-8"
-                disabled={guests <= 1}
-                onClick={() => setGuests((g) => Math.max(1, g - 1))}
+                disabled={guests <= minParty}
+                onClick={() => setGuests((g) => Math.max(minParty, g - 1))}
                 aria-label="Decrease guests"
               >
                 <Minus className="h-3.5 w-3.5" />
