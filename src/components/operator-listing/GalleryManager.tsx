@@ -171,8 +171,12 @@ export function GalleryManager({ open, onOpenChange }: Props) {
             },
           });
 
+          const wasFirstEver = photos.length === 0 && i === 0;
           update({ status: "done", progress: 100 });
           refresh();
+          if (wasFirstEver) {
+            toast.success("Set as your Cover Photo — you can change this anytime.");
+          }
         } catch (e: any) {
           update({ status: "error", error: e?.message || "Upload failed" });
           toast.error(`${file.name}: ${e?.message || "Upload failed"}`);
