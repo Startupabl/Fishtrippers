@@ -74,6 +74,36 @@ export type Database = {
         }
         Relationships: []
       }
+      boat_types: {
+        Row: {
+          category_group: string
+          created_at: string
+          icon_url: string | null
+          id: string
+          sort_order: number
+          subcategory_name: string
+          updated_at: string
+        }
+        Insert: {
+          category_group: string
+          created_at?: string
+          icon_url?: string | null
+          id: string
+          sort_order?: number
+          subcategory_name: string
+          updated_at?: string
+        }
+        Update: {
+          category_group?: string
+          created_at?: string
+          icon_url?: string | null
+          id?: string
+          sort_order?: number
+          subcategory_name?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       booking_slots: {
         Row: {
           booking_id: string
@@ -1549,48 +1579,70 @@ export type Database = {
       }
       vessels: {
         Row: {
+          boat_type_id: string | null
           created_at: string
           engine_size: string | null
           engine_type: string | null
           features: Json
+          horsepower_per_engine: number | null
           id: string
           length_ft: number | null
           manufacturer: string | null
+          max_cruising_speed_knots: number | null
           max_passenger_capacity: number
           model: string | null
+          num_engines: number | null
           operator_id: string
+          restored: boolean
           updated_at: string
           year: number | null
         }
         Insert: {
+          boat_type_id?: string | null
           created_at?: string
           engine_size?: string | null
           engine_type?: string | null
           features?: Json
+          horsepower_per_engine?: number | null
           id?: string
           length_ft?: number | null
           manufacturer?: string | null
+          max_cruising_speed_knots?: number | null
           max_passenger_capacity: number
           model?: string | null
+          num_engines?: number | null
           operator_id: string
+          restored?: boolean
           updated_at?: string
           year?: number | null
         }
         Update: {
+          boat_type_id?: string | null
           created_at?: string
           engine_size?: string | null
           engine_type?: string | null
           features?: Json
+          horsepower_per_engine?: number | null
           id?: string
           length_ft?: number | null
           manufacturer?: string | null
+          max_cruising_speed_knots?: number | null
           max_passenger_capacity?: number
           model?: string | null
+          num_engines?: number | null
           operator_id?: string
+          restored?: boolean
           updated_at?: string
           year?: number | null
         }
         Relationships: [
+          {
+            foreignKeyName: "vessels_boat_type_id_fkey"
+            columns: ["boat_type_id"]
+            isOneToOne: false
+            referencedRelation: "boat_types"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "vessels_operator_id_fkey"
             columns: ["operator_id"]
