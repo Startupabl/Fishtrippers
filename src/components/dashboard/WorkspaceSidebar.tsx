@@ -120,7 +120,7 @@ export function WorkspaceSidebar() {
         {mode === "loading" ? null : mode === "both" ? (
           <>
             <SidebarGroup>
-              <SidebarGroupLabel>Aide Workspace</SidebarGroupLabel>
+              <SidebarGroupLabel>{useOperatorRoleLabel().titleCase} Workspace</SidebarGroupLabel>
               <SidebarGroupContent>
                 <ItemsMenu items={aideItems} />
               </SidebarGroupContent>
