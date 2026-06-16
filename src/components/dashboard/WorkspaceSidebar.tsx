@@ -20,7 +20,7 @@ import {
   SidebarMenuItem,
   useSidebar,
 } from "@/components/ui/sidebar";
-import { useHasActiveListingStatus } from "@/hooks/useHasActiveListing";
+import { useHasActiveListingStatus, useOperatorRoleLabel } from "@/hooks/useHasActiveListing";
 import { useHasLearnerOrdersStatus } from "@/hooks/useHasLearnerOrders";
 
 type Item = {
@@ -36,7 +36,7 @@ const aideItems: Item[] = [
   { title: "Dashboard", to: "/dashboard", icon: LayoutDashboard, exact: true },
   { title: "My Schedule", to: "/dashboard/upcoming-sessions", icon: Calendar },
   { title: "My Earnings", to: "/dashboard/earnings", icon: Wallet },
-  { title: "My Listings", to: "/dashboard/aide/courses", icon: BookOpen },
+  { title: "My Listing", to: "/dashboard/my-listing", icon: BookOpen },
   { title: "Lab Hours", to: "/settings/profile", hash: "lab-hours", icon: Clock },
 ];
 
@@ -47,7 +47,7 @@ const learnerItems: Item[] = [
 ];
 
 const guestItems: Item[] = [
-  { title: "Become an Aide", to: "/mentor/create-path", search: { new: true }, icon: Plus },
+  { title: "List Your Trip", to: "/mentor/create-path", search: { new: true }, icon: Plus },
   { title: "Book a Course", to: "/search", icon: Search },
 ];
 
@@ -56,12 +56,13 @@ export type WorkspaceMode = "aide" | "learner" | "both" | "none" | "loading";
 export function useWorkspaceMode(): { mode: WorkspaceMode; title: string } {
   const { hasListing, isLoaded: listingLoaded } = useHasActiveListingStatus();
   const { hasOrders, isLoaded: ordersLoaded } = useHasLearnerOrdersStatus();
+  const { titleCase: roleLabel } = useOperatorRoleLabel();
 
   if (!listingLoaded || !ordersLoaded) {
     return { mode: "loading", title: "Workspace" };
   }
   if (hasListing && hasOrders) return { mode: "both", title: "My Dashboard" };
-  if (hasListing) return { mode: "aide", title: "Aide Workspace" };
+  if (hasListing) return { mode: "aide", title: `${roleLabel} Workspace` };
   if (hasOrders) return { mode: "learner", title: "Learner Hub" };
   return { mode: "none", title: "Get Started" };
 }
@@ -109,6 +110,7 @@ function ItemsMenu({ items }: { items: Item[] }) {
 
 export function WorkspaceSidebar() {
   const { mode, title } = useWorkspaceMode();
+  const { titleCase: operatorLabel } = useOperatorRoleLabel();
 
   return (
     <Sidebar
@@ -119,7 +121,7 @@ export function WorkspaceSidebar() {
         {mode === "loading" ? null : mode === "both" ? (
           <>
             <SidebarGroup>
-              <SidebarGroupLabel>Aide Workspace</SidebarGroupLabel>
+              <SidebarGroupLabel>{operatorLabel} Workspace</SidebarGroupLabel>
               <SidebarGroupContent>
                 <ItemsMenu items={aideItems} />
               </SidebarGroupContent>

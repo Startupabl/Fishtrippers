@@ -1,58 +1,100 @@
-## Problem
-
-When a user finishes onboarding and clicks "Submit for review," the data is written to the `operators` table. The admin listings page (`/admin/listings`) reads from the legacy `journeys` table, so the submitted listing never appears. The page's columns (Priority, Listing #, Listing, Category, Aide, Status, Stripe Payout, Featured, Manage) also reference fields that don't exist on `operators` yet (`priority_order`, `featured`, `slug`, `course_id_slug`, `cover_image_url`, archived status).
+# Captain/Guide Dashboard — wire to operator listings
 
 ## Goal
 
-Keep the admin listings page UI and behavior identical, but back it with `operators` so submitted listings show up. Rename only the "Aide (User)" column header to "Captain/Guide".
+1. In the avatar dropdown, rename "Become an Aide" → **List Your Trip**, and when the user has an operator listing show **Captain Dashboard** (business) or **Guide Dashboard** (individual/guide) instead of "Go to Aide Dashboard".
+2. Apply the same Captain/Guide labelling across the workspace sidebar and dashboard header.
+3. Make the dashboard actually work for users who submitted an operator listing — the listing they just created should be visible and manageable from the front-end captain/guide dashboard.
 
-## Plan
+## Source of the Captain vs Guide label
 
-### 1. Database migration — extend `public.operators`
+The onboarding wizard stores `operators.business_type`:
+- `"charter"` (or any business type) → **Captain**
+- `"guide"` → **Guide**
+- fallback when unknown → **Captain**
 
-Add the columns the admin page needs:
-- `listing_number text UNIQUE` — short human ID (format `LST-XXXXXX`), auto-assigned by trigger like `orders.order_number`.
-- `slug text UNIQUE` — assigned on approval from `display_name`.
-- `featured boolean NOT NULL DEFAULT false`.
-- `priority_order integer NOT NULL DEFAULT 0`.
-- `status text NOT NULL DEFAULT 'draft'` with values `'draft' | 'published' | 'archived'` (mirrors journeys.status semantics; `submitForReview` keeps `status='draft'`, approval flips to `'published'`, admin archive flips to `'archived'`).
-- `cover_image_url text` — first image from `listing-portfolio` for that operator (set at submit/approve time; falls back to first trip cover).
+A new hook `useOperatorRoleLabel()` returns `{ role: "captain" | "guide", titleCase: "Captain" | "Guide" }` by reading the signed‑in user's `operators` row.
 
-Add the listing-number generator + trigger (sibling of `generate_unique_order_number`/`assign_order_number`) and an index on `(priority_order DESC, created_at DESC)`.
+## 1. Detect "has a listing" from operators, not journeys
 
-### 2. Server functions — replace journey-based admin fns with operator-based ones
+`src/hooks/useHasActiveListing.ts` currently counts rows in `journeys`. Replace its query with a count of `operators` rows for the signed‑in user where `status in ('draft','published')`. Return the same `{ hasListing, isLoaded }` shape so existing callers keep working.
 
-In `src/lib/admin.functions.ts`, add operator-scoped equivalents and switch the page to them:
-- `listAdminListings({ moderation })` — selects from `operators`, joins `profiles` for captain name/email + `stripe_connect_id`/`is_payout_ready`, derives `cover_image_url` (column or first trip image), maps `primary_category` → `category`, `display_name` → `title`, `listing_number` → `course_id_slug`-equivalent. Same filter semantics: `archived` → `status='archived'`; `all` → not archived; otherwise `moderation_status = filter`.
-- `setListingPriority`, `setListingFeatured`, `setListingModeration`, `archiveListing`, `restoreListing`, `hardDeleteListing` — same shape as the existing journey versions, but updating `operators`.
-- Approval path: when `moderation='approved'`, set `status='published'`, assign a `slug` if missing (slugify `display_name`, ensure uniqueness), keep payout-readiness gate (block approval if captain isn't payout-ready). Decline → `status='draft'` and store `moderation_note`. Restore → `status='draft'`, `moderation_status='pending'`.
+Add the new `useOperatorRoleLabel()` hook in the same file (single query, cached by `["my-operator", userId]`).
 
-Keep the legacy journey fns in place (other admin pages may still use them) — just stop calling them from `/admin/listings`.
+## 2. Dropdown menu (`src/components/layout/UserAvatarMenu.tsx`)
 
-### 3. Submit flow — fill the new fields
+- Section label: when `hasListing` show `"{Role} Zone"` (Captain Zone / Guide Zone), otherwise keep "Earn".
+- With listing → link label becomes `"{Role} Dashboard"` and points to `/dashboard`.
+- Without listing → label becomes **List Your Trip**, link target stays `/mentor/create-path?new=true`.
+- Sprout/LayoutDashboard icons preserved.
 
-In `submitOperatorForReview` (`src/lib/operators.functions.ts`):
-- Keep current upsert.
-- Backfill `cover_image_url` if null: list the user's `listing-portfolio/<userId>/` objects (or fall back to first `trip_packages.cover_image_url` for the operator), store the first public URL.
-- Leave `status='draft'`, `moderation_status='pending'`, `featured=false`, `priority_order=0` — the trigger assigns `listing_number`.
+## 3. Workspace sidebar (`src/components/dashboard/WorkspaceSidebar.tsx`)
 
-### 4. Admin listings page
+- `useWorkspaceMode()` returns `title: "{Role} Workspace"` when `hasListing`.
+- Sidebar group label: `"{Role} Workspace"`.
+- "Become an Aide" item (shown when no listing) → **List Your Trip**.
+- "My Listings" stays as the entry to the listing manager but points to a new route (see step 5).
 
-`src/routes/_admin/admin.listings.tsx`:
-- Swap server-fn imports to the new `listAdminListings` / `setListing*` / `archiveListing` / `restoreListing` / `hardDeleteListing`.
-- Rename the only column header `Aide (User)` → `Captain/Guide`.
-- Update the search input placeholder `"Search by aide…"` → `"Search by captain/guide…"` (single visible string; otherwise no UI changes).
-- Filter logic, sorting, priority editor, featured toggle, status pill, archive/restore/delete confirms, Stripe payout column — all stay the same; they now read the operator-derived fields.
-- The "view" Eye link points to `/operator/preview` (or `/c/<category>/<slug>` once approved) instead of the old journey URL.
+## 4. Dashboard shell (`src/routes/_authenticated/dashboard.tsx`)
 
-### 5. Verify
+- `head().title` → `"{Role} Dashboard — Lemonaidely"` (derived from the hook; default Captain on first paint to avoid SSR jitter).
+- Inline "Aide Dashboard" heading inside `AideDashboardHome` → `"{Role} Dashboard"`.
+- Rename internal helper variable `atAideRoot` → `atOperatorRoot` (cosmetic, keeps grep clean). No URL changes — `/dashboard` stays the same so existing links keep working.
 
-After the migration runs and the new code lands:
-- `Blue Ocean Charters` (the existing pending operator) appears under the Pending tab with a populated Listing #, captain name/email, Offshore category, and a cover image if portfolio uploads exist.
-- Approve/decline/archive/restore/feature/priority all work and persist.
-- The Aide rename is the only visible header change.
+## 5. Operator listing manager — new route `/dashboard/my-listing`
+
+Replace the legacy journey-based "My Listings" page (`dashboard.aide.courses.tsx`) with a new operator-centric page. We keep the file so the route id stays stable but rewrite the body.
+
+What it shows for the signed‑in operator:
+
+- Hero card: cover image (from `operators.cover_image_url`), display name, listing number, moderation badge (Pending / Approved / Action Needed with note), status pill (Draft / Published / Archived), payout-ready indicator.
+- Primary actions: **Edit listing** (→ `/mentor/create-path`, resumes the wizard from the stored draft), **Preview** (→ `/operator/preview`), **View public page** (when published, → `/c/<category>/<slug>`).
+- **Trip catalog** table: rows from `trip_packages` for this operator, with title, price, duration, status, and an Edit button that opens the existing `TripFormDialog` (reuse the component already used by the wizard).
+- **Vessels** mini-list from `vessels` (read‑only summary; edit links into the wizard step).
+- Empty state when no operator row exists yet: CTA "List Your Trip".
+
+Sidebar item label changes from "My Listings" to **My Listing** (singular) and `to` becomes `/dashboard/my-listing`. The old `/dashboard/aide/courses` route file is deleted along with the legacy "Courses" sidebar entry.
+
+## 6. Bookings / Earnings / Messages on the operator data model
+
+Per your "Full rebuild" choice, rewire these existing dashboard pages to operator listings instead of journeys.
+
+### 6a. Server functions (`src/lib/operator-dashboard.functions.ts`, new)
+
+All authenticated via `requireSupabaseAuth` and scoped to `operators.user_id = auth.uid()`:
+
+- `getMyOperator()` → `operators` row + business_type, status, moderation, cover, slug, payout flags.
+- `listMyTripPackages()` → trips for the operator.
+- `listMyBookings({ status?, range? })` → joins `bookings` with `trip_packages` filtered to this operator (resolving via `course_id`/`trip_package_id` — we'll add the resolver in this fn rather than schema changes).
+- `getMyEarningsSummary({ range })` → sums `bookings.aide_earnings`, payout status from `getMyStripeIds()`, grouped by trip.
+- `listMyMessageThreads()` → existing `message_threads` already keyed to mentor_id = user_id; just relabel the UI.
+
+No DB migration required for this pass — bookings/messages already reference the signed-in user via `aide_id`/`mentor_id`, which equals `operators.user_id`. We're swapping the *labels* and the *filter source* (trip catalog instead of journey catalog) but keeping the underlying rows.
+
+### 6b. Page wiring
+
+- `dashboard.bookings.tsx`: swap `listMyJourneysWithStats` filter dropdown for `listMyTripPackages`; columns unchanged.
+- `dashboard.earnings.tsx` + `dashboard.earnings-bookings.tsx`: same swap — group by trip package title; per-listing breakdown reads from the operator's trips.
+- `dashboard.messages.*`: header copy "Conversations with your learners" → "Conversations with your guests"; data fetch unchanged.
+- `dashboard.upcoming-sessions.tsx`: filter via `trip_packages` instead of `journeys`.
+
+Each page keeps its current URL and layout — only the data source and a few labels change.
+
+## 7. Cleanup
+
+- Remove the legacy `/dashboard/aide/courses` route file once `/dashboard/my-listing` is in place; remove `aideItems` entry pointing at it.
+- Strip "Aide" terminology from user‑visible strings in the dashboard (kept only as internal variable names where rename is risky).
+- No changes to admin pages, onboarding wizard, or public listing pages.
 
 ## Out of scope
 
-- No changes to the operator onboarding wizard, preview page, or listing URLs beyond the admin "view" link target.
-- The legacy `journeys`-based admin views (orders, other admin tabs) are untouched.
+- Renaming database tables or columns (e.g. `aide_earnings`, `mentor_id`) — internal only.
+- Re-architecting the legacy `journeys` system itself; we just stop surfacing it in the operator dashboard.
+- Notifications, reviews, or coupon tooling for trip packages (can follow up).
+
+## Technical notes
+
+- `useHasActiveListing` change is a one-file swap; existing call sites keep their boolean contract.
+- `useOperatorRoleLabel()` defaults to `"captain"` while loading so the dropdown/sidebar never flashes "Guide" for charter operators.
+- Trip edit reuses the existing `TripFormDialog` component (already standalone — just needs the operator id passed in).
+- All new server functions go in `src/lib/operator-dashboard.functions.ts` and use `requireSupabaseAuth`; no edits to `client.ts`/`auth-middleware.ts`.

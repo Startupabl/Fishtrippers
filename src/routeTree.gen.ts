@@ -62,6 +62,7 @@ import { Route as AuthenticatedSettingsBillingRouteImport } from './routes/_auth
 import { Route as AuthenticatedOperatorPreviewRouteImport } from './routes/_authenticated/operator.preview'
 import { Route as AuthenticatedDashboardUpcomingSessionsRouteImport } from './routes/_authenticated/dashboard.upcoming-sessions'
 import { Route as AuthenticatedDashboardMyOrdersRouteImport } from './routes/_authenticated/dashboard.my-orders'
+import { Route as AuthenticatedDashboardMyListingRouteImport } from './routes/_authenticated/dashboard.my-listing'
 import { Route as AuthenticatedDashboardMessagesRouteImport } from './routes/_authenticated/dashboard.messages'
 import { Route as AuthenticatedDashboardLearnerRouteImport } from './routes/_authenticated/dashboard.learner'
 import { Route as AuthenticatedDashboardFavoritesRouteImport } from './routes/_authenticated/dashboard.favorites'
@@ -373,6 +374,12 @@ const AuthenticatedDashboardMyOrdersRoute =
     path: '/my-orders',
     getParentRoute: () => AuthenticatedDashboardRoute,
   } as any)
+const AuthenticatedDashboardMyListingRoute =
+  AuthenticatedDashboardMyListingRouteImport.update({
+    id: '/my-listing',
+    path: '/my-listing',
+    getParentRoute: () => AuthenticatedDashboardRoute,
+  } as any)
 const AuthenticatedDashboardMessagesRoute =
   AuthenticatedDashboardMessagesRouteImport.update({
     id: '/messages',
@@ -640,6 +647,7 @@ export interface FileRoutesByFullPath {
   '/dashboard/favorites': typeof AuthenticatedDashboardFavoritesRoute
   '/dashboard/learner': typeof AuthenticatedDashboardLearnerRouteWithChildren
   '/dashboard/messages': typeof AuthenticatedDashboardMessagesRouteWithChildren
+  '/dashboard/my-listing': typeof AuthenticatedDashboardMyListingRoute
   '/dashboard/my-orders': typeof AuthenticatedDashboardMyOrdersRoute
   '/dashboard/upcoming-sessions': typeof AuthenticatedDashboardUpcomingSessionsRoute
   '/operator/preview': typeof AuthenticatedOperatorPreviewRoute
@@ -727,6 +735,7 @@ export interface FileRoutesByTo {
   '/dashboard/earnings-bookings': typeof AuthenticatedDashboardEarningsBookingsRoute
   '/dashboard/favorites': typeof AuthenticatedDashboardFavoritesRoute
   '/dashboard/learner': typeof AuthenticatedDashboardLearnerRouteWithChildren
+  '/dashboard/my-listing': typeof AuthenticatedDashboardMyListingRoute
   '/dashboard/my-orders': typeof AuthenticatedDashboardMyOrdersRoute
   '/dashboard/upcoming-sessions': typeof AuthenticatedDashboardUpcomingSessionsRoute
   '/operator/preview': typeof AuthenticatedOperatorPreviewRoute
@@ -820,6 +829,7 @@ export interface FileRoutesById {
   '/_authenticated/dashboard/favorites': typeof AuthenticatedDashboardFavoritesRoute
   '/_authenticated/dashboard/learner': typeof AuthenticatedDashboardLearnerRouteWithChildren
   '/_authenticated/dashboard/messages': typeof AuthenticatedDashboardMessagesRouteWithChildren
+  '/_authenticated/dashboard/my-listing': typeof AuthenticatedDashboardMyListingRoute
   '/_authenticated/dashboard/my-orders': typeof AuthenticatedDashboardMyOrdersRoute
   '/_authenticated/dashboard/upcoming-sessions': typeof AuthenticatedDashboardUpcomingSessionsRoute
   '/_authenticated/operator/preview': typeof AuthenticatedOperatorPreviewRoute
@@ -912,6 +922,7 @@ export interface FileRouteTypes {
     | '/dashboard/favorites'
     | '/dashboard/learner'
     | '/dashboard/messages'
+    | '/dashboard/my-listing'
     | '/dashboard/my-orders'
     | '/dashboard/upcoming-sessions'
     | '/operator/preview'
@@ -999,6 +1010,7 @@ export interface FileRouteTypes {
     | '/dashboard/earnings-bookings'
     | '/dashboard/favorites'
     | '/dashboard/learner'
+    | '/dashboard/my-listing'
     | '/dashboard/my-orders'
     | '/dashboard/upcoming-sessions'
     | '/operator/preview'
@@ -1091,6 +1103,7 @@ export interface FileRouteTypes {
     | '/_authenticated/dashboard/favorites'
     | '/_authenticated/dashboard/learner'
     | '/_authenticated/dashboard/messages'
+    | '/_authenticated/dashboard/my-listing'
     | '/_authenticated/dashboard/my-orders'
     | '/_authenticated/dashboard/upcoming-sessions'
     | '/_authenticated/operator/preview'
@@ -1540,6 +1553,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedDashboardMyOrdersRouteImport
       parentRoute: typeof AuthenticatedDashboardRoute
     }
+    '/_authenticated/dashboard/my-listing': {
+      id: '/_authenticated/dashboard/my-listing'
+      path: '/my-listing'
+      fullPath: '/dashboard/my-listing'
+      preLoaderRoute: typeof AuthenticatedDashboardMyListingRouteImport
+      parentRoute: typeof AuthenticatedDashboardRoute
+    }
     '/_authenticated/dashboard/messages': {
       id: '/_authenticated/dashboard/messages'
       path: '/messages'
@@ -1940,6 +1960,7 @@ interface AuthenticatedDashboardRouteChildren {
   AuthenticatedDashboardFavoritesRoute: typeof AuthenticatedDashboardFavoritesRoute
   AuthenticatedDashboardLearnerRoute: typeof AuthenticatedDashboardLearnerRouteWithChildren
   AuthenticatedDashboardMessagesRoute: typeof AuthenticatedDashboardMessagesRouteWithChildren
+  AuthenticatedDashboardMyListingRoute: typeof AuthenticatedDashboardMyListingRoute
   AuthenticatedDashboardMyOrdersRoute: typeof AuthenticatedDashboardMyOrdersRoute
   AuthenticatedDashboardUpcomingSessionsRoute: typeof AuthenticatedDashboardUpcomingSessionsRoute
   AuthenticatedDashboardListingsJourneyIdCouponsRoute: typeof AuthenticatedDashboardListingsJourneyIdCouponsRoute
@@ -1959,6 +1980,7 @@ const AuthenticatedDashboardRouteChildren: AuthenticatedDashboardRouteChildren =
       AuthenticatedDashboardLearnerRouteWithChildren,
     AuthenticatedDashboardMessagesRoute:
       AuthenticatedDashboardMessagesRouteWithChildren,
+    AuthenticatedDashboardMyListingRoute: AuthenticatedDashboardMyListingRoute,
     AuthenticatedDashboardMyOrdersRoute: AuthenticatedDashboardMyOrdersRoute,
     AuthenticatedDashboardUpcomingSessionsRoute:
       AuthenticatedDashboardUpcomingSessionsRoute,

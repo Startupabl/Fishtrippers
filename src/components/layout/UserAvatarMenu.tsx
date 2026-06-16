@@ -18,7 +18,7 @@ import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuthStore } from "@/stores/useAuthStore";
 import { useProfileStore } from "@/stores/useProfileStore";
-import { useHasActiveListing } from "@/hooks/useHasActiveListing";
+import { useHasActiveListing, useOperatorRoleLabel } from "@/hooks/useHasActiveListing";
 import { useHasLearnerOrders } from "@/hooks/useHasLearnerOrders";
 import { useCurrencyStore, type CurrencyCode } from "@/stores/useCurrencyStore";
 import { SUPPORTED_CURRENCIES, getCurrencyMeta } from "@/lib/currency";
@@ -130,6 +130,7 @@ export function UserAvatarMenuItems({
   onLogout: () => void | Promise<void>;
 }) {
   const isAdmin = useAuthStore((s) => s.user?.isAdmin ?? false);
+  const { titleCase: roleLabel } = useOperatorRoleLabel();
   const { guard, dialog: profileGuardDialog } = useProfileGuard();
   return (
     <>
@@ -163,16 +164,16 @@ export function UserAvatarMenuItems({
         </DropdownMenuItem>
       )}
 
-      {/* Section 2 — Aide Zone */}
+      {/* Section 2 — Operator Zone */}
       <DropdownMenuSeparator />
       <DropdownMenuLabel className="px-3 pb-1 pt-2 text-xs font-semibold uppercase tracking-wide text-muted-foreground">
-        {hasListing ? "Aide Zone" : "Earn"}
+        {hasListing ? `${roleLabel} Zone` : "Earn"}
       </DropdownMenuLabel>
       {hasListing ? (
         <DropdownMenuItem asChild>
           <Link to="/dashboard" className="flex w-full cursor-pointer items-center gap-2 px-3 py-2">
             <LayoutDashboard className="size-4" style={{ color: DESIGN_SYSTEM.colors.leafGreen }} />
-            Go to Aide Dashboard
+            {roleLabel} Dashboard
           </Link>
         </DropdownMenuItem>
       ) : (
@@ -184,7 +185,7 @@ export function UserAvatarMenuItems({
             className="flex w-full cursor-pointer items-center gap-2 px-3 py-2"
           >
             <Sprout className="size-4" style={{ color: DESIGN_SYSTEM.colors.leafGreen }} />
-            Become an Aide
+            List Your Trip
           </Link>
         </DropdownMenuItem>
       )}

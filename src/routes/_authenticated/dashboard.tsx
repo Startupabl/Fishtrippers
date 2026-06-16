@@ -23,7 +23,7 @@ import { startNewMentorExpressListing } from "@/stores/useMentorExpressStore";
 import { ListingLiveCelebrationDialog } from "@/components/dashboard/ListingLiveCelebrationDialog";
 import { useProfileGuard } from "@/components/onboarding/ProfileCompletionGuard";
 import { useAuthStore } from "@/stores/useAuthStore";
-import { useHasActiveListing } from "@/hooks/useHasActiveListing";
+import { useHasActiveListing, useOperatorRoleLabel } from "@/hooks/useHasActiveListing";
 import { getMyStripeIds } from "@/lib/payouts.functions";
 import { SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar";
 import { WorkspaceSidebar, useWorkspaceMode } from "@/components/dashboard/WorkspaceSidebar";
@@ -80,6 +80,7 @@ function AideDashboardHome() {
   const { guard, dialog: profileGuardDialog } = useProfileGuard();
   const user = useAuthStore((s) => s.user);
   const hasListing = useHasActiveListing();
+  const { titleCase: roleLabel } = useOperatorRoleLabel();
   const fetchIds = useServerFn(getMyStripeIds);
   const { data: stripeIds } = useQuery({
     queryKey: ["my-stripe-ids", user?.id],
@@ -107,10 +108,10 @@ function AideDashboardHome() {
       <div className="flex flex-wrap items-end justify-between gap-3">
         <div>
           <h1 className="text-3xl text-foreground md:text-4xl" style={lora}>
-            Aide Dashboard
+            {roleLabel} Dashboard
           </h1>
           <p className="mt-1 text-sm text-muted-foreground">
-            Your hub for managing Courses, availability, and earnings.
+            Your hub for managing your listing, schedule, and earnings.
           </p>
         </div>
         <Button
@@ -158,10 +159,10 @@ function AideDashboardHome() {
         </h2>
         <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
           <NavCard
-            to="/dashboard/aide/courses"
+            to="/dashboard/my-listing"
             icon={<BookOpen className="size-5" />}
-            title="My Listings"
-            desc="View, edit, and archive your listings."
+            title="My Listing"
+            desc="View, edit, and manage your listing and trips."
             tint={`${YELLOW}33`}
           />
           <NavCard
