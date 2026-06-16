@@ -201,6 +201,16 @@ export const operatorDraftSchema = z.object({
 // features: { [featureId]: comment } — comment may be ""
 const featuresMapSchema = z.record(z.string(), z.string().max(50));
 
+// Accept either the legacy array form or the new record form for features.
+const featuresInputSchema = z
+  .union([z.array(z.string()), featuresMapSchema])
+  .transform((v) =>
+    Array.isArray(v)
+      ? Object.fromEntries(v.map((id) => [id, ""]))
+      : v,
+  )
+  .default({} as Record<string, string>);
+
 export const vesselDraftSchema = z.object({
   boat_type_id: z.string().trim().min(1).max(64).optional().nullable(),
   manufacturer: z.string().trim().max(120).optional().nullable(),
@@ -212,7 +222,7 @@ export const vesselDraftSchema = z.object({
   horsepower_per_engine: z.number().int().min(0).max(10000).optional().nullable(),
   max_cruising_speed_knots: z.number().min(0).max(200).optional().nullable(),
   max_passenger_capacity: z.number().int().min(1).max(200).optional().nullable(),
-  features: featuresMapSchema.default({}),
+  features: featuresInputSchema,
   // kept for backwards compat but no longer surfaced in UI
   engine_type: z.string().trim().max(120).optional().nullable(),
   engine_size: z.string().trim().max(120).optional().nullable(),
