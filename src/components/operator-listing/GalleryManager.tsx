@@ -61,6 +61,8 @@ export function GalleryManager({ open, onOpenChange }: Props) {
   const refresh = useCallback(() => {
     qc.invalidateQueries({ queryKey: ["operator-photos-mine"] });
     qc.invalidateQueries({ queryKey: ["operator-listing-preview"] });
+    qc.invalidateQueries({ queryKey: ["my-operator-full"] });
+    qc.invalidateQueries({ queryKey: ["admin", "listings"] });
   }, [qc]);
 
   const delMut = useMutation({
@@ -169,8 +171,12 @@ export function GalleryManager({ open, onOpenChange }: Props) {
             },
           });
 
+          const wasFirstEver = photos.length === 0 && i === 0;
           update({ status: "done", progress: 100 });
           refresh();
+          if (wasFirstEver) {
+            toast.success("Set as your Cover Photo — you can change this anytime.");
+          }
         } catch (e: any) {
           update({ status: "error", error: e?.message || "Upload failed" });
           toast.error(`${file.name}: ${e?.message || "Upload failed"}`);
@@ -198,6 +204,8 @@ export function GalleryManager({ open, onOpenChange }: Props) {
           <DialogTitle>Manage gallery photos</DialogTitle>
           <DialogDescription>
             Up to {MAX_PHOTOS} photos, 5MB each. Images are auto-optimized.
+            The <strong>Cover Photo</strong> is shown on search results and in
+            the admin dashboard — click the star on any photo to make it the main image.
           </DialogDescription>
         </DialogHeader>
 

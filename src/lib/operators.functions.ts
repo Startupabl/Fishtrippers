@@ -205,3 +205,14 @@ export const saveDefaultDeparture = createServerFn({ method: "POST" })
     if (error) throw new Error(error.message);
     return { operator: row };
   });
+
+/**
+ * Single source of truth for the operator's search/admin card thumbnail.
+ * Returns the synced cover_image_url (driven by operator_photos.is_cover),
+ * which already points at the 4:3 thumb rendition produced by the upload pipeline.
+ */
+export function getOperatorCardImage(
+  operator: { cover_image_url?: string | null } | null | undefined,
+): string | null {
+  return operator?.cover_image_url ?? null;
+}
