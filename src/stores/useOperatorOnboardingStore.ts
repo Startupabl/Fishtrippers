@@ -33,6 +33,13 @@ export interface VesselDraftState {
   features: Record<string, string>;
 }
 
+export interface DefaultDeparture {
+  address: string;
+  lat: number | null;
+  lng: number | null;
+  place_id: string | null;
+}
+
 export interface OperatorOnboardingState {
   currentStep: StepId;
   setStep: (s: StepId) => void;
@@ -47,6 +54,7 @@ export interface OperatorOnboardingState {
   primary_category: PrimaryCategory | null;
   target_species: string[];
   vessel: VesselDraftState;
+  default_departure: DefaultDeparture;
 
   submitted: boolean;
 
@@ -62,6 +70,7 @@ export interface OperatorOnboardingState {
   }) => void;
   setPrimaryCategory: (c: PrimaryCategory) => void;
   toggleSpecies: (id: string) => void;
+  setDefaultDeparture: (d: DefaultDeparture) => void;
   setSubmitted: (v: boolean) => void;
   reset: () => void;
   hydrateFromServer: (input: { operator: any | null; vessel: any | null }) => void;
