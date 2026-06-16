@@ -80,6 +80,7 @@ function AideDashboardHome() {
   const { guard, dialog: profileGuardDialog } = useProfileGuard();
   const user = useAuthStore((s) => s.user);
   const hasListing = useHasActiveListing();
+  const { titleCase: roleLabel } = useOperatorRoleLabel();
   const fetchIds = useServerFn(getMyStripeIds);
   const { data: stripeIds } = useQuery({
     queryKey: ["my-stripe-ids", user?.id],
