@@ -59,6 +59,7 @@ import { Route as AuthenticatedSettingsSecurityRouteImport } from './routes/_aut
 import { Route as AuthenticatedSettingsProfileRouteImport } from './routes/_authenticated/settings.profile'
 import { Route as AuthenticatedSettingsPayoutsRouteImport } from './routes/_authenticated/settings.payouts'
 import { Route as AuthenticatedSettingsBillingRouteImport } from './routes/_authenticated/settings.billing'
+import { Route as AuthenticatedOperatorPreviewRouteImport } from './routes/_authenticated/operator.preview'
 import { Route as AuthenticatedDashboardUpcomingSessionsRouteImport } from './routes/_authenticated/dashboard.upcoming-sessions'
 import { Route as AuthenticatedDashboardMyOrdersRouteImport } from './routes/_authenticated/dashboard.my-orders'
 import { Route as AuthenticatedDashboardMessagesRouteImport } from './routes/_authenticated/dashboard.messages'
@@ -354,6 +355,12 @@ const AuthenticatedSettingsBillingRoute =
     path: '/billing',
     getParentRoute: () => AuthenticatedSettingsRoute,
   } as any)
+const AuthenticatedOperatorPreviewRoute =
+  AuthenticatedOperatorPreviewRouteImport.update({
+    id: '/operator/preview',
+    path: '/operator/preview',
+    getParentRoute: () => AuthenticatedRoute,
+  } as any)
 const AuthenticatedDashboardUpcomingSessionsRoute =
   AuthenticatedDashboardUpcomingSessionsRouteImport.update({
     id: '/upcoming-sessions',
@@ -635,6 +642,7 @@ export interface FileRoutesByFullPath {
   '/dashboard/messages': typeof AuthenticatedDashboardMessagesRouteWithChildren
   '/dashboard/my-orders': typeof AuthenticatedDashboardMyOrdersRoute
   '/dashboard/upcoming-sessions': typeof AuthenticatedDashboardUpcomingSessionsRoute
+  '/operator/preview': typeof AuthenticatedOperatorPreviewRoute
   '/settings/billing': typeof AuthenticatedSettingsBillingRoute
   '/settings/payouts': typeof AuthenticatedSettingsPayoutsRoute
   '/settings/profile': typeof AuthenticatedSettingsProfileRoute
@@ -721,6 +729,7 @@ export interface FileRoutesByTo {
   '/dashboard/learner': typeof AuthenticatedDashboardLearnerRouteWithChildren
   '/dashboard/my-orders': typeof AuthenticatedDashboardMyOrdersRoute
   '/dashboard/upcoming-sessions': typeof AuthenticatedDashboardUpcomingSessionsRoute
+  '/operator/preview': typeof AuthenticatedOperatorPreviewRoute
   '/settings/billing': typeof AuthenticatedSettingsBillingRoute
   '/settings/payouts': typeof AuthenticatedSettingsPayoutsRoute
   '/settings/profile': typeof AuthenticatedSettingsProfileRoute
@@ -813,6 +822,7 @@ export interface FileRoutesById {
   '/_authenticated/dashboard/messages': typeof AuthenticatedDashboardMessagesRouteWithChildren
   '/_authenticated/dashboard/my-orders': typeof AuthenticatedDashboardMyOrdersRoute
   '/_authenticated/dashboard/upcoming-sessions': typeof AuthenticatedDashboardUpcomingSessionsRoute
+  '/_authenticated/operator/preview': typeof AuthenticatedOperatorPreviewRoute
   '/_authenticated/settings/billing': typeof AuthenticatedSettingsBillingRoute
   '/_authenticated/settings/payouts': typeof AuthenticatedSettingsPayoutsRoute
   '/_authenticated/settings/profile': typeof AuthenticatedSettingsProfileRoute
@@ -904,6 +914,7 @@ export interface FileRouteTypes {
     | '/dashboard/messages'
     | '/dashboard/my-orders'
     | '/dashboard/upcoming-sessions'
+    | '/operator/preview'
     | '/settings/billing'
     | '/settings/payouts'
     | '/settings/profile'
@@ -990,6 +1001,7 @@ export interface FileRouteTypes {
     | '/dashboard/learner'
     | '/dashboard/my-orders'
     | '/dashboard/upcoming-sessions'
+    | '/operator/preview'
     | '/settings/billing'
     | '/settings/payouts'
     | '/settings/profile'
@@ -1081,6 +1093,7 @@ export interface FileRouteTypes {
     | '/_authenticated/dashboard/messages'
     | '/_authenticated/dashboard/my-orders'
     | '/_authenticated/dashboard/upcoming-sessions'
+    | '/_authenticated/operator/preview'
     | '/_authenticated/settings/billing'
     | '/_authenticated/settings/payouts'
     | '/_authenticated/settings/profile'
@@ -1505,6 +1518,13 @@ declare module '@tanstack/react-router' {
       fullPath: '/settings/billing'
       preLoaderRoute: typeof AuthenticatedSettingsBillingRouteImport
       parentRoute: typeof AuthenticatedSettingsRoute
+    }
+    '/_authenticated/operator/preview': {
+      id: '/_authenticated/operator/preview'
+      path: '/operator/preview'
+      fullPath: '/operator/preview'
+      preLoaderRoute: typeof AuthenticatedOperatorPreviewRouteImport
+      parentRoute: typeof AuthenticatedRoute
     }
     '/_authenticated/dashboard/upcoming-sessions': {
       id: '/_authenticated/dashboard/upcoming-sessions'
@@ -1979,6 +1999,7 @@ interface AuthenticatedRouteChildren {
   AuthenticatedSettingsRoute: typeof AuthenticatedSettingsRouteWithChildren
   AuthenticatedCertificateOrderIdRoute: typeof AuthenticatedCertificateOrderIdRoute
   AuthenticatedClassroomOrderIdRoute: typeof AuthenticatedClassroomOrderIdRoute
+  AuthenticatedOperatorPreviewRoute: typeof AuthenticatedOperatorPreviewRoute
 }
 
 const AuthenticatedRouteChildren: AuthenticatedRouteChildren = {
@@ -1988,6 +2009,7 @@ const AuthenticatedRouteChildren: AuthenticatedRouteChildren = {
   AuthenticatedSettingsRoute: AuthenticatedSettingsRouteWithChildren,
   AuthenticatedCertificateOrderIdRoute: AuthenticatedCertificateOrderIdRoute,
   AuthenticatedClassroomOrderIdRoute: AuthenticatedClassroomOrderIdRoute,
+  AuthenticatedOperatorPreviewRoute: AuthenticatedOperatorPreviewRoute,
 }
 
 const AuthenticatedRouteWithChildren = AuthenticatedRoute._addFileChildren(
