@@ -4,6 +4,7 @@ import { cn } from "@/lib/utils";
 import {
   PRIMARY_CATEGORIES,
   PRIMARY_CATEGORY_DETAILS,
+  FISHING_ENVIRONMENTS,
   type PrimaryCategory,
 } from "@/lib/operators.shared";
 import {
@@ -28,8 +29,10 @@ const CATEGORY_ICON: Record<PrimaryCategory, typeof Waves> = {
 export function FishingFocusStep({ onBack, onNext }: Props) {
   const primary_category = useOperatorOnboardingStore((s) => s.primary_category);
   const target_species = useOperatorOnboardingStore((s) => s.target_species);
+  const fishing_environments = useOperatorOnboardingStore((s) => s.fishing_environments);
   const setPrimaryCategory = useOperatorOnboardingStore((s) => s.setPrimaryCategory);
   const toggleSpecies = useOperatorOnboardingStore((s) => s.toggleSpecies);
+  const toggleEnvironment = useOperatorOnboardingStore((s) => s.toggleEnvironment);
   const valid = useOperatorOnboardingStore(isFishingFocusValid);
 
 
