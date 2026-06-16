@@ -5,7 +5,6 @@ import {
   CheckCircle2,
   MapPin,
   Minus,
-  ChevronDown,
   Fish,
 } from "lucide-react";
 import { Link } from "@tanstack/react-router";
