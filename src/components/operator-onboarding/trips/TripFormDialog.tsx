@@ -490,7 +490,7 @@ export function TripFormDialog({ open, onOpenChange, initial }: Props) {
               <div className="rounded-lg border bg-background p-3 text-sm">
                 <div className="flex items-center justify-between">
                   <span className="text-muted-foreground">
-                    Total at full party ({form.max_party_size} guests)
+                    Total at full trip ({form.max_party_size} guests)
                   </span>
                   <span className="font-semibold">
                     {formatMoney(totalPreview, captainCurrency)}
