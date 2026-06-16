@@ -17,6 +17,7 @@ import {
   isReadyToSubmit,
   useOperatorOnboardingStore,
 } from "@/stores/useOperatorOnboardingStore";
+import { ConnectPayoutsDialog } from "@/components/operator-onboarding/ConnectPayoutsDialog";
 
 interface Props {
   onBack: () => void;
@@ -38,6 +39,7 @@ export function ReviewSubmitStep({ onBack }: Props) {
   const navigate = useNavigate();
   const [submitting, setSubmitting] = useState(false);
   const [boatTypeName, setBoatTypeName] = useState<string>("");
+  const [payoutsOpen, setPayoutsOpen] = useState(false);
 
   useEffect(() => {
     let cancelled = false;
@@ -97,7 +99,7 @@ export function ReviewSubmitStep({ onBack }: Props) {
       await submit({ data: payload });
       setSubmitted(true);
       toast.success("Listing submitted for review");
-      navigate({ to: "/operator/preview" });
+      setPayoutsOpen(true);
     } catch (e: any) {
       toast.error(e?.message || "Submission failed");
     } finally {
@@ -237,6 +239,15 @@ export function ReviewSubmitStep({ onBack }: Props) {
           {submitting ? "Submitting…" : "Submit for approval"}
         </Button>
       </div>
+
+      <ConnectPayoutsDialog
+        open={payoutsOpen}
+        onOpenChange={(o) => {
+          setPayoutsOpen(o);
+          if (!o) navigate({ to: "/operator/preview" });
+        }}
+        onLater={() => navigate({ to: "/operator/preview" })}
+      />
     </div>
   );
 }
