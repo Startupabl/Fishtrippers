@@ -59,8 +59,8 @@ const TIERS: Tier[] = [
   },
 ];
 
-const LEAF_GREEN = "#3DA35D";
-const SUNNY_YELLOW = "#F5C518";
+const LEAF_GREEN = "#0A2540";
+const SUNNY_YELLOW = "#E8B547";
 
 function LemonadeVessel({
   vessel,

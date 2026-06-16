@@ -135,7 +135,7 @@ function FishTrippersProcess() {
             aria-hidden
           />
           <div
-            className="absolute left-0 top-7 -z-0 h-1 rounded-full bg-gradient-to-r from-[#F5C518] to-[#3DA35D] transition-[width] duration-700 ease-out"
+            className="absolute left-0 top-7 -z-0 h-1 rounded-full bg-gradient-to-r from-[#E8B547] to-[#0A2540] transition-[width] duration-700 ease-out"
             style={{ width: `${fillPct}%` }}
             aria-hidden
           />
@@ -155,7 +155,7 @@ function FishTrippersProcess() {
                   className={
                     "relative z-10 inline-flex size-14 items-center justify-center rounded-full ring-4 ring-background transition-all duration-500 " +
                     (active
-                      ? "bg-gradient-to-br from-[#F5C518] to-[#3DA35D] text-white shadow-lg"
+                      ? "bg-gradient-to-br from-[#E8B547] to-[#0A2540] text-white shadow-lg"
                       : "bg-muted text-muted-foreground grayscale")
                   }
                 >
@@ -166,7 +166,7 @@ function FishTrippersProcess() {
                 </span>
                 <h3
                   className="mt-2 min-h-[2lh] text-balance text-xl font-bold md:text-2xl"
-                  style={{ fontFamily: "Lora, ui-serif, Georgia, serif", color: "#3DA35D" }}
+                  style={{ fontFamily: "Lora, ui-serif, Georgia, serif", color: "#0A2540" }}
                 >
                   {s.title}
                 </h3>
@@ -185,7 +185,7 @@ function FishTrippersProcess() {
             aria-hidden
           />
           <div
-            className="absolute left-7 top-0 -z-0 w-1 rounded-full bg-gradient-to-b from-[#F5C518] to-[#3DA35D] transition-[height] duration-700 ease-out"
+            className="absolute left-7 top-0 -z-0 w-1 rounded-full bg-gradient-to-b from-[#E8B547] to-[#0A2540] transition-[height] duration-700 ease-out"
             style={{ height: `${fillPct}%` }}
             aria-hidden
           />
@@ -205,7 +205,7 @@ function FishTrippersProcess() {
                   className={
                     "relative z-10 inline-flex size-14 shrink-0 items-center justify-center rounded-full ring-4 ring-background transition-all duration-500 " +
                     (active
-                      ? "bg-gradient-to-br from-[#F5C518] to-[#3DA35D] text-white shadow-lg"
+                      ? "bg-gradient-to-br from-[#E8B547] to-[#0A2540] text-white shadow-lg"
                       : "bg-muted text-muted-foreground grayscale")
                   }
                 >
@@ -217,7 +217,7 @@ function FishTrippersProcess() {
                   </span>
                   <h3
                     className="mt-1 text-2xl font-bold"
-                    style={{ fontFamily: "Lora, ui-serif, Georgia, serif", color: "#3DA35D" }}
+                    style={{ fontFamily: "Lora, ui-serif, Georgia, serif", color: "#0A2540" }}
                   >
                     {s.title}
                   </h3>
@@ -271,7 +271,7 @@ function CategoryGrid() {
                     <Link
                       to="/search"
                       search={{ category: c.name } as never}
-                      className="group relative flex aspect-square flex-col items-center justify-end overflow-hidden rounded-2xl border border-border bg-[#3DA35D]/10 p-4 text-center shadow-sm transition-all duration-200 hover:scale-105 hover:border-[#F5C518] hover:shadow-md focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#F5C518]"
+                      className="group relative flex aspect-square flex-col items-center justify-end overflow-hidden rounded-2xl border border-border bg-[#0A2540]/10 p-4 text-center shadow-sm transition-all duration-200 hover:scale-105 hover:border-[#E8B547] hover:shadow-md focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#E8B547]"
                     >
                       <img
                         src={img}
@@ -446,14 +446,14 @@ function Index() {
             aria-hidden
             style={{
               background:
-                "linear-gradient(90deg, #F5C518 0%, #3DA35D 100%)",
+                "linear-gradient(90deg, #E8B547 0%, #0A2540 100%)",
             }}
           />
           <DialogHeader className="px-5 pt-4 pb-3 border-b border-border">
             <DialogTitle
               style={{
                 fontFamily: "Lora, ui-serif, Georgia, serif",
-                color: "#3DA35D",
+                color: "#0A2540",
               }}
             >
               What is FishTrippers?
