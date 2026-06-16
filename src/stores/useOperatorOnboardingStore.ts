@@ -200,6 +200,9 @@ export const useOperatorOnboardingStore = create<OperatorOnboardingState>()(
             lat: operator.default_departure_lat ?? null,
             lng: operator.default_departure_lng ?? null,
             place_id: operator.default_departure_place_id ?? null,
+            city: operator.default_departure_city ?? null,
+            state: operator.default_departure_state ?? null,
+            country: operator.default_departure_country ?? null,
           },
           vessel: vessel
             ? {
