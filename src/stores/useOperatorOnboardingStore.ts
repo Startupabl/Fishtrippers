@@ -55,6 +55,8 @@ export interface OperatorOnboardingState {
   cancellation_policy: CancellationPolicy | null;
   primary_category: PrimaryCategory | null;
   target_species: string[];
+  fishing_environments: string[];
+  base_currency: string;
   vessel: VesselDraftState;
   default_departure: DefaultDeparture;
 
@@ -72,6 +74,8 @@ export interface OperatorOnboardingState {
   }) => void;
   setPrimaryCategory: (c: PrimaryCategory) => void;
   toggleSpecies: (id: string) => void;
+  toggleEnvironment: (id: string) => void;
+  setBaseCurrency: (c: string) => void;
   setDefaultDeparture: (d: DefaultDeparture) => void;
   setSubmitted: (v: boolean) => void;
   reset: () => void;
