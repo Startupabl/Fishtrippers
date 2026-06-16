@@ -204,6 +204,8 @@ export function GalleryManager({ open, onOpenChange }: Props) {
           <DialogTitle>Manage gallery photos</DialogTitle>
           <DialogDescription>
             Up to {MAX_PHOTOS} photos, 5MB each. Images are auto-optimized.
+            The <strong>Cover Photo</strong> is shown on search results and in
+            the admin dashboard — click the star on any photo to make it the main image.
           </DialogDescription>
         </DialogHeader>
 
