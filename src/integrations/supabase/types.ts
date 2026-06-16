@@ -856,6 +856,7 @@ export type Database = {
         Row: {
           about: string | null
           advance_notice_hours: number | null
+          base_currency: string
           booking_type:
             | Database["public"]["Enums"]["operator_booking_type"]
             | null
@@ -876,6 +877,7 @@ export type Database = {
           default_departure_state: string | null
           display_name: string | null
           featured: boolean
+          fishing_environments: string[]
           id: string
           listing_number: string | null
           location: string | null
@@ -895,6 +897,7 @@ export type Database = {
         Insert: {
           about?: string | null
           advance_notice_hours?: number | null
+          base_currency?: string
           booking_type?:
             | Database["public"]["Enums"]["operator_booking_type"]
             | null
@@ -915,6 +918,7 @@ export type Database = {
           default_departure_state?: string | null
           display_name?: string | null
           featured?: boolean
+          fishing_environments?: string[]
           id?: string
           listing_number?: string | null
           location?: string | null
@@ -934,6 +938,7 @@ export type Database = {
         Update: {
           about?: string | null
           advance_notice_hours?: number | null
+          base_currency?: string
           booking_type?:
             | Database["public"]["Enums"]["operator_booking_type"]
             | null
@@ -954,6 +959,7 @@ export type Database = {
           default_departure_state?: string | null
           display_name?: string | null
           featured?: boolean
+          fishing_environments?: string[]
           id?: string
           listing_number?: string | null
           location?: string | null
@@ -1535,11 +1541,17 @@ export type Database = {
           departure_place_id: string | null
           description: string | null
           duration_minutes: number
+          environments: string[]
           id: string
+          itinerary: string | null
           max_party_size: number | null
           operator_id: string
+          per_extra_minor: number
           price_minor: number
+          start_time: string | null
           status: Database["public"]["Enums"]["trip_package_status"]
+          target_species: string[]
+          techniques: string[]
           template_key: string | null
           title: string
           updated_at: string
@@ -1554,11 +1566,17 @@ export type Database = {
           departure_place_id?: string | null
           description?: string | null
           duration_minutes: number
+          environments?: string[]
           id?: string
+          itinerary?: string | null
           max_party_size?: number | null
           operator_id: string
+          per_extra_minor?: number
           price_minor?: number
+          start_time?: string | null
           status?: Database["public"]["Enums"]["trip_package_status"]
+          target_species?: string[]
+          techniques?: string[]
           template_key?: string | null
           title: string
           updated_at?: string
@@ -1573,11 +1591,17 @@ export type Database = {
           departure_place_id?: string | null
           description?: string | null
           duration_minutes?: number
+          environments?: string[]
           id?: string
+          itinerary?: string | null
           max_party_size?: number | null
           operator_id?: string
+          per_extra_minor?: number
           price_minor?: number
+          start_time?: string | null
           status?: Database["public"]["Enums"]["trip_package_status"]
+          target_species?: string[]
+          techniques?: string[]
           template_key?: string | null
           title?: string
           updated_at?: string
