@@ -192,6 +192,12 @@ export const useOperatorOnboardingStore = create<OperatorOnboardingState>()(
             ? operator.target_species
             : [],
           submitted: !!operator.submitted_at,
+          default_departure: {
+            address: operator.default_departure_address ?? "",
+            lat: operator.default_departure_lat ?? null,
+            lng: operator.default_departure_lng ?? null,
+            place_id: operator.default_departure_place_id ?? null,
+          },
           vessel: vessel
             ? {
                 boat_type_id: vessel.boat_type_id ?? "",
