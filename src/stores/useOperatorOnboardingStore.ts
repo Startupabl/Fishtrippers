@@ -243,7 +243,7 @@ export function isProfileValid(s: OperatorOnboardingState): boolean {
   const aboutLen = s.about.trim().length;
   return (
     s.display_name.trim().length >= 2 &&
-    s.location.trim().length >= 2 &&
+    s.default_departure.address.trim().length >= 2 &&
     aboutLen >= 150 &&
     aboutLen <= 1000
   );
