@@ -194,6 +194,10 @@ function CreatePathPage() {
     if (nextIdx < STEP_ORDER.length) {
       goTo(STEP_ORDER[nextIdx]);
       scrollFormToTop();
+    } else {
+      // Final step finished → go to the preview, where the operator
+      // uploads gallery photos and submits for admin approval.
+      navigate({ to: "/operator/preview" });
     }
   };
   const back = () => {
@@ -279,7 +283,6 @@ function CreatePathPage() {
             {state.currentStep === "booking_rules" && (
               <BookingRulesStep onBack={back} onNext={advance} />
             )}
-            {state.currentStep === "review" && <ReviewSubmitStep onBack={back} />}
           </div>
         </main>
       </div>
