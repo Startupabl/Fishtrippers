@@ -31,7 +31,7 @@ const display = { fontFamily: "Montserrat, system-ui, sans-serif" };
 export const Route = createFileRoute(
   "/_authenticated/dashboard/learner/purchases",
 )({
-  head: () => ({ meta: [{ title: "Purchase History — Lemonaidely" }] }),
+  head: () => ({ meta: [{ title: "Purchase History — FishTrippers" }] }),
   component: LearnerPurchases,
 });
 

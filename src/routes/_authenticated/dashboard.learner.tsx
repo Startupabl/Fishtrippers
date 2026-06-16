@@ -13,7 +13,7 @@ const LEAF = DESIGN_SYSTEM.colors.leafGreen;
 const YELLOW = DESIGN_SYSTEM.colors.sunnyYellow;
 
 export const Route = createFileRoute("/_authenticated/dashboard/learner")({
-  head: () => ({ meta: [{ title: "My Learning Hub — Lemonaidely" }] }),
+  head: () => ({ meta: [{ title: "My Learning Hub — FishTrippers" }] }),
   component: LearnerWorkspace,
 });
 

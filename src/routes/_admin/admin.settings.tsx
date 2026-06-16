@@ -2,7 +2,7 @@ import { createFileRoute, Link, Outlet, useRouterState } from "@tanstack/react-r
 import { Tags, Mail, ChevronRight, FileText } from "lucide-react";
 import { Card } from "@/components/ui/card";
 
-const GREEN = "#3DA35D";
+const GREEN = "#0A2540";
 
 export const Route = createFileRoute("/_admin/admin/settings")({
   component: SettingsLayout,

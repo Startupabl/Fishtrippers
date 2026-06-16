@@ -9,10 +9,10 @@ import { toast } from "sonner";
 export const Route = createFileRoute("/forgot-password")({
   head: () => ({
     meta: [
-      { title: "Reset your password — Lemonaidely" },
+      { title: "Reset your password — FishTrippers" },
       {
         name: "description",
-        content: "Reset your Lemonaidely password by email.",
+        content: "Reset your FishTrippers password by email.",
       },
     ],
   }),

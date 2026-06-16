@@ -2,7 +2,7 @@ import { createFileRoute } from "@tanstack/react-router";
 import { MENTORS, PATHS } from "@/data/lesson-paths";
 import { slugify } from "@/lib/journeys.shared";
 
-const BASE_URL = "https://lemonaidely.com";
+const BASE_URL = "https://fishtrippers.com";
 
 interface SitemapEntry {
   path: string;

@@ -77,7 +77,7 @@ const DURATIONS = [30, 45, 60, 90, 120] as const;
 export const Route = createFileRoute(
   "/_authenticated/dashboard/upcoming-sessions",
 )({
-  head: () => ({ meta: [{ title: "My Schedule — Lemonaidely" }] }),
+  head: () => ({ meta: [{ title: "My Schedule — FishTrippers" }] }),
   component: UpcomingSessionsPage,
 });
 

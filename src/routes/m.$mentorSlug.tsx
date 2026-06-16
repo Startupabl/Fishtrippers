@@ -19,9 +19,9 @@ export const Route = createFileRoute("/m/$mentorSlug")({
     if (!loaderData) return {};
     const { mentor } = loaderData;
     const origin =
-      typeof window !== "undefined" ? window.location.origin : "https://Lemonaidely";
+      typeof window !== "undefined" ? window.location.origin : "https://FishTrippers";
     const url = `${origin}/m/${mentor.slug}`;
-    const title = `${displayMentorName(mentor.name)} — Aide on Lemonaidely`;
+    const title = `${displayMentorName(mentor.name)} — Aide on FishTrippers`;
     const description = mentor.bio.slice(0, 155);
 
     return {
@@ -29,14 +29,14 @@ export const Route = createFileRoute("/m/$mentorSlug")({
         { title },
         { name: "description", content: description },
         { property: "og:type", content: "profile" },
-        { property: "og:title", content: `${displayMentorName(mentor.name)} — Aide on Lemonaidely` },
+        { property: "og:title", content: `${displayMentorName(mentor.name)} — Aide on FishTrippers` },
         { property: "og:description", content: description },
         { property: "og:image", content: mentor.avatarUrl },
         { property: "og:image:alt", content: mentor.name },
         { property: "og:url", content: url },
-        { property: "og:site_name", content: "Lemonaidely" },
+        { property: "og:site_name", content: "FishTrippers" },
         { name: "twitter:card", content: "summary_large_image" },
-        { name: "twitter:title", content: `${displayMentorName(mentor.name)} — Aide on Lemonaidely` },
+        { name: "twitter:title", content: `${displayMentorName(mentor.name)} — Aide on FishTrippers` },
         { name: "twitter:description", content: description },
         { name: "twitter:image", content: mentor.avatarUrl },
       ],

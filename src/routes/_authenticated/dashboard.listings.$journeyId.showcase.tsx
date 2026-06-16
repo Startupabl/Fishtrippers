@@ -43,7 +43,7 @@ export const Route = createFileRoute(
   "/_authenticated/dashboard/listings/$journeyId/showcase",
 )({
   head: () => ({
-    meta: [{ title: "Showcase Studio — Lemonaidely" }],
+    meta: [{ title: "Showcase Studio — FishTrippers" }],
   }),
   component: ShowcaseStudioPage,
 });

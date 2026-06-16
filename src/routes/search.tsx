@@ -38,21 +38,21 @@ export const Route = createFileRoute("/search")({
   validateSearch: zodValidator(searchSchema),
   head: () => ({
     meta: [
-      { title: "Browse Aide-Led AI Courses — Lemonaidely" },
+      { title: "Browse Aide-Led AI Courses — FishTrippers" },
       {
         name: "description",
         content:
           "Browse live, Aide-guided AI Courses by category — find the Course that matches what you want to master.",
       },
-      { property: "og:title", content: "Browse Aide-Led AI Courses — Lemonaidely" },
+      { property: "og:title", content: "Browse Aide-Led AI Courses — FishTrippers" },
       {
         property: "og:description",
         content:
           "Browse live, Aide-guided AI Courses by category — find the Course that matches what you want to master.",
       },
-      { property: "og:url", content: "https://lemonaidely.com/search" },
+      { property: "og:url", content: "https://fishtrippers.com/search" },
     ],
-    links: [{ rel: "canonical", href: "https://lemonaidely.com/search" }],
+    links: [{ rel: "canonical", href: "https://fishtrippers.com/search" }],
   }),
   component: SearchPage,
 });

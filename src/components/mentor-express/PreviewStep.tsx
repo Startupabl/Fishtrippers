@@ -89,7 +89,7 @@ export function PreviewStep({
           onClick={() => onEditStep(1)}
           disabled={submitting}
           className="rounded-2xl border-2 bg-white hover:bg-white/90"
-          style={{ borderColor: "#3DA35D", color: "#1F6B36" }}
+          style={{ borderColor: "#0A2540", color: "#1F6B36" }}
         >
           Edit
         </Button>

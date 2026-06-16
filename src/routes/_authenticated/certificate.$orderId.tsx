@@ -8,7 +8,7 @@ import { getCertificate } from "@/lib/orders.functions";
 export const Route = createFileRoute(
   "/_authenticated/certificate/$orderId",
 )({
-  head: () => ({ meta: [{ title: "Certificate of Completion — Lemonaidely" }] }),
+  head: () => ({ meta: [{ title: "Certificate of Completion — FishTrippers" }] }),
   component: CertificatePage,
 });
 
@@ -119,7 +119,7 @@ function CertificatePage() {
                   textTransform: "uppercase",
                 }}
               >
-                Lemonaidely
+                FishTrippers
               </p>
               <div
                 style={{
@@ -225,7 +225,7 @@ function CertificatePage() {
               <div style={{ textAlign: "right", minWidth: 200 }}>
                 <div style={{ borderBottom: "1px solid #999", height: 28 }} />
                 <p style={{ marginTop: 4 }}>Issued by</p>
-                <p style={{ fontWeight: 600, color: "#1a1a1a" }}>Lemonaidely</p>
+                <p style={{ fontWeight: 600, color: "#1a1a1a" }}>FishTrippers</p>
               </div>
             </div>
           </div>

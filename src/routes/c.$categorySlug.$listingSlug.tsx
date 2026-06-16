@@ -79,7 +79,7 @@ export const Route = createFileRoute("/c/$categorySlug/$listingSlug")({
     const categorySlug = params?.categorySlug ?? loaderData?.categorySlug ?? "listings";
     const listingSlug = params?.listingSlug ?? loaderData?.slug ?? "";
     const origin =
-      typeof window !== "undefined" ? window.location.origin : "https://lemonaidely.lovable.app";
+      typeof window !== "undefined" ? window.location.origin : "https://fishtrippers.lovable.app";
     const canonicalUrl = `${origin}/c/${categorySlug}/${listingSlug}`;
 
     const baseMeta = [{ name: "robots", content: "index, follow" }];
@@ -91,7 +91,7 @@ export const Route = createFileRoute("/c/$categorySlug/$listingSlug")({
       };
     }
     const { path, mentor } = loaderData;
-    const title = `${path.title} with ${displayMentorName(mentor.name)} — Lemonaidely`;
+    const title = `${path.title} with ${displayMentorName(mentor.name)} — FishTrippers`;
     const tags = (path.tags ?? []).filter(Boolean);
     const tagSuffix = tags.length > 0 ? ` · Tags: ${tags.join(", ")}` : "";
     const description = (path.description.slice(0, 155) + tagSuffix).slice(0, 200);
@@ -111,7 +111,7 @@ export const Route = createFileRoute("/c/$categorySlug/$listingSlug")({
         { property: "og:image", content: path.coverImage },
         { property: "og:image:alt", content: `${displayMentorName(mentor.name)} — ${path.title}` },
         { property: "og:url", content: canonicalUrl },
-        { property: "og:site_name", content: "Lemonaidely" },
+        { property: "og:site_name", content: "FishTrippers" },
         { name: "twitter:card", content: "summary_large_image" },
         { name: "twitter:title", content: ogTitle },
         { name: "twitter:description", content: description },
@@ -127,7 +127,7 @@ export const Route = createFileRoute("/c/$categorySlug/$listingSlug")({
             name: path.title,
             image: path.coverImage,
             description,
-            brand: { "@type": "Brand", name: "Lemonaidely" },
+            brand: { "@type": "Brand", name: "FishTrippers" },
             offers: {
               "@type": "Offer",
               url: `${origin}/checkout?path=${path.slug}`,
@@ -521,7 +521,7 @@ function PathPage() {
       {isAdminAudit && dbJourney && (
         <div
           className="sticky top-0 z-50 -mx-4 md:-mx-8 mb-4 flex flex-wrap items-center justify-between gap-3 px-4 py-2 text-white shadow-md"
-          style={{ backgroundColor: "#3DA35D" }}
+          style={{ backgroundColor: "#0A2540" }}
         >
           <div className="flex items-center gap-3">
             <Link
@@ -583,7 +583,7 @@ function PathPage() {
               <Button
                 type="button"
                 className="rounded-2xl text-white hover:opacity-90"
-                style={{ backgroundColor: "#3DA35D" }}
+                style={{ backgroundColor: "#0A2540" }}
               >
                 Manage Listing
                 <ChevronDown className="size-4" />

@@ -138,7 +138,7 @@ View your listing:
   listing_rejected_notification: {
     display_name: "Listing Rejected (Notification)",
     description: "Sent to an instructor when their course listing is sent back to draft with admin feedback.",
-    subject: "Update regarding your Lemonaidely listing: {{listing_title}}",
+    subject: "Update regarding your FishTrippers listing: {{listing_title}}",
     body: `Hi {{user_name}},
 
 Thank you for submitting your listing, {{listing_title}}! Our team reviewed your submission and needs a quick update before it can go live:

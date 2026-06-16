@@ -34,7 +34,7 @@ const SLOT_LABELS: Record<Slot, string> = {
   evening: "Evening",
 };
 
-const LEAF_GREEN = "#3DA35D";
+const LEAF_GREEN = "#0A2540";
 const SUNNY_YELLOW = "#FFD23F";
 
 interface Props {

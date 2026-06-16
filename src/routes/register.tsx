@@ -18,10 +18,10 @@ export const Route = createFileRoute("/register")({
   ),
   head: () => ({
     meta: [
-      { title: "Create your account — Lemonaidely" },
+      { title: "Create your account — FishTrippers" },
       {
         name: "description",
-        content: "Sign up for Lemonaidely and find your perfect AI Aide.",
+        content: "Sign up for FishTrippers and find your perfect AI Aide.",
       },
     ],
   }),

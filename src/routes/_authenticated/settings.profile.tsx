@@ -286,7 +286,7 @@ function ProfileSettingsPage() {
     <div className="space-y-6">
     {showWelcomeBanner ? (
       <Alert
-        className="relative border-[#3DA35D]/30 bg-[#3DA35D]/10 pl-5 pr-12 shadow-sm"
+        className="relative border-[#0A2540]/30 bg-[#0A2540]/10 pl-5 pr-12 shadow-sm"
       >
         <span
           aria-hidden
@@ -294,7 +294,7 @@ function ProfileSettingsPage() {
           style={{ backgroundColor: DESIGN_SYSTEM.colors.leafGreen }}
         />
         <AlertDescription className="text-foreground text-[15px] leading-relaxed">
-          👋 Welcome to Lemonaidely! Before continuing to your dashboard, let's finish setting up your account. Having your correct name, photo, and time zone ensures your scheduled sessions and interactions sync perfectly. Fill out the quick details below to unlock your workspace!
+          👋 Welcome to FishTrippers! Before continuing to your dashboard, let's finish setting up your account. Having your correct name, photo, and time zone ensures your scheduled sessions and interactions sync perfectly. Fill out the quick details below to unlock your workspace!
         </AlertDescription>
         <Button
           type="button"
@@ -302,7 +302,7 @@ function ProfileSettingsPage() {
           size="icon"
           onClick={dismissBanner}
           aria-label="Dismiss welcome message"
-          className="absolute right-2 top-2 h-7 w-7 text-foreground/60 hover:text-foreground hover:bg-[#3DA35D]/15"
+          className="absolute right-2 top-2 h-7 w-7 text-foreground/60 hover:text-foreground hover:bg-[#0A2540]/15"
         >
           <X className="h-4 w-4" />
         </Button>

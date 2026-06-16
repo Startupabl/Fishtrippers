@@ -55,14 +55,14 @@ export const INFO_PAGES: Record<string, InfoPage> = {
   "privacy-policy": {
     slug: "privacy-policy",
     title: "Privacy Policy",
-    description: "How Lemonaidely collects, uses, and protects your information.",
+    description: "How FishTrippers collects, uses, and protects your information.",
     headline: "Your privacy is our priority.",
     category: "Legal & Compliance",
     lastUpdated: "May 2026",
     sections: [
       {
         heading: "1. Simple Data Promise",
-        body: "In this early version of Lemonaidely, we only collect the information necessary to create your account and match you with an Aide. We do not sell your data to third parties.",
+        body: "In this early version of FishTrippers, we only collect the information necessary to create your account and match you with an Aide. We do not sell your data to third parties.",
       },
       {
         heading: "2. Learning Data",
@@ -77,18 +77,18 @@ export const INFO_PAGES: Record<string, InfoPage> = {
   "terms-of-service": {
     slug: "terms-of-service",
     title: "Terms of Service",
-    description: "The rules that govern your use of Lemonaidely.",
-    headline: "The rules of the road for Lemonaidely.",
+    description: "The rules that govern your use of FishTrippers.",
+    headline: "The rules of the road for FishTrippers.",
     category: "Legal & Compliance",
     lastUpdated: "May 2026",
     sections: [
       {
         heading: "1. Our Community Spirit",
-        body: "Lemonaidely is a place for respectful learning. We expect all Aides and learners to treat each other with patience and kindness.",
+        body: "FishTrippers is a place for respectful learning. We expect all Aides and learners to treat each other with patience and kindness.",
       },
       {
         heading: "2. The Aide-Learner Relationship",
-        body: "Aides are independent guides helping you learn AI tools. They are not employees of Lemonaidely. We provide the platform; they provide the wisdom.",
+        body: "Aides are independent guides helping you learn AI tools. They are not employees of FishTrippers. We provide the platform; they provide the wisdom.",
       },
       {
         heading: "3. Beta Platform Notice",
@@ -99,7 +99,7 @@ export const INFO_PAGES: Record<string, InfoPage> = {
   "mentor-agreement": stub(
     "mentor-agreement",
     "Aide Agreement",
-    "Terms that apply to Aides offering Courses on Lemonaidely.",
+    "Terms that apply to Aides offering Courses on FishTrippers.",
     "Our promise to Aides, and yours to learners.",
     "The full Aide Agreement is coming soon. In the meantime, Aides agree to offer guidance with patience, kindness, and honesty.",
     "Legal & Compliance",
@@ -107,8 +107,8 @@ export const INFO_PAGES: Record<string, InfoPage> = {
   "acceptable-use-policy": stub(
     "acceptable-use-policy",
     "Acceptable Use Policy",
-    "What you can and can't do on Lemonaidely.",
-    "Keeping Lemonaidely safe and useful for everyone.",
+    "What you can and can't do on FishTrippers.",
+    "Keeping FishTrippers safe and useful for everyone.",
     "The full Acceptable Use Policy is coming soon. Be respectful, stay on-topic, and don't misuse the platform.",
     "Legal & Compliance",
   ),
@@ -117,7 +117,7 @@ export const INFO_PAGES: Record<string, InfoPage> = {
   "trust-and-safety": stub(
     "trust-and-safety",
     "Trust & Safety",
-    "How we keep Lemonaidely a safe place to learn and teach.",
+    "How we keep FishTrippers a safe place to learn and teach.",
     "Building a community you can trust.",
     "Detailed Trust & Safety guidelines are coming soon. If you ever feel unsafe, contact support immediately.",
     "Trust & Operations",
@@ -125,7 +125,7 @@ export const INFO_PAGES: Record<string, InfoPage> = {
   "data-handling": stub(
     "data-handling",
     "Data Handling",
-    "How Lemonaidely stores, processes, and protects your data.",
+    "How FishTrippers stores, processes, and protects your data.",
     "Clear answers about your data.",
     "Our full data handling overview is coming soon. We collect only what's needed to deliver Aide-ship and never sell your data.",
     "Trust & Operations",
@@ -133,7 +133,7 @@ export const INFO_PAGES: Record<string, InfoPage> = {
   security: stub(
     "security",
     "Platform Security",
-    "The technical and organizational measures protecting Lemonaidely.",
+    "The technical and organizational measures protecting FishTrippers.",
     "Security you don't have to think about.",
     "A detailed security overview is coming soon. We use industry-standard encryption in transit and at rest.",
     "Trust & Operations",
@@ -145,14 +145,14 @@ export const INFO_PAGES: Record<string, InfoPage> = {
     title: "How It Works: Your Path to AI Mastery",
     footerLabel: "How it Works",
     description:
-      "How Lemonaidely connects you with human Aides through structured Courses, live sessions, and Refuel add-ons.",
+      "How FishTrippers connects you with human Aides through structured Courses, live sessions, and Refuel add-ons.",
     headline:
       "Stop stumbling through complex tools. Master AI with a human Aide by your side.",
     category: "Learner Resources",
     sections: [
       {
         variant: "lead",
-        body: "Stop stumbling through complex tools and expensive, impersonal tutorials. At Lemonaidely, we believe the fastest way to master a new skill is through a direct, human connection. We've built a peer-to-peer marketplace where the world's leading AI experts—our **Aides**—guide you every step of the way.",
+        body: "Stop stumbling through complex tools and expensive, impersonal tutorials. At FishTrippers, we believe the fastest way to master a new skill is through a direct, human connection. We've built a peer-to-peer marketplace where the world's leading AI experts—our **Aides**—guide you every step of the way.",
       },
       {
         icon: "🗺️",
@@ -181,7 +181,7 @@ export const INFO_PAGES: Record<string, InfoPage> = {
       {
         icon: "🌱",
         heading: "Supporting the Grove",
-        body: "Lemonaidely is proud to support this growing community of creators. To keep our site running and our community vibrant, we collect a small service fee on each booking. We kindly ask that you keep your bookings and communications within the platform—this ensures your sessions are protected and helps us continue to provide the \"juice\" that powers your growth.",
+        body: "FishTrippers is proud to support this growing community of creators. To keep our site running and our community vibrant, we collect a small service fee on each booking. We kindly ask that you keep your bookings and communications within the platform—this ensures your sessions are protected and helps us continue to provide the \"juice\" that powers your growth.",
       },
       {
         icon: "⛽",
@@ -194,7 +194,7 @@ export const INFO_PAGES: Record<string, InfoPage> = {
   "first-lesson-guide": stub(
     "first-lesson-guide",
     "First Lesson Guide",
-    "What to expect from your very first lesson on Lemonaidely.",
+    "What to expect from your very first lesson on FishTrippers.",
     "Your first lesson, made easy.",
     "A friendly first-lesson guide is coming soon. Show up curious — your Aide will take care of the rest.",
     "Learner Resources",
@@ -202,7 +202,7 @@ export const INFO_PAGES: Record<string, InfoPage> = {
   "learner-faqs": stub(
     "learner-faqs",
     "Learner FAQs",
-    "Answers to common questions from learners on Lemonaidely.",
+    "Answers to common questions from learners on FishTrippers.",
     "Got a question? Start here.",
     "Our full Learner FAQ is coming soon. In the meantime, contact support and we'll get right back to you.",
     "Learner Resources",
@@ -213,7 +213,7 @@ export const INFO_PAGES: Record<string, InfoPage> = {
     ...stub(
       "become-a-mentor",
       "Become an Aide",
-      "Share your AI know-how, build a Course, and start earning on Lemonaidely.",
+      "Share your AI know-how, build a Course, and start earning on FishTrippers.",
       "Turn what you know into income.",
       "Full Aide onboarding details are coming soon. Ready now? List your first Course from the Aide dashboard.",
       "Aide Resources",
@@ -224,7 +224,7 @@ export const INFO_PAGES: Record<string, InfoPage> = {
     ...stub(
       "mentor-faqs",
       "Aide FAQs",
-      "Answers to common questions from Aides on Lemonaidely.",
+      "Answers to common questions from Aides on FishTrippers.",
       "Everything Aides ask, in one place.",
       "Our full Aide FAQ is coming soon. Reach out anytime — we love hearing from our Aides.",
       "Aide Resources",
@@ -235,16 +235,16 @@ export const INFO_PAGES: Record<string, InfoPage> = {
   // Company & Contact
   "about-us": {
     slug: "about-us",
-    title: "The Lemonaidely Manifesto: AI Made Refreshing",
-    footerLabel: "About Lemonaidely",
+    title: "The FishTrippers Manifesto: AI Made Refreshing",
+    footerLabel: "About FishTrippers",
     description:
-      "All the juice, none of the seeds. Why Lemonaidely exists and how our human Aides help creators master AI.",
+      "All the juice, none of the seeds. Why FishTrippers exists and how our human Aides help creators master AI.",
     headline: "All the juice, none of the seeds.",
     category: "Company & Contact",
     sections: [
       {
         variant: "lead",
-        body: "In an era of AI noise, Lemonaidely is the filter. We believe that mastering the world's most powerful creative tools shouldn't be a bitter struggle—it should be a refreshing transformation. The current AI landscape is often 'sour': overwhelming, cluttered with technical 'seeds,' and prone to leaving creators feeling burnt out. We exist to provide the clarity, Aide-ship, and 'juice' you need to actually produce work that matters.",
+        body: "In an era of AI noise, FishTrippers is the filter. We believe that mastering the world's most powerful creative tools shouldn't be a bitter struggle—it should be a refreshing transformation. The current AI landscape is often 'sour': overwhelming, cluttered with technical 'seeds,' and prone to leaving creators feeling burnt out. We exist to provide the clarity, Aide-ship, and 'juice' you need to actually produce work that matters.",
       },
       {
         body: "Our marketplace connects you with human experts—your Aide—to help you navigate the cutting edge of AI Art, Music, Video, Writing, and Design. Every Aide offers Signature Aide Courses, which are specialized, structured paths designed to take you from curious to capable. These are the secret recipes for mastering specific AI workflows, ensuring you aren't just learning tools, but mastering the craft.",
@@ -253,7 +253,7 @@ export const INFO_PAGES: Record<string, InfoPage> = {
         body: "While our courses provide the roadmap, our Aides provide the Personal Touch. They guide you through the noise, helping you apply advanced AI techniques to your unique creative voice. And if you ever need a little more momentum, our Refuel Sessions allow you to extend your journey whenever you need extra support, a deeper dive, or a creative tune-up.",
       },
       {
-        body: "Whether you are a professional looking to Juice Up your workflow or a creator mastering a new medium, we provide the expertise you need to succeed. At Lemonaidely, we give you all the juice and none of the seeds.",
+        body: "Whether you are a professional looking to Juice Up your workflow or a creator mastering a new medium, we provide the expertise you need to succeed. At FishTrippers, we give you all the juice and none of the seeds.",
       },
     ],
     cta: { label: "Find Your Aide", to: "/search" },
@@ -261,15 +261,15 @@ export const INFO_PAGES: Record<string, InfoPage> = {
   contact: stub(
     "contact",
     "Contact Support",
-    "Get in touch with the Lemonaidely team.",
+    "Get in touch with the FishTrippers team.",
     "We're here to help.",
-    "A full contact form is coming soon. For now, email us at hello@Lemonaidely and we'll respond within one business day.",
+    "A full contact form is coming soon. For now, email us at hello@FishTrippers and we'll respond within one business day.",
     "Company & Contact",
   ),
   news: stub(
     "news",
-    "Lemonaidely News",
-    "Updates, announcements, and stories from the Lemonaidely community.",
+    "FishTrippers News",
+    "Updates, announcements, and stories from the FishTrippers community.",
     "Fresh-squeezed updates from the Grove.",
     "Our newsroom is coming soon. Until then, follow us on Instagram, TikTok, LinkedIn, or YouTube for the latest.",
     "Company & Contact",
@@ -304,7 +304,7 @@ export const FOOTER_GROUPS: FooterGroup[] = [
   {
     category: "Support & Safety",
     links: [
-      { kind: "info", slug: "about-us", label: "About Lemonaidely" },
+      { kind: "info", slug: "about-us", label: "About FishTrippers" },
       { kind: "info", slug: "contact", label: "Contact Support" },
       { kind: "info", slug: "trust-and-safety", label: "Trust & Safety" },
       { kind: "info", slug: "data-handling", label: "Data & Security" },
@@ -323,10 +323,10 @@ export const FOOTER_GROUPS: FooterGroup[] = [
     category: "Connect",
     links: [
       { kind: "info", slug: "news", label: "News", icon: "newspaper" },
-      { kind: "external", to: "https://instagram.com/lemonaidely", label: "Instagram", icon: "instagram", newTab: true },
-      { kind: "external", to: "https://tiktok.com/@lemonaidely", label: "TikTok", icon: "tiktok", newTab: true },
-      { kind: "external", to: "https://linkedin.com/company/lemonaidely", label: "LinkedIn", icon: "linkedin", newTab: true },
-      { kind: "external", to: "https://youtube.com/@lemonaidely", label: "YouTube", icon: "youtube", newTab: true },
+      { kind: "external", to: "https://instagram.com/fishtrippers", label: "Instagram", icon: "instagram", newTab: true },
+      { kind: "external", to: "https://tiktok.com/@fishtrippers", label: "TikTok", icon: "tiktok", newTab: true },
+      { kind: "external", to: "https://linkedin.com/company/fishtrippers", label: "LinkedIn", icon: "linkedin", newTab: true },
+      { kind: "external", to: "https://youtube.com/@fishtrippers", label: "YouTube", icon: "youtube", newTab: true },
     ],
   },
 ];

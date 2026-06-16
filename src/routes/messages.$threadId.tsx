@@ -21,7 +21,7 @@ const searchSchema = z.object({
 export const Route = createFileRoute("/messages/$threadId")({
   validateSearch: zodValidator(searchSchema),
   head: () => ({
-    meta: [{ title: "Messages — Lemonaidely" }],
+    meta: [{ title: "Messages — FishTrippers" }],
   }),
   component: MessagesPage,
 });

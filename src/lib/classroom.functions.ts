@@ -3,8 +3,8 @@ import { z } from "zod";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 import { supabaseAdmin } from "@/integrations/supabase/client.server";
 
-const DAILY_ROOM_NAME = "lemonaidely";
-const DAILY_ROOM_BASE_URL = `https://lemonaidely.daily.co/${DAILY_ROOM_NAME}`;
+const DAILY_ROOM_NAME = "fishtrippers";
+const DAILY_ROOM_BASE_URL = `https://fishtrippers.daily.co/${DAILY_ROOM_NAME}`;
 
 export interface DailyJoinInfo {
   role: "aide" | "learner";

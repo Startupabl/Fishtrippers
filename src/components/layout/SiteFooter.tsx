@@ -36,12 +36,12 @@ const SOCIALS: Array<{
   label: string;
   icon: React.ComponentType<{ className?: string }>;
 }> = [
-  { href: "https://www.facebook.com/lemonaidely", label: "Facebook", icon: Facebook },
-  { href: "https://www.instagram.com/lemonaidely", label: "Instagram", icon: Instagram },
-  { href: "https://www.pinterest.com/lemonaidely/", label: "Pinterest", icon: PinterestIcon },
-  { href: "https://www.tiktok.com/@lemonaidely", label: "TikTok", icon: Music2 },
-  { href: "https://www.linkedin.com/company/lemonaidely", label: "LinkedIn", icon: Linkedin },
-  { href: "https://www.youtube.com/@lemonaidely", label: "YouTube", icon: Youtube },
+  { href: "https://www.facebook.com/fishtrippers", label: "Facebook", icon: Facebook },
+  { href: "https://www.instagram.com/fishtrippers", label: "Instagram", icon: Instagram },
+  { href: "https://www.pinterest.com/fishtrippers/", label: "Pinterest", icon: PinterestIcon },
+  { href: "https://www.tiktok.com/@fishtrippers", label: "TikTok", icon: Music2 },
+  { href: "https://www.linkedin.com/company/fishtrippers", label: "LinkedIn", icon: Linkedin },
+  { href: "https://www.youtube.com/@fishtrippers", label: "YouTube", icon: Youtube },
 ];
 
 export function SiteFooter() {

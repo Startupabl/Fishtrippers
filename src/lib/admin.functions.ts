@@ -329,7 +329,7 @@ export const setJourneyModeration = createServerFn({ method: "POST" })
             mentorId: row.mentor_id,
           });
         } else {
-          const appUrl = process.env.APP_URL ?? "https://lemonaidely.com";
+          const appUrl = process.env.APP_URL ?? "https://fishtrippers.com";
           const listingUrl =
             row.slug && row.category
               ? `${appUrl}/c/${row.category}/${row.slug}`
@@ -392,7 +392,7 @@ export const setJourneyModeration = createServerFn({ method: "POST" })
           .maybeSingle();
 
         if (mentorProfile?.email) {
-          const appUrl = process.env.APP_URL ?? "https://lemonaidely.com";
+          const appUrl = process.env.APP_URL ?? "https://fishtrippers.com";
           const editUrl = `${appUrl}/mentor/create-path?draftId=${data.journeyId}`;
           const rendered = await renderEmailTemplate("listing_rejected_notification", {
             user_name: mentorProfile.first_name ?? "there",
@@ -789,9 +789,9 @@ export const impersonateUser = createServerFn({ method: "POST" })
               // redirectTo could exfiltrate the impersonated user's session token.
               const allowed = new Set(
                 [
-                  process.env.APP_URL ?? "https://lemonaidely.com",
-                  "https://lemonaidely.com",
-                  "https://www.lemonaidely.com",
+                  process.env.APP_URL ?? "https://fishtrippers.com",
+                  "https://fishtrippers.com",
+                  "https://www.fishtrippers.com",
                 ].map((o) => {
                   try {
                     return new URL(o).origin;
@@ -1159,7 +1159,7 @@ export const sendReportedListingToDraft = createServerFn({ method: "POST" })
           .eq("id", row.mentor_id)
           .maybeSingle();
         if (mentorProfile?.email) {
-          const appUrl = process.env.APP_URL ?? "https://lemonaidely.com";
+          const appUrl = process.env.APP_URL ?? "https://fishtrippers.com";
           const editUrl = `${appUrl}/mentor/create-path?draftId=${data.journeyId}`;
           const rendered = await renderEmailTemplate("listing_rejected_notification", {
             user_name: mentorProfile.first_name ?? "there",

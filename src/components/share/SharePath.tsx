@@ -23,7 +23,7 @@ export function SharePath({
   promoSuffix = "",
   compact = false,
 }: SharePathProps) {
-  const text = `Check out this course: ${title} with ${displayMentorName(mentorName)} on Lemonaidely${promoSuffix}`;
+  const text = `Check out this course: ${title} with ${displayMentorName(mentorName)} on FishTrippers${promoSuffix}`;
 
   function getShareUrl() {
     if (typeof window !== "undefined") return window.location.href;

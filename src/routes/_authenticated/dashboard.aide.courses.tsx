@@ -51,7 +51,7 @@ const YELLOW = DESIGN_SYSTEM.colors.sunnyYellow;
 export const Route = createFileRoute("/_authenticated/dashboard/aide/courses")({
   head: () => ({
     meta: [
-      { title: "My Listings — Lemonaidely" },
+      { title: "My Listings — FishTrippers" },
       { name: "description", content: "Manage the listings you offer as an Aide." },
     ],
   }),

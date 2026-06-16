@@ -19,7 +19,7 @@ import {
 import { cn } from "@/lib/utils";
 
 export const Route = createFileRoute("/_authenticated/dashboard/messages")({
-  head: () => ({ meta: [{ title: "Messages — Lemonaidely" }] }),
+  head: () => ({ meta: [{ title: "Messages — FishTrippers" }] }),
   component: MessagesLayout,
 });
 
@@ -160,7 +160,7 @@ function MessagesLayout() {
                     aria-hidden
                     className="absolute inset-y-0 left-0 w-1"
                     style={{
-                      backgroundColor: unread ? "#F5C518" : "transparent",
+                      backgroundColor: unread ? "#E8B547" : "transparent",
                     }}
                   />
                   <Link

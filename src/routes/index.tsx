@@ -37,21 +37,21 @@ import { MissionMatchQuiz } from "@/components/onboarding/MissionMatchQuiz";
 export const Route = createFileRoute("/")({
   head: () => ({
     meta: [
-      { title: "Lemonaidely™ — Learn AI Tools 1:1 with an Expert Aide" },
+      { title: "FishTrippers™ — Learn AI Tools 1:1 with an Expert Aide" },
       {
         name: "description",
         content:
           "Get paired with an expert Aide for live, 1:1 Courses on ChatGPT, Midjourney, and more. AI Made Refreshing™.",
       },
-      { property: "og:title", content: "Lemonaidely™ — Learn AI Tools 1:1 with an Expert Aide" },
+      { property: "og:title", content: "FishTrippers™ — Learn AI Tools 1:1 with an Expert Aide" },
       {
         property: "og:description",
         content:
           "Get paired with an expert Aide for live, 1:1 Courses on ChatGPT, Midjourney, and more.",
       },
-      { property: "og:url", content: "https://lemonaidely.com/" },
+      { property: "og:url", content: "https://fishtrippers.com/" },
     ],
-    links: [{ rel: "canonical", href: "https://lemonaidely.com/" }],
+    links: [{ rel: "canonical", href: "https://fishtrippers.com/" }],
   }),
   component: Index,
 });
@@ -86,7 +86,7 @@ const PROCESS_STEPS = [
   },
 ] as const;
 
-function LemonaidelyProcess() {
+function FishTrippersProcess() {
   const [revealed, setRevealed] = useState(0);
   const refs = useRef<Array<HTMLLIElement | null>>([]);
 
@@ -122,14 +122,10 @@ function LemonaidelyProcess() {
           className="mb-12 text-center text-2xl tracking-tight md:text-3xl"
           style={{ fontFamily: '"Plus Jakarta Sans", "Inter", system-ui, sans-serif', fontWeight: 800 }}
         >
-          <span style={{ color: "#3DA35D" }}>The </span>
-          <span style={{ color: "#F5C518" }}>Lemon</span>
-          <span style={{ color: "#3DA35D" }}>AI</span>
-          <span style={{ color: "#F5C518" }}>
-            dely
-            <span aria-hidden="true" className="ml-0.5 align-super text-[0.5em] font-semibold" style={{ color: "#3DA35D" }}>™</span>
-          </span>
-          <span style={{ color: "#3DA35D" }}> Process</span>
+          <span style={{ color: "#0A2540" }}>The </span>
+          <span style={{ color: "#E8B547" }}>Fish</span>
+          <span style={{ color: "#0A2540" }}>Trippers</span>
+          <span style={{ color: "#0A2540" }}> Process</span>
         </h2>
 
         {/* Desktop: horizontal */}
@@ -139,7 +135,7 @@ function LemonaidelyProcess() {
             aria-hidden
           />
           <div
-            className="absolute left-0 top-7 -z-0 h-1 rounded-full bg-gradient-to-r from-[#F5C518] to-[#3DA35D] transition-[width] duration-700 ease-out"
+            className="absolute left-0 top-7 -z-0 h-1 rounded-full bg-gradient-to-r from-[#E8B547] to-[#0A2540] transition-[width] duration-700 ease-out"
             style={{ width: `${fillPct}%` }}
             aria-hidden
           />
@@ -159,7 +155,7 @@ function LemonaidelyProcess() {
                   className={
                     "relative z-10 inline-flex size-14 items-center justify-center rounded-full ring-4 ring-background transition-all duration-500 " +
                     (active
-                      ? "bg-gradient-to-br from-[#F5C518] to-[#3DA35D] text-white shadow-lg"
+                      ? "bg-gradient-to-br from-[#E8B547] to-[#0A2540] text-white shadow-lg"
                       : "bg-muted text-muted-foreground grayscale")
                   }
                 >
@@ -170,7 +166,7 @@ function LemonaidelyProcess() {
                 </span>
                 <h3
                   className="mt-2 min-h-[2lh] text-balance text-xl font-bold md:text-2xl"
-                  style={{ fontFamily: "Lora, ui-serif, Georgia, serif", color: "#3DA35D" }}
+                  style={{ fontFamily: "Lora, ui-serif, Georgia, serif", color: "#0A2540" }}
                 >
                   {s.title}
                 </h3>
@@ -189,7 +185,7 @@ function LemonaidelyProcess() {
             aria-hidden
           />
           <div
-            className="absolute left-7 top-0 -z-0 w-1 rounded-full bg-gradient-to-b from-[#F5C518] to-[#3DA35D] transition-[height] duration-700 ease-out"
+            className="absolute left-7 top-0 -z-0 w-1 rounded-full bg-gradient-to-b from-[#E8B547] to-[#0A2540] transition-[height] duration-700 ease-out"
             style={{ height: `${fillPct}%` }}
             aria-hidden
           />
@@ -209,7 +205,7 @@ function LemonaidelyProcess() {
                   className={
                     "relative z-10 inline-flex size-14 shrink-0 items-center justify-center rounded-full ring-4 ring-background transition-all duration-500 " +
                     (active
-                      ? "bg-gradient-to-br from-[#F5C518] to-[#3DA35D] text-white shadow-lg"
+                      ? "bg-gradient-to-br from-[#E8B547] to-[#0A2540] text-white shadow-lg"
                       : "bg-muted text-muted-foreground grayscale")
                   }
                 >
@@ -221,7 +217,7 @@ function LemonaidelyProcess() {
                   </span>
                   <h3
                     className="mt-1 text-2xl font-bold"
-                    style={{ fontFamily: "Lora, ui-serif, Georgia, serif", color: "#3DA35D" }}
+                    style={{ fontFamily: "Lora, ui-serif, Georgia, serif", color: "#0A2540" }}
                   >
                     {s.title}
                   </h3>
@@ -275,7 +271,7 @@ function CategoryGrid() {
                     <Link
                       to="/search"
                       search={{ category: c.name } as never}
-                      className="group relative flex aspect-square flex-col items-center justify-end overflow-hidden rounded-2xl border border-border bg-[#3DA35D]/10 p-4 text-center shadow-sm transition-all duration-200 hover:scale-105 hover:border-[#F5C518] hover:shadow-md focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#F5C518]"
+                      className="group relative flex aspect-square flex-col items-center justify-end overflow-hidden rounded-2xl border border-border bg-[#0A2540]/10 p-4 text-center shadow-sm transition-all duration-200 hover:scale-105 hover:border-[#E8B547] hover:shadow-md focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#E8B547]"
                     >
                       <img
                         src={img}
@@ -324,8 +320,8 @@ function Index() {
 
   useEffect(() => {
     try {
-      if (localStorage.getItem("lemonaidely_quiz_open") === "1") {
-        localStorage.removeItem("lemonaidely_quiz_open");
+      if (localStorage.getItem("fishtrippers_quiz_open") === "1") {
+        localStorage.removeItem("fishtrippers_quiz_open");
         setQuizOpen(true);
       }
     } catch {
@@ -439,8 +435,8 @@ function Index() {
       {/* CATEGORY QUICK-LINKS */}
       <CategoryGrid />
 
-      {/* THE LEMONAIDELY PROCESS */}
-      <LemonaidelyProcess />
+      {/* THE FISHTRIPPERS PROCESS */}
+      <FishTrippersProcess />
 
 
       <Dialog open={videoOpen} onOpenChange={setVideoOpen}>
@@ -450,20 +446,20 @@ function Index() {
             aria-hidden
             style={{
               background:
-                "linear-gradient(90deg, #F5C518 0%, #3DA35D 100%)",
+                "linear-gradient(90deg, #E8B547 0%, #0A2540 100%)",
             }}
           />
           <DialogHeader className="px-5 pt-4 pb-3 border-b border-border">
             <DialogTitle
               style={{
                 fontFamily: "Lora, ui-serif, Georgia, serif",
-                color: "#3DA35D",
+                color: "#0A2540",
               }}
             >
-              What is Lemonaidely?
+              What is FishTrippers?
             </DialogTitle>
             <DialogDescription className="sr-only">
-              Intro video about Lemonaidely.
+              Intro video about FishTrippers.
             </DialogDescription>
           </DialogHeader>
           {videoOpen && (
@@ -479,7 +475,7 @@ function Index() {
               >
                 <iframe
                   src="https://iframe.mediadelivery.net/embed/683194/aa5f7090-2922-4ba8-a2c8-0d11de0d09f2?autoplay=true&loop=false&muted=true&color=FF5733"
-                  title="What is Lemonaidely?"
+                  title="What is FishTrippers?"
                   style={{
                     position: "absolute",
                     top: 0,

@@ -38,7 +38,7 @@ const display = { fontFamily: "Montserrat, system-ui, sans-serif" };
 export const Route = createFileRoute(
   "/_authenticated/dashboard/learner/schedule",
 )({
-  head: () => ({ meta: [{ title: "My Schedule — Lemonaidely" }] }),
+  head: () => ({ meta: [{ title: "My Schedule — FishTrippers" }] }),
   component: LearnerSchedule,
 });
 

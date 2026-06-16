@@ -35,7 +35,7 @@ const searchSchema = z.object({
 
 export const Route = createFileRoute("/_authenticated/booking-review")({
   validateSearch: zodValidator(searchSchema),
-  head: () => ({ meta: [{ title: "Review your booking — Lemonaidely" }] }),
+  head: () => ({ meta: [{ title: "Review your booking — FishTrippers" }] }),
   component: BookingReviewPage,
 });
 
@@ -366,7 +366,7 @@ function BookingReviewPage() {
                     </dd>
                   </div>
                   <p className="text-xs text-muted-foreground text-left">
-                    Includes Lemonaidely service fee ({feeLabel}): {fmt(fee)}. By enrolling in this course, you agree to our{" "}
+                    Includes FishTrippers service fee ({feeLabel}): {fmt(fee)}. By enrolling in this course, you agree to our{" "}
                     <Link to="/terms-of-service" className="text-accent hover:underline">
                       Terms of Service
                     </Link>

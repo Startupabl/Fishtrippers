@@ -17,8 +17,8 @@ export const Route = createFileRoute("/login")({
   ),
   head: () => ({
     meta: [
-      { title: "Log in — Lemonaidely" },
-      { name: "description", content: "Log in to your Lemonaidely account." },
+      { title: "Log in — FishTrippers" },
+      { name: "description", content: "Log in to your FishTrippers account." },
     ],
   }),
   component: LoginPage,

@@ -8,17 +8,17 @@ import { GiftCheckoutDialog } from "@/components/gift/GiftCheckoutDialog";
 export const Route = createFileRoute("/gift")({
   head: () => ({
     meta: [
-      { title: "LemonAIdely Gift Cards — Lemonaidely" },
+      { title: "FishTrippers Gift Cards — FishTrippers" },
       {
         name: "description",
         content:
-          "Give the gift of a guided AI Course. LemonAIdely Gift Cards from $60 to $500 — redeemable for any 1-on-1 guided AI Course.",
+          "Give the gift of a guided fishing trip. FishTrippers Gift Cards from $60 to $500 — redeemable for any charter or guided trip.",
       },
-      { property: "og:title", content: "LemonAIdely Gift Cards — Lemonaidely" },
+      { property: "og:title", content: "FishTrippers Gift Cards" },
       {
         property: "og:description",
         content:
-          "Lemonade-themed gift cards from a Small Sip to a full Pitcher. Fresh skills, hand-delivered.",
+          "Gift cards from a half-day to a full charter. Unforgettable trips, hand-delivered.",
       },
     ],
   }),
@@ -59,8 +59,8 @@ const TIERS: Tier[] = [
   },
 ];
 
-const LEAF_GREEN = "#3DA35D";
-const SUNNY_YELLOW = "#F5C518";
+const LEAF_GREEN = "#0A2540";
+const SUNNY_YELLOW = "#E8B547";
 
 function LemonadeVessel({
   vessel,
@@ -179,7 +179,7 @@ function GiftPage() {
         <div className="flex items-center gap-3 text-info">
           <Gift className="size-6" />
           <span className="text-xs font-semibold uppercase tracking-wide">
-            LemonAIdely Gift Cards
+            FishTrippers Gift Cards
           </span>
         </div>
 
@@ -192,7 +192,7 @@ function GiftPage() {
         <p className="mt-3 max-w-2xl text-lg text-muted-foreground">
           Pick a course size for the curious friend, the career-switcher, or
           the creative who wants a real expert in their corner. Each gift is
-          redeemable for any 1-on-1 guided AI Course on Lemonaidely.
+          redeemable for any 1-on-1 guided AI Course on FishTrippers.
         </p>
         <p
           className="mt-4 inline-flex items-center gap-2 rounded-full bg-info px-4 py-1.5 text-sm font-semibold text-white"

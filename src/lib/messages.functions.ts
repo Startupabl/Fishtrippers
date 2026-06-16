@@ -291,7 +291,7 @@ export const sendMessage = createServerFn({ method: "POST" })
               const recipientFirst = recipient.first_name?.trim() || "there";
               const trimmed = (data.body ?? "").trim();
               const snippet = trimmed.length > 50 ? trimmed.slice(0, 50).trimEnd() + "…" : trimmed;
-              const threadUrl = `https://lemonaidely.com/dashboard/messages/${data.thread_id}`;
+              const threadUrl = `https://fishtrippers.com/dashboard/messages/${data.thread_id}`;
               const fill = (s: string) =>
                 s
                   .replaceAll("{{recipient_first_name}}", recipientFirst)

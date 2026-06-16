@@ -10,10 +10,10 @@ import { useProfileGuard } from "@/components/onboarding/ProfileCompletionGuard"
 export const Route = createFileRoute("/onboarding/choice")({
   head: () => ({
     meta: [
-      { title: "Choose your path — Lemonaidely" },
+      { title: "Choose your path — FishTrippers" },
       {
         name: "description",
-        content: "Tell us how you want to use Lemonaidely.",
+        content: "Tell us how you want to use FishTrippers.",
       },
     ],
   }),
@@ -75,7 +75,7 @@ function ChoicePage() {
           to="/"
           onClick={() => {
             try {
-              localStorage.setItem("lemonaidely_quiz_open", "1");
+              localStorage.setItem("fishtrippers_quiz_open", "1");
             } catch {
               // ignore
             }
