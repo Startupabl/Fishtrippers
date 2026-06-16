@@ -285,7 +285,11 @@ export function isBoatDetailsValid(s: OperatorOnboardingState): boolean {
 }
 
 export function isFishingFocusValid(s: OperatorOnboardingState): boolean {
-  return !!s.primary_category && s.target_species.length >= 1;
+  return (
+    !!s.primary_category &&
+    s.target_species.length >= 1 &&
+    s.fishing_environments.length >= 1
+  );
 }
 
 export function isBookingRulesValid(s: OperatorOnboardingState): boolean {
