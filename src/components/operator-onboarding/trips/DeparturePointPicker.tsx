@@ -132,6 +132,9 @@ export function DeparturePointPicker({ value, onChange }: Props) {
         lat: r.lat,
         lng: r.lng,
         placeId: r.placeId,
+        city: (r as any).city ?? null,
+        state: (r as any).state ?? null,
+        country: (r as any).country ?? null,
       });
       if (placesLibRef.current) {
         sessionTokenRef.current = new placesLibRef.current.AutocompleteSessionToken();
@@ -142,6 +145,9 @@ export function DeparturePointPicker({ value, onChange }: Props) {
         lat: null,
         lng: null,
         placeId: s.placeId,
+        city: null,
+        state: null,
+        country: null,
       });
     } finally {
       setLoading(false);
