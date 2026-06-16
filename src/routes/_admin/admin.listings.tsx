@@ -87,7 +87,7 @@ function ListingsPage() {
       await qc.cancelQueries({ queryKey });
       const prev = qc.getQueryData<ListingRow[]>(queryKey);
       qc.setQueryData<ListingRow[]>(queryKey, (old: ListingRow[] | undefined) =>
-        (old ?? []).map((r) =>
+        (old ?? []).map((r: ListingRow) =>
           r.id === vars.journeyId ? { ...r, featured: vars.featured } : r,
         ),
       );
@@ -107,7 +107,7 @@ function ListingsPage() {
       await qc.cancelQueries({ queryKey });
       const prev = qc.getQueryData<ListingRow[]>(queryKey);
       qc.setQueryData<ListingRow[]>(queryKey, (old: ListingRow[] | undefined) =>
-        (old ?? []).map((r) =>
+        (old ?? []).map((r: ListingRow) =>
           r.id === vars.journeyId ? { ...r, priority_order: vars.priority } : r,
         ),
       );
@@ -162,7 +162,7 @@ function ListingsPage() {
       await qc.cancelQueries({ queryKey });
       const prev = qc.getQueryData<ListingRow[]>(queryKey);
       qc.setQueryData<ListingRow[]>(queryKey, (old: ListingRow[] | undefined) =>
-        (old ?? []).map((r) =>
+        (old ?? []).map((r: ListingRow) =>
           r.id === vars.journeyId ? { ...r, moderation_status: vars.moderation } : r,
         ),
       );
@@ -184,12 +184,12 @@ function ListingsPage() {
 
   const categories = useMemo(() => {
     const set = new Set<string>();
-    for (const r of data ?? []) if (r.category) set.add(r.category);
+    for (const r of (data ?? []) as ListingRow[]) if (r.category) set.add(r.category);
     return Array.from(set).sort();
   }, [data]);
 
   const rows = useMemo(() => {
-    const all = (data ?? []).filter((r) => {
+    const all = (data ?? []).filter((r: ListingRow) => {
       if (titleQ && !r.title.toLowerCase().includes(titleQ.toLowerCase())) return false;
       if (aideQ) {
         const aide = `${r.mentor_name ?? ""} ${r.mentor_email ?? ""}`.toLowerCase();
