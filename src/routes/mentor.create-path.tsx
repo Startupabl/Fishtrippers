@@ -14,6 +14,7 @@ import {
   type StepId,
 } from "@/stores/useOperatorOnboardingStore";
 import { getMyOperator } from "@/lib/operators.functions";
+import { listMyTrips } from "@/lib/trips.functions";
 import {
   OnboardingSidebar,
   type SidebarStep,
@@ -79,6 +80,14 @@ function CreatePathPage() {
     }
   }, [server]);
 
+  const fetchTrips = useServerFn(listMyTrips);
+  const { data: tripsData } = useQuery({
+    queryKey: ["my-trips"],
+    queryFn: () => fetchTrips(),
+    enabled: !!authUser,
+  });
+  const tripCount = tripsData?.trips?.length ?? 0;
+
   // ---- Step status computation ----
   const steps: SidebarStep[] = useMemo(() => {
     const profileOk = isProfileValid(state);
@@ -96,6 +105,7 @@ function CreatePathPage() {
         return boatOk ? "complete" : "upcoming";
       }
       if (id === "fishing_focus") return focusOk ? "complete" : "upcoming";
+      if (id === "trip_catalog") return tripCount > 0 ? "complete" : "upcoming";
       if (id === "booking_rules") return rulesOk ? "complete" : "upcoming";
       if (id === "review") return "upcoming";
       return "upcoming";
@@ -110,7 +120,7 @@ function CreatePathPage() {
       { id: "booking_rules", label: "Booking rules", status: status("booking_rules") },
       { id: "review", label: "Review & submit", status: status("review") },
     ];
-  }, [state]);
+  }, [state, tripCount]);
 
   const goTo = (id: StepId) => state.setStep(id);
   const saveDraft = useServerFn(upsertOperatorDraft);
