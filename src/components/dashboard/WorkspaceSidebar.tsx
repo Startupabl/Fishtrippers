@@ -110,6 +110,7 @@ function ItemsMenu({ items }: { items: Item[] }) {
 
 export function WorkspaceSidebar() {
   const { mode, title } = useWorkspaceMode();
+  const { titleCase: operatorLabel } = useOperatorRoleLabel();
 
   return (
     <Sidebar
