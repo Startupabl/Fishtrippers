@@ -813,6 +813,10 @@ export type Database = {
             | Database["public"]["Enums"]["operator_cancellation_policy"]
             | null
           created_at: string
+          default_departure_address: string | null
+          default_departure_lat: number | null
+          default_departure_lng: number | null
+          default_departure_place_id: string | null
           display_name: string | null
           id: string
           location: string | null
@@ -839,6 +843,10 @@ export type Database = {
             | Database["public"]["Enums"]["operator_cancellation_policy"]
             | null
           created_at?: string
+          default_departure_address?: string | null
+          default_departure_lat?: number | null
+          default_departure_lng?: number | null
+          default_departure_place_id?: string | null
           display_name?: string | null
           id?: string
           location?: string | null
@@ -865,6 +873,10 @@ export type Database = {
             | Database["public"]["Enums"]["operator_cancellation_policy"]
             | null
           created_at?: string
+          default_departure_address?: string | null
+          default_departure_lat?: number | null
+          default_departure_lng?: number | null
+          default_departure_place_id?: string | null
           display_name?: string | null
           id?: string
           location?: string | null
