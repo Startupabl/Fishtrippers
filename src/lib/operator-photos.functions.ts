@@ -38,7 +38,7 @@ export const listMyOperatorPhotos = createServerFn({ method: "GET" })
       .order("position", { ascending: true })
       .order("created_at", { ascending: true });
     if (error) throw new Error(error.message);
-    return (data ?? []) as OperatorPhoto[];
+    return (data ?? []) as unknown as OperatorPhoto[];
   });
 
 export interface AddPhotoInput {
@@ -95,7 +95,7 @@ export const addOperatorPhoto = createServerFn({ method: "POST" })
       .select("*")
       .single();
     if (error) throw new Error(error.message);
-    return inserted as OperatorPhoto;
+    return inserted as unknown as OperatorPhoto;
   });
 
 export const deleteOperatorPhoto = createServerFn({ method: "POST" })
@@ -203,5 +203,5 @@ export const getOperatorPhotosPublic = createServerFn({ method: "GET" })
       .order("position", { ascending: true })
       .order("created_at", { ascending: true });
     if (error) throw new Error(error.message);
-    return (rows ?? []) as OperatorPhoto[];
+    return (rows ?? []) as unknown as OperatorPhoto[];
   });
