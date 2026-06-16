@@ -52,11 +52,11 @@ export interface TripEditorState {
   id?: string | null;
   title: string;
   description: string;
-  itinerary: string;
   start_time: string;
   duration_minutes: number | null;
   price_minor: number | null;
   per_extra_minor: number | null;
+  min_party_size: number | null;
   max_party_size: number | null;
   template_key?: string | null;
   target_species: string[];
@@ -78,11 +78,11 @@ const empty: TripEditorState = {
   id: null,
   title: "",
   description: "",
-  itinerary: "",
   start_time: "",
   duration_minutes: null,
   price_minor: null,
   per_extra_minor: 0,
+  min_party_size: 1,
   max_party_size: null,
   template_key: null,
   target_species: [],
