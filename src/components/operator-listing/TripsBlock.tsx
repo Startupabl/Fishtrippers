@@ -77,7 +77,7 @@ export function TripsBlock({ trips }: Props) {
                   </div>
                   <div className="text-xs text-muted-foreground">per group</div>
                 </div>
-                <Button className="bg-amber-500 text-black hover:bg-amber-600">
+                <Button className="bg-gold text-ocean-deep hover:bg-gold-deep">
                   View availability
                 </Button>
               </div>
