@@ -120,7 +120,7 @@ function CreatePathPage() {
       { id: "booking_rules", label: "Booking rules", status: status("booking_rules") },
       { id: "review", label: "Review & submit", status: status("review") },
     ];
-  }, [state]);
+  }, [state, tripCount]);
 
   const goTo = (id: StepId) => state.setStep(id);
   const saveDraft = useServerFn(upsertOperatorDraft);
