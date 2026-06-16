@@ -130,6 +130,7 @@ export function UserAvatarMenuItems({
   onLogout: () => void | Promise<void>;
 }) {
   const isAdmin = useAuthStore((s) => s.user?.isAdmin ?? false);
+  const { titleCase: roleLabel } = useOperatorRoleLabel();
   const { guard, dialog: profileGuardDialog } = useProfileGuard();
   return (
     <>
