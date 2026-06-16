@@ -6,7 +6,7 @@ import { Logo } from "@/components/brand/Logo";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 
-const GREEN = "#3DA35D";
+const OCEAN = "#0A2540";
 
 export const Route = createFileRoute("/_admin")({
   beforeLoad: async () => {
@@ -87,13 +87,13 @@ function AdminLayout() {
           "fixed inset-y-0 left-0 z-40 w-[12.5rem] transform text-white transition-transform lg:static lg:translate-x-0",
           open ? "translate-x-0" : "-translate-x-full",
         )}
-        style={{ backgroundColor: GREEN }}
+        style={{ backgroundColor: OCEAN }}
       >
         <div className="flex items-center justify-between px-5 pb-4 pt-6">
-          <Link to="/admin" className="inline-flex">
-            <span className="text-xl font-extrabold tracking-tight text-white">
-              Lemon<span className="text-white/70">AI</span>dely
-              <span className="ml-0.5 align-super text-[0.5em]">™</span>
+          <Link to="/admin" className="inline-flex" aria-label="FishTrippers Admin">
+            <span className="text-xl font-extrabold tracking-tight">
+              <span style={{ color: "#E8B547" }}>Fish</span>
+              <span className="text-white">Trippers</span>
             </span>
           </Link>
           <button
@@ -154,7 +154,7 @@ function AdminLayout() {
             <h1 className="text-base font-semibold text-foreground">{pageTitle(pathname)}</h1>
             <span
               className="rounded-md px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider text-white"
-              style={{ backgroundColor: GREEN }}
+              style={{ backgroundColor: OCEAN }}
             >
               Admin
             </span>

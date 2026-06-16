@@ -122,14 +122,10 @@ function FishTrippersProcess() {
           className="mb-12 text-center text-2xl tracking-tight md:text-3xl"
           style={{ fontFamily: '"Plus Jakarta Sans", "Inter", system-ui, sans-serif', fontWeight: 800 }}
         >
-          <span style={{ color: "#3DA35D" }}>The </span>
-          <span style={{ color: "#F5C518" }}>Lemon</span>
-          <span style={{ color: "#3DA35D" }}>AI</span>
-          <span style={{ color: "#F5C518" }}>
-            dely
-            <span aria-hidden="true" className="ml-0.5 align-super text-[0.5em] font-semibold" style={{ color: "#3DA35D" }}>™</span>
-          </span>
-          <span style={{ color: "#3DA35D" }}> Process</span>
+          <span style={{ color: "#0A2540" }}>The </span>
+          <span style={{ color: "#E8B547" }}>Fish</span>
+          <span style={{ color: "#0A2540" }}>Trippers</span>
+          <span style={{ color: "#0A2540" }}> Process</span>
         </h2>
 
         {/* Desktop: horizontal */}

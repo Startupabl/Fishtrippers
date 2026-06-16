@@ -12,13 +12,13 @@ export const Route = createFileRoute("/gift")({
       {
         name: "description",
         content:
-          "Give the gift of a guided AI Course. FishTrippers Gift Cards from $60 to $500 — redeemable for any 1-on-1 guided AI Course.",
+          "Give the gift of a guided fishing trip. FishTrippers Gift Cards from $60 to $500 — redeemable for any charter or guided trip.",
       },
-      { property: "og:title", content: "FishTrippers Gift Cards — FishTrippers" },
+      { property: "og:title", content: "FishTrippers Gift Cards" },
       {
         property: "og:description",
         content:
-          "Lemonade-themed gift cards from a Small Sip to a full Pitcher. Fresh skills, hand-delivered.",
+          "Gift cards from a half-day to a full charter. Unforgettable trips, hand-delivered.",
       },
     ],
   }),
