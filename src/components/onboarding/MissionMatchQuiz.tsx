@@ -275,8 +275,8 @@ export function MissionMatchQuiz({ open, onOpenChange }: Props) {
                       htmlFor={id}
                       className={`flex cursor-pointer items-start gap-3 rounded-xl border p-4 transition-colors ${
                         isChecked
-                          ? "border-[#3DA35D] bg-[#3DA35D]/10"
-                          : "border-border hover:border-[#3DA35D]/50 hover:bg-[#3DA35D]/5"
+                          ? "border-[#0A2540] bg-[#0A2540]/10"
+                          : "border-border hover:border-[#0A2540]/50 hover:bg-[#0A2540]/5"
                       }`}
                     >
                       <Checkbox
@@ -305,12 +305,12 @@ export function MissionMatchQuiz({ open, onOpenChange }: Props) {
           )}
 
           {stepIdx === 2 && (
-            <div className="mt-6 flex flex-col items-center gap-5 rounded-2xl border border-[#3DA35D]/30 bg-[#3DA35D]/10 p-8 text-center">
+            <div className="mt-6 flex flex-col items-center gap-5 rounded-2xl border border-[#0A2540]/30 bg-[#0A2540]/10 p-8 text-center">
               <p className="text-sm text-muted-foreground">
                 Based on your workflow, your AI skill flavor is:
               </p>
               <div className="flex flex-col items-center gap-3">
-                <div className="flex size-16 items-center justify-center rounded-full bg-[#F5C518]/20 text-[#3DA35D]">
+                <div className="flex size-16 items-center justify-center rounded-full bg-[#E8B547]/20 text-[#0A2540]">
                   <FlavorIcon className="size-8" />
                 </div>
                 <h3

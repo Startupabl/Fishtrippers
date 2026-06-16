@@ -160,7 +160,7 @@ function MessagesLayout() {
                     aria-hidden
                     className="absolute inset-y-0 left-0 w-1"
                     style={{
-                      backgroundColor: unread ? "#F5C518" : "transparent",
+                      backgroundColor: unread ? "#E8B547" : "transparent",
                     }}
                   />
                   <Link

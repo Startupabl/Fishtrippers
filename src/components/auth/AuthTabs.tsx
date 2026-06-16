@@ -22,9 +22,9 @@ export function AuthTabs() {
 
   const tabBase =
     "relative pb-3 text-base transition-colors border-b-[3px] focus-visible:outline-none";
-  const activeClass = "text-[#3DA35D] font-bold border-[#3DA35D]";
+  const activeClass = "text-[#0A2540] font-bold border-[#0A2540]";
   const inactiveClass =
-    "text-gray-500 font-medium border-transparent hover:text-[#3DA35D] hover:font-semibold";
+    "text-gray-500 font-medium border-transparent hover:text-[#0A2540] hover:font-semibold";
 
   return (
     <nav

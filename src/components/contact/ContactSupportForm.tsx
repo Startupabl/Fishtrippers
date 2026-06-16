@@ -106,10 +106,10 @@ export function ContactSupportForm() {
     return (
       <section
         aria-live="polite"
-        className="mt-10 animate-in fade-in zoom-in-95 rounded-2xl border border-[#3DA35D]/30 bg-[#3DA35D]/5 p-8 text-center duration-500"
+        className="mt-10 animate-in fade-in zoom-in-95 rounded-2xl border border-[#0A2540]/30 bg-[#0A2540]/5 p-8 text-center duration-500"
       >
-        <div className="mx-auto flex size-14 items-center justify-center rounded-full bg-[#3DA35D]/15">
-          <CheckCircle2 className="size-7 text-[#3DA35D]" />
+        <div className="mx-auto flex size-14 items-center justify-center rounded-full bg-[#0A2540]/15">
+          <CheckCircle2 className="size-7 text-[#0A2540]" />
         </div>
         <h2 className="mt-4 text-xl font-semibold text-foreground">Thank you!</h2>
         <p className="mx-auto mt-2 max-w-md text-sm text-muted-foreground">
@@ -208,7 +208,7 @@ export function ContactSupportForm() {
               onChange={(e) => update("booking_id", e.target.value)}
               className={cn(
                 "transition-shadow",
-                isBookingTopic && "ring-2 ring-[#F5C518]/70 border-[#F5C518]/70 focus-visible:ring-[#F5C518]",
+                isBookingTopic && "ring-2 ring-[#E8B547]/70 border-[#E8B547]/70 focus-visible:ring-[#E8B547]",
               )}
               placeholder="e.g. LMN-1042 or 'Intro to Watercolor'"
             />
@@ -241,7 +241,7 @@ export function ContactSupportForm() {
             type="submit"
             size="lg"
             disabled={mutation.isPending}
-            style={{ backgroundColor: "#3DA35D" }}
+            style={{ backgroundColor: "#0A2540" }}
             className="text-white hover:opacity-95"
           >
             {mutation.isPending ? (

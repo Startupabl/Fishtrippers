@@ -286,7 +286,7 @@ function ProfileSettingsPage() {
     <div className="space-y-6">
     {showWelcomeBanner ? (
       <Alert
-        className="relative border-[#3DA35D]/30 bg-[#3DA35D]/10 pl-5 pr-12 shadow-sm"
+        className="relative border-[#0A2540]/30 bg-[#0A2540]/10 pl-5 pr-12 shadow-sm"
       >
         <span
           aria-hidden
@@ -302,7 +302,7 @@ function ProfileSettingsPage() {
           size="icon"
           onClick={dismissBanner}
           aria-label="Dismiss welcome message"
-          className="absolute right-2 top-2 h-7 w-7 text-foreground/60 hover:text-foreground hover:bg-[#3DA35D]/15"
+          className="absolute right-2 top-2 h-7 w-7 text-foreground/60 hover:text-foreground hover:bg-[#0A2540]/15"
         >
           <X className="h-4 w-4" />
         </Button>

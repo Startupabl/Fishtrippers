@@ -4,9 +4,9 @@
 
 import type { JourneyCategory } from "@/data/lesson-paths";
 
-const GREEN = "#3DA35D";
+const GREEN = "#0A2540";
 const GREEN_DARK = "#1F6B36";
-const YELLOW = "#F5C518";
+const YELLOW = "#E8B547";
 const CREAM = "#FFFDF5";
 const INK = "#1F2A24";
 

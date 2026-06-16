@@ -19,13 +19,13 @@ function MessagesEmptyState() {
             rx="42"
             ry="34"
             transform="rotate(-18 60 68)"
-            fill="#F5C518"
+            fill="#E8B547"
             stroke="#1F6B36"
             strokeWidth="3"
           />
           <path
             d="M86 36c6-7 16-9 21-5 4 3 1 12-5 18-5 5-12 7-17 5"
-            fill="#3DA35D"
+            fill="#0A2540"
             stroke="#1F6B36"
             strokeWidth="2.5"
             strokeLinejoin="round"

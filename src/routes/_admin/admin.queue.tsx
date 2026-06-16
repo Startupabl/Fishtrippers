@@ -202,7 +202,7 @@ function ListingsToApprove() {
                   size="sm"
                   onClick={() => moderateMutation.mutate({ journeyId: j.id, moderation: "approved" })}
                   disabled={moderateMutation.isPending}
-                  style={{ backgroundColor: "#3DA35D" }}
+                  style={{ backgroundColor: "#0A2540" }}
                   className="text-white hover:opacity-95"
                 >
                   <Check className="size-4" /> Approve
@@ -348,7 +348,7 @@ function OpenInquiries() {
                 size="sm"
                 onClick={() => mutation.mutate(t.id)}
                 disabled={mutation.isPending}
-                style={{ backgroundColor: "#3DA35D" }}
+                style={{ backgroundColor: "#0A2540" }}
                 className="text-white hover:opacity-95"
               >
                 {mutation.isPending ? (
@@ -584,7 +584,7 @@ function UserTypePill({ type }: { type: string }) {
   const label = type.charAt(0).toUpperCase() + type.slice(1);
   const color =
     type === "aide"
-      ? "bg-[#3DA35D]/10 text-[#1f6b3a]"
+      ? "bg-[#0A2540]/10 text-[#1f6b3a]"
       : type === "learner"
         ? "bg-blue-100 text-blue-800"
         : "bg-slate-100 text-slate-700";
@@ -598,7 +598,7 @@ function UserTypePill({ type }: { type: string }) {
 function EmptyState({ title }: { title: string }) {
   return (
     <div className="rounded-lg border border-dashed bg-white p-10 text-center">
-      <CheckCircle2 className="mx-auto size-8 text-[#3DA35D]" />
+      <CheckCircle2 className="mx-auto size-8 text-[#0A2540]" />
       <p className="mt-3 text-sm font-medium text-foreground">{title}</p>
     </div>
   );

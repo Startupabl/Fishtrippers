@@ -521,7 +521,7 @@ function PathPage() {
       {isAdminAudit && dbJourney && (
         <div
           className="sticky top-0 z-50 -mx-4 md:-mx-8 mb-4 flex flex-wrap items-center justify-between gap-3 px-4 py-2 text-white shadow-md"
-          style={{ backgroundColor: "#3DA35D" }}
+          style={{ backgroundColor: "#0A2540" }}
         >
           <div className="flex items-center gap-3">
             <Link
@@ -583,7 +583,7 @@ function PathPage() {
               <Button
                 type="button"
                 className="rounded-2xl text-white hover:opacity-90"
-                style={{ backgroundColor: "#3DA35D" }}
+                style={{ backgroundColor: "#0A2540" }}
               >
                 Manage Listing
                 <ChevronDown className="size-4" />
