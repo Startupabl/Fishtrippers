@@ -33,6 +33,13 @@ export interface VesselDraftState {
   features: Record<string, string>;
 }
 
+export interface DefaultDeparture {
+  address: string;
+  lat: number | null;
+  lng: number | null;
+  place_id: string | null;
+}
+
 export interface OperatorOnboardingState {
   currentStep: StepId;
   setStep: (s: StepId) => void;
@@ -47,6 +54,7 @@ export interface OperatorOnboardingState {
   primary_category: PrimaryCategory | null;
   target_species: string[];
   vessel: VesselDraftState;
+  default_departure: DefaultDeparture;
 
   submitted: boolean;
 
@@ -62,6 +70,7 @@ export interface OperatorOnboardingState {
   }) => void;
   setPrimaryCategory: (c: PrimaryCategory) => void;
   toggleSpecies: (id: string) => void;
+  setDefaultDeparture: (d: DefaultDeparture) => void;
   setSubmitted: (v: boolean) => void;
   reset: () => void;
   hydrateFromServer: (input: { operator: any | null; vessel: any | null }) => void;
@@ -97,6 +106,7 @@ export const useOperatorOnboardingStore = create<OperatorOnboardingState>()(
       primary_category: null,
       target_species: [],
       vessel: emptyVessel(),
+      default_departure: { address: "", lat: null, lng: null, place_id: null },
       submitted: false,
 
       setBusinessType: (t) => set({ business_type: t }),
@@ -140,6 +150,7 @@ export const useOperatorOnboardingStore = create<OperatorOnboardingState>()(
               : [...s.target_species, id],
           };
         }),
+      setDefaultDeparture: (d) => set({ default_departure: d }),
       setSubmitted: (v) => set({ submitted: v }),
       reset: () =>
         set({
@@ -154,6 +165,7 @@ export const useOperatorOnboardingStore = create<OperatorOnboardingState>()(
           primary_category: null,
           target_species: [],
           vessel: emptyVessel(),
+          default_departure: { address: "", lat: null, lng: null, place_id: null },
           submitted: false,
         }),
       hydrateFromServer: ({ operator, vessel }) => {
@@ -180,6 +192,12 @@ export const useOperatorOnboardingStore = create<OperatorOnboardingState>()(
             ? operator.target_species
             : [],
           submitted: !!operator.submitted_at,
+          default_departure: {
+            address: operator.default_departure_address ?? "",
+            lat: operator.default_departure_lat ?? null,
+            lng: operator.default_departure_lng ?? null,
+            place_id: operator.default_departure_place_id ?? null,
+          },
           vessel: vessel
             ? {
                 boat_type_id: vessel.boat_type_id ?? "",

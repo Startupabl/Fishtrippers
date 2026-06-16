@@ -21,8 +21,11 @@ import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
 import { toast } from "sonner";
 import { upsertTrip } from "@/lib/trips.functions";
+import { saveDefaultDeparture } from "@/lib/operators.functions";
 import { DURATION_OPTIONS } from "@/lib/trips.shared";
 import { DeparturePointPicker } from "./DeparturePointPicker";
+import { Checkbox } from "@/components/ui/checkbox";
+import { useOperatorOnboardingStore } from "@/stores/useOperatorOnboardingStore";
 
 export interface TripEditorState {
   id?: string | null;
@@ -59,16 +62,22 @@ const empty: TripEditorState = {
 export function TripFormDialog({ open, onOpenChange, initial }: Props) {
   const [form, setForm] = useState<TripEditorState>(initial ?? empty);
   const [priceInput, setPriceInput] = useState("");
+  const defaultDeparture = useOperatorOnboardingStore((s) => s.default_departure);
+  const setDefaultDeparture = useOperatorOnboardingStore((s) => s.setDefaultDeparture);
+  const hasDefault = !!defaultDeparture.address;
+  const [saveAsDefault, setSaveAsDefault] = useState(!hasDefault);
   const qc = useQueryClient();
   const upsertFn = useServerFn(upsertTrip);
+  const saveDefaultFn = useServerFn(saveDefaultDeparture);
 
   useEffect(() => {
     if (open) {
       const next = initial ?? empty;
       setForm(next);
       setPriceInput(next.price_minor != null ? (next.price_minor / 100).toString() : "");
+      setSaveAsDefault(!hasDefault);
     }
-  }, [open, initial]);
+  }, [open, initial, hasDefault]);
 
   const mutation = useMutation({
     mutationFn: async () => {
@@ -80,7 +89,7 @@ export function TripFormDialog({ open, onOpenChange, initial }: Props) {
         throw new Error("Description is too short");
       if (!form.departure_address.trim())
         throw new Error("Pick a departure point");
-      return upsertFn({
+      const result = await upsertFn({
         data: {
           id: form.id ?? null,
           title: form.title.trim(),
@@ -95,6 +104,28 @@ export function TripFormDialog({ open, onOpenChange, initial }: Props) {
           departure_place_id: form.departure_place_id,
         },
       });
+      if (saveAsDefault) {
+        try {
+          await saveDefaultFn({
+            data: {
+              address: form.departure_address.trim(),
+              lat: form.departure_lat,
+              lng: form.departure_lng,
+              place_id: form.departure_place_id,
+            },
+          });
+          setDefaultDeparture({
+            address: form.departure_address.trim(),
+            lat: form.departure_lat,
+            lng: form.departure_lng,
+            place_id: form.departure_place_id,
+          });
+        } catch (e) {
+          // Non-fatal: don't block trip save if default save fails.
+          console.warn("Could not save default departure", e);
+        }
+      }
+      return result;
     },
     onSuccess: () => {
       toast.success(form.id ? "Trip updated" : "Trip added");
@@ -195,6 +226,21 @@ export function TripFormDialog({ open, onOpenChange, initial }: Props) {
                 })
               }
             />
+            <label className="mt-2 flex items-start gap-2 rounded-lg border bg-muted/30 p-3 text-sm cursor-pointer">
+              <Checkbox
+                checked={saveAsDefault}
+                onCheckedChange={(v) => setSaveAsDefault(v === true)}
+                className="mt-0.5"
+              />
+              <span className="leading-snug">
+                <span className="font-medium">Save as my default departure point</span>
+                <span className="block text-xs text-muted-foreground">
+                  {hasDefault
+                    ? "Update your default so new trips prefill with this location."
+                    : "We'll prefill this for every new trip so you don't have to retype it."}
+                </span>
+              </span>
+            </label>
           </div>
         </div>
         <DialogFooter>

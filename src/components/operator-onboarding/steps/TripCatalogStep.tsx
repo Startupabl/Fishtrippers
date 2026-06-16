@@ -33,6 +33,7 @@ function formatPrice(minor: number): string {
 export function TripCatalogStep({ onBack, onNext }: Props) {
   const primary_category = useOperatorOnboardingStore((s) => s.primary_category);
   const setStep = useOperatorOnboardingStore((s) => s.setStep);
+  const defaultDeparture = useOperatorOnboardingStore((s) => s.default_departure);
   const listFn = useServerFn(listMyTrips);
   const deleteFn = useServerFn(deleteTrip);
   const qc = useQueryClient();
@@ -67,10 +68,10 @@ export function TripCatalogStep({ onBack, onNext }: Props) {
       duration_minutes: preset?.duration ?? null,
       price_minor: null,
       template_key: preset?.key ?? null,
-      departure_address: "",
-      departure_lat: null,
-      departure_lng: null,
-      departure_place_id: null,
+      departure_address: defaultDeparture.address ?? "",
+      departure_lat: defaultDeparture.lat ?? null,
+      departure_lng: defaultDeparture.lng ?? null,
+      departure_place_id: defaultDeparture.place_id ?? null,
     });
     setOpen(true);
   };

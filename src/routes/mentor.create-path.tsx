@@ -164,6 +164,11 @@ function CreatePathPage() {
     }
   };
 
+  const scrollFormToTop = () => {
+    if (typeof window === "undefined") return;
+    window.scrollTo({ top: 0, behavior: "auto" });
+  };
+
   const advance = async () => {
     const idx = STEP_ORDER.indexOf(state.currentStep);
     let nextIdx = idx + 1;
@@ -179,7 +184,10 @@ function CreatePathPage() {
       const ok = await persistCurrentStep();
       if (!ok) return;
     }
-    if (nextIdx < STEP_ORDER.length) goTo(STEP_ORDER[nextIdx]);
+    if (nextIdx < STEP_ORDER.length) {
+      goTo(STEP_ORDER[nextIdx]);
+      scrollFormToTop();
+    }
   };
   const back = () => {
     const idx = STEP_ORDER.indexOf(state.currentStep);
@@ -190,7 +198,10 @@ function CreatePathPage() {
     ) {
       prevIdx -= 1;
     }
-    if (prevIdx >= 0) goTo(STEP_ORDER[prevIdx]);
+    if (prevIdx >= 0) {
+      goTo(STEP_ORDER[prevIdx]);
+      scrollFormToTop();
+    }
   };
 
   if (!initialized || !authUser) {
