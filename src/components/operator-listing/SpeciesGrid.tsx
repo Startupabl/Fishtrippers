@@ -11,15 +11,15 @@ export function SpeciesGrid({ species }: Props) {
   return (
     <section id="species" className="scroll-mt-32 space-y-4">
       <h2 className="text-2xl font-bold tracking-tight">Targeted species</h2>
-      <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 md:grid-cols-4">
+      <div className="grid grid-cols-2 items-stretch gap-4 sm:grid-cols-3 md:grid-cols-4">
         {species.map((id) => {
           const icon = getSpeciesIcon(id);
           return (
             <div
               key={id}
-              className="flex flex-col items-center gap-3 rounded-2xl border bg-card/60 p-5 text-center transition-shadow hover:shadow-sm"
+              className="flex h-full flex-col items-center justify-between gap-3 rounded-2xl border bg-card/60 p-5 text-center transition-shadow hover:shadow-sm"
             >
-              <div className="flex h-20 w-20 items-center justify-center">
+              <div className="flex h-24 w-24 shrink-0 items-center justify-center">
                 {icon ? (
                   <img
                     src={icon}
@@ -27,13 +27,13 @@ export function SpeciesGrid({ species }: Props) {
                     loading="lazy"
                     width={512}
                     height={512}
-                    className="h-full w-full object-contain"
+                    className="mx-auto block h-full w-full object-contain object-center"
                   />
                 ) : (
                   <Fish className="h-10 w-10 text-foreground/70" />
                 )}
               </div>
-              <span className="text-sm font-medium">{speciesLabel(id)}</span>
+              <span className="block h-5 text-sm font-medium leading-5">{speciesLabel(id)}</span>
             </div>
           );
         })}
