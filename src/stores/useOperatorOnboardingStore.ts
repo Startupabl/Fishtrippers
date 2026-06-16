@@ -158,6 +158,16 @@ export const useOperatorOnboardingStore = create<OperatorOnboardingState>()(
               : [...s.target_species, id],
           };
         }),
+      toggleEnvironment: (id) =>
+        set((s) => {
+          const has = s.fishing_environments.includes(id);
+          return {
+            fishing_environments: has
+              ? s.fishing_environments.filter((x) => x !== id)
+              : [...s.fishing_environments, id],
+          };
+        }),
+      setBaseCurrency: (c) => set({ base_currency: c }),
       setDefaultDeparture: (d) => set({ default_departure: d }),
       setSubmitted: (v) => set({ submitted: v }),
       reset: () =>
