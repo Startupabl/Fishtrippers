@@ -133,6 +133,38 @@ export function speciesLabel(id: string): string {
   return legacy ?? id;
 }
 
+// ---------- Fishing environments (multi-select on operator profile) ----------
+export const FISHING_ENVIRONMENTS = [
+  { id: "inshore", label: "Inshore", description: "Shallow, sheltered waters (bays, estuaries, marshes)." },
+  { id: "nearshore", label: "Nearshore", description: "Coastal waters, typically 1–10 miles from land." },
+  { id: "offshore", label: "Offshore / Deep Sea", description: "The open ocean, far from land." },
+  { id: "flats", label: "Flats", description: "Shallow, clear, sight-fishing waters." },
+  { id: "freshwater", label: "Freshwater", description: "Lakes, ponds, and reservoirs." },
+  { id: "rivers_streams", label: "Rivers & Streams", description: "Running water systems." },
+  { id: "backcountry", label: "Backcountry", description: "Remote, narrow waterways, mangroves, or swamp-like environments." },
+] as const;
+export type FishingEnvironmentId = (typeof FISHING_ENVIRONMENTS)[number]["id"];
+export const FISHING_ENVIRONMENT_IDS: string[] = FISHING_ENVIRONMENTS.map((e) => e.id);
+
+export function fishingEnvironmentLabel(id: string): string {
+  return FISHING_ENVIRONMENTS.find((e) => e.id === id)?.label ?? id;
+}
+
+// ---------- Fishing techniques (per-trip; not stored on operator profile) ----------
+export const FISHING_TECHNIQUES = [
+  "Trolling",
+  "Spinning/Casting",
+  "Fly Fishing",
+  "Bottom Fishing",
+  "Jigging",
+  "Popping",
+  "Bait & Switch",
+  "Live Bait Fishing",
+  "Net Fishing",
+  "Spearfishing",
+] as const;
+export type FishingTechnique = (typeof FISHING_TECHNIQUES)[number];
+
 // ---------- Boat feature catalog (with optional per-item comments) ----------
 
 export interface FeatureItem {
