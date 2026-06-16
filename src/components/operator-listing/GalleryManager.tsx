@@ -61,6 +61,8 @@ export function GalleryManager({ open, onOpenChange }: Props) {
   const refresh = useCallback(() => {
     qc.invalidateQueries({ queryKey: ["operator-photos-mine"] });
     qc.invalidateQueries({ queryKey: ["operator-listing-preview"] });
+    qc.invalidateQueries({ queryKey: ["my-operator-full"] });
+    qc.invalidateQueries({ queryKey: ["admin", "listings"] });
   }, [qc]);
 
   const delMut = useMutation({
