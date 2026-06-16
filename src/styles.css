@@ -213,6 +213,10 @@
 .text-gold { color: var(--gold); }
 .border-gold { border-color: var(--gold); }
 .hover\:bg-gold-deep:hover { background-color: var(--gold-deep); }
+.text-gold-deep { color: var(--gold-deep); }
+.border-gold-deep { border-color: var(--gold-deep); }
+.bg-gold-soft { background-color: color-mix(in oklab, var(--gold) 14%, #ffffff); }
+.hover\:bg-gold\/10:hover { background-color: color-mix(in oklab, var(--gold) 10%, transparent); }
 
 
 /* Print: isolate the receipt voucher */
