@@ -335,7 +335,7 @@ function MyListingPage() {
                     </TableCell>
                     <TableCell>
                       {t.price_minor != null
-                        ? formatCurrency(t.price_minor / 100, t.currency ?? "USD")
+                        ? formatCurrency(t.price_minor, t.currency ?? "USD")
                         : "—"}
                     </TableCell>
                     <TableCell className="max-w-[280px] truncate text-muted-foreground">
