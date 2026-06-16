@@ -36,7 +36,7 @@ const aideItems: Item[] = [
   { title: "Dashboard", to: "/dashboard", icon: LayoutDashboard, exact: true },
   { title: "My Schedule", to: "/dashboard/upcoming-sessions", icon: Calendar },
   { title: "My Earnings", to: "/dashboard/earnings", icon: Wallet },
-  { title: "My Listings", to: "/dashboard/aide/courses", icon: BookOpen },
+  { title: "My Listing", to: "/dashboard/my-listing", icon: BookOpen },
   { title: "Lab Hours", to: "/settings/profile", hash: "lab-hours", icon: Clock },
 ];
 
@@ -47,7 +47,7 @@ const learnerItems: Item[] = [
 ];
 
 const guestItems: Item[] = [
-  { title: "Become an Aide", to: "/mentor/create-path", search: { new: true }, icon: Plus },
+  { title: "List Your Trip", to: "/mentor/create-path", search: { new: true }, icon: Plus },
   { title: "Book a Course", to: "/search", icon: Search },
 ];
 
