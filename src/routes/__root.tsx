@@ -146,10 +146,14 @@ function RootShell({ children }: { children: React.ReactNode }) {
   );
 }
 
+function FxRatesLoader() {
+  useFxRates();
+  return null;
+}
+
 function RootComponent() {
   const { queryClient } = Route.useRouteContext();
   useAuthListener();
-  useFxRates();
   const router = useRouter();
   const pathname = router.state.location.pathname;
   const isAdminRoute = pathname === "/admin" || pathname.startsWith("/admin/");
@@ -159,6 +163,7 @@ function RootComponent() {
   if (isAdminRoute) {
     return (
       <QueryClientProvider client={queryClient}>
+        <FxRatesLoader />
         <Outlet />
         <Toaster />
       </QueryClientProvider>
@@ -167,6 +172,7 @@ function RootComponent() {
 
   return (
     <QueryClientProvider client={queryClient}>
+      <FxRatesLoader />
       <ProfileCompletionRedirector />
       <SiteHeader />
       <div className="min-w-0 max-w-full overflow-x-hidden pb-20 lg:pb-0">
@@ -178,3 +184,4 @@ function RootComponent() {
     </QueryClientProvider>
   );
 }
+
