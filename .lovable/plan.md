@@ -1,93 +1,41 @@
-# Listing Gallery & Media System
+## Goal
 
-A modular gallery for the operator listing: hard-capped uploads, client-side WebP optimization, a 5-image grid with full-screen lightbox, and cover-photo logic that feeds the search card thumbnail.
+Make the admin/listings thumbnail (column 2) reflect the operator's selected Cover Photo, use the same image on public search cards, and let the operator switch the main photo at any time.
 
-## 1. Data model
+## Current state (already wired)
 
-New table `public.operator_photos`:
+- `operator_photos.is_cover` + the `sync_operator_cover` trigger mirror the chosen cover into `operators.cover_image_url` (falls back to the first photo when nothing is starred).
+- `admin/listings` column 2 already renders `row.cover_image_url` as the 40×40 thumbnail next to the date tooltip — so once the trigger fires, the admin row updates on the next fetch.
+- `GalleryManager` already exposes a star button per photo that calls `setOperatorCoverPhoto`, plus delete and reorder.
 
-- `id uuid pk`
-- `operator_id uuid fk -> operators(id) on delete cascade`
-- `position int` (sort order, 0-based)
-- `is_cover boolean default false`
-- `storage_path text` (folder in `listing-portfolio` bucket)
-- `hero_url text` (1920w WebP)
-- `gallery_url text` (800w WebP)
-- `thumb_url text` (1200x900 WebP, 4:3 — search card)
-- `width int`, `height int`, `bytes int`
-- `created_at timestamptz default now()`
+So the data path is in place. This plan closes the remaining UX/wiring gaps.
 
-Constraints / triggers:
-- Partial unique index: only one `is_cover = true` per operator.
-- Trigger: enforce ≤ 15 photos per operator on INSERT.
-- Trigger: when a photo is inserted/updated/deleted, recompute cover (default first by position if none flagged) and mirror its `thumb_url` into `operators.cover_image_url` so search cards stay in sync.
+## Changes
 
-RLS:
-- SELECT: anyone (public listings) — table reads are for the public listing page.
-- INSERT/UPDATE/DELETE: owner of the parent operator only.
-- Public read on the `listing-portfolio` bucket already exists.
+1. **Admin thumbnail freshness**
+   - In `src/routes/_admin/admin.listings.tsx`, invalidate the admin listings query after a cover change is broadcast (listen on the `operator-photos-mine` query key or just refetch on focus — current setup already refetches on focus, so only add a small "Cover" hint tooltip on the thumbnail: `Cover photo — set in Gallery`).
+   - Add an empty-state placeholder copy "No cover yet" so admins can spot listings missing a hero image.
 
-## 2. Upload & optimization pipeline (client-side)
+2. **GalleryManager clarity**
+   - Show a visible "Cover" pill on the starred photo (in addition to the star icon) so operators clearly see which photo is the main one.
+   - Add a small helper line at the top of the dialog: "The Cover Photo is shown on search results and in the admin dashboard. Click the star on any photo to make it the main image."
+   - Confirm the first uploaded photo auto-becomes cover (already handled by trigger fallback) and surface that via toast on first upload: "Set as your Cover Photo — you can change this anytime."
 
-All processing happens in the browser before upload — Cloudflare Workers can't run `sharp`, and doing it client-side keeps bandwidth and storage low.
+3. **Search card wiring**
+   - The public search page (`src/routes/search.tsx`) currently lists journeys. When the operator search/result card is built, it must read `operators.cover_image_url` (the same field that drives the admin thumbnail) and render the 4:3 thumbnail rendition.
+   - For now: add a small `getOperatorCardImage(operator)` helper in `src/lib/operators.functions.ts` that returns `cover_image_url` (which already points at the 1200×900 `thumb_url` written by the upload pipeline), so any future operator card uses one source of truth.
 
-- New util `src/lib/image-pipeline.ts` using Canvas + `canvas.toBlob('image/webp', 0.82)`:
-  - Reject files > 5 MB or non-image MIME up front.
-  - Decode once via `createImageBitmap`.
-  - Produce three WebP renditions per photo: `hero` (max 1920w), `gallery` (max 800w), `thumb` (1200×900, cover-cropped 4:3). Preserve aspect ratio for hero/gallery.
-- Uploads stream to `listing-portfolio/{operator_id}/{photo_uuid}/{hero|gallery|thumb}.webp` via the browser Supabase client (owner is authenticated → respects RLS / storage policies).
-- After all three blobs succeed, a `createServerFn` (`addOperatorPhoto`) inserts the DB row with public URLs + dimensions.
-- Per-file progress (0–100%) is tracked in component state and rendered in the dropzone list.
-
-## 3. Management UI (owner)
-
-New `src/components/operator-listing/GalleryManager.tsx`, surfaced from the existing "Upload Gallery Images" CTA in `HeaderGallery` (opens a dialog/sheet):
-
-- Drag-and-drop zone (`react-dropzone` already common in shadcn ecosystem — add if missing) with click-to-browse fallback.
-- File list with per-file progress bar, filename, size, and inline error states (oversize / wrong type / over-cap).
-- Existing photo grid with:
-  - Star icon to set cover (highlights current cover).
-  - Trash icon to delete (confirm).
-  - Drag handles to reorder (persists `position`).
-- Counter: "X / 15 photos". Upload button disabled past cap.
-
-Server functions in `src/lib/operator-photos.functions.ts` (auth-gated via `requireSupabaseAuth`, ownership-checked):
-- `listMyOperatorPhotos`
-- `addOperatorPhoto({ storage_path, hero_url, gallery_url, thumb_url, width, height, bytes })`
-- `deleteOperatorPhoto({ id })` — also removes objects from storage.
-- `setCoverPhoto({ id })`
-- `reorderOperatorPhotos({ ids: string[] })`
-
-## 4. Viewing experience
-
-Refactor `HeaderGallery.tsx`:
-
-- When photos exist: responsive 5-up grid (1 large left, 4 small right on ≥ sm), each `<img loading="lazy" decoding="async">` using the `gallery_url` rendition; the hero tile uses `hero_url`.
-- "Show all photos" button overlaid on the last tile → opens `LightboxModal`.
-- Empty state: keep current placeholder card + "Upload Gallery Images" CTA (now wired to open `GalleryManager`).
-
-New `src/components/operator-listing/LightboxModal.tsx`:
-
-- Full-screen `Dialog` rendering `hero_url` images.
-- Prev / Next / Close controls, arrow-key + swipe (touch) navigation, image counter ("3 / 12").
-- Preloads neighboring images for snappy nav.
-
-## 5. Public listing card integration
-
-- The existing `operators.cover_image_url` field (already used by search cards) is now driven by the cover-photo trigger above — no search-page changes required beyond confirming the card consumes `cover_image_url`.
-- Defaulting: first uploaded photo becomes cover automatically; explicit star overrides.
-
-## Technical notes
-
-- Canvas-based WebP encode keeps the pipeline serverless-safe; quality 0.82 hits a good size/visual trade-off.
-- Three renditions per photo: ~ (1920w ~250KB) + (800w ~80KB) + (1200×900 ~120KB). 15 photos worst-case ≈ 7 MB total per listing.
-- Lazy loading via native `loading="lazy"`; lightbox images preload only ±1 neighbor.
-- `react-dropzone` adds ~12KB gz; acceptable. Alternative: hand-rolled drop handler if avoiding deps.
-- Storage path is scoped by `operator_id`; storage RLS policy must already allow the owner to write under that prefix (verify and add migration if not).
-- A separate cleanup edge function is **not** needed — `deleteOperatorPhoto` removes blobs synchronously.
+4. **Cache invalidation**
+   - In `GalleryManager`, after `setOperatorCoverPhoto` / `deleteOperatorPhoto` / `addOperatorPhoto`, also invalidate the `["admin-listings"]` and `["my-listing"]` query keys so the admin table and the owner's dashboard refresh without a manual reload.
 
 ## Out of scope
 
-- Server-side re-encoding / CDN transforms.
-- Video uploads.
-- AI-generated alt text (can be a later pass).
+- Building the operator search results page (journeys-vs-operators search is a separate task).
+- Re-encoding or resizing existing cover images — pipeline already emits the 4:3 thumb.
+- Editing image-pipeline output shapes.
+
+## Files touched
+
+- `src/routes/_admin/admin.listings.tsx` — tooltip + empty-state copy on thumbnail.
+- `src/components/operator-listing/GalleryManager.tsx` — "Cover" pill, helper text, broader cache invalidation, first-upload toast.
+- `src/lib/operators.functions.ts` — add `getOperatorCardImage` helper (used by future search card).
