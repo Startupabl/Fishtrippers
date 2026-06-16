@@ -260,6 +260,8 @@ export const operatorDraftSchema = z.object({
   cancellation_policy: z.enum(CANCELLATION_POLICIES).nullable().optional(),
   primary_category: z.enum(PRIMARY_CATEGORIES).nullable().optional(),
   target_species: z.array(z.string()).optional().nullable(),
+  fishing_environments: z.array(z.string()).optional().nullable(),
+  base_currency: z.string().trim().min(3).max(3).optional().nullable(),
 });
 
 // features: { [featureId]: comment } — comment may be ""
