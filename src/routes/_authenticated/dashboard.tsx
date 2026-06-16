@@ -159,10 +159,10 @@ function AideDashboardHome() {
         </h2>
         <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
           <NavCard
-            to="/dashboard/aide/courses"
+            to="/dashboard/my-listing"
             icon={<BookOpen className="size-5" />}
-            title="My Listings"
-            desc="View, edit, and archive your listings."
+            title="My Listing"
+            desc="View, edit, and manage your listing and trips."
             tint={`${YELLOW}33`}
           />
           <NavCard
