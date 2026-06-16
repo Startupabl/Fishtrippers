@@ -68,12 +68,12 @@ function Chip({ children }: { children: React.ReactNode }) {
 }
 
 function TripCard({ trip }: { trip: Trip }) {
-  const [guests, setGuests] = useState(1);
-  const [showItinerary, setShowItinerary] = useState(false);
+  const minParty = Math.max(1, trip.min_party_size ?? 1);
+  const maxParty = Math.max(minParty, trip.max_party_size ?? 1);
+  const [guests, setGuests] = useState(minParty);
 
   const display = useCurrencyStore((s) => s.currency);
   const base = ((trip.currency || "USD").toUpperCase()) as CurrencyCode;
-  const maxParty = trip.max_party_size ?? 1;
   const perExtra = trip.per_extra_minor ?? 0;
   const totalMinorBase =
     trip.price_minor + perExtra * Math.max(0, guests - 1);
