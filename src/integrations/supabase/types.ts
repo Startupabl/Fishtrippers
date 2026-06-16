@@ -815,9 +815,12 @@ export type Database = {
           cover_image_url: string | null
           created_at: string
           default_departure_address: string | null
+          default_departure_city: string | null
+          default_departure_country: string | null
           default_departure_lat: number | null
           default_departure_lng: number | null
           default_departure_place_id: string | null
+          default_departure_state: string | null
           display_name: string | null
           featured: boolean
           id: string
@@ -851,9 +854,12 @@ export type Database = {
           cover_image_url?: string | null
           created_at?: string
           default_departure_address?: string | null
+          default_departure_city?: string | null
+          default_departure_country?: string | null
           default_departure_lat?: number | null
           default_departure_lng?: number | null
           default_departure_place_id?: string | null
+          default_departure_state?: string | null
           display_name?: string | null
           featured?: boolean
           id?: string
@@ -887,9 +893,12 @@ export type Database = {
           cover_image_url?: string | null
           created_at?: string
           default_departure_address?: string | null
+          default_departure_city?: string | null
+          default_departure_country?: string | null
           default_departure_lat?: number | null
           default_departure_lng?: number | null
           default_departure_place_id?: string | null
+          default_departure_state?: string | null
           display_name?: string | null
           featured?: boolean
           id?: string
