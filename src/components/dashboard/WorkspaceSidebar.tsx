@@ -20,7 +20,7 @@ import {
   SidebarMenuItem,
   useSidebar,
 } from "@/components/ui/sidebar";
-import { useHasActiveListingStatus } from "@/hooks/useHasActiveListing";
+import { useHasActiveListingStatus, useOperatorRoleLabel } from "@/hooks/useHasActiveListing";
 import { useHasLearnerOrdersStatus } from "@/hooks/useHasLearnerOrders";
 
 type Item = {
