@@ -150,6 +150,7 @@ export const useOperatorOnboardingStore = create<OperatorOnboardingState>()(
               : [...s.target_species, id],
           };
         }),
+      setDefaultDeparture: (d) => set({ default_departure: d }),
       setSubmitted: (v) => set({ submitted: v }),
       reset: () =>
         set({
