@@ -505,9 +505,14 @@ export const listAdminUsers = createServerFn({ method: "GET" })
       .order("created_at", { ascending: false })
       .limit(200);
     const ids = (profiles ?? []).map((p) => p.id);
-    const [{ data: roles }, { data: journeysList }, { data: bookingsList }] = await Promise.all([
+    const [{ data: roles }, { data: journeysList }, { data: operatorsList }, { data: bookingsList }] = await Promise.all([
       supabaseAdmin.from("user_roles").select("user_id, role").in("user_id", ids),
       supabaseAdmin.from("journeys").select("mentor_id").in("mentor_id", ids),
+      supabaseAdmin
+        .from("operators")
+        .select("owner_id, status")
+        .in("owner_id", ids)
+        .in("status", ["draft", "published"]),
       supabaseAdmin.from("bookings").select("learner_id").in("learner_id", ids),
     ]);
     const roleMap = new Map<string, string[]>();
@@ -519,6 +524,9 @@ export const listAdminUsers = createServerFn({ method: "GET" })
     const listingsCount = new Map<string, number>();
     for (const j of journeysList ?? []) {
       listingsCount.set(j.mentor_id, (listingsCount.get(j.mentor_id) ?? 0) + 1);
+    }
+    for (const o of operatorsList ?? []) {
+      listingsCount.set((o as any).owner_id, (listingsCount.get((o as any).owner_id) ?? 0) + 1);
     }
     const bookingsCount = new Map<string, number>();
     for (const b of bookingsList ?? []) {
@@ -700,7 +708,7 @@ export const getAdminUserDetail = createServerFn({ method: "POST" })
       console.error("[admin] getUserById", e);
     }
 
-    const [{ data: roles }, { data: ipRows }, { data: journeys }, { data: bookings }] =
+    const [{ data: roles }, { data: ipRows }, { data: journeys }, { data: operatorRows }, { data: bookings }] =
       await Promise.all([
         supabaseAdmin.from("user_roles").select("role").eq("user_id", data.userId),
         supabaseAdmin
@@ -716,12 +724,29 @@ export const getAdminUserDetail = createServerFn({ method: "POST" })
           .order("created_at", { ascending: false })
           .limit(50),
         supabaseAdmin
+          .from("operators")
+          .select("id, display_name, slug, status, moderation_status, created_at, primary_category, listing_number")
+          .eq("owner_id", data.userId)
+          .order("created_at", { ascending: false })
+          .limit(50),
+        supabaseAdmin
           .from("bookings")
           .select("id, status, total_price, currency, created_at, course_id")
           .eq("learner_id", data.userId)
           .order("created_at", { ascending: false })
           .limit(50),
       ]);
+
+    const operatorListings = (operatorRows ?? []).map((o: any) => ({
+      id: o.id,
+      title: o.display_name ?? "Untitled listing",
+      slug: o.slug ?? null,
+      status: o.status ?? "draft",
+      moderation_status: o.moderation_status ?? "pending",
+      base_price_minor: null as number | null,
+      currency: "USD",
+      created_at: o.created_at,
+    }));
 
     const courseIds = Array.from(
       new Set((bookings ?? []).map((b) => b.course_id).filter(Boolean) as string[]),
@@ -740,7 +765,7 @@ export const getAdminUserDetail = createServerFn({ method: "POST" })
       auth: authInfo,
       roles: (roles ?? []).map((r) => r.role),
       ipHistory: ipRows ?? [],
-      listings: journeys ?? [],
+      listings: [...operatorListings, ...(journeys ?? [])],
       bookings: (bookings ?? []).map((b) => ({
         ...b,
         course_title: b.course_id ? courseTitleMap.get(b.course_id) ?? null : null,
