@@ -226,6 +226,21 @@ export function TripFormDialog({ open, onOpenChange, initial }: Props) {
                 })
               }
             />
+            <label className="mt-2 flex items-start gap-2 rounded-lg border bg-muted/30 p-3 text-sm cursor-pointer">
+              <Checkbox
+                checked={saveAsDefault}
+                onCheckedChange={(v) => setSaveAsDefault(v === true)}
+                className="mt-0.5"
+              />
+              <span className="leading-snug">
+                <span className="font-medium">Save as my default departure point</span>
+                <span className="block text-xs text-muted-foreground">
+                  {hasDefault
+                    ? "Update your default so new trips prefill with this location."
+                    : "We'll prefill this for every new trip so you don't have to retype it."}
+                </span>
+              </span>
+            </label>
           </div>
         </div>
         <DialogFooter>
