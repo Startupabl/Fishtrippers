@@ -85,8 +85,8 @@ function ListingsPage() {
       setFeaturedFn({ data: vars }),
     onMutate: async (vars) => {
       await qc.cancelQueries({ queryKey });
-      const prev = qc.getQueryData<typeof data>(queryKey);
-      qc.setQueryData<typeof data>(queryKey, (old) =>
+      const prev = qc.getQueryData<ListingRow[]>(queryKey);
+      qc.setQueryData<ListingRow[]>(queryKey, (old: ListingRow[] | undefined) =>
         (old ?? []).map((r) =>
           r.id === vars.journeyId ? { ...r, featured: vars.featured } : r,
         ),
@@ -105,8 +105,8 @@ function ListingsPage() {
       setPriorityFn({ data: vars }),
     onMutate: async (vars) => {
       await qc.cancelQueries({ queryKey });
-      const prev = qc.getQueryData<typeof data>(queryKey);
-      qc.setQueryData<typeof data>(queryKey, (old) =>
+      const prev = qc.getQueryData<ListingRow[]>(queryKey);
+      qc.setQueryData<ListingRow[]>(queryKey, (old: ListingRow[] | undefined) =>
         (old ?? []).map((r) =>
           r.id === vars.journeyId ? { ...r, priority_order: vars.priority } : r,
         ),
@@ -160,8 +160,8 @@ function ListingsPage() {
       setModerationFn({ data: vars }),
     onMutate: async (vars) => {
       await qc.cancelQueries({ queryKey });
-      const prev = qc.getQueryData<typeof data>(queryKey);
-      qc.setQueryData<typeof data>(queryKey, (old) =>
+      const prev = qc.getQueryData<ListingRow[]>(queryKey);
+      qc.setQueryData<ListingRow[]>(queryKey, (old: ListingRow[] | undefined) =>
         (old ?? []).map((r) =>
           r.id === vars.journeyId ? { ...r, moderation_status: vars.moderation } : r,
         ),
