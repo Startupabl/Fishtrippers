@@ -14,6 +14,7 @@ import {
   type StepId,
 } from "@/stores/useOperatorOnboardingStore";
 import { getMyOperator } from "@/lib/operators.functions";
+import { listMyTrips } from "@/lib/trips.functions";
 import {
   OnboardingSidebar,
   type SidebarStep,
