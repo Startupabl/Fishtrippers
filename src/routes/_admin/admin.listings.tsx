@@ -344,7 +344,7 @@ function ListingsPage() {
               <th className="px-2 py-2 font-semibold">Listing #</th>
               <th className="px-2 py-2 font-semibold">Listing</th>
               <th className="px-2 py-2 font-semibold">Category</th>
-              <th className="px-2 py-2 font-semibold">Aide (User)</th>
+              <th className="px-2 py-2 font-semibold">Captain/Guide</th>
               <th className="px-2 py-2 font-semibold">Status</th>
               <th className="px-2 py-2 font-semibold">Stripe Payout Status</th>
               <th className="px-2 py-2 font-semibold">Featured</th>
