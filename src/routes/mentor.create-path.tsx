@@ -132,18 +132,27 @@ function CreatePathPage() {
           vessel:
             state.business_type === "charter"
               ? {
+                  boat_type_id: state.vessel.boat_type_id || null,
                   manufacturer: state.vessel.manufacturer || null,
-                  model: state.vessel.model || null,
                   year: state.vessel.year ? Number(state.vessel.year) : null,
                   length_ft: state.vessel.length_ft
                     ? Number(state.vessel.length_ft)
                     : null,
-                  engine_type: state.vessel.engine_type || null,
-                  engine_size: state.vessel.engine_size || null,
+                  restored: state.vessel.restored,
+                  num_engines: state.vessel.num_engines
+                    ? Number(state.vessel.num_engines)
+                    : null,
+                  horsepower_per_engine: state.vessel.horsepower_per_engine
+                    ? Number(state.vessel.horsepower_per_engine)
+                    : null,
+                  max_cruising_speed_knots: state.vessel.max_cruising_speed_knots
+                    ? Number(state.vessel.max_cruising_speed_knots)
+                    : null,
+                  engine_type: state.vessel.engine_manufacturer || null,
                   max_passenger_capacity: state.vessel.max_passenger_capacity
                     ? Number(state.vessel.max_passenger_capacity)
                     : null,
-                  features: state.vessel.features ?? [],
+                  features: state.vessel.features ?? {},
                 }
               : null,
         },
