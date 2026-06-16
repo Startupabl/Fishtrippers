@@ -22,6 +22,9 @@ import {
   isProfileValid,
   useOperatorOnboardingStore,
 } from "@/stores/useOperatorOnboardingStore";
+import { DeparturePointPicker } from "@/components/operator-onboarding/trips/DeparturePointPicker";
+import { useServerFn } from "@tanstack/react-start";
+import { saveDefaultDeparture } from "@/lib/operators.functions";
 
 interface Props {
   onBack: () => void;
