@@ -39,7 +39,7 @@ function statusStyle(s: string): React.CSSProperties {
   return {};
 }
 
-type ListingRow = Awaited<ReturnType<typeof listAdminJourneys>>[number];
+type ListingRow = Awaited<ReturnType<typeof listAdminListings>>[number];
 
 function ListingsPage() {
   const [filter, setFilter] = useState<Filter>("all");
@@ -65,13 +65,13 @@ function ListingsPage() {
     setSortBy("priority");
   };
 
-  const fetchListings = useServerFn(listAdminJourneys);
-  const setFeaturedFn = useServerFn(setJourneyFeatured);
-  const setModerationFn = useServerFn(setJourneyModeration);
-  const setPriorityFn = useServerFn(setJourneyPriority);
-  const archiveFn = useServerFn(archiveJourney);
-  const restoreFn = useServerFn(restoreJourney);
-  const hardDeleteFn = useServerFn(hardDeleteJourney);
+  const fetchListings = useServerFn(listAdminListings);
+  const setFeaturedFn = useServerFn(setListingFeatured);
+  const setModerationFn = useServerFn(setListingModeration);
+  const setPriorityFn = useServerFn(setListingPriority);
+  const archiveFn = useServerFn(archiveListing);
+  const restoreFn = useServerFn(restoreListing);
+  const hardDeleteFn = useServerFn(hardDeleteListing);
   const qc = useQueryClient();
 
   const queryKey = ["admin", "listings", filter] as const;
