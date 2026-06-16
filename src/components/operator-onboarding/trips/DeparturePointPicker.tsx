@@ -10,6 +10,9 @@ interface SelectedPlace {
   lat: number | null;
   lng: number | null;
   placeId: string | null;
+  city?: string | null;
+  state?: string | null;
+  country?: string | null;
 }
 
 interface Props {
