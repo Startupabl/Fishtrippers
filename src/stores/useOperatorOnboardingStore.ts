@@ -214,6 +214,10 @@ export const useOperatorOnboardingStore = create<OperatorOnboardingState>()(
           target_species: Array.isArray(operator.target_species)
             ? operator.target_species
             : [],
+          fishing_environments: Array.isArray(operator.fishing_environments)
+            ? operator.fishing_environments
+            : [],
+          base_currency: operator.base_currency ?? "USD",
           submitted: !!operator.submitted_at,
           default_departure: {
             address: operator.default_departure_address ?? "",
