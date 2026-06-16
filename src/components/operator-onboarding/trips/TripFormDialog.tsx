@@ -422,7 +422,7 @@ export function TripFormDialog({ open, onOpenChange, initial }: Props) {
                 </div>
               </div>
               <div className="space-y-2">
-                <Label htmlFor="trip-party">Max party size</Label>
+                <Label htmlFor="trip-party">Max trip size</Label>
                 <Input
                   id="trip-party"
                   type="number"
@@ -437,6 +437,25 @@ export function TripFormDialog({ open, onOpenChange, initial }: Props) {
                   placeholder="e.g. 6"
                 />
               </div>
+            </div>
+            <div className="space-y-2 max-w-[50%] pr-1.5">
+              <Label htmlFor="trip-min-party">Min trip size</Label>
+              <Input
+                id="trip-min-party"
+                type="number"
+                min={1}
+                max={50}
+                step="1"
+                value={form.min_party_size ?? ""}
+                onChange={(e) => {
+                  const n = parseInt(e.target.value, 10);
+                  setForm({ ...form, min_party_size: Number.isFinite(n) ? n : 1 });
+                }}
+                placeholder="e.g. 2"
+              />
+              <p className="text-xs text-muted-foreground">
+                The trip requires at least this many guests to run.
+              </p>
             </div>
             <div className="space-y-2">
               <Label htmlFor="trip-extra">Price per additional angler</Label>
