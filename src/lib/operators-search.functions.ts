@@ -46,10 +46,14 @@ function formatPrice(minor: number, currency: string): string {
 }
 
 export const searchOperatorsServer = createServerFn({ method: "POST" })
-  .middleware([requireSupabaseAuth])
   .inputValidator((d: z.input<typeof searchSchema>) => searchSchema.parse(d))
-  .handler(async ({ data, context }) => {
-    const { supabase } = context;
+  .handler(async ({ data }) => {
+    const supabase = createClient<Database>(
+      process.env.SUPABASE_URL!,
+      process.env.SUPABASE_PUBLISHABLE_KEY!,
+      { auth: { storage: undefined, persistSession: false, autoRefreshToken: false } },
+    );
+
 
     let query = supabase
       .from("operators")
