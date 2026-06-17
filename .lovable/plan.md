@@ -1,36 +1,43 @@
-## Changes to `/operator/preview`
+# Align site categories with fishing environments
 
-### 1. `src/components/operator-listing/SectionNav.tsx`
-- Remove the **Targeted species** item.
-- Rename **Boat info** → **Boat Specs**.
+Today the `categories` table is empty and the legacy "Categories" admin page is the only UI managing it. The 7 fishing environments are hard-coded in `src/lib/operators.shared.ts` (`FISHING_ENVIRONMENTS`) and used in the operator onboarding Step 4 multi-select. We'll make the same 7 environments the official site categories and wire them everywhere categories already plug in.
 
-### 2. `src/components/operator-listing/SpeciesGrid.tsx`
-- Rename heading **Targeted species** → **Fishing for**.
-- Drop the grid-of-cards layout. Render one rounded card (`rounded-2xl border bg-card p-6`) under the heading containing a single wrapped row of species chips/pills.
+## Canonical list (id → label)
 
-### 3. `src/components/operator-listing/BoatInfoBlock.tsx`
-- Rename heading **Boat info** → **Boat Specs**.
-- Reshape for the narrow side-rail (`~320px`): single column, vertical stack inside one compact card.
-- Order, top to bottom:
-  1. Boat type icon image (small, centered, e.g. `h-20 w-32 object-contain`)
-  2. Boat type
-  3. Manufacturer
-  4. Year
-  5. Length
-  6. Engines (`N × HP HP`)
-  7. Capacity (`N passengers`)
-- Drop the Cruising-speed row (not in the requested list). Keep the "Recently restored" footnote.
-- Each row stays as a `label / value` line with dashed underline, sized for the narrow column.
+- `inshore` → Inshore
+- `nearshore` → Nearshore
+- `offshore` → Offshore / Deep Sea
+- `flats` → Flats
+- `freshwater` → Freshwater
+- `rivers_streams` → Rivers & Streams
+- `backcountry` → Backcountry
 
-### 4. `src/components/operator-listing/AmenitiesGrid.tsx`
-- Rename heading **What's included** → **Equipped with**. Section id stays `#included` (matches anchor link).
+## Changes
 
-### 5. `src/routes/_authenticated/operator.preview.tsx`
-- Remove `<BoatInfoBlock />` from the main column.
-- Remove `<FeaturesCard />` from the right aside (duplicate of the on-page Equipped-with block).
-- Right aside becomes: `CaptainCard`, then `BoatInfoBlock` (charter only) directly beneath it.
-- Drop the now-unused `FeaturesCard` import.
+1. **Seed the `categories` table** with the 7 rows above (parent-level, no children). Each row gets:
+   - `name` = environment label (e.g. "Inshore")
+   - `slug` / id-style key kept in sync with the env id so we can map categories ↔ operator filter
+   - `is_featured = true` so all 7 surface on the homepage grid
+   - `image_url = null` for now (admin can upload images later from the Categories page)
+   
+   Done via a one-time `INSERT … ON CONFLICT DO NOTHING` so re-running is safe and existing edits aren't clobbered.
+
+2. **Admin Categories page** (`src/routes/_admin/admin.settings.categories.tsx`): no code change — it already lists everything in the table, so the 7 environments appear automatically after seeding and remain editable (rename / replace image / toggle featured).
+
+3. **Homepage featured grid** (`src/routes/index.tsx`): already reads `listFeaturedCategories()` and links to `/search?category=<name>`. After seeding, the 7 environments show up automatically with placeholder imagery until the admin uploads photos.
+
+4. **Search page** (`src/routes/search.tsx` + `src/lib/journeys.functions.ts`): the category facet already filters by name. Replace the legacy journeys-only filter wiring so that when a fishing-environment category is selected, the operator/listing query also filters operators by `fishing_environments @> {<env_id>}`. Mapping uses the canonical id list above (label → id).
+
+5. **Listing detail / category links**: ensure operator listings expose their primary environment as the category slug used in `/c/$categorySlug/$listingSlug` URLs (already supported by the route — just confirm slug generation uses the environment label).
+
+6. **Operator onboarding (Step 4)**: no change — `FISHING_ENVIRONMENTS` stays the source of truth. We just mirror it into the `categories` table.
 
 ## Out of scope
-- Backend / data-model changes.
-- Trip cards, gallery, policies, biting blocks.
+
+- Building a brand-new public operator browse page (search currently still queries the legacy `journeys` table; we'll bolt the environment filter onto it but not redesign the page).
+- Sub-categories under environments.
+- Auto-uploading category cover images — admin can do that from the Categories page after seeding.
+
+## Question for you
+
+Want me to **delete any existing non-environment categories** during seeding (clean slate), or just **add** the 7 environments alongside whatever is already there? The table is currently empty, so either way the visible result is the same — this is about what happens if you add other categories later.
