@@ -266,24 +266,25 @@ function UpcomingSessionsPage() {
       <Table className="w-full">
         <TableHeader>
           <TableRow>
-            <TableHead className="font-bold">Session Time</TableHead>
-            <TableHead className="font-bold">Course Title</TableHead>
+            <TableHead className="font-bold">Trip Time</TableHead>
+            <TableHead className="font-bold">Total Hours</TableHead>
+            <TableHead className="font-bold">Trip Title</TableHead>
             <TableHead className="font-bold">Status</TableHead>
             <TableHead className="font-bold">Seats</TableHead>
-            <TableHead className="font-bold">Student(s)</TableHead>
+            <TableHead className="font-bold">Client(s)</TableHead>
             <TableHead className="font-bold">Action</TableHead>
           </TableRow>
         </TableHeader>
         <TableBody>
           {isLoading ? (
             <TableRow>
-              <TableCell colSpan={6} className="text-center text-muted-foreground py-10">
+              <TableCell colSpan={7} className="text-center text-muted-foreground py-10">
                 Loading…
               </TableCell>
             </TableRow>
           ) : data.length === 0 ? (
             <TableRow>
-              <TableCell colSpan={6} className="text-center text-muted-foreground py-10">
+              <TableCell colSpan={7} className="text-center text-muted-foreground py-10">
                 {emptyText}
               </TableCell>
             </TableRow>
@@ -313,8 +314,7 @@ function UpcomingSessionsPage() {
         My Schedule
       </h1>
       <p className="mt-2 text-muted-foreground">
-        Every session you've scheduled — including unbooked listings and pending
-        custom offers. Past unbooked slots auto-hide.
+        Every booked trip — including pending custom offers.
       </p>
 
       <Tabs defaultValue="upcoming" className="mt-6">
@@ -418,12 +418,20 @@ function UpcomingSessionsPage() {
   );
 }
 
-function StatusBadge({ status }: { status: ScheduleRow["status"] }) {
+function StatusBadge({ status }: { status: ScheduleRow["status"] | "complete" }) {
   if (status === "unbooked")
-    return <Badge variant="secondary">Unbooked</Badge>;
+    return <Badge variant="secondary">unbooked</Badge>;
   if (status === "booked")
-    return <Badge className="bg-emerald-600 hover:bg-emerald-600 text-white">Booked</Badge>;
+    return <Badge className="bg-emerald-600 hover:bg-emerald-600 text-white">booked</Badge>;
+  if (status === "complete")
+    return <Badge className="bg-emerald-100 text-emerald-700 hover:bg-emerald-100 border border-emerald-200">complete</Badge>;
   return <Badge className="bg-amber-500 hover:bg-amber-500 text-white">Pending Reschedule</Badge>;
+}
+
+function formatHours(minutes: number): string {
+  const h = minutes / 60;
+  const rounded = Math.round(h * 100) / 100;
+  return `${rounded}h`;
 }
 
 function ScheduleTableRow({
@@ -494,20 +502,20 @@ function ScheduleTableRow({
             </a>
           )}
         </div>
-        <div className="text-xs text-muted-foreground">
-          {row.durationMinutes} min · {row.source === "custom_offer" ? "Custom offer" : "Live course"}
-        </div>
         {row.pendingReschedule && (
           <div className="mt-1 text-xs text-amber-600">
             Proposed → {fmtSessionTime(row.pendingReschedule.proposed_starts_at)} ({row.pendingReschedule.proposed_duration_minutes} min)
           </div>
         )}
       </TableCell>
+      <TableCell className="text-sm font-mono text-foreground whitespace-nowrap">
+        {formatHours(row.durationMinutes)}
+      </TableCell>
       <TableCell className="text-sm font-medium text-foreground max-w-[220px]">
         <div className="truncate" title={row.listingTitle}>{row.listingTitle}</div>
       </TableCell>
       <TableCell>
-        <StatusBadge status={row.status} />
+        <StatusBadge status={mode === "completed" ? "complete" : row.status} />
       </TableCell>
       <TableCell className="text-sm font-mono text-foreground whitespace-nowrap">
         {row.filledSeats}/{row.maxSeats}
@@ -528,12 +536,12 @@ function ScheduleTableRow({
                 variant="outline"
                 className="h-8 px-2 text-xs font-medium"
               >
-                {studentCount} students ▾
+                {studentCount} clients ▾
               </Button>
             </PopoverTrigger>
             <PopoverContent className="w-64 p-2" align="start">
               <div className="text-xs font-semibold text-muted-foreground px-2 py-1">
-                Enrolled students
+                Enrolled clients
               </div>
               <ul className="max-h-64 overflow-y-auto">
                 {row.students.map((s) => (
@@ -553,11 +561,7 @@ function ScheduleTableRow({
         )}
       </TableCell>
       <TableCell className="text-sm">
-        {mode === "completed" ? (
-          <Badge className="bg-emerald-100 text-emerald-700 hover:bg-emerald-100 border border-emerald-200">
-            Completed
-          </Badge>
-        ) : (
+        {mode === "completed" ? null : (
           <div className="flex flex-wrap items-center gap-1">
             {row.status === "unbooked" && (
               <>
