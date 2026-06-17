@@ -1,7 +1,15 @@
-Edit `src/components/listings/OperatorCard.tsx`:
+Show "N Trip(s) Available" under the charter name on each `OperatorCard`, using the count of trip packages the operator has created.
 
-1. **Boat icon**: Remove the dynamic `boat_type_icon_url` image. Always render the static `Sailboat` lucide icon for every card (same one used originally).
-2. **Icon sizes**: Set all three capsule icons (`Sailboat`, `Users`, `Star`) to the same size as the white-section icons — `size-4` (matching `ShieldCheck` in the title row).
-3. **Remove "Trips from"**: Delete the `<span className="text-xs text-muted-foreground">Trips from</span>` line in the footer price row, leaving only the price (or "Contact for pricing" fallback).
+**1. `src/lib/operators-search.functions.ts`**
+- Add `trip_count: number` to `OperatorCardDTO`.
+- In the row mapper, compute `trip_count = (active.length > 0 ? active.length : trips.length)` — matches the same "prefer active, fall back to all" logic already used for pricing, so newly approved listings still show a count.
 
-No other changes — layout, capsule width (90%), and one-line alignment remain intact.
+**2. `src/components/listings/OperatorCard.tsx`**
+- Just below the `<h3>` title (and above the city line), render:
+  ```
+  <Ship icon> {trip_count} Trip{trip_count === 1 ? "" : "s"} Available
+  ```
+  Hide the row entirely when `trip_count === 0`.
+- Use the `Ship` lucide icon at `size-3.5`, styled like the existing city/instant-confirm rows (`mt-1.5 flex items-center gap-1.5 text-sm text-muted-foreground`).
+
+No other changes (capsule, pricing, layout untouched).

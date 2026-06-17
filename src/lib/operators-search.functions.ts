@@ -22,6 +22,7 @@ export type OperatorCardDTO = {
   rating: number | null;
   review_count: number | null;
   lowest_price_label: string | null; // e.g. "From US $200"
+  trip_count: number;
 };
 
 const searchSchema = z.object({
@@ -131,6 +132,7 @@ export const searchOperatorsServer = createServerFn({ method: "POST" })
         lowest_price_label: cheapest
           ? formatPrice(cheapest.price_minor, cheapest.currency)
           : null,
+        trip_count: active.length > 0 ? active.length : trips.length,
       };
     });
 
