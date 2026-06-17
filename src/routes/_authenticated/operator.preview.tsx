@@ -236,7 +236,11 @@ function OperatorPreviewPage() {
               businessType={op?.business_type}
               about={op?.about}
             />
-            <TripsBlock trips={trips as any} />
+            <TripsBlock
+              trips={trips as any}
+              hostId={op?.id ?? null}
+              hostHasAvailability={data?.hostHasAvailability ?? false}
+            />
             <WhatsBitingStub />
             <PoliciesBlock cancellationPolicy={op?.cancellation_policy ?? null} />
           </div>

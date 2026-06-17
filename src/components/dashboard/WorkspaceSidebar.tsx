@@ -2,9 +2,9 @@ import { Link, useRouterState } from "@tanstack/react-router";
 import {
   LayoutDashboard,
   Calendar,
+  CalendarDays,
   Wallet,
   BookOpen,
-  Clock,
   Receipt,
   Plus,
   Search,
@@ -37,7 +37,7 @@ const aideItems: Item[] = [
   { title: "My Schedule", to: "/dashboard/upcoming-sessions", icon: Calendar },
   { title: "My Earnings", to: "/dashboard/earnings", icon: Wallet },
   { title: "My Listing", to: "/dashboard/my-listing", icon: BookOpen },
-  { title: "Lab Hours", to: "/settings/profile", hash: "lab-hours", icon: Clock },
+  { title: "Manage Availability", to: "/dashboard/master-calendar", icon: CalendarDays },
 ];
 
 const learnerItems: Item[] = [

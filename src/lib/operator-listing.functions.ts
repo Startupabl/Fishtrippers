@@ -7,6 +7,7 @@ export interface OperatorListingPayload {
   boatType: { id: string; subcategory_name: string; icon_url: string | null } | null;
   trips: any[];
   ownerProfile: { full_name: string | null; avatar_url: string | null } | null;
+  hostHasAvailability: boolean;
 }
 
 export const getMyOperatorListing = createServerFn({ method: "GET" })
@@ -24,20 +25,26 @@ export const getMyOperatorListing = createServerFn({ method: "GET" })
     let vessel: any = null;
     let boatType: OperatorListingPayload["boatType"] = null;
     let trips: any[] = [];
+    let hostHasAvailability = false;
 
     if (operator) {
-      const [vRes, tRes] = await Promise.all([
+      const [vRes, tRes, aRes] = await Promise.all([
         supabase.from("vessels").select("*").eq("operator_id", operator.id).maybeSingle(),
         supabase
           .from("trip_packages")
           .select("*")
           .eq("operator_id", operator.id)
           .order("created_at", { ascending: true }),
+        supabase
+          .from("host_availability")
+          .select("id", { count: "exact", head: true })
+          .eq("host_id", operator.id),
       ]);
       if (vRes.error) throw new Error(vRes.error.message);
       if (tRes.error) throw new Error(tRes.error.message);
       vessel = vRes.data;
       trips = tRes.data ?? [];
+      hostHasAvailability = (aRes.count ?? 0) > 0;
 
       if (vessel?.boat_type_id) {
         const { data: bt } = await supabase
@@ -69,5 +76,6 @@ export const getMyOperatorListing = createServerFn({ method: "GET" })
       ownerProfile: prof
         ? { full_name: fullName, avatar_url: prof.avatar_url ?? null }
         : null,
+      hostHasAvailability,
     };
   });

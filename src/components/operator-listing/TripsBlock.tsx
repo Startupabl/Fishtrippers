@@ -19,6 +19,8 @@ import {
   fishingEnvironmentLabel,
 } from "@/lib/operators.shared";
 import { CurrencyDisclaimer } from "./CurrencyDisclaimer";
+import { CheckDatesDialog } from "./CheckDatesDialog";
+import { RequestToBookDialog } from "./RequestToBookDialog";
 
 interface Trip {
   id: string;
@@ -35,10 +37,13 @@ interface Trip {
   environments?: string[] | null;
   techniques?: string[] | null;
   departure_address?: string | null;
+  booking_type?: "instant_book" | "request_to_book" | null;
 }
 
 interface Props {
   trips: Trip[];
+  hostId?: string | null;
+  hostHasAvailability?: boolean;
 }
 
 function formatDuration(mins: number) {
@@ -66,10 +71,20 @@ function Chip({ children }: { children: React.ReactNode }) {
   );
 }
 
-function TripCard({ trip }: { trip: Trip }) {
+function TripCard({
+  trip,
+  hostId,
+  hostHasAvailability,
+}: {
+  trip: Trip;
+  hostId?: string | null;
+  hostHasAvailability?: boolean;
+}) {
   const minParty = Math.max(1, trip.min_party_size ?? 1);
   const maxParty = Math.max(minParty, trip.max_party_size ?? 1);
   const [guests, setGuests] = useState(minParty);
+  const [checkDatesOpen, setCheckDatesOpen] = useState(false);
+  const [requestOpen, setRequestOpen] = useState(false);
 
   const display = useCurrencyStore((s) => s.currency);
   const base = ((trip.currency || "USD").toUpperCase()) as CurrencyCode;
@@ -222,16 +237,67 @@ function TripCard({ trip }: { trip: Trip }) {
             />
           </div>
 
-          <Button className="mt-3 w-full bg-gold text-ocean-deep hover:bg-gold-deep">
-            Request to book
-          </Button>
+          {(() => {
+            const bt = trip.booking_type ?? "request_to_book";
+            const instantReady = bt === "instant_book" && hostHasAvailability && !!hostId;
+            const instantNotReady = bt === "instant_book" && (!hostHasAvailability || !hostId);
+
+            if (instantReady) {
+              return (
+                <Button
+                  className="mt-3 w-full bg-gold text-ocean-deep hover:bg-gold-deep"
+                  onClick={() => setCheckDatesOpen(true)}
+                >
+                  Check Dates
+                </Button>
+              );
+            }
+            return (
+              <>
+                {instantNotReady && (
+                  <p className="mt-3 rounded-md bg-amber-50 px-3 py-2 text-xs text-amber-900">
+                    The calendar isn&apos;t updated for this trip yet — instant booking
+                    isn&apos;t available. You can still send the host a request below.
+                  </p>
+                )}
+                <Button
+                  className="mt-3 w-full bg-gold text-ocean-deep hover:bg-gold-deep"
+                  onClick={() => setRequestOpen(true)}
+                >
+                  Request to Book
+                </Button>
+              </>
+            );
+          })()}
         </aside>
       </div>
+
+      {hostId ? (
+        <CheckDatesDialog
+          open={checkDatesOpen}
+          onOpenChange={setCheckDatesOpen}
+          tripId={trip.id}
+          hostId={hostId}
+          tripTitle={trip.title}
+          guests={guests}
+        />
+      ) : null}
+
+      <RequestToBookDialog
+        open={requestOpen}
+        onOpenChange={setRequestOpen}
+        tripId={trip.id}
+        tripTitle={trip.title}
+        defaultStartTime={trip.start_time ?? null}
+        defaultDurationHours={Math.max(1, Math.round((trip.duration_minutes ?? 240) / 60))}
+        minParty={minParty}
+        maxParty={maxParty}
+      />
     </article>
   );
 }
 
-export function TripsBlock({ trips }: Props) {
+export function TripsBlock({ trips, hostId, hostHasAvailability }: Props) {
   return (
     <section id="trips" className="scroll-mt-32 space-y-4">
       <h2 className="text-2xl font-bold tracking-tight">
@@ -254,7 +320,12 @@ export function TripsBlock({ trips }: Props) {
       ) : (
         <div className="space-y-4">
           {trips.map((t) => (
-            <TripCard key={t.id} trip={t} />
+            <TripCard
+              key={t.id}
+              trip={t}
+              hostId={hostId}
+              hostHasAvailability={hostHasAvailability}
+            />
           ))}
         </div>
       )}
