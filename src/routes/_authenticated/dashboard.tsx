@@ -139,7 +139,7 @@ function AideDashboardHome() {
             to="/dashboard/upcoming-sessions"
             icon={<Calendar className="size-5" />}
             title="My Schedule"
-            desc="Track your scheduled learner sessions."
+            desc="Track your scheduled fishing trips."
             tint={`${YELLOW}33`}
           />
           <NavCard
