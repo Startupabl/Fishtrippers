@@ -1,6 +1,6 @@
 // Shared types, constants & Zod schemas used by both client and server functions.
 import { z } from "zod";
-import { Fish, Sailboat, Waves, Sun, Trees, Mountain, TreePine, type LucideIcon } from "lucide-react";
+import { Fish, Sailboat, Waves, Sun, Trees, Mountain, TreePine, Anchor, Footprints, type LucideIcon } from "lucide-react";
 
 
 // ---------- Business / category enums ----------
@@ -151,6 +151,8 @@ export const FISHING_ENVIRONMENTS: readonly FishingEnvironment[] = [
   { id: "freshwater", label: "Freshwater", description: "Lakes, ponds, and reservoirs.", icon: Trees },
   { id: "rivers_streams", label: "Rivers & Streams", description: "Running water systems.", icon: Mountain },
   { id: "backcountry", label: "Backcountry", description: "Remote, narrow waterways, mangroves, or swamp-like environments.", icon: TreePine },
+  { id: "shore_shoreline", label: "Shore / Shoreline", description: "Fishing from beaches, jetties, piers and rocky shorelines.", icon: Anchor },
+  { id: "walk_wade", label: "Walk & Wade", description: "Wading creeks, flats and shallow waters on foot.", icon: Footprints },
 ] as const;
 export type FishingEnvironmentId = (typeof FISHING_ENVIRONMENTS)[number]["id"];
 export const FISHING_ENVIRONMENT_IDS: string[] = FISHING_ENVIRONMENTS.map((e) => e.id);
