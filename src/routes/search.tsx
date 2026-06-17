@@ -1,417 +1,392 @@
-import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
+import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useServerFn } from "@tanstack/react-start";
 import { useQuery } from "@tanstack/react-query";
-import { Search, X, SlidersHorizontal } from "lucide-react";
+import { useState } from "react";
+import {
+  Search,
+  MapPin,
+  Calendar,
+  Users,
+  SlidersHorizontal,
+  ArrowUpDown,
+  Zap,
+  ChevronDown,
+} from "lucide-react";
 import { z } from "zod";
 import { fallback, zodValidator } from "@tanstack/zod-adapter";
-import { LiveJourneyCard } from "@/components/listings/LiveJourneyCard";
-import { listCategories, type CategoryRow } from "@/lib/categories.functions";
-import { DESIGN_SYSTEM } from "@/lib/brand";
 import {
-  Accordion,
-  AccordionContent,
-  AccordionItem,
-  AccordionTrigger,
-} from "@/components/ui/accordion";
-import { searchJourneysServer, type JourneyRow } from "@/lib/journeys.functions";
-import { TagSuggestInput } from "@/components/search/TagSuggestInput";
+  searchOperatorsServer,
+  type OperatorCardDTO,
+} from "@/lib/operators-search.functions";
+import { OperatorCard } from "@/components/listings/OperatorCard";
+import { FISHING_ENVIRONMENTS } from "@/lib/operators.shared";
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover";
 import { cn } from "@/lib/utils";
 
 const searchSchema = z.object({
   q: fallback(z.string(), "").default(""),
+  city: fallback(z.string(), "").default(""),
   category: fallback(z.string(), "").default(""),
-  subcategory: fallback(z.string(), "").default(""),
-  level: fallback(
-    z.enum(["beginner", "intermediate", "advanced", ""]),
-    "",
-  ).default(""),
-  empty: fallback(z.boolean(), false).default(false),
+  instantBook: fallback(z.boolean(), false).default(false),
+  tripDate: fallback(z.string(), "").default(""),
+  adults: fallback(z.number().int().min(1).max(20), 2).default(2),
+  children: fallback(z.number().int().min(0).max(20), 0).default(0),
+  duration: fallback(z.string(), "").default(""),
+  priceRange: fallback(z.string(), "").default(""),
+  departureTime: fallback(z.string(), "").default(""),
+  technique: fallback(z.string(), "").default(""),
+  species: fallback(z.string(), "").default(""),
 });
 
-const LEVEL_LABELS: Record<"beginner" | "intermediate" | "advanced", string> = {
-  beginner: "Fresh Squeezed (Beginner)",
-  intermediate: "Zesty (Intermediate)",
-  advanced: "Tart (Advanced)",
-};
+type SearchState = z.infer<typeof searchSchema>;
 
 export const Route = createFileRoute("/search")({
   validateSearch: zodValidator(searchSchema),
   head: () => ({
     meta: [
-      { title: "Browse Aide-Led AI Courses — FishTrippers" },
+      { title: "Browse Fishing Charters & Guides — FishTrippers" },
       {
         name: "description",
         content:
-          "Browse live, Aide-guided AI Courses by category — find the Course that matches what you want to master.",
+          "Search verified fishing charters and guides by city, fishing environment, and more.",
       },
-      { property: "og:title", content: "Browse Aide-Led AI Courses — FishTrippers" },
-      {
-        property: "og:description",
-        content:
-          "Browse live, Aide-guided AI Courses by category — find the Course that matches what you want to master.",
-      },
-      { property: "og:url", content: "https://fishtrippers.com/search" },
     ],
-    links: [{ rel: "canonical", href: "https://fishtrippers.com/search" }],
   }),
   component: SearchPage,
 });
 
 function SearchPage() {
   const navigate = useNavigate();
-  const { q, category, subcategory, level, empty } = Route.useSearch();
+  const search = Route.useSearch();
 
-  const searchFn = useServerFn(searchJourneysServer);
+  // Local input state for city — only commit to URL on Search click / Enter
+  const [cityInput, setCityInput] = useState(search.city);
+  const [qInput, setQInput] = useState(search.q);
+
+  const searchFn = useServerFn(searchOperatorsServer);
   const liveQuery = useQuery({
-    queryKey: ["search-journeys", q, category, subcategory, level],
-    queryFn: () => searchFn({ data: { q, category, subcategory } }),
+    queryKey: [
+      "search-operators",
+      search.q,
+      search.city,
+      search.category,
+      search.instantBook,
+    ],
+    queryFn: () =>
+      searchFn({
+        data: {
+          q: search.q || null,
+          city: search.city || null,
+          category: search.category || null,
+          instantBook: search.instantBook || null,
+        },
+      }),
   });
 
-  const allResults: JourneyRow[] = liveQuery.data?.items ?? [];
-  const liveResults: JourneyRow[] = level
-    ? allResults.filter(
-        (j) => (j.experience_level ?? "").toLowerCase() === level,
-      )
-    : allResults;
+  const results: OperatorCardDTO[] = liveQuery.data?.items ?? [];
 
-  const fetchCategories = useServerFn(listCategories);
-  const categoriesQuery = useQuery({
-    queryKey: ["categories"],
-    queryFn: () => fetchCategories(),
-  });
-  const allCats: CategoryRow[] = categoriesQuery.data ?? [];
-  const parentCats = allCats.filter((c) => c.parent_id === null);
-  const childrenByParent = new Map<string, CategoryRow[]>();
-  for (const c of allCats) {
-    if (c.parent_id) {
-      const arr = childrenByParent.get(c.parent_id) ?? [];
-      arr.push(c);
-      childrenByParent.set(c.parent_id, arr);
-    }
-  }
-
-  function setSearch(
-    next: Partial<{
-      q: string;
-      category: string;
-      subcategory: string;
-      level: "" | "beginner" | "intermediate" | "advanced";
-      empty: boolean;
-    }>,
-  ) {
+  function setSearch(next: Partial<SearchState>) {
     navigate({
       to: "/search",
-      search: (prev: {
-        q?: string;
-        category?: string;
-        subcategory?: string;
-        level?: "" | "beginner" | "intermediate" | "advanced";
-        empty?: boolean;
-      }) => ({
-        q: prev.q ?? "",
-        category: prev.category ?? "",
-        subcategory: prev.subcategory ?? "",
-        level: prev.level ?? "",
-        empty: prev.empty ?? false,
-        ...next,
-      }),
+      search: (prev: Partial<SearchState>) => ({ ...prev, ...next }),
       replace: true,
     });
   }
 
-  const sidebar = (
-    <div className="space-y-4">
-      <div className="relative">
-        <Search className="pointer-events-none absolute left-3 top-1/2 z-10 size-4 -translate-y-1/2 text-muted-foreground" />
-        <TagSuggestInput
-          value={q}
-          onChange={(v) => setSearch({ q: v })}
-          onSubmit={(v) => setSearch({ q: v })}
-          placeholder="Search courses…"
-          ariaLabel="Search courses"
-          inputClassName="w-full rounded-full border border-border bg-card py-2.5 pl-10 pr-4 text-sm text-foreground placeholder:text-muted-foreground focus:border-info focus:outline-none focus:ring-2 focus:ring-info/30"
-        />
-      </div>
+  function submitTopBar() {
+    setSearch({ city: cityInput, q: qInput });
+  }
 
-      <div className="space-y-1">
-        <div className="flex items-center justify-between px-1">
-          <h2 className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
-            Experience Level
-          </h2>
-          {level && (
-            <button
-              type="button"
-              onClick={() => setSearch({ level: "" })}
-              className="text-xs font-medium text-info hover:underline"
-            >
-              Clear
-            </button>
-          )}
-        </div>
+  const activeCategoryLabel =
+    FISHING_ENVIRONMENTS.find((e) => e.id === search.category)?.label ??
+    "All categories";
 
-        <Accordion type="single" collapsible className="w-full">
-          <AccordionItem value="experience-level" className="border-b-0">
-            <AccordionTrigger
-              className={cn(
-                "rounded-md px-3 py-2 text-sm font-medium hover:bg-accent hover:no-underline",
-                level && "text-info",
-              )}
-            >
-              {level
-                ? LEVEL_LABELS[level as "beginner" | "intermediate" | "advanced"]
-                : "All Levels"}
-            </AccordionTrigger>
-            <AccordionContent className="pb-1 pl-3">
+  const headerLabel = search.city
+    ? `${search.city}: ${results.length} fishing ${results.length === 1 ? "charter" : "charters"} available`
+    : `${results.length} fishing ${results.length === 1 ? "charter" : "charters"} available`;
+
+  return (
+    <main className="mx-auto max-w-[1400px] px-4 md:px-8 py-6">
+      {/* TOP SEARCH BAR */}
+      <section className="rounded-2xl border border-border bg-card p-3 shadow-sm">
+        <form
+          onSubmit={(e) => {
+            e.preventDefault();
+            submitTopBar();
+          }}
+          className="grid grid-cols-1 gap-2 md:grid-cols-[1.5fr_1fr_1fr_auto]"
+        >
+          <label className="flex items-center gap-2 rounded-xl border border-border bg-background px-3 py-2.5">
+            <MapPin className="size-4 text-muted-foreground" />
+            <input
+              type="text"
+              value={cityInput}
+              onChange={(e) => setCityInput(e.target.value)}
+              placeholder="City (e.g. San Francisco)"
+              className="w-full bg-transparent text-sm outline-none placeholder:text-muted-foreground"
+              aria-label="City"
+            />
+          </label>
+
+          <label className="flex items-center gap-2 rounded-xl border border-border bg-background px-3 py-2.5 text-muted-foreground">
+            <Calendar className="size-4" />
+            <input
+              type="date"
+              value={search.tripDate}
+              onChange={(e) => setSearch({ tripDate: e.target.value })}
+              className="w-full bg-transparent text-sm text-foreground outline-none"
+              aria-label="Trip date"
+            />
+          </label>
+
+          <Popover>
+            <PopoverTrigger asChild>
               <button
                 type="button"
-                onClick={() => setSearch({ level: "" })}
-                className={cn(
-                  "block w-full rounded-md px-3 py-1.5 text-left text-sm transition-colors",
-                  !level
-                    ? "bg-info/15 font-medium text-info"
-                    : "text-muted-foreground hover:bg-accent hover:text-foreground",
-                )}
+                className="flex items-center justify-between gap-2 rounded-xl border border-border bg-background px-3 py-2.5 text-left text-sm"
               >
-                All Levels
+                <span className="flex items-center gap-2">
+                  <Users className="size-4 text-muted-foreground" />
+                  {search.adults} adult{search.adults === 1 ? "" : "s"} •{" "}
+                  {search.children} child{search.children === 1 ? "" : "ren"}
+                </span>
+                <ChevronDown className="size-4 text-muted-foreground" />
               </button>
-              {(["beginner", "intermediate", "advanced"] as const).map((lv) => (
-                <button
-                  key={lv}
-                  type="button"
-                  onClick={() => setSearch({ level: lv })}
-                  className={cn(
-                    "block w-full rounded-md px-3 py-1.5 text-left text-sm transition-colors",
-                    level === lv
-                      ? "bg-info/15 font-medium text-info"
-                      : "text-muted-foreground hover:bg-accent hover:text-foreground",
-                  )}
-                >
-                  {LEVEL_LABELS[lv]}
-                </button>
-              ))}
-            </AccordionContent>
-          </AccordionItem>
-        </Accordion>
-      </div>
+            </PopoverTrigger>
+            <PopoverContent className="w-64 p-4">
+              <Stepper
+                label="Adults"
+                value={search.adults}
+                min={1}
+                onChange={(v) => setSearch({ adults: v })}
+              />
+              <div className="h-3" />
+              <Stepper
+                label="Children"
+                value={search.children}
+                min={0}
+                onChange={(v) => setSearch({ children: v })}
+              />
+            </PopoverContent>
+          </Popover>
 
+          <button
+            type="submit"
+            className="inline-flex items-center justify-center gap-2 rounded-xl bg-info px-6 py-2.5 text-sm font-semibold text-info-foreground transition-opacity hover:opacity-90"
+          >
+            <Search className="size-4" />
+            Search
+          </button>
+        </form>
+      </section>
 
-      <div className="space-y-1">
-        <div className="flex items-center justify-between px-1">
-          <h2 className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
-            Categories
-          </h2>
-          {(category || subcategory) && (
-            <button
-              type="button"
-              onClick={() => setSearch({ category: "", subcategory: "" })}
-              className="text-xs font-medium text-info hover:underline"
-            >
-              Clear
-            </button>
-          )}
-        </div>
+      {/* FILTER PILL ROW */}
+      <section className="mt-4 flex flex-wrap items-center gap-2">
+        <FilterPill label="Sort by Recommended" icon={<ArrowUpDown className="size-3.5" />} disabled />
+        <FilterPill label="Filters" icon={<SlidersHorizontal className="size-3.5" />} disabled />
 
         <button
           type="button"
-          onClick={() => setSearch({ category: "", subcategory: "" })}
+          onClick={() => setSearch({ instantBook: !search.instantBook })}
           className={cn(
-            "block w-full rounded-md px-3 py-2 text-left text-sm font-medium transition-colors",
-            !category
-              ? "bg-info text-info-foreground"
-              : "text-foreground hover:bg-accent",
+            "inline-flex items-center gap-1.5 rounded-full border px-3.5 py-1.5 text-sm font-medium transition-colors",
+            search.instantBook
+              ? "border-info bg-info text-info-foreground"
+              : "border-border bg-card text-foreground hover:bg-accent",
           )}
         >
-          All Categories
+          <Zap className="size-3.5" />
+          Instant Book
         </button>
 
-        <Accordion type="multiple" className="w-full">
-          {parentCats.map((parent) => {
-            const kids = childrenByParent.get(parent.id) ?? [];
-            if (kids.length === 0) {
-              return (
-                <button
-                  key={parent.id}
-                  type="button"
-                  onClick={() =>
-                    setSearch({ category: parent.name, subcategory: "" })
-                  }
-                  className={cn(
-                    "block w-full rounded-md px-3 py-2 text-left text-sm font-medium transition-colors",
-                    category === parent.name && !subcategory
-                      ? "bg-info text-info-foreground"
-                      : "text-foreground hover:bg-accent",
-                  )}
-                >
-                  {parent.name}
-                </button>
-              );
-            }
-            return (
-              <AccordionItem
-                key={parent.id}
-                value={parent.id}
-                className="border-b-0"
+        <PopoverPill
+          label={activeCategoryLabel === "All categories" ? "Category" : activeCategoryLabel}
+          active={!!search.category}
+        >
+          <div className="w-60 p-2">
+            <button
+              type="button"
+              onClick={() => setSearch({ category: "" })}
+              className={cn(
+                "block w-full rounded-md px-3 py-1.5 text-left text-sm",
+                !search.category
+                  ? "bg-info/15 font-medium text-info"
+                  : "text-foreground hover:bg-accent",
+              )}
+            >
+              All categories
+            </button>
+            {FISHING_ENVIRONMENTS.map((env) => (
+              <button
+                key={env.id}
+                type="button"
+                onClick={() => setSearch({ category: env.id })}
+                className={cn(
+                  "block w-full rounded-md px-3 py-1.5 text-left text-sm",
+                  search.category === env.id
+                    ? "bg-info/15 font-medium text-info"
+                    : "text-foreground hover:bg-accent",
+                )}
               >
-                <AccordionTrigger
-                  className={cn(
-                    "rounded-md px-3 py-2 text-sm font-medium hover:bg-accent hover:no-underline",
-                    category === parent.name && "text-info",
-                  )}
-                >
-                  {parent.name}
-                </AccordionTrigger>
-                <AccordionContent className="pb-1 pl-3">
-                  <button
-                    type="button"
-                    onClick={() =>
-                      setSearch({ category: parent.name, subcategory: "" })
-                    }
-                    className={cn(
-                      "block w-full rounded-md px-3 py-1.5 text-left text-sm transition-colors",
-                      category === parent.name && !subcategory
-                        ? "bg-info/15 font-medium text-info"
-                        : "text-muted-foreground hover:bg-accent hover:text-foreground",
-                    )}
-                  >
-                    All {parent.name}
-                  </button>
-                  {kids.map((kid) => (
-                    <button
-                      key={kid.id}
-                      type="button"
-                      onClick={() =>
-                        setSearch({
-                          category: parent.name,
-                          subcategory: kid.name,
-                        })
-                      }
-                      className={cn(
-                        "block w-full rounded-md px-3 py-1.5 text-left text-sm transition-colors",
-                        subcategory === kid.name
-                          ? "bg-info/15 font-medium text-info"
-                          : "text-muted-foreground hover:bg-accent hover:text-foreground",
-                      )}
-                    >
-                      {kid.name}
-                    </button>
-                  ))}
-                </AccordionContent>
-              </AccordionItem>
-            );
-          })}
-        </Accordion>
-      </div>
-    </div>
-  );
+                {env.label}
+              </button>
+            ))}
+          </div>
+        </PopoverPill>
 
-  return (
-    <main className="mx-auto max-w-[1400px] px-4 md:px-8 py-10">
-      <header className="mb-6">
+        <FilterPill label="Duration" comingSoon />
+        <FilterPill label="Price Range" comingSoon />
+        <FilterPill label="Departure Time" comingSoon />
+        <FilterPill label="Fishing Technique" comingSoon />
+        <FilterPill label="Target Fish" comingSoon />
+      </section>
+
+      {/* RESULTS HEADER */}
+      <header className="mt-6 mb-4">
         <h1
-          className="text-3xl text-foreground md:text-4xl"
+          className="text-2xl text-foreground md:text-3xl"
           style={{ fontFamily: "Lora, ui-serif, Georgia, serif" }}
         >
-          Explore Courses
+          {liveQuery.isLoading ? "Searching…" : headerLabel}
         </h1>
-        <p className="mt-1 text-sm text-muted-foreground">
-          {liveQuery.isLoading
-            ? "Searching…"
-            : `Showing ${liveResults.length} ${liveResults.length === 1 ? "Course" : "Courses"}${q ? ` for "${q}"` : ""}`}
-        </p>
       </header>
 
-      {level && (
-        <div className="mb-4 inline-flex items-center gap-2 rounded-full bg-primary/15 px-3 py-1 text-xs font-medium text-foreground">
-          <span>
-            Level:{" "}
-            {LEVEL_LABELS[level as "beginner" | "intermediate" | "advanced"]}
-          </span>
+      {/* RESULTS GRID */}
+      {liveQuery.isLoading ? (
+        <ul className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
+          {Array.from({ length: 6 }).map((_, i) => (
+            <li
+              key={i}
+              className="aspect-[16/12] animate-pulse rounded-2xl border border-border bg-muted/40"
+            />
+          ))}
+        </ul>
+      ) : results.length === 0 ? (
+        <div className="rounded-2xl border border-dashed border-border bg-card p-10 text-center text-sm text-muted-foreground">
+          No charters match your search. Try clearing the city or category filter.
+        </div>
+      ) : (
+        <ul className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
+          {results.map((op) => (
+            <OperatorCard key={op.id} operator={op} />
+          ))}
+        </ul>
+      )}
+    </main>
+  );
+}
+
+function FilterPill({
+  label,
+  icon,
+  disabled,
+  comingSoon,
+}: {
+  label: string;
+  icon?: React.ReactNode;
+  disabled?: boolean;
+  comingSoon?: boolean;
+}) {
+  if (comingSoon) {
+    return (
+      <Popover>
+        <PopoverTrigger asChild>
           <button
             type="button"
-            onClick={() => setSearch({ level: "" })}
-            className="hover:text-primary"
-            aria-label="Clear level filter"
+            className="inline-flex items-center gap-1.5 rounded-full border border-border bg-card px-3.5 py-1.5 text-sm font-medium text-foreground hover:bg-accent"
           >
-            <X className="size-3" />
+            {label}
+            <ChevronDown className="size-3.5 text-muted-foreground" />
           </button>
-        </div>
-      )}
+        </PopoverTrigger>
+        <PopoverContent className="w-56 p-3 text-sm text-muted-foreground">
+          Coming soon — this filter is still being wired up.
+        </PopoverContent>
+      </Popover>
+    );
+  }
+  return (
+    <button
+      type="button"
+      disabled={disabled}
+      className="inline-flex items-center gap-1.5 rounded-full border border-border bg-card px-3.5 py-1.5 text-sm font-medium text-foreground hover:bg-accent disabled:cursor-default disabled:opacity-90"
+    >
+      {icon}
+      {label}
+      {!icon && <ChevronDown className="size-3.5 text-muted-foreground" />}
+    </button>
+  );
+}
 
-      <div className="grid grid-cols-12 gap-6">
-        {/* Sidebar */}
-        <aside className="col-span-12 lg:col-span-3">
-          {/* Mobile: collapsible */}
-          <details className="lg:hidden rounded-2xl border border-border bg-card p-4">
-            <summary className="flex cursor-pointer items-center gap-2 text-sm font-semibold text-foreground">
-              <SlidersHorizontal className="size-4" />
-              Search & Filters
-            </summary>
-            <div className="mt-4">{sidebar}</div>
-          </details>
-          {/* Desktop: sticky */}
-          <div className="hidden lg:block lg:sticky lg:top-24">{sidebar}</div>
-        </aside>
+function PopoverPill({
+  label,
+  active,
+  children,
+}: {
+  label: string;
+  active?: boolean;
+  children: React.ReactNode;
+}) {
+  return (
+    <Popover>
+      <PopoverTrigger asChild>
+        <button
+          type="button"
+          className={cn(
+            "inline-flex items-center gap-1.5 rounded-full border px-3.5 py-1.5 text-sm font-medium transition-colors",
+            active
+              ? "border-info bg-info text-info-foreground"
+              : "border-border bg-card text-foreground hover:bg-accent",
+          )}
+        >
+          {label}
+          <ChevronDown className="size-3.5" />
+        </button>
+      </PopoverTrigger>
+      <PopoverContent align="start" className="p-0">
+        {children}
+      </PopoverContent>
+    </Popover>
+  );
+}
 
-        {/* Results */}
-        <section id="search-results" className="col-span-12 lg:col-span-9">
-          {empty && (
-            <div className="mb-6 flex items-start gap-4 rounded-2xl border border-emerald-200 bg-emerald-50 p-4 sm:p-5">
-              <div className="flex-1">
-                <p className="text-sm font-semibold text-foreground">
-                  You haven't placed any orders yet.
-                </p>
-                <p className="mt-1 text-sm text-muted-foreground">
-                  Ready to start learning? Browse our AI courses below.
-                </p>
-                <button
-                  type="button"
-                  onClick={() => {
-                    setSearch({ empty: false });
-                    document
-                      .getElementById("search-results")
-                      ?.scrollIntoView({ behavior: "smooth", block: "start" });
-                  }}
-                  className="mt-3 inline-flex items-center rounded-full px-4 py-2 text-sm font-semibold text-white shadow-sm transition-opacity hover:opacity-90"
-                  style={{ backgroundColor: DESIGN_SYSTEM.colors.leafGreen }}
-                >
-                  Browse Courses
-                </button>
-              </div>
-              <button
-                type="button"
-                aria-label="Dismiss"
-                onClick={() => setSearch({ empty: false })}
-                className="rounded-full p-1 text-muted-foreground transition-colors hover:bg-emerald-100"
-              >
-                <X className="size-4" />
-              </button>
-            </div>
-          )}
-          {liveQuery.isLoading ? (
-            <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
-              {Array.from({ length: 6 }).map((_, i) => (
-                <div
-                  key={i}
-                  className="aspect-[16/10] animate-pulse rounded-2xl border border-border bg-muted/40"
-                />
-              ))}
-            </div>
-          ) : liveResults.length === 0 ? (
-            <div className="rounded-2xl border border-dashed border-border bg-card p-8 text-center text-sm text-muted-foreground">
-              Mission not found! Try a different keyword or category.{" "}
-              <Link to="/" className="text-info hover:underline">
-                Back home
-              </Link>
-            </div>
-          ) : (
-            <ul className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
-              {liveResults.map((j) => (
-                <LiveJourneyCard key={j.id} journey={j} />
-              ))}
-            </ul>
-          )}
-        </section>
+function Stepper({
+  label,
+  value,
+  min,
+  onChange,
+}: {
+  label: string;
+  value: number;
+  min: number;
+  onChange: (v: number) => void;
+}) {
+  return (
+    <div className="flex items-center justify-between">
+      <span className="text-sm font-medium text-foreground">{label}</span>
+      <div className="flex items-center gap-3">
+        <button
+          type="button"
+          onClick={() => onChange(Math.max(min, value - 1))}
+          className="flex size-7 items-center justify-center rounded-full border border-border text-foreground hover:bg-accent"
+          aria-label={`Decrease ${label}`}
+        >
+          −
+        </button>
+        <span className="w-6 text-center text-sm tabular-nums">{value}</span>
+        <button
+          type="button"
+          onClick={() => onChange(value + 1)}
+          className="flex size-7 items-center justify-center rounded-full border border-border text-foreground hover:bg-accent"
+          aria-label={`Increase ${label}`}
+        >
+          +
+        </button>
       </div>
-    </main>
+    </div>
   );
 }
