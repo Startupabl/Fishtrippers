@@ -4,10 +4,9 @@ import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import {
   Sparkles,
   Play,
-  LayoutGrid,
-  Handshake,
-  GlassWater,
-  RefreshCw,
+  Search,
+  CalendarCheck,
+  Waves,
   ChevronLeft,
   ChevronRight,
 } from "lucide-react";
