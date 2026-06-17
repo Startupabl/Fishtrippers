@@ -392,6 +392,16 @@ function MyListingPage() {
                       size="icon"
                       variant="ghost"
                       asChild
+                      title="Manage Availability"
+                    >
+                      <Link to="/dashboard/master-calendar">
+                        <CalendarDays className="size-4" />
+                      </Link>
+                    </Button>
+                    <Button
+                      size="icon"
+                      variant="ghost"
+                      asChild
                       title="Preview"
                     >
                       <Link to="/operator/preview">
