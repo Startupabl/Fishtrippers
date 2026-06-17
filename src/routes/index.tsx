@@ -427,7 +427,6 @@ function Index() {
                   <OperatorCard key={op.id} operator={op} />
                 ))}
               </ul>
-              </ul>
             )}
           </div>
         </section>
