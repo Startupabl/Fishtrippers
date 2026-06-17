@@ -13,15 +13,19 @@ const ALLOWED_PREFIXES = [
   "/reset-password",
   "/onboarding",
   "/pages",
-  "/privacy-policy",
-  "/terms-of-service",
+  "/privacy",
+  "/terms",
   "/security",
   "/trust-and-safety",
   "/acceptable-use-policy",
   "/data-handling",
   "/mentor-agreement",
   "/contact",
-  "/about-us",
+  "/about",
+  "/how-it-works-trippers",
+  "/how-it-works-hosts",
+  "/cancellation-policy",
+  "/create-listing",
 ];
 
 function isAllowed(pathname: string): boolean {
