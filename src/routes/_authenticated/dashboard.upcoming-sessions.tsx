@@ -536,12 +536,12 @@ function ScheduleTableRow({
                 variant="outline"
                 className="h-8 px-2 text-xs font-medium"
               >
-                {studentCount} students ▾
+                {studentCount} clients ▾
               </Button>
             </PopoverTrigger>
             <PopoverContent className="w-64 p-2" align="start">
               <div className="text-xs font-semibold text-muted-foreground px-2 py-1">
-                Enrolled students
+                Enrolled clients
               </div>
               <ul className="max-h-64 overflow-y-auto">
                 {row.students.map((s) => (
