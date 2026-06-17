@@ -71,10 +71,20 @@ function Chip({ children }: { children: React.ReactNode }) {
   );
 }
 
-function TripCard({ trip }: { trip: Trip }) {
+function TripCard({
+  trip,
+  hostId,
+  hostHasAvailability,
+}: {
+  trip: Trip;
+  hostId?: string | null;
+  hostHasAvailability?: boolean;
+}) {
   const minParty = Math.max(1, trip.min_party_size ?? 1);
   const maxParty = Math.max(minParty, trip.max_party_size ?? 1);
   const [guests, setGuests] = useState(minParty);
+  const [checkDatesOpen, setCheckDatesOpen] = useState(false);
+  const [requestOpen, setRequestOpen] = useState(false);
 
   const display = useCurrencyStore((s) => s.currency);
   const base = ((trip.currency || "USD").toUpperCase()) as CurrencyCode;
