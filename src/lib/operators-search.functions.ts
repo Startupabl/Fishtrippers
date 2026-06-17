@@ -13,6 +13,7 @@ export type OperatorCardDTO = {
   cover_image_url: string | null;
   vessel_length_ft: number | null;
   vessel_capacity: number | null;
+  business_type: "charter" | "guide" | null;
   boat_type_icon_url: string | null;
   boat_type_name: string | null;
   booking_type: "instant" | "inquiry" | null;
@@ -64,7 +65,7 @@ export const searchOperatorsServer = createServerFn({ method: "POST" })
       .from("operators")
       .select(
         `
-        id, slug, display_name,
+        id, slug, display_name, business_type,
         default_departure_city, default_departure_state, default_departure_country,
         cover_image_url, booking_type, fishing_environments, featured, priority_order, created_at,
         vessels ( length_ft, max_passenger_capacity, boat_type_id, boat_types ( icon_url, subcategory_name ) ),
@@ -120,6 +121,7 @@ export const searchOperatorsServer = createServerFn({ method: "POST" })
         cover_image_url: row.cover_image_url ?? null,
         vessel_length_ft: vessel?.length_ft != null ? Number(vessel.length_ft) : null,
         vessel_capacity: vessel?.max_passenger_capacity ?? null,
+        business_type: row.business_type ?? null,
         boat_type_icon_url: boatType?.icon_url ?? null,
         boat_type_name: boatType?.subcategory_name ?? null,
         booking_type: row.booking_type ?? null,

@@ -1,5 +1,5 @@
 import { Link } from "@tanstack/react-router";
-import { Sailboat, Users, ShieldCheck, MapPin, Zap, Star, Ship } from "lucide-react";
+import { Sailboat, Users, ShieldCheck, MapPin, Zap, Star, Ship, Footprints } from "lucide-react";
 import type { OperatorCardDTO } from "@/lib/operators-search.functions";
 
 export function OperatorCard({ operator }: { operator: OperatorCardDTO }) {
@@ -9,7 +9,17 @@ export function OperatorCard({ operator }: { operator: OperatorCardDTO }) {
 
   const segments: Array<{ key: string; content: React.ReactNode }> = [];
 
-  if (operator.vessel_length_ft != null) {
+  if (operator.business_type === "guide") {
+    segments.push({
+      key: "guide",
+      content: (
+        <>
+          <Footprints className="size-4 text-foreground" />
+          <span>Guide</span>
+        </>
+      ),
+    });
+  } else if (operator.vessel_length_ft != null) {
     segments.push({
       key: "length",
       content: (
