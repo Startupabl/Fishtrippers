@@ -13,6 +13,7 @@ export type OperatorCardDTO = {
   cover_image_url: string | null;
   vessel_length_ft: number | null;
   vessel_capacity: number | null;
+  business_type: "charter" | "guide" | null;
   boat_type_icon_url: string | null;
   boat_type_name: string | null;
   booking_type: "instant" | "inquiry" | null;
