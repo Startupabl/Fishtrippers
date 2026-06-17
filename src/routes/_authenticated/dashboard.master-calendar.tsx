@@ -28,7 +28,8 @@ import {
   setAllTripsBookingType,
 } from "@/lib/host-availability.functions";
 import { listMyTrips } from "@/lib/trips.functions";
-import { Zap, MessageSquare, CalendarDays } from "lucide-react";
+import { Zap, MessageSquare, CalendarDays, HelpCircle } from "lucide-react";
+import { HowBookingsWorkDialog } from "@/components/dashboard/HowBookingsWorkDialog";
 
 export const Route = createFileRoute("/_authenticated/dashboard/master-calendar")({
   head: () => ({
@@ -70,6 +71,7 @@ function MasterCalendarPage() {
   const [selected, setSelected] = useState<Set<string>>(new Set());
   const [confirmType, setConfirmType] =
     useState<"instant_book" | "request_to_book" | null>(null);
+  const [helpOpen, setHelpOpen] = useState(false);
 
   const trips = (tripsRes?.trips ?? []) as Array<{
     id: string;
@@ -137,15 +139,26 @@ function MasterCalendarPage() {
 
   return (
     <div className="mx-auto max-w-6xl px-4 py-8">
-      <header className="mb-6">
-        <h1 className="text-2xl font-bold tracking-tight">
-          <CalendarDays className="mr-2 inline-block size-6" />
-          Manage Availability
-        </h1>
-        <p className="mt-1 text-sm text-muted-foreground">
-          Block dates you can&apos;t run trips. Booked dates appear automatically
-          when guests pay for an instant-book trip.
-        </p>
+      <header className="mb-6 flex flex-wrap items-start justify-between gap-3">
+        <div>
+          <h1 className="text-2xl font-bold tracking-tight">
+            <CalendarDays className="mr-2 inline-block size-6" />
+            Manage Availability
+          </h1>
+          <p className="mt-1 text-sm text-muted-foreground">
+            Block dates you can&apos;t run trips. Booked dates appear automatically
+            when guests pay for an instant-book trip.
+          </p>
+        </div>
+        <Button
+          variant="outline"
+          size="sm"
+          onClick={() => setHelpOpen(true)}
+          className="shrink-0"
+        >
+          <HelpCircle className="mr-1.5 size-4" />
+          How Bookings Work
+        </Button>
       </header>
 
       {/* Booking mode toggle */}
@@ -250,6 +263,8 @@ function MasterCalendarPage() {
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
+
+      <HowBookingsWorkDialog open={helpOpen} onOpenChange={setHelpOpen} />
     </div>
   );
 }
