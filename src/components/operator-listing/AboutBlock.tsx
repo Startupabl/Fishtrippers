@@ -12,7 +12,9 @@ export function AboutBlock({ businessType, about }: Props) {
   return (
     <section className="space-y-3">
       <h2 className="text-2xl font-bold tracking-tight">{title}</h2>
-      <p className="whitespace-pre-wrap break-words [overflow-wrap:anywhere] leading-relaxed text-foreground/90">{text}</p>
+      <div className="rounded-2xl border bg-card p-6 shadow-sm">
+        <p className="whitespace-pre-wrap break-words [overflow-wrap:anywhere] leading-relaxed text-foreground/90">{text}</p>
+      </div>
     </section>
   );
 }
