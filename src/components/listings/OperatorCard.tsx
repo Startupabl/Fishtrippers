@@ -18,11 +18,11 @@ export function OperatorCard({ operator }: { operator: OperatorCardDTO }) {
             <img
               src={operator.boat_type_icon_url}
               alt={operator.boat_type_name ?? "Boat"}
-              className="h-5 w-auto object-contain"
+              className="h-7 w-auto object-contain"
               loading="lazy"
             />
           ) : (
-            <Sailboat className="h-5 w-5 text-foreground" />
+            <Sailboat className="h-7 w-7 text-foreground" />
           )}
           <span>{operator.vessel_length_ft} ft</span>
         </>
@@ -35,7 +35,7 @@ export function OperatorCard({ operator }: { operator: OperatorCardDTO }) {
       key: "capacity",
       content: (
         <>
-          <Users className="h-5 w-5 text-foreground" />
+          <Users className="h-3 w-3 text-foreground" />
           <span>{operator.vessel_capacity}</span>
         </>
       ),
@@ -47,7 +47,7 @@ export function OperatorCard({ operator }: { operator: OperatorCardDTO }) {
       key: "verified",
       content: (
         <>
-          <Star className="h-5 w-5 fill-amber-400 text-amber-400" />
+          <Star className="h-3 w-3 fill-amber-400 text-amber-400" />
           <span>Verified</span>
         </>
       ),
