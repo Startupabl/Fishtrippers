@@ -29,6 +29,7 @@ import { Route as CheckoutRouteImport } from './routes/checkout'
 import { Route as BecomeAnAideRouteImport } from './routes/become-an-aide'
 import { Route as BecomeAMentorRouteImport } from './routes/become-a-mentor'
 import { Route as AcceptableUsePolicyRouteImport } from './routes/acceptable-use-policy'
+import { Route as AboutRouteImport } from './routes/about'
 import { Route as AuthenticatedRouteImport } from './routes/_authenticated'
 import { Route as AdminRouteImport } from './routes/_admin'
 import { Route as IndexRouteImport } from './routes/index'
@@ -195,6 +196,11 @@ const BecomeAMentorRoute = BecomeAMentorRouteImport.update({
 const AcceptableUsePolicyRoute = AcceptableUsePolicyRouteImport.update({
   id: '/acceptable-use-policy',
   path: '/acceptable-use-policy',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AboutRoute = AboutRouteImport.update({
+  id: '/about',
+  path: '/about',
   getParentRoute: () => rootRouteImport,
 } as any)
 const AuthenticatedRoute = AuthenticatedRouteImport.update({
@@ -570,6 +576,7 @@ const AdminAdminSettingsPagesPageIdRoute =
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
+  '/about': typeof AboutRoute
   '/acceptable-use-policy': typeof AcceptableUsePolicyRoute
   '/become-a-mentor': typeof BecomeAMentorRoute
   '/become-an-aide': typeof BecomeAnAideRoute
@@ -657,6 +664,7 @@ export interface FileRoutesByFullPath {
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
+  '/about': typeof AboutRoute
   '/acceptable-use-policy': typeof AcceptableUsePolicyRoute
   '/become-a-mentor': typeof BecomeAMentorRoute
   '/become-an-aide': typeof BecomeAnAideRoute
@@ -744,6 +752,7 @@ export interface FileRoutesById {
   '/': typeof IndexRoute
   '/_admin': typeof AdminRouteWithChildren
   '/_authenticated': typeof AuthenticatedRouteWithChildren
+  '/about': typeof AboutRoute
   '/acceptable-use-policy': typeof AcceptableUsePolicyRoute
   '/become-a-mentor': typeof BecomeAMentorRoute
   '/become-an-aide': typeof BecomeAnAideRoute
@@ -833,6 +842,7 @@ export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
   fullPaths:
     | '/'
+    | '/about'
     | '/acceptable-use-policy'
     | '/become-a-mentor'
     | '/become-an-aide'
@@ -920,6 +930,7 @@ export interface FileRouteTypes {
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
+    | '/about'
     | '/acceptable-use-policy'
     | '/become-a-mentor'
     | '/become-an-aide'
@@ -1006,6 +1017,7 @@ export interface FileRouteTypes {
     | '/'
     | '/_admin'
     | '/_authenticated'
+    | '/about'
     | '/acceptable-use-policy'
     | '/become-a-mentor'
     | '/become-an-aide'
@@ -1096,6 +1108,7 @@ export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   AdminRoute: typeof AdminRouteWithChildren
   AuthenticatedRoute: typeof AuthenticatedRouteWithChildren
+  AboutRoute: typeof AboutRoute
   AcceptableUsePolicyRoute: typeof AcceptableUsePolicyRoute
   BecomeAMentorRoute: typeof BecomeAMentorRoute
   BecomeAnAideRoute: typeof BecomeAnAideRoute
@@ -1268,6 +1281,13 @@ declare module '@tanstack/react-router' {
       path: '/acceptable-use-policy'
       fullPath: '/acceptable-use-policy'
       preLoaderRoute: typeof AcceptableUsePolicyRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/about': {
+      id: '/about'
+      path: '/about'
+      fullPath: '/about'
+      preLoaderRoute: typeof AboutRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/_authenticated': {
@@ -1999,6 +2019,7 @@ const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   AdminRoute: AdminRouteWithChildren,
   AuthenticatedRoute: AuthenticatedRouteWithChildren,
+  AboutRoute: AboutRoute,
   AcceptableUsePolicyRoute: AcceptableUsePolicyRoute,
   BecomeAMentorRoute: BecomeAMentorRoute,
   BecomeAnAideRoute: BecomeAnAideRoute,
