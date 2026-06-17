@@ -274,17 +274,16 @@ export const setJourneyModeration = createServerFn({ method: "POST" })
         .eq("id", data.journeyId)
         .single();
       if (cur) {
-        // Block approval if the Aide hasn't connected a payout account.
-        const { data: mentor } = await supabaseAdmin
-          .from("profiles")
-          .select("is_payout_ready")
-          .eq("id", cur.mentor_id)
-          .maybeSingle();
-        if (!mentor?.is_payout_ready) {
-          throw new Error(
-            "Cannot approve — Aide has not connected a payout account.",
-          );
-        }
+        // NOTE: Stripe-connected payout check temporarily disabled for design/testing.
+        // Re-enable before launch by restoring the is_payout_ready guard below.
+        // const { data: mentor } = await supabaseAdmin
+        //   .from("profiles")
+        //   .select("is_payout_ready")
+        //   .eq("id", cur.mentor_id)
+        //   .maybeSingle();
+        // if (!mentor?.is_payout_ready) {
+        //   throw new Error("Cannot approve — Aide has not connected a payout account.");
+        // }
         if (cur.status !== "published") updates.status = "published";
         if (!cur.slug) {
           const base =
