@@ -96,6 +96,7 @@ export function TripCatalogStep({ onBack, onNext }: Props) {
       min_party_size: t.min_party_size ?? 1,
       max_party_size: t.max_party_size ?? null,
       template_key: t.template_key ?? null,
+      booking_type: t.booking_type ?? "request_to_book",
       target_species: Array.isArray(t.target_species) ? t.target_species : [],
       environments: Array.isArray(t.environments) ? t.environments : [],
       techniques: Array.isArray(t.techniques) ? t.techniques : [],
