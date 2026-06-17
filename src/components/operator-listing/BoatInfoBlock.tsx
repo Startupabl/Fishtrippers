@@ -4,7 +4,6 @@ interface Vessel {
   length_ft?: number | null;
   num_engines?: number | null;
   horsepower_per_engine?: number | null;
-  max_cruising_speed_knots?: number | null;
   max_passenger_capacity?: number | null;
   restored?: boolean | null;
 }
@@ -32,9 +31,6 @@ export function BoatInfoBlock({ vessel, boatType }: Props) {
   } else if (vessel.num_engines) {
     rows.push(["Engines", String(vessel.num_engines)]);
   }
-  if (vessel.max_cruising_speed_knots) {
-    rows.push(["Cruising speed", `${vessel.max_cruising_speed_knots} kn`]);
-  }
   if (vessel.max_passenger_capacity) {
     rows.push(["Capacity", `${vessel.max_passenger_capacity} passengers`]);
   }
@@ -42,30 +38,31 @@ export function BoatInfoBlock({ vessel, boatType }: Props) {
   if (rows.length === 0 && !boatType?.icon_url) return null;
 
   return (
-    <section id="boat" className="scroll-mt-32 space-y-4">
-      <h2 className="text-2xl font-bold tracking-tight">Boat info</h2>
-      <div className="rounded-2xl border bg-card p-6">
-        <div className="flex flex-col gap-6 md:flex-row md:items-center">
-          {boatType?.icon_url && (
-            <div className="flex h-24 w-40 shrink-0 items-center justify-center rounded-xl bg-muted/40">
-              <img
-                src={boatType.icon_url}
-                alt={boatType.subcategory_name}
-                className="h-16 w-32 object-contain"
-              />
+    <section id="boat" className="scroll-mt-32 space-y-3">
+      <h3 className="text-base font-semibold">Boat Specs</h3>
+      <div className="rounded-2xl border bg-card p-5 shadow-sm">
+        {boatType?.icon_url && (
+          <div className="mb-4 flex items-center justify-center rounded-xl bg-muted/40 py-3">
+            <img
+              src={boatType.icon_url}
+              alt={boatType.subcategory_name}
+              className="h-20 w-32 object-contain"
+            />
+          </div>
+        )}
+        <dl className="space-y-2">
+          {rows.map(([label, value]) => (
+            <div
+              key={label}
+              className="flex items-baseline justify-between gap-3 border-b border-dashed pb-1.5"
+            >
+              <dt className="text-xs text-muted-foreground">{label}</dt>
+              <dd className="text-sm font-semibold text-right">{value}</dd>
             </div>
-          )}
-          <dl className="grid flex-1 grid-cols-1 gap-x-8 gap-y-3 sm:grid-cols-2">
-            {rows.map(([label, value]) => (
-              <div key={label} className="flex justify-between border-b border-dashed pb-2">
-                <dt className="text-sm text-muted-foreground">{label}</dt>
-                <dd className="text-sm font-semibold">{value}</dd>
-              </div>
-            ))}
-          </dl>
-        </div>
+          ))}
+        </dl>
         {vessel.restored && (
-          <p className="mt-4 text-xs text-muted-foreground">Recently restored / refit.</p>
+          <p className="mt-3 text-xs text-muted-foreground">Recently restored / refit.</p>
         )}
       </div>
     </section>

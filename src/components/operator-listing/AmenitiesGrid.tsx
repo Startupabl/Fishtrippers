@@ -11,7 +11,7 @@ export function AmenitiesGrid({ features }: Props) {
 
   return (
     <section id="included" className="scroll-mt-32 space-y-4">
-      <h2 className="text-2xl font-bold tracking-tight">What&apos;s included</h2>
+      <h2 className="text-2xl font-bold tracking-tight">Equipped with</h2>
       <div className="space-y-6 rounded-2xl border bg-card p-6">
         {BOAT_FEATURE_GROUPS.map((g) => {
           const items = g.items.filter((i) => selected.has(i.id));
