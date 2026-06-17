@@ -30,6 +30,7 @@ import { Route as FirstLessonGuideRouteImport } from './routes/first-lesson-guid
 import { Route as DataHandlingRouteImport } from './routes/data-handling'
 import { Route as ContactRouteImport } from './routes/contact'
 import { Route as CheckoutRouteImport } from './routes/checkout'
+import { Route as CancellationPolicyRouteImport } from './routes/cancellation-policy'
 import { Route as BecomeAnAideRouteImport } from './routes/become-an-aide'
 import { Route as BecomeAMentorRouteImport } from './routes/become-a-mentor'
 import { Route as AcceptableUsePolicyRouteImport } from './routes/acceptable-use-policy'
@@ -205,6 +206,11 @@ const ContactRoute = ContactRouteImport.update({
 const CheckoutRoute = CheckoutRouteImport.update({
   id: '/checkout',
   path: '/checkout',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const CancellationPolicyRoute = CancellationPolicyRouteImport.update({
+  id: '/cancellation-policy',
+  path: '/cancellation-policy',
   getParentRoute: () => rootRouteImport,
 } as any)
 const BecomeAnAideRoute = BecomeAnAideRouteImport.update({
@@ -604,6 +610,7 @@ export interface FileRoutesByFullPath {
   '/acceptable-use-policy': typeof AcceptableUsePolicyRoute
   '/become-a-mentor': typeof BecomeAMentorRoute
   '/become-an-aide': typeof BecomeAnAideRoute
+  '/cancellation-policy': typeof CancellationPolicyRoute
   '/checkout': typeof CheckoutRouteWithChildren
   '/contact': typeof ContactRoute
   '/data-handling': typeof DataHandlingRoute
@@ -696,6 +703,7 @@ export interface FileRoutesByTo {
   '/acceptable-use-policy': typeof AcceptableUsePolicyRoute
   '/become-a-mentor': typeof BecomeAMentorRoute
   '/become-an-aide': typeof BecomeAnAideRoute
+  '/cancellation-policy': typeof CancellationPolicyRoute
   '/checkout': typeof CheckoutRouteWithChildren
   '/contact': typeof ContactRoute
   '/data-handling': typeof DataHandlingRoute
@@ -788,6 +796,7 @@ export interface FileRoutesById {
   '/acceptable-use-policy': typeof AcceptableUsePolicyRoute
   '/become-a-mentor': typeof BecomeAMentorRoute
   '/become-an-aide': typeof BecomeAnAideRoute
+  '/cancellation-policy': typeof CancellationPolicyRoute
   '/checkout': typeof CheckoutRouteWithChildren
   '/contact': typeof ContactRoute
   '/data-handling': typeof DataHandlingRoute
@@ -882,6 +891,7 @@ export interface FileRouteTypes {
     | '/acceptable-use-policy'
     | '/become-a-mentor'
     | '/become-an-aide'
+    | '/cancellation-policy'
     | '/checkout'
     | '/contact'
     | '/data-handling'
@@ -974,6 +984,7 @@ export interface FileRouteTypes {
     | '/acceptable-use-policy'
     | '/become-a-mentor'
     | '/become-an-aide'
+    | '/cancellation-policy'
     | '/checkout'
     | '/contact'
     | '/data-handling'
@@ -1065,6 +1076,7 @@ export interface FileRouteTypes {
     | '/acceptable-use-policy'
     | '/become-a-mentor'
     | '/become-an-aide'
+    | '/cancellation-policy'
     | '/checkout'
     | '/contact'
     | '/data-handling'
@@ -1160,6 +1172,7 @@ export interface RootRouteChildren {
   AcceptableUsePolicyRoute: typeof AcceptableUsePolicyRoute
   BecomeAMentorRoute: typeof BecomeAMentorRoute
   BecomeAnAideRoute: typeof BecomeAnAideRoute
+  CancellationPolicyRoute: typeof CancellationPolicyRoute
   CheckoutRoute: typeof CheckoutRouteWithChildren
   ContactRoute: typeof ContactRoute
   DataHandlingRoute: typeof DataHandlingRoute
@@ -1340,6 +1353,13 @@ declare module '@tanstack/react-router' {
       path: '/checkout'
       fullPath: '/checkout'
       preLoaderRoute: typeof CheckoutRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/cancellation-policy': {
+      id: '/cancellation-policy'
+      path: '/cancellation-policy'
+      fullPath: '/cancellation-policy'
+      preLoaderRoute: typeof CancellationPolicyRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/become-an-aide': {
@@ -2103,6 +2123,7 @@ const rootRouteChildren: RootRouteChildren = {
   AcceptableUsePolicyRoute: AcceptableUsePolicyRoute,
   BecomeAMentorRoute: BecomeAMentorRoute,
   BecomeAnAideRoute: BecomeAnAideRoute,
+  CancellationPolicyRoute: CancellationPolicyRoute,
   CheckoutRoute: CheckoutRouteWithChildren,
   ContactRoute: ContactRoute,
   DataHandlingRoute: DataHandlingRoute,
