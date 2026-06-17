@@ -11,18 +11,23 @@ import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import { getLivePageBySlug } from "@/lib/site-pages.functions";
 
-const SLUG = "how-bookings-work-for-guides";
-
 interface Props {
   open: boolean;
   onOpenChange: (open: boolean) => void;
+  slug?: string;
+  title?: string;
 }
 
-export function HowBookingsWorkDialog({ open, onOpenChange }: Props) {
+export function HowBookingsWorkDialog({
+  open,
+  onOpenChange,
+  slug = "how-bookings-work-for-guides",
+  title = "How Bookings Work",
+}: Props) {
   const fetchPage = useServerFn(getLivePageBySlug);
   const { data, isLoading, isError } = useQuery({
-    queryKey: ["site_page", SLUG],
-    queryFn: () => fetchPage({ data: { slug: SLUG } }),
+    queryKey: ["site_page", slug],
+    queryFn: () => fetchPage({ data: { slug } }),
     enabled: open,
     staleTime: 5 * 60 * 1000,
   });
@@ -31,9 +36,7 @@ export function HowBookingsWorkDialog({ open, onOpenChange }: Props) {
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="max-w-2xl">
         <DialogHeader>
-          <DialogTitle>
-            {data?.title ?? "How Bookings Work"}
-          </DialogTitle>
+          <DialogTitle>{data?.title ?? title}</DialogTitle>
         </DialogHeader>
 
         <div className="max-h-[70vh] overflow-y-auto pr-1">
@@ -57,7 +60,7 @@ export function HowBookingsWorkDialog({ open, onOpenChange }: Props) {
           )}
           {data?.content_html && (
             <div
-              className="prose prose-sm dark:prose-invert max-w-none [&_h2]:mt-5 [&_h2]:text-base [&_h2]:font-semibold [&_ul]:list-disc [&_ul]:pl-5 [&_p]:my-2"
+              className="prose prose-sm dark:prose-invert max-w-none [&_h2]:mt-5 [&_h2]:text-base [&_h2]:font-semibold [&_h3]:mt-4 [&_h3]:text-sm [&_h3]:font-semibold [&_ul]:list-disc [&_ul]:pl-5 [&_p]:my-2"
               dangerouslySetInnerHTML={{ __html: data.content_html }}
             />
           )}
