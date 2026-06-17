@@ -314,8 +314,7 @@ function UpcomingSessionsPage() {
         My Schedule
       </h1>
       <p className="mt-2 text-muted-foreground">
-        Every session you've scheduled — including unbooked listings and pending
-        custom offers. Past unbooked slots auto-hide.
+        Every booked trip — including pending custom offers.
       </p>
 
       <Tabs defaultValue="upcoming" className="mt-6">
