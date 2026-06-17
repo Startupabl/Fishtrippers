@@ -86,6 +86,7 @@ const empty: TripEditorState = {
   min_party_size: 1,
   max_party_size: null,
   template_key: null,
+  booking_type: "request_to_book",
   target_species: [],
   environments: [],
   techniques: [],
