@@ -18,11 +18,11 @@ export function OperatorCard({ operator }: { operator: OperatorCardDTO }) {
             <img
               src={operator.boat_type_icon_url}
               alt={operator.boat_type_name ?? "Boat"}
-              className="size-4 object-contain"
+              className="size-7 object-contain"
               loading="lazy"
             />
           ) : (
-            <Sailboat className="size-4 text-foreground" />
+            <Sailboat className="size-6 text-foreground" />
           )}
           <span>{operator.vessel_length_ft} ft</span>
         </>
@@ -35,25 +35,20 @@ export function OperatorCard({ operator }: { operator: OperatorCardDTO }) {
       key: "capacity",
       content: (
         <>
-          <Users className="size-4 text-foreground" />
+          <Users className="size-5 text-foreground" />
           <span>{operator.vessel_capacity}</span>
         </>
       ),
     });
   }
 
-  if (operator.rating != null) {
+  if (operator.verified) {
     segments.push({
-      key: "rating",
+      key: "verified",
       content: (
         <>
-          <Star className="size-4 fill-amber-400 text-amber-400" />
-          <span>
-            {operator.rating.toFixed(1)}
-            {operator.review_count != null && (
-              <span className="ml-1 text-muted-foreground">({operator.review_count})</span>
-            )}
-          </span>
+          <Star className="size-5 fill-amber-400 text-amber-400" />
+          <span>Verified</span>
         </>
       ),
     });
@@ -81,13 +76,13 @@ export function OperatorCard({ operator }: { operator: OperatorCardDTO }) {
           )}
 
           {segments.length > 0 && (
-            <div className="absolute inset-x-3 bottom-3 flex">
-              <div className="inline-flex items-stretch rounded-full bg-card/95 text-xs font-semibold text-foreground shadow-sm backdrop-blur">
+            <div className="absolute inset-x-0 bottom-4 flex justify-center px-4">
+              <div className="inline-flex w-[66%] min-w-[220px] max-w-[320px] items-stretch justify-around rounded-full bg-card/95 text-sm font-semibold text-foreground shadow-md backdrop-blur">
                 {segments.map((seg, idx) => (
                   <div
                     key={seg.key}
-                    className={`flex items-center gap-1.5 px-3 py-1.5 ${
-                      idx > 0 ? "border-l border-border" : ""
+                    className={`flex flex-1 items-center justify-center gap-2 px-3 py-2.5 ${
+                      idx > 0 ? "border-l border-border/70" : ""
                     }`}
                   >
                     {seg.content}
@@ -95,6 +90,9 @@ export function OperatorCard({ operator }: { operator: OperatorCardDTO }) {
                 ))}
               </div>
             </div>
+          )}
+        </div>
+
           )}
         </div>
 

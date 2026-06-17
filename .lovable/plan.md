@@ -1,40 +1,21 @@
 ## Goal
-Replace the three separate pills on `OperatorCard` with one rounded capsule split into segments by thin vertical dividers, matching the attached design. The boat icon pulls from the operator's vessel `boat_type.icon_url` (admin-managed boat type database) instead of a hardcoded Lucide icon.
+Make the info capsule on `OperatorCard` larger, centered horizontally over the bottom of the cover image, with a bigger boat-type icon and three segments: boat size, capacity, verified.
 
-## Changes
+## Changes — `src/components/listings/OperatorCard.tsx` only
 
-### 1. `src/lib/operators-search.functions.ts`
-- Extend the operators select to pull `vessels ( length_ft, max_passenger_capacity, boat_type_id, boat_types ( icon_url, subcategory_name ) )`.
-- Add to `OperatorCardDTO`:
-  - `boat_type_icon_url: string | null`
-  - `boat_type_name: string | null`
-  - `rating: number | null` (null for now — no aggregate source yet)
-  - `review_count: number | null` (null for now)
-- Map the joined boat_type icon onto the DTO. Rating/review_count remain null until a reviews-aggregate is wired (out of scope here).
+- Container row: change `inset-x-3 bottom-3 flex` to `inset-x-0 bottom-4 flex justify-center px-4`, so the capsule centers and breathes from the edges.
+- Capsule: bump from `text-xs` / `py-1.5` to `text-sm font-semibold`, `py-2.5 px-1`, with a slightly thicker shadow (`shadow-md`). Target width ≈ 2/3 of card: add `w-[66%] min-w-[220px] max-w-[320px]` and `justify-around` so the three segments space evenly.
+- Segments: each segment becomes `flex-1 justify-center gap-2 px-3 py-1`, dividers stay as `border-l border-border/70`.
+- Boat icon: render at `size-7` (image) instead of `size-4`, with `object-contain`. Lucide fallback also `size-6`. This matches the prominent boat silhouette in the reference.
+- People icon: `size-5`.
+- Rebuild the three fixed segments (drop the rating segment entirely for now):
+  1. Boat icon + `{length_ft} ft`
+  2. People icon + `{capacity}`
+  3. Filled amber star + `Verified` label (only when `operator.verified` true — which is currently always true for approved listings)
+- Each segment only renders if its data is present; if length or capacity is missing, that segment is omitted but the capsule still centers.
 
-### 2. `src/components/listings/OperatorCard.tsx`
-Replace the current row of three separate pills with one capsule:
-
-```text
-┌───────────────────────────────────────────────┐
-│ [boat-icon] 28 ft │ 👥 4 │ ★ 5.0 (70)         │
-└───────────────────────────────────────────────┘
-```
-
-- Single `div` with `rounded-full bg-card/95 shadow-sm backdrop-blur` containing flex children.
-- Each segment is a flex item with `px-3 py-1.5`, separated by `divide-x divide-border` (or explicit `border-l` on segments 2+).
-- Segment 1: boat icon. If `boat_type_icon_url` exists render an `<img>` (size-4, object-contain) with alt = boat_type_name. Fallback to `Sailboat` lucide icon. Then `{length_ft} ft`.
-- Segment 2: `Users` icon + capacity number.
-- Segment 3: filled star (amber) + rating + `(count)` in muted. Only render when `rating != null`; otherwise omit this segment entirely so the capsule stays clean.
-- Keep "Verified" badge as its own separate small pill above-right OR fold into the title row only (already shown next to the name) — remove the duplicate verified pill on the image to match the design's single capsule.
-
-### 3. No DB migration
-`boat_types` table and `vessels.boat_type_id` FK already exist with `icon_url`. Public anon SELECT policy on `boat_types` is already in place.
+No data/server changes needed — `verified` is already on the DTO and `boat_type_icon_url` is already wired.
 
 ## Out of scope
-- Wiring real review aggregates (rating/count) — the segment will simply not render until that data exists.
-- Onboarding/admin changes to boat type selection.
-
-## Files touched
-- `src/lib/operators-search.functions.ts` (extend query + DTO)
-- `src/components/listings/OperatorCard.tsx` (new capsule layout)
+- Real review ratings/counts (still deferred).
+- Any change to title row, price row, or image.
