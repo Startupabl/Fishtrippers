@@ -8,6 +8,8 @@ import {
   Handshake,
   GlassWater,
   RefreshCw,
+  ChevronLeft,
+  ChevronRight,
 } from "lucide-react";
 
 
@@ -242,6 +244,36 @@ function CategoryGrid() {
     queryFn: () => fetchFeatured(),
   });
 
+  const scrollerRef = useRef<HTMLUListElement | null>(null);
+  const [canScrollLeft, setCanScrollLeft] = useState(false);
+  const [canScrollRight, setCanScrollRight] = useState(false);
+
+  const updateArrows = () => {
+    const el = scrollerRef.current;
+    if (!el) return;
+    setCanScrollLeft(el.scrollLeft > 4);
+    setCanScrollRight(el.scrollLeft + el.clientWidth < el.scrollWidth - 4);
+  };
+
+  useEffect(() => {
+    updateArrows();
+    const el = scrollerRef.current;
+    if (!el) return;
+    const onScroll = () => updateArrows();
+    el.addEventListener("scroll", onScroll, { passive: true });
+    window.addEventListener("resize", updateArrows);
+    return () => {
+      el.removeEventListener("scroll", onScroll);
+      window.removeEventListener("resize", updateArrows);
+    };
+  }, [categories.length, isLoading]);
+
+  const scrollBy = (dir: 1 | -1) => {
+    const el = scrollerRef.current;
+    if (!el) return;
+    el.scrollBy({ left: dir * el.clientWidth * 0.8, behavior: "smooth" });
+  };
+
   if (!isLoading && categories.length === 0) return null;
 
   return (
@@ -256,41 +288,68 @@ function CategoryGrid() {
         <p className="mt-2 text-sm text-muted-foreground">
           Pick a flavor and find the perfect Aide-led course.
         </p>
-        <ul className="mt-8 grid grid-cols-2 gap-4 md:grid-cols-3 lg:grid-cols-6">
-          {isLoading
-            ? Array.from({ length: 6 }).map((_, i) => (
-                <li
-                  key={i}
-                  className="aspect-square animate-pulse rounded-2xl border border-border bg-muted/40"
-                />
-              ))
-            : categories.map((c) => {
-                const img = c.image_url ?? getCategoryPlaceholder(c.name as JourneyCategory);
-                return (
-                  <li key={c.id}>
-                    <Link
-                      to="/search"
-                      search={{ category: c.name } as never}
-                      className="group relative flex aspect-square flex-col items-center justify-end overflow-hidden rounded-2xl border border-border bg-[#0A2540]/10 p-4 text-center shadow-sm transition-all duration-200 hover:scale-105 hover:border-[#E8B547] hover:shadow-md focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#E8B547]"
-                    >
-                      <img
-                        src={img}
-                        alt=""
-                        className="absolute inset-0 size-full object-cover transition-transform duration-300 group-hover:scale-110"
-                        loading="lazy"
-                      />
-                      <span className="absolute inset-0 bg-gradient-to-t from-[#1F2A24]/85 via-[#1F2A24]/30 to-transparent" />
-                      <span
-                        className="relative z-10 text-sm font-bold text-white md:text-base"
-                        style={{ fontFamily: "Lora, ui-serif, Georgia, serif" }}
+
+        <div className="relative mt-8">
+          {canScrollLeft && (
+            <button
+              type="button"
+              aria-label="Scroll categories left"
+              onClick={() => scrollBy(-1)}
+              className="absolute left-2 top-1/2 z-10 hidden -translate-y-1/2 items-center justify-center rounded-full border border-border bg-white p-2 shadow-md transition hover:bg-muted focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#E8B547] md:flex"
+            >
+              <ChevronLeft className="size-5 text-foreground" />
+            </button>
+          )}
+          {canScrollRight && (
+            <button
+              type="button"
+              aria-label="Scroll categories right"
+              onClick={() => scrollBy(1)}
+              className="absolute right-2 top-1/2 z-10 hidden -translate-y-1/2 items-center justify-center rounded-full border border-border bg-white p-2 shadow-md transition hover:bg-muted focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#E8B547] md:flex"
+            >
+              <ChevronRight className="size-5 text-foreground" />
+            </button>
+          )}
+
+          <ul
+            ref={scrollerRef}
+            className="flex gap-4 overflow-x-auto scroll-smooth pb-2 snap-x snap-mandatory [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden"
+          >
+            {isLoading
+              ? Array.from({ length: 6 }).map((_, i) => (
+                  <li
+                    key={i}
+                    className="aspect-square w-[180px] shrink-0 animate-pulse snap-start rounded-2xl border border-border bg-muted/40 md:w-[200px]"
+                  />
+                ))
+              : categories.map((c) => {
+                  const img = c.image_url ?? getCategoryPlaceholder(c.name as JourneyCategory);
+                  return (
+                    <li key={c.id} className="w-[180px] shrink-0 snap-start md:w-[200px]">
+                      <Link
+                        to="/search"
+                        search={{ category: c.name } as never}
+                        className="group relative flex aspect-square w-full flex-col items-center justify-end overflow-hidden rounded-2xl border border-border bg-[#0A2540]/10 p-4 text-center shadow-sm transition-all duration-200 hover:scale-105 hover:border-[#E8B547] hover:shadow-md focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#E8B547]"
                       >
-                        {c.name}
-                      </span>
-                    </Link>
-                  </li>
-                );
-              })}
-        </ul>
+                        <img
+                          src={img}
+                          alt=""
+                          className="absolute inset-0 size-full object-cover transition-transform duration-300 group-hover:scale-110"
+                          loading="lazy"
+                        />
+                        <span className="absolute inset-0 bg-gradient-to-t from-[#1F2A24]/85 via-[#1F2A24]/30 to-transparent" />
+                        <span
+                          className="relative z-10 text-sm font-bold text-white md:text-base"
+                          style={{ fontFamily: "Lora, ui-serif, Georgia, serif" }}
+                        >
+                          {c.name}
+                        </span>
+                      </Link>
+                    </li>
+                  );
+                })}
+          </ul>
+        </div>
       </div>
     </section>
   );
