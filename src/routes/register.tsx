@@ -272,7 +272,7 @@ function RegisterPage() {
                 </Link>{" "}
                 and{" "}
                 <Link
-                  to="/privacy-policy"
+                  to="/privacy"
                   target="_blank"
                   rel="noopener noreferrer"
                   className="underline hover:text-info"
