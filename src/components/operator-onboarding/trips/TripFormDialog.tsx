@@ -59,6 +59,7 @@ export interface TripEditorState {
   min_party_size: number | null;
   max_party_size: number | null;
   template_key?: string | null;
+  booking_type: "instant_book" | "request_to_book";
   target_species: string[];
   environments: string[];
   techniques: string[];
