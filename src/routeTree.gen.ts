@@ -16,6 +16,7 @@ import { Route as SecurityRouteImport } from './routes/security'
 import { Route as SearchRouteImport } from './routes/search'
 import { Route as ResetPasswordRouteImport } from './routes/reset-password'
 import { Route as RegisterRouteImport } from './routes/register'
+import { Route as PrivacyRouteImport } from './routes/privacy'
 import { Route as MentorFaqsRouteImport } from './routes/mentor-faqs'
 import { Route as MentorAgreementRouteImport } from './routes/mentor-agreement'
 import { Route as LoginRouteImport } from './routes/login'
@@ -132,6 +133,11 @@ const ResetPasswordRoute = ResetPasswordRouteImport.update({
 const RegisterRoute = RegisterRouteImport.update({
   id: '/register',
   path: '/register',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const PrivacyRoute = PrivacyRouteImport.update({
+  id: '/privacy',
+  path: '/privacy',
   getParentRoute: () => rootRouteImport,
 } as any)
 const MentorFaqsRoute = MentorFaqsRouteImport.update({
@@ -597,6 +603,7 @@ export interface FileRoutesByFullPath {
   '/login': typeof LoginRoute
   '/mentor-agreement': typeof MentorAgreementRoute
   '/mentor-faqs': typeof MentorFaqsRoute
+  '/privacy': typeof PrivacyRoute
   '/register': typeof RegisterRoute
   '/reset-password': typeof ResetPasswordRoute
   '/search': typeof SearchRoute
@@ -686,6 +693,7 @@ export interface FileRoutesByTo {
   '/login': typeof LoginRoute
   '/mentor-agreement': typeof MentorAgreementRoute
   '/mentor-faqs': typeof MentorFaqsRoute
+  '/privacy': typeof PrivacyRoute
   '/register': typeof RegisterRoute
   '/reset-password': typeof ResetPasswordRoute
   '/search': typeof SearchRoute
@@ -775,6 +783,7 @@ export interface FileRoutesById {
   '/login': typeof LoginRoute
   '/mentor-agreement': typeof MentorAgreementRoute
   '/mentor-faqs': typeof MentorFaqsRoute
+  '/privacy': typeof PrivacyRoute
   '/register': typeof RegisterRoute
   '/reset-password': typeof ResetPasswordRoute
   '/search': typeof SearchRoute
@@ -866,6 +875,7 @@ export interface FileRouteTypes {
     | '/login'
     | '/mentor-agreement'
     | '/mentor-faqs'
+    | '/privacy'
     | '/register'
     | '/reset-password'
     | '/search'
@@ -955,6 +965,7 @@ export interface FileRouteTypes {
     | '/login'
     | '/mentor-agreement'
     | '/mentor-faqs'
+    | '/privacy'
     | '/register'
     | '/reset-password'
     | '/search'
@@ -1043,6 +1054,7 @@ export interface FileRouteTypes {
     | '/login'
     | '/mentor-agreement'
     | '/mentor-faqs'
+    | '/privacy'
     | '/register'
     | '/reset-password'
     | '/search'
@@ -1135,6 +1147,7 @@ export interface RootRouteChildren {
   LoginRoute: typeof LoginRoute
   MentorAgreementRoute: typeof MentorAgreementRoute
   MentorFaqsRoute: typeof MentorFaqsRoute
+  PrivacyRoute: typeof PrivacyRoute
   RegisterRoute: typeof RegisterRoute
   ResetPasswordRoute: typeof ResetPasswordRoute
   SearchRoute: typeof SearchRoute
@@ -1203,6 +1216,13 @@ declare module '@tanstack/react-router' {
       path: '/register'
       fullPath: '/register'
       preLoaderRoute: typeof RegisterRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/privacy': {
+      id: '/privacy'
+      path: '/privacy'
+      fullPath: '/privacy'
+      preLoaderRoute: typeof PrivacyRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/mentor-faqs': {
@@ -2054,6 +2074,7 @@ const rootRouteChildren: RootRouteChildren = {
   LoginRoute: LoginRoute,
   MentorAgreementRoute: MentorAgreementRoute,
   MentorFaqsRoute: MentorFaqsRoute,
+  PrivacyRoute: PrivacyRoute,
   RegisterRoute: RegisterRoute,
   ResetPasswordRoute: ResetPasswordRoute,
   SearchRoute: SearchRoute,
