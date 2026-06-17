@@ -153,16 +153,18 @@ export const setListingModeration = createServerFn({ method: "POST" })
         .eq("id", data.journeyId)
         .maybeSingle();
       if (cur) {
-        const { data: owner } = await supabaseAdmin
-          .from("profiles")
-          .select("is_payout_ready")
-          .eq("id", cur.owner_id)
-          .maybeSingle();
-        if (!owner?.is_payout_ready) {
-          throw new Error(
-            "Cannot approve — Captain/Guide has not connected a payout account.",
-          );
-        }
+        // NOTE: Stripe payout-ready check temporarily disabled for design/testing.
+        // Re-enable before launch by restoring the is_payout_ready guard below.
+        // const { data: owner } = await supabaseAdmin
+        //   .from("profiles")
+        //   .select("is_payout_ready")
+        //   .eq("id", cur.owner_id)
+        //   .maybeSingle();
+        // if (!owner?.is_payout_ready) {
+        //   throw new Error(
+        //     "Cannot approve — Captain/Guide has not connected a payout account.",
+        //   );
+        // }
         if (cur.status !== "published") updates.status = "published";
         if (!cur.slug) {
           const base =
