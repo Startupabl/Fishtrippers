@@ -5,7 +5,9 @@ import {
   MapPin,
   Minus,
   Fish,
+  HelpCircle,
 } from "lucide-react";
+import { HowBookingsWorkDialog } from "@/components/HowBookingsWorkDialog";
 import { Link } from "@tanstack/react-router";
 import { Button } from "@/components/ui/button";
 import { formatCurrency } from "@/lib/format-currency";
@@ -298,12 +300,25 @@ function TripCard({
 }
 
 export function TripsBlock({ trips, hostId, hostHasAvailability }: Props) {
+  const [helpOpen, setHelpOpen] = useState(false);
+
   return (
     <section id="trips" className="scroll-mt-32 space-y-4">
-      <h2 className="text-2xl font-bold tracking-tight">
-        Trip availability and prices
-      </h2>
-
+      <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
+        <h2 className="text-2xl font-bold tracking-tight">
+          Trip availability and prices
+        </h2>
+        <Button
+          type="button"
+          variant="ghost"
+          size="sm"
+          className="self-start sm:self-auto text-primary hover:text-primary"
+          onClick={() => setHelpOpen(true)}
+        >
+          <HelpCircle className="mr-1.5 h-4 w-4" />
+          How Bookings Work
+        </Button>
+      </div>
 
       {trips.length === 0 ? (
         <div className="rounded-2xl border border-dashed bg-card p-10 text-center">
@@ -329,6 +344,13 @@ export function TripsBlock({ trips, hostId, hostHasAvailability }: Props) {
           ))}
         </div>
       )}
+
+      <HowBookingsWorkDialog
+        open={helpOpen}
+        onOpenChange={setHelpOpen}
+        slug="how-it-works-for-anglers"
+        title="How Bookings Work for Anglers"
+      />
     </section>
   );
 }

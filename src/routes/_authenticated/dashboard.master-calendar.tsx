@@ -29,7 +29,7 @@ import {
 } from "@/lib/host-availability.functions";
 import { listMyTrips } from "@/lib/trips.functions";
 import { Zap, MessageSquare, CalendarDays, HelpCircle } from "lucide-react";
-import { HowBookingsWorkDialog } from "@/components/dashboard/HowBookingsWorkDialog";
+import { HowBookingsWorkDialog } from "@/components/HowBookingsWorkDialog";
 
 export const Route = createFileRoute("/_authenticated/dashboard/master-calendar")({
   head: () => ({
