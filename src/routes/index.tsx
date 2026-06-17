@@ -14,7 +14,7 @@ import {
 import { useServerFn } from "@tanstack/react-start";
 import { useAuthStore } from "@/stores/useAuthStore";
 import { useQuery } from "@tanstack/react-query";
-import { listFeaturedJourneys } from "@/lib/journeys.functions";
+import { searchOperatorsServer } from "@/lib/operators-search.functions";
 import { listFeaturedCategories } from "@/lib/categories.functions";
 import { getCategoryPlaceholder } from "@/lib/category-placeholders";
 import type { JourneyCategory } from "@/data/lesson-paths";
