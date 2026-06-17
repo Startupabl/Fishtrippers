@@ -167,14 +167,14 @@ function EarningsPage() {
         </div>
         <div className="flex items-center gap-2">
           <span className="text-xs uppercase tracking-wide text-muted-foreground">
-            Course
+            Trip
           </span>
           <Select value={courseFilter} onValueChange={setCourseFilter}>
             <SelectTrigger className="w-[220px]">
               <SelectValue />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="all">All Courses</SelectItem>
+              <SelectItem value="all">All Trips</SelectItem>
               {courseOptions.map((t) => (
                 <SelectItem key={t} value={t}>
                   {t}
@@ -204,8 +204,8 @@ function EarningsPage() {
                 </button>
               </TableHead>
               <TableHead className="font-bold">Order Number</TableHead>
-              <TableHead className="font-bold">Course Title</TableHead>
-              <TableHead className="font-bold">Student</TableHead>
+              <TableHead className="font-bold">Trip Title</TableHead>
+              <TableHead className="font-bold">Angler</TableHead>
               <TableHead className="font-bold">Money Earned</TableHead>
               <TableHead className="font-bold">Actions</TableHead>
             </TableRow>
@@ -221,7 +221,7 @@ function EarningsPage() {
               <TableRow>
                 <TableCell colSpan={6} className="text-center text-muted-foreground py-10">
                   {orders.length === 0
-                    ? "No earnings yet — once a learner pays, the ledger will populate here."
+                    ? "No earnings yet — once an angler books a trip, the ledger will populate here."
                     : "No orders match the current filters."}
                 </TableCell>
               </TableRow>
