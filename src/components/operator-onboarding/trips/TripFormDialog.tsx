@@ -38,7 +38,7 @@ import { toast } from "sonner";
 import { X } from "lucide-react";
 import { upsertTrip, getMyCapabilities } from "@/lib/trips.functions";
 import { saveDefaultDeparture } from "@/lib/operators.functions";
-import { DURATION_OPTIONS } from "@/lib/trips.shared";
+import { DURATION_OPTIONS, BOOKING_TYPE_OPTIONS } from "@/lib/trips.shared";
 import {
   FISHING_ENVIRONMENTS,
   FISHING_TECHNIQUES,
@@ -59,6 +59,7 @@ export interface TripEditorState {
   min_party_size: number | null;
   max_party_size: number | null;
   template_key?: string | null;
+  booking_type: "instant_book" | "request_to_book";
   target_species: string[];
   environments: string[];
   techniques: string[];
@@ -85,6 +86,7 @@ const empty: TripEditorState = {
   min_party_size: 1,
   max_party_size: null,
   template_key: null,
+  booking_type: "request_to_book",
   target_species: [],
   environments: [],
   techniques: [],
@@ -171,6 +173,7 @@ export function TripFormDialog({ open, onOpenChange, initial }: Props) {
           max_party_size: form.max_party_size!,
           currency: captainCurrency,
           template_key: form.template_key ?? null,
+          booking_type: form.booking_type,
           target_species: form.target_species,
           environments: form.environments,
           techniques: form.techniques,
@@ -386,6 +389,37 @@ export function TripFormDialog({ open, onOpenChange, initial }: Props) {
                   );
                 })}
               </div>
+            </div>
+          </section>
+
+          {/* Booking method */}
+          <section className="space-y-3 rounded-xl border bg-muted/30 p-4">
+            <h3 className="text-sm font-semibold uppercase tracking-wide text-muted-foreground">
+              Booking method
+            </h3>
+            <p className="text-xs text-muted-foreground">
+              Override how this individual trip is booked. Inshore or simple trips work
+              great as Instant Book; custom or offshore trips often do better as Request to Book.
+            </p>
+            <div className="grid gap-2 sm:grid-cols-2">
+              {BOOKING_TYPE_OPTIONS.map((opt) => {
+                const selected = form.booking_type === opt.value;
+                return (
+                  <button
+                    key={opt.value}
+                    type="button"
+                    onClick={() => setForm({ ...form, booking_type: opt.value })}
+                    className={`rounded-lg border p-3 text-left transition-colors ${
+                      selected
+                        ? "border-primary bg-primary/5 ring-1 ring-primary"
+                        : "border-border bg-background hover:border-primary/40"
+                    }`}
+                  >
+                    <div className="text-sm font-medium">{opt.label}</div>
+                    <div className="mt-1 text-xs text-muted-foreground">{opt.hint}</div>
+                  </button>
+                );
+              })}
             </div>
           </section>
 

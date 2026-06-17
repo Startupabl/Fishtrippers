@@ -75,6 +75,7 @@ export const upsertTrip = createServerFn({ method: "POST" })
       max_party_size: data.max_party_size,
       currency: data.currency ?? "USD",
       template_key: data.template_key ?? null,
+      booking_type: data.booking_type ?? "request_to_book",
       target_species: data.target_species,
       environments: data.environments,
       techniques: data.techniques,
