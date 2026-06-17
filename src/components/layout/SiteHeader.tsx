@@ -18,11 +18,12 @@ export function SiteHeader() {
   const isAuthenticated = !!user;
   const _navigate = useNavigate();
   void _navigate;
-  const { guard, dialog: profileGuardDialog } = useProfileGuard();
+  const { hasListing } = useHasActiveListingStatus();
 
   if (pathname.startsWith("/checkout")) return null;
 
   const isHome = pathname === "/";
+  const showManage = isAuthenticated && hasListing;
 
   return (
     <header
@@ -39,18 +40,27 @@ export function SiteHeader() {
         </div>
 
         <div className="flex items-center gap-2 lg:gap-3">
-          <Button
-            asChild
-            className="hidden h-11 rounded-full bg-gold px-5 text-base font-bold text-ocean-deep shadow-sm hover:bg-gold-deep sm:inline-flex lg:px-6"
-          >
-            <Link
-              to="/mentor/create-path"
-              search={{ new: true }}
-              onClick={guard(startNewMentorExpressListing)}
+          {showManage ? (
+            <Button
+              asChild
+              className="hidden h-11 rounded-full bg-gold px-5 text-base font-bold text-ocean-deep shadow-sm hover:bg-gold-deep sm:inline-flex lg:px-6"
             >
-              List Your Trip
-            </Link>
-          </Button>
+              <Link to="/dashboard/my-listing">Manage Listing</Link>
+            </Button>
+          ) : (
+            <Button
+              asChild
+              className="hidden h-11 rounded-full bg-gold px-5 text-base font-bold text-ocean-deep shadow-sm hover:bg-gold-deep sm:inline-flex lg:px-6"
+            >
+              <Link
+                to="/mentor/create-path"
+                search={{ new: true }}
+                onClick={guard(startNewMentorExpressListing)}
+              >
+                Create a Listing
+              </Link>
+            </Button>
+          )}
 
           {isAuthenticated ? (
             <>
