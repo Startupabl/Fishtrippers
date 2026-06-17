@@ -1,34 +1,35 @@
-## How Bookings Work — in-page popup on Manage Availability + editable CMS content
+## Goal
 
-Keep the host on Manage Availability. The link opens a modal dialog that fetches and renders the CMS page body inline. You still edit the copy from **Admin → Settings → Pages**.
+Add a "How Bookings Work" link next to the **Trip availability and prices** heading on the operator listing (preview / edit / view). Clicking it opens an in-page popup with angler-focused copy, fully editable from the existing Admin → Settings → Pages CMS.
 
-### 1. Seed the CMS page (migration)
+## Changes
 
-Insert into `site_pages` (idempotent with `ON CONFLICT (slug) DO NOTHING`):
-- slug: `how-bookings-work-for-guides`
-- title: `How Bookings Work for Captains & Guides`
+### 1. Seed CMS page (migration)
+Insert one row into `site_pages` (idempotent `ON CONFLICT DO NOTHING`):
+- slug: `how-it-works-for-anglers`
+- title: `How Bookings Work for Anglers`
 - category: `resources`
 - status: `live`
-- description: short summary
-- content_html: full copy you provided, marked up with `<h2>`, `<h3>`, `<p>`, `<ul>`, `<li>`, `<strong>` (already allow-listed by the sanitizer)
+- content_html: full provided copy marked up with `<h2>`, `<h3>`, `<p>`, `<ul>`, `<li>`, `<strong>` (sections: Browse and Choose, Check the Booking Type — Instant Book / Request to Book, Double-Booking Protection)
 
-### 2. New component: `HowBookingsWorkDialog`
+Editable anytime from Admin → Settings → Pages.
 
-File: `src/components/dashboard/HowBookingsWorkDialog.tsx`
+### 2. Generalize the existing dialog
+Rename `src/components/dashboard/HowBookingsWorkDialog.tsx` → `src/components/HowBookingsWorkDialog.tsx` and add two optional props:
+- `slug?: string` (default keeps the captain slug for backward compat)
+- `title?: string` (dialog header)
 
-- shadcn `Dialog` with `max-w-2xl`, scrollable body (`max-h-[80vh] overflow-y-auto`).
-- Fetches content via `useServerFn(getLivePageBySlug)` + `useQuery` keyed by slug, only enabled when `open === true` (lazy load).
-- States: skeleton while loading, friendly fallback if the page is missing/unpublished, and on success render the sanitized HTML using `dangerouslySetInnerHTML` inside a `prose prose-sm dark:prose-invert` wrapper so headings/lists style correctly.
-- Footer: single "Close" button. Dialog closes via overlay / Esc as usual — user stays on `/dashboard/master-calendar`.
+Update the one existing import in `dashboard.master-calendar.tsx` to the new path. Behavior unchanged — still fetches via `useServerFn(getLivePageBySlug)` keyed by slug, renders sanitized HTML, Close button.
 
-### 3. Wire the trigger on Manage Availability
+### 3. Wire the angler link into `TripsBlock`
+In `src/components/operator-listing/TripsBlock.tsx`:
+- Import `HelpCircle`, `Button`, and `HowBookingsWorkDialog`.
+- Convert the `TripsBlock` function to include local `open` state (small refactor — add a tiny wrapper or convert to a component with `useState`).
+- Render the heading row as a flex row: heading on the left, a small ghost `Button` with `HelpCircle` icon labeled **"How Bookings Work"** on the right (stacks under heading on mobile).
+- Mount `<HowBookingsWorkDialog open={open} onOpenChange={setOpen} slug="how-it-works-for-anglers" title="How Bookings Work for Anglers" />`.
 
-File: `src/routes/_authenticated/dashboard.master-calendar.tsx`
+Because `TripsBlock` is shared, the link appears automatically on preview, edit, and public view pages — no per-route wiring needed.
 
-Add a small "How Bookings Work" link/button in the page header (right of the title on desktop, beneath the subtitle on mobile) using a `HelpCircle` icon. Clicking it toggles local `open` state and mounts `<HowBookingsWorkDialog open={open} onOpenChange={setOpen} />`. No navigation, no new tab.
+## Result
 
-### Result
-
-- One link in the header → opens a modal with the explainer; closing returns the user to the calendar exactly where they were.
-- Copy is editable anytime from the existing Pages CMS — change title/body/status without code changes.
-- No new admin UI, no schema changes beyond seeding one row.
+One angler-facing "How Bookings Work" link beside the Trip availability heading on every listing surface, opening an in-page modal users can dismiss to stay on the page. Copy editable from Pages CMS via slug `how-it-works-for-anglers`. No schema changes beyond seeding one row, no new routes.
