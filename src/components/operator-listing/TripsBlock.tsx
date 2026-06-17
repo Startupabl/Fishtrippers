@@ -237,11 +237,62 @@ function TripCard({
             />
           </div>
 
-          <Button className="mt-3 w-full bg-gold text-ocean-deep hover:bg-gold-deep">
-            Request to book
-          </Button>
+          {(() => {
+            const bt = trip.booking_type ?? "request_to_book";
+            const instantReady = bt === "instant_book" && hostHasAvailability && !!hostId;
+            const instantNotReady = bt === "instant_book" && (!hostHasAvailability || !hostId);
+
+            if (instantReady) {
+              return (
+                <Button
+                  className="mt-3 w-full bg-gold text-ocean-deep hover:bg-gold-deep"
+                  onClick={() => setCheckDatesOpen(true)}
+                >
+                  Check Dates
+                </Button>
+              );
+            }
+            return (
+              <>
+                {instantNotReady && (
+                  <p className="mt-3 rounded-md bg-amber-50 px-3 py-2 text-xs text-amber-900">
+                    The calendar isn&apos;t updated for this trip yet — instant booking
+                    isn&apos;t available. You can still send the host a request below.
+                  </p>
+                )}
+                <Button
+                  className="mt-3 w-full bg-gold text-ocean-deep hover:bg-gold-deep"
+                  onClick={() => setRequestOpen(true)}
+                >
+                  Request to Book
+                </Button>
+              </>
+            );
+          })()}
         </aside>
       </div>
+
+      {hostId ? (
+        <CheckDatesDialog
+          open={checkDatesOpen}
+          onOpenChange={setCheckDatesOpen}
+          tripId={trip.id}
+          hostId={hostId}
+          tripTitle={trip.title}
+          guests={guests}
+        />
+      ) : null}
+
+      <RequestToBookDialog
+        open={requestOpen}
+        onOpenChange={setRequestOpen}
+        tripId={trip.id}
+        tripTitle={trip.title}
+        defaultStartTime={trip.start_time ?? null}
+        defaultDurationHours={Math.max(1, Math.round((trip.duration_minutes ?? 240) / 60))}
+        minParty={minParty}
+        maxParty={maxParty}
+      />
     </article>
   );
 }
