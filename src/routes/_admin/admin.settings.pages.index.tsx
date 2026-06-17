@@ -24,12 +24,12 @@ export const Route = createFileRoute("/_admin/admin/settings/pages/")({
 });
 
 const CATEGORY_LABEL: Record<string, string> = {
-  learning_teaching: "Learning & Teaching",
-  support_safety: "Support & Safety",
+  explore: "Explore",
+  resources: "Resources",
   legal: "Legal",
 };
 
-type Category = "learning_teaching" | "support_safety" | "legal";
+type Category = "explore" | "resources" | "legal";
 type Status = "live" | "draft";
 
 interface PageRow {

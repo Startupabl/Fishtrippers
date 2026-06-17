@@ -24,7 +24,7 @@ export const Route = createFileRoute("/_admin/admin/settings/pages/$pageId")({
   component: PageEditor,
 });
 
-type Category = "learning_teaching" | "support_safety" | "legal";
+type Category = "explore" | "resources" | "legal";
 type Status = "live" | "draft";
 
 interface PageRow {
@@ -56,7 +56,7 @@ interface FormState {
 const EMPTY_FORM: FormState = {
   slug: "",
   title: "",
-  category: "learning_teaching",
+  category: "explore",
   order_priority: 100,
   is_external: false,
   external_url: "",
@@ -277,8 +277,8 @@ function PageEditor() {
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="learning_teaching">Learning & Teaching</SelectItem>
-                  <SelectItem value="support_safety">Support & Safety</SelectItem>
+                  <SelectItem value="explore">Explore</SelectItem>
+                  <SelectItem value="resources">Resources</SelectItem>
                   <SelectItem value="legal">Legal</SelectItem>
                 </SelectContent>
               </Select>

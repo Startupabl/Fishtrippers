@@ -1,23 +1,75 @@
-## Goal
-Replace the existing `FishTrippersProcess` section on the home page with a modern, 3-step "How Fishtrippers Works" section.
+## 1. Database — new footer categories
 
-## Changes (single file: `src/routes/index.tsx`)
+One migration:
+- Rename enum `site_page_category` values: `learning_teaching` → `explore`, `support_safety` → `resources` (`legal` stays).
+- Seed 9 `site_pages` rows (all `status='live'`, `is_external=false`) so the footer is fully driven by admin out of the box:
 
-1. **Imports** — drop unused process icons (`LayoutGrid`, `Handshake`, `GlassWater`, `RefreshCw`) and add `Search`, `CalendarCheck`, `Waves` from `lucide-react`. Remove `useEffect`/`useRef`/IntersectionObserver usage from this section (no longer needed).
+| Category | Title | Slug |
+|---|---|---|
+| explore | About Fishtrippers | `about` |
+| explore | Create a Listing | `create-listing` |
+| explore | Search for Trips | `search` |
+| resources | How it Works for Trippers | `how-it-works-trippers` |
+| resources | How it Works for Hosts | `how-it-works-hosts` |
+| resources | Contact Us | `contact` |
+| legal | Terms of Service | `terms` |
+| legal | Privacy Policy | `privacy` |
+| legal | Pricing & Cancellation Policy | `cancellation-policy` |
 
-2. **Replace `PROCESS_STEPS`** with 3 entries:
-   - `Search` · "1. Find Your Perfect Trip" · "Browse the best local charters, fishing guides, and walk-and-wade experts. Filter by your favorite environment, target fish, or preferred style of fishing."
-   - `CalendarCheck` · "2. Book Your Way" · "Lock in your dates instantly with Instant Booking, or message a captain directly to build a fully customized, tailor-made fishing adventure."
-   - `Waves` · "3. Hit the Water" · "Show up at the dock or the shoreline, meet your expert guide, and enjoy a hassle-free day of world-class fishing!"
+## 2. Page Manager (admin) — label updates
 
-3. **Rewrite `FishTrippersProcess`** as a clean 3-column section:
-   - Section header centered: "How Fishtrippers Works" (same Plus Jakarta Sans 800, deep-navy `#0A2540`, with "Fish" in brand gold `#E8B547`). Short muted subhead under it.
-   - Grid: `grid grid-cols-1 md:grid-cols-3 gap-6 lg:gap-8`.
-   - Each step is a centered card: `rounded-2xl border border-border bg-card p-8 shadow-sm transition-all duration-300 hover:-translate-y-1 hover:shadow-lg`.
-   - Icon in a circular brand-gradient badge (`from-[#E8B547] to-[#0A2540]`, white icon, `size-14` rounded-full) centered at top.
-   - Title in Lora serif (`#0A2540`), body in muted text, all center-aligned.
-   - Keep `prefers-reduced-motion` friendly (transitions only, no JS observers).
+In `src/lib/site-pages.functions.ts` and `src/routes/_admin/admin.settings.pages.{index,$pageId}.tsx`:
+- Swap `CategoryEnum` to `["explore","resources","legal"]`.
+- Update `CATEGORY_LABEL` map → `Explore`, `Resources`, `Legal`.
 
-4. Section wrapper keeps `border-b border-border bg-card/40` and existing `max-w-[1600px]` container so it slots into the page unchanged. `<FishTrippersProcess />` call site (line 498) stays the same.
+## 3. Footer — `src/components/layout/SiteFooter.tsx`
 
-No other sections, routes, or data changes.
+- Keep dynamic fetch from `listLivePages`.
+- New layout: `grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-10`.
+- Columns 1–3: render Explore / Resources / Legal from DB rows (title + slug → `/<slug>` via plain `<a>` since slugs are real top-level routes, not `/pages/$slug`). External rows still honor `external_url`.
+- Column 4 — "Follow Us": icon-only grid (Facebook, Instagram, YouTube, TikTok) — rounded square buttons (`size-10 rounded-lg border border-border/40 hover:bg-primary hover:text-primary-foreground`), `aria-label` on each.
+- Theme: deep-slate footer (`bg-[#0A0F1A] text-slate-400`), headings `text-white font-semibold uppercase text-xs tracking-wider`, links `text-slate-400 hover:text-white`, thin `border-slate-800/70` separator.
+- Bottom bar: left-aligned `© 2026 Fishtrippers. All rights reserved.` (no flex-row jumble), small muted text.
+
+## 4. Routes — rename + create placeholders
+
+Use `mv` for renames, then update `createFileRoute` strings and any internal links:
+
+| Old file | New file | Slug |
+|---|---|---|
+| `about-us.tsx` | `about.tsx` | `/about` |
+| `terms-of-service.tsx` | `terms.tsx` | `/terms` |
+| `privacy-policy.tsx` | `privacy.tsx` | `/privacy` |
+| `how-it-works.tsx` | `how-it-works-trippers.tsx` | `/how-it-works-trippers` |
+| (new) | `how-it-works-hosts.tsx` | `/how-it-works-hosts` |
+| (new) | `cancellation-policy.tsx` | `/cancellation-policy` |
+| (new) | `create-listing.tsx` | `/create-listing` |
+
+`search.tsx` and `contact.tsx` already exist — leave them untouched.
+
+Update references to the old paths in: `register.tsx`, `_authenticated/booking-review.tsx`, `ProfileCompletionRedirector.tsx`, `sitemap[.]xml.ts`, `pages.$slug.tsx` redirects/fallbacks.
+
+### Placeholder page component
+
+All 7 new/renamed route pages render the same shell that pulls editable copy from `site_pages` by slug (so admin edits flow straight through):
+
+```tsx
+// inside component
+const { data } = useQuery({ queryKey:['site_pages','live',slug], queryFn: () => fetchPage({data:{slug}}) });
+return (
+  <main className="mx-auto max-w-3xl px-4 py-16">
+    <h1 className="text-4xl font-semibold tracking-tight">{data?.title ?? FALLBACK_TITLE}</h1>
+    {data?.description && <p className="mt-3 text-lg text-muted-foreground">{data.description}</p>}
+    <div className="mt-10 prose prose-neutral max-w-none"
+         dangerouslySetInnerHTML={{ __html: data?.content_html ?? '<p>Content coming soon. Edit this page from Admin → Settings → Pages.</p>' }} />
+  </main>
+);
+```
+
+Each route sets its own `head()` with title + meta description.
+
+## 5. Cleanup
+
+- Keep `pages.$slug.tsx` for any future admin-only ad-hoc pages (legacy fallback).
+- Update `sitemap[.]xml.ts` slug list to the new URLs.
+- Old `INFO_PAGES` keys in `src/lib/content.ts` updated to match new slugs so the fallback prose stays intact.

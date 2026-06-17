@@ -38,8 +38,8 @@ export const Route = createFileRoute("/pages/$slug")({
 });
 
 const CATEGORY_LABEL: Record<string, string> = {
-  learning_teaching: "Learning & Teaching",
-  support_safety: "Support & Safety",
+  explore: "Explore",
+  resources: "Resources",
   legal: "Legal",
 };
 

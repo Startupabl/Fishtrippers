@@ -1823,7 +1823,7 @@ export type Database = {
       operator_cancellation_policy: "flexible" | "moderate" | "strict"
       operator_primary_category: "offshore" | "inshore" | "freshwater" | "fly"
       order_status_t: "active" | "completed" | "refunded" | "paid"
-      site_page_category: "learning_teaching" | "support_safety" | "legal"
+      site_page_category: "explore" | "resources" | "legal"
       site_page_status: "live" | "draft"
       trip_package_status: "draft" | "active" | "archived"
       user_alert_kind:
@@ -1979,7 +1979,7 @@ export const Constants = {
       operator_cancellation_policy: ["flexible", "moderate", "strict"],
       operator_primary_category: ["offshore", "inshore", "freshwater", "fly"],
       order_status_t: ["active", "completed", "refunded", "paid"],
-      site_page_category: ["learning_teaching", "support_safety", "legal"],
+      site_page_category: ["explore", "resources", "legal"],
       site_page_status: ["live", "draft"],
       trip_package_status: ["draft", "active", "archived"],
       user_alert_kind: [

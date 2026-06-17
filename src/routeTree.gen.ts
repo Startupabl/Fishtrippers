@@ -10,29 +10,32 @@
 
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as TrustAndSafetyRouteImport } from './routes/trust-and-safety'
-import { Route as TermsOfServiceRouteImport } from './routes/terms-of-service'
+import { Route as TermsRouteImport } from './routes/terms'
 import { Route as SitemapDotxmlRouteImport } from './routes/sitemap[.]xml'
 import { Route as SecurityRouteImport } from './routes/security'
 import { Route as SearchRouteImport } from './routes/search'
 import { Route as ResetPasswordRouteImport } from './routes/reset-password'
 import { Route as RegisterRouteImport } from './routes/register'
-import { Route as PrivacyPolicyRouteImport } from './routes/privacy-policy'
+import { Route as PrivacyRouteImport } from './routes/privacy'
 import { Route as MentorFaqsRouteImport } from './routes/mentor-faqs'
 import { Route as MentorAgreementRouteImport } from './routes/mentor-agreement'
 import { Route as LoginRouteImport } from './routes/login'
 import { Route as LearnerFaqsRouteImport } from './routes/learner-faqs'
 import { Route as JourneyWelcomeRouteImport } from './routes/journey-welcome'
-import { Route as HowItWorksRouteImport } from './routes/how-it-works'
+import { Route as HowItWorksTrippersRouteImport } from './routes/how-it-works-trippers'
+import { Route as HowItWorksHostsRouteImport } from './routes/how-it-works-hosts'
 import { Route as GiftRouteImport } from './routes/gift'
 import { Route as ForgotPasswordRouteImport } from './routes/forgot-password'
 import { Route as FirstLessonGuideRouteImport } from './routes/first-lesson-guide'
 import { Route as DataHandlingRouteImport } from './routes/data-handling'
+import { Route as CreateListingRouteImport } from './routes/create-listing'
 import { Route as ContactRouteImport } from './routes/contact'
 import { Route as CheckoutRouteImport } from './routes/checkout'
+import { Route as CancellationPolicyRouteImport } from './routes/cancellation-policy'
 import { Route as BecomeAnAideRouteImport } from './routes/become-an-aide'
 import { Route as BecomeAMentorRouteImport } from './routes/become-a-mentor'
 import { Route as AcceptableUsePolicyRouteImport } from './routes/acceptable-use-policy'
-import { Route as AboutUsRouteImport } from './routes/about-us'
+import { Route as AboutRouteImport } from './routes/about'
 import { Route as AuthenticatedRouteImport } from './routes/_authenticated'
 import { Route as AdminRouteImport } from './routes/_admin'
 import { Route as IndexRouteImport } from './routes/index'
@@ -106,9 +109,9 @@ const TrustAndSafetyRoute = TrustAndSafetyRouteImport.update({
   path: '/trust-and-safety',
   getParentRoute: () => rootRouteImport,
 } as any)
-const TermsOfServiceRoute = TermsOfServiceRouteImport.update({
-  id: '/terms-of-service',
-  path: '/terms-of-service',
+const TermsRoute = TermsRouteImport.update({
+  id: '/terms',
+  path: '/terms',
   getParentRoute: () => rootRouteImport,
 } as any)
 const SitemapDotxmlRoute = SitemapDotxmlRouteImport.update({
@@ -136,9 +139,9 @@ const RegisterRoute = RegisterRouteImport.update({
   path: '/register',
   getParentRoute: () => rootRouteImport,
 } as any)
-const PrivacyPolicyRoute = PrivacyPolicyRouteImport.update({
-  id: '/privacy-policy',
-  path: '/privacy-policy',
+const PrivacyRoute = PrivacyRouteImport.update({
+  id: '/privacy',
+  path: '/privacy',
   getParentRoute: () => rootRouteImport,
 } as any)
 const MentorFaqsRoute = MentorFaqsRouteImport.update({
@@ -166,9 +169,14 @@ const JourneyWelcomeRoute = JourneyWelcomeRouteImport.update({
   path: '/journey-welcome',
   getParentRoute: () => rootRouteImport,
 } as any)
-const HowItWorksRoute = HowItWorksRouteImport.update({
-  id: '/how-it-works',
-  path: '/how-it-works',
+const HowItWorksTrippersRoute = HowItWorksTrippersRouteImport.update({
+  id: '/how-it-works-trippers',
+  path: '/how-it-works-trippers',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const HowItWorksHostsRoute = HowItWorksHostsRouteImport.update({
+  id: '/how-it-works-hosts',
+  path: '/how-it-works-hosts',
   getParentRoute: () => rootRouteImport,
 } as any)
 const GiftRoute = GiftRouteImport.update({
@@ -191,6 +199,11 @@ const DataHandlingRoute = DataHandlingRouteImport.update({
   path: '/data-handling',
   getParentRoute: () => rootRouteImport,
 } as any)
+const CreateListingRoute = CreateListingRouteImport.update({
+  id: '/create-listing',
+  path: '/create-listing',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const ContactRoute = ContactRouteImport.update({
   id: '/contact',
   path: '/contact',
@@ -199,6 +212,11 @@ const ContactRoute = ContactRouteImport.update({
 const CheckoutRoute = CheckoutRouteImport.update({
   id: '/checkout',
   path: '/checkout',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const CancellationPolicyRoute = CancellationPolicyRouteImport.update({
+  id: '/cancellation-policy',
+  path: '/cancellation-policy',
   getParentRoute: () => rootRouteImport,
 } as any)
 const BecomeAnAideRoute = BecomeAnAideRouteImport.update({
@@ -216,9 +234,9 @@ const AcceptableUsePolicyRoute = AcceptableUsePolicyRouteImport.update({
   path: '/acceptable-use-policy',
   getParentRoute: () => rootRouteImport,
 } as any)
-const AboutUsRoute = AboutUsRouteImport.update({
-  id: '/about-us',
-  path: '/about-us',
+const AboutRoute = AboutRouteImport.update({
+  id: '/about',
+  path: '/about',
   getParentRoute: () => rootRouteImport,
 } as any)
 const AuthenticatedRoute = AuthenticatedRouteImport.update({
@@ -594,29 +612,32 @@ const AdminAdminSettingsPagesPageIdRoute =
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
-  '/about-us': typeof AboutUsRoute
+  '/about': typeof AboutRoute
   '/acceptable-use-policy': typeof AcceptableUsePolicyRoute
   '/become-a-mentor': typeof BecomeAMentorRoute
   '/become-an-aide': typeof BecomeAnAideRoute
+  '/cancellation-policy': typeof CancellationPolicyRoute
   '/checkout': typeof CheckoutRouteWithChildren
   '/contact': typeof ContactRoute
+  '/create-listing': typeof CreateListingRoute
   '/data-handling': typeof DataHandlingRoute
   '/first-lesson-guide': typeof FirstLessonGuideRoute
   '/forgot-password': typeof ForgotPasswordRoute
   '/gift': typeof GiftRouteWithChildren
-  '/how-it-works': typeof HowItWorksRoute
+  '/how-it-works-hosts': typeof HowItWorksHostsRoute
+  '/how-it-works-trippers': typeof HowItWorksTrippersRoute
   '/journey-welcome': typeof JourneyWelcomeRoute
   '/learner-faqs': typeof LearnerFaqsRoute
   '/login': typeof LoginRoute
   '/mentor-agreement': typeof MentorAgreementRoute
   '/mentor-faqs': typeof MentorFaqsRoute
-  '/privacy-policy': typeof PrivacyPolicyRoute
+  '/privacy': typeof PrivacyRoute
   '/register': typeof RegisterRoute
   '/reset-password': typeof ResetPasswordRoute
   '/search': typeof SearchRoute
   '/security': typeof SecurityRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
-  '/terms-of-service': typeof TermsOfServiceRoute
+  '/terms': typeof TermsRoute
   '/trust-and-safety': typeof TrustAndSafetyRoute
   '/admin': typeof AdminAdminRouteWithChildren
   '/booking-review': typeof AuthenticatedBookingReviewRoute
@@ -685,29 +706,32 @@ export interface FileRoutesByFullPath {
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
-  '/about-us': typeof AboutUsRoute
+  '/about': typeof AboutRoute
   '/acceptable-use-policy': typeof AcceptableUsePolicyRoute
   '/become-a-mentor': typeof BecomeAMentorRoute
   '/become-an-aide': typeof BecomeAnAideRoute
+  '/cancellation-policy': typeof CancellationPolicyRoute
   '/checkout': typeof CheckoutRouteWithChildren
   '/contact': typeof ContactRoute
+  '/create-listing': typeof CreateListingRoute
   '/data-handling': typeof DataHandlingRoute
   '/first-lesson-guide': typeof FirstLessonGuideRoute
   '/forgot-password': typeof ForgotPasswordRoute
   '/gift': typeof GiftRouteWithChildren
-  '/how-it-works': typeof HowItWorksRoute
+  '/how-it-works-hosts': typeof HowItWorksHostsRoute
+  '/how-it-works-trippers': typeof HowItWorksTrippersRoute
   '/journey-welcome': typeof JourneyWelcomeRoute
   '/learner-faqs': typeof LearnerFaqsRoute
   '/login': typeof LoginRoute
   '/mentor-agreement': typeof MentorAgreementRoute
   '/mentor-faqs': typeof MentorFaqsRoute
-  '/privacy-policy': typeof PrivacyPolicyRoute
+  '/privacy': typeof PrivacyRoute
   '/register': typeof RegisterRoute
   '/reset-password': typeof ResetPasswordRoute
   '/search': typeof SearchRoute
   '/security': typeof SecurityRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
-  '/terms-of-service': typeof TermsOfServiceRoute
+  '/terms': typeof TermsRoute
   '/trust-and-safety': typeof TrustAndSafetyRoute
   '/booking-review': typeof AuthenticatedBookingReviewRoute
   '/dashboard': typeof AuthenticatedDashboardRouteWithChildren
@@ -776,29 +800,32 @@ export interface FileRoutesById {
   '/': typeof IndexRoute
   '/_admin': typeof AdminRouteWithChildren
   '/_authenticated': typeof AuthenticatedRouteWithChildren
-  '/about-us': typeof AboutUsRoute
+  '/about': typeof AboutRoute
   '/acceptable-use-policy': typeof AcceptableUsePolicyRoute
   '/become-a-mentor': typeof BecomeAMentorRoute
   '/become-an-aide': typeof BecomeAnAideRoute
+  '/cancellation-policy': typeof CancellationPolicyRoute
   '/checkout': typeof CheckoutRouteWithChildren
   '/contact': typeof ContactRoute
+  '/create-listing': typeof CreateListingRoute
   '/data-handling': typeof DataHandlingRoute
   '/first-lesson-guide': typeof FirstLessonGuideRoute
   '/forgot-password': typeof ForgotPasswordRoute
   '/gift': typeof GiftRouteWithChildren
-  '/how-it-works': typeof HowItWorksRoute
+  '/how-it-works-hosts': typeof HowItWorksHostsRoute
+  '/how-it-works-trippers': typeof HowItWorksTrippersRoute
   '/journey-welcome': typeof JourneyWelcomeRoute
   '/learner-faqs': typeof LearnerFaqsRoute
   '/login': typeof LoginRoute
   '/mentor-agreement': typeof MentorAgreementRoute
   '/mentor-faqs': typeof MentorFaqsRoute
-  '/privacy-policy': typeof PrivacyPolicyRoute
+  '/privacy': typeof PrivacyRoute
   '/register': typeof RegisterRoute
   '/reset-password': typeof ResetPasswordRoute
   '/search': typeof SearchRoute
   '/security': typeof SecurityRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
-  '/terms-of-service': typeof TermsOfServiceRoute
+  '/terms': typeof TermsRoute
   '/trust-and-safety': typeof TrustAndSafetyRoute
   '/_admin/admin': typeof AdminAdminRouteWithChildren
   '/_authenticated/booking-review': typeof AuthenticatedBookingReviewRoute
@@ -869,29 +896,32 @@ export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
   fullPaths:
     | '/'
-    | '/about-us'
+    | '/about'
     | '/acceptable-use-policy'
     | '/become-a-mentor'
     | '/become-an-aide'
+    | '/cancellation-policy'
     | '/checkout'
     | '/contact'
+    | '/create-listing'
     | '/data-handling'
     | '/first-lesson-guide'
     | '/forgot-password'
     | '/gift'
-    | '/how-it-works'
+    | '/how-it-works-hosts'
+    | '/how-it-works-trippers'
     | '/journey-welcome'
     | '/learner-faqs'
     | '/login'
     | '/mentor-agreement'
     | '/mentor-faqs'
-    | '/privacy-policy'
+    | '/privacy'
     | '/register'
     | '/reset-password'
     | '/search'
     | '/security'
     | '/sitemap.xml'
-    | '/terms-of-service'
+    | '/terms'
     | '/trust-and-safety'
     | '/admin'
     | '/booking-review'
@@ -960,29 +990,32 @@ export interface FileRouteTypes {
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
-    | '/about-us'
+    | '/about'
     | '/acceptable-use-policy'
     | '/become-a-mentor'
     | '/become-an-aide'
+    | '/cancellation-policy'
     | '/checkout'
     | '/contact'
+    | '/create-listing'
     | '/data-handling'
     | '/first-lesson-guide'
     | '/forgot-password'
     | '/gift'
-    | '/how-it-works'
+    | '/how-it-works-hosts'
+    | '/how-it-works-trippers'
     | '/journey-welcome'
     | '/learner-faqs'
     | '/login'
     | '/mentor-agreement'
     | '/mentor-faqs'
-    | '/privacy-policy'
+    | '/privacy'
     | '/register'
     | '/reset-password'
     | '/search'
     | '/security'
     | '/sitemap.xml'
-    | '/terms-of-service'
+    | '/terms'
     | '/trust-and-safety'
     | '/booking-review'
     | '/dashboard'
@@ -1050,29 +1083,32 @@ export interface FileRouteTypes {
     | '/'
     | '/_admin'
     | '/_authenticated'
-    | '/about-us'
+    | '/about'
     | '/acceptable-use-policy'
     | '/become-a-mentor'
     | '/become-an-aide'
+    | '/cancellation-policy'
     | '/checkout'
     | '/contact'
+    | '/create-listing'
     | '/data-handling'
     | '/first-lesson-guide'
     | '/forgot-password'
     | '/gift'
-    | '/how-it-works'
+    | '/how-it-works-hosts'
+    | '/how-it-works-trippers'
     | '/journey-welcome'
     | '/learner-faqs'
     | '/login'
     | '/mentor-agreement'
     | '/mentor-faqs'
-    | '/privacy-policy'
+    | '/privacy'
     | '/register'
     | '/reset-password'
     | '/search'
     | '/security'
     | '/sitemap.xml'
-    | '/terms-of-service'
+    | '/terms'
     | '/trust-and-safety'
     | '/_admin/admin'
     | '/_authenticated/booking-review'
@@ -1144,29 +1180,32 @@ export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   AdminRoute: typeof AdminRouteWithChildren
   AuthenticatedRoute: typeof AuthenticatedRouteWithChildren
-  AboutUsRoute: typeof AboutUsRoute
+  AboutRoute: typeof AboutRoute
   AcceptableUsePolicyRoute: typeof AcceptableUsePolicyRoute
   BecomeAMentorRoute: typeof BecomeAMentorRoute
   BecomeAnAideRoute: typeof BecomeAnAideRoute
+  CancellationPolicyRoute: typeof CancellationPolicyRoute
   CheckoutRoute: typeof CheckoutRouteWithChildren
   ContactRoute: typeof ContactRoute
+  CreateListingRoute: typeof CreateListingRoute
   DataHandlingRoute: typeof DataHandlingRoute
   FirstLessonGuideRoute: typeof FirstLessonGuideRoute
   ForgotPasswordRoute: typeof ForgotPasswordRoute
   GiftRoute: typeof GiftRouteWithChildren
-  HowItWorksRoute: typeof HowItWorksRoute
+  HowItWorksHostsRoute: typeof HowItWorksHostsRoute
+  HowItWorksTrippersRoute: typeof HowItWorksTrippersRoute
   JourneyWelcomeRoute: typeof JourneyWelcomeRoute
   LearnerFaqsRoute: typeof LearnerFaqsRoute
   LoginRoute: typeof LoginRoute
   MentorAgreementRoute: typeof MentorAgreementRoute
   MentorFaqsRoute: typeof MentorFaqsRoute
-  PrivacyPolicyRoute: typeof PrivacyPolicyRoute
+  PrivacyRoute: typeof PrivacyRoute
   RegisterRoute: typeof RegisterRoute
   ResetPasswordRoute: typeof ResetPasswordRoute
   SearchRoute: typeof SearchRoute
   SecurityRoute: typeof SecurityRoute
   SitemapDotxmlRoute: typeof SitemapDotxmlRoute
-  TermsOfServiceRoute: typeof TermsOfServiceRoute
+  TermsRoute: typeof TermsRoute
   TrustAndSafetyRoute: typeof TrustAndSafetyRoute
   MMentorSlugRoute: typeof MMentorSlugRoute
   MentorCreatePathRoute: typeof MentorCreatePathRoute
@@ -1189,11 +1228,11 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof TrustAndSafetyRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/terms-of-service': {
-      id: '/terms-of-service'
-      path: '/terms-of-service'
-      fullPath: '/terms-of-service'
-      preLoaderRoute: typeof TermsOfServiceRouteImport
+    '/terms': {
+      id: '/terms'
+      path: '/terms'
+      fullPath: '/terms'
+      preLoaderRoute: typeof TermsRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/sitemap.xml': {
@@ -1231,11 +1270,11 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof RegisterRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/privacy-policy': {
-      id: '/privacy-policy'
-      path: '/privacy-policy'
-      fullPath: '/privacy-policy'
-      preLoaderRoute: typeof PrivacyPolicyRouteImport
+    '/privacy': {
+      id: '/privacy'
+      path: '/privacy'
+      fullPath: '/privacy'
+      preLoaderRoute: typeof PrivacyRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/mentor-faqs': {
@@ -1273,11 +1312,18 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof JourneyWelcomeRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/how-it-works': {
-      id: '/how-it-works'
-      path: '/how-it-works'
-      fullPath: '/how-it-works'
-      preLoaderRoute: typeof HowItWorksRouteImport
+    '/how-it-works-trippers': {
+      id: '/how-it-works-trippers'
+      path: '/how-it-works-trippers'
+      fullPath: '/how-it-works-trippers'
+      preLoaderRoute: typeof HowItWorksTrippersRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/how-it-works-hosts': {
+      id: '/how-it-works-hosts'
+      path: '/how-it-works-hosts'
+      fullPath: '/how-it-works-hosts'
+      preLoaderRoute: typeof HowItWorksHostsRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/gift': {
@@ -1308,6 +1354,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof DataHandlingRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/create-listing': {
+      id: '/create-listing'
+      path: '/create-listing'
+      fullPath: '/create-listing'
+      preLoaderRoute: typeof CreateListingRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/contact': {
       id: '/contact'
       path: '/contact'
@@ -1320,6 +1373,13 @@ declare module '@tanstack/react-router' {
       path: '/checkout'
       fullPath: '/checkout'
       preLoaderRoute: typeof CheckoutRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/cancellation-policy': {
+      id: '/cancellation-policy'
+      path: '/cancellation-policy'
+      fullPath: '/cancellation-policy'
+      preLoaderRoute: typeof CancellationPolicyRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/become-an-aide': {
@@ -1343,11 +1403,11 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AcceptableUsePolicyRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/about-us': {
-      id: '/about-us'
-      path: '/about-us'
-      fullPath: '/about-us'
-      preLoaderRoute: typeof AboutUsRouteImport
+    '/about': {
+      id: '/about'
+      path: '/about'
+      fullPath: '/about'
+      preLoaderRoute: typeof AboutRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/_authenticated': {
@@ -2079,29 +2139,32 @@ const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   AdminRoute: AdminRouteWithChildren,
   AuthenticatedRoute: AuthenticatedRouteWithChildren,
-  AboutUsRoute: AboutUsRoute,
+  AboutRoute: AboutRoute,
   AcceptableUsePolicyRoute: AcceptableUsePolicyRoute,
   BecomeAMentorRoute: BecomeAMentorRoute,
   BecomeAnAideRoute: BecomeAnAideRoute,
+  CancellationPolicyRoute: CancellationPolicyRoute,
   CheckoutRoute: CheckoutRouteWithChildren,
   ContactRoute: ContactRoute,
+  CreateListingRoute: CreateListingRoute,
   DataHandlingRoute: DataHandlingRoute,
   FirstLessonGuideRoute: FirstLessonGuideRoute,
   ForgotPasswordRoute: ForgotPasswordRoute,
   GiftRoute: GiftRouteWithChildren,
-  HowItWorksRoute: HowItWorksRoute,
+  HowItWorksHostsRoute: HowItWorksHostsRoute,
+  HowItWorksTrippersRoute: HowItWorksTrippersRoute,
   JourneyWelcomeRoute: JourneyWelcomeRoute,
   LearnerFaqsRoute: LearnerFaqsRoute,
   LoginRoute: LoginRoute,
   MentorAgreementRoute: MentorAgreementRoute,
   MentorFaqsRoute: MentorFaqsRoute,
-  PrivacyPolicyRoute: PrivacyPolicyRoute,
+  PrivacyRoute: PrivacyRoute,
   RegisterRoute: RegisterRoute,
   ResetPasswordRoute: ResetPasswordRoute,
   SearchRoute: SearchRoute,
   SecurityRoute: SecurityRoute,
   SitemapDotxmlRoute: SitemapDotxmlRoute,
-  TermsOfServiceRoute: TermsOfServiceRoute,
+  TermsRoute: TermsRoute,
   TrustAndSafetyRoute: TrustAndSafetyRoute,
   MMentorSlugRoute: MMentorSlugRoute,
   MentorCreatePathRoute: MentorCreatePathRoute,
