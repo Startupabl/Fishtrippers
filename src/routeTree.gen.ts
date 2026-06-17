@@ -10,6 +10,7 @@
 
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as TrustAndSafetyRouteImport } from './routes/trust-and-safety'
+import { Route as TermsRouteImport } from './routes/terms'
 import { Route as SitemapDotxmlRouteImport } from './routes/sitemap[.]xml'
 import { Route as SecurityRouteImport } from './routes/security'
 import { Route as SearchRouteImport } from './routes/search'
@@ -101,6 +102,11 @@ import { Route as AdminAdminSettingsPagesPageIdRouteImport } from './routes/_adm
 const TrustAndSafetyRoute = TrustAndSafetyRouteImport.update({
   id: '/trust-and-safety',
   path: '/trust-and-safety',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const TermsRoute = TermsRouteImport.update({
+  id: '/terms',
+  path: '/terms',
   getParentRoute: () => rootRouteImport,
 } as any)
 const SitemapDotxmlRoute = SitemapDotxmlRouteImport.update({
@@ -596,6 +602,7 @@ export interface FileRoutesByFullPath {
   '/search': typeof SearchRoute
   '/security': typeof SecurityRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
+  '/terms': typeof TermsRoute
   '/trust-and-safety': typeof TrustAndSafetyRoute
   '/admin': typeof AdminAdminRouteWithChildren
   '/booking-review': typeof AuthenticatedBookingReviewRoute
@@ -684,6 +691,7 @@ export interface FileRoutesByTo {
   '/search': typeof SearchRoute
   '/security': typeof SecurityRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
+  '/terms': typeof TermsRoute
   '/trust-and-safety': typeof TrustAndSafetyRoute
   '/booking-review': typeof AuthenticatedBookingReviewRoute
   '/dashboard': typeof AuthenticatedDashboardRouteWithChildren
@@ -772,6 +780,7 @@ export interface FileRoutesById {
   '/search': typeof SearchRoute
   '/security': typeof SecurityRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
+  '/terms': typeof TermsRoute
   '/trust-and-safety': typeof TrustAndSafetyRoute
   '/_admin/admin': typeof AdminAdminRouteWithChildren
   '/_authenticated/booking-review': typeof AuthenticatedBookingReviewRoute
@@ -862,6 +871,7 @@ export interface FileRouteTypes {
     | '/search'
     | '/security'
     | '/sitemap.xml'
+    | '/terms'
     | '/trust-and-safety'
     | '/admin'
     | '/booking-review'
@@ -950,6 +960,7 @@ export interface FileRouteTypes {
     | '/search'
     | '/security'
     | '/sitemap.xml'
+    | '/terms'
     | '/trust-and-safety'
     | '/booking-review'
     | '/dashboard'
@@ -1037,6 +1048,7 @@ export interface FileRouteTypes {
     | '/search'
     | '/security'
     | '/sitemap.xml'
+    | '/terms'
     | '/trust-and-safety'
     | '/_admin/admin'
     | '/_authenticated/booking-review'
@@ -1128,6 +1140,7 @@ export interface RootRouteChildren {
   SearchRoute: typeof SearchRoute
   SecurityRoute: typeof SecurityRoute
   SitemapDotxmlRoute: typeof SitemapDotxmlRoute
+  TermsRoute: typeof TermsRoute
   TrustAndSafetyRoute: typeof TrustAndSafetyRoute
   MMentorSlugRoute: typeof MMentorSlugRoute
   MentorCreatePathRoute: typeof MentorCreatePathRoute
@@ -1148,6 +1161,13 @@ declare module '@tanstack/react-router' {
       path: '/trust-and-safety'
       fullPath: '/trust-and-safety'
       preLoaderRoute: typeof TrustAndSafetyRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/terms': {
+      id: '/terms'
+      path: '/terms'
+      fullPath: '/terms'
+      preLoaderRoute: typeof TermsRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/sitemap.xml': {
@@ -2039,6 +2059,7 @@ const rootRouteChildren: RootRouteChildren = {
   SearchRoute: SearchRoute,
   SecurityRoute: SecurityRoute,
   SitemapDotxmlRoute: SitemapDotxmlRoute,
+  TermsRoute: TermsRoute,
   TrustAndSafetyRoute: TrustAndSafetyRoute,
   MMentorSlugRoute: MMentorSlugRoute,
   MentorCreatePathRoute: MentorCreatePathRoute,
