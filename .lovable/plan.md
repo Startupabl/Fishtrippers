@@ -1,43 +1,108 @@
-# Align site categories with fishing environments
+## Goal
+Make `/search` query real operator listings (not the legacy `journeys` table), with the search bar at the top of the page, FishingBooker-style filter pills underneath, and cards that match your uploaded reference. Reuse the same card everywhere we surface listings (search + homepage featured).
 
-Today the `categories` table is empty and the legacy "Categories" admin page is the only UI managing it. The 7 fishing environments are hard-coded in `src/lib/operators.shared.ts` (`FISHING_ENVIRONMENTS`) and used in the operator onboarding Step 4 multi-select. We'll make the same 7 environments the official site categories and wire them everywhere categories already plug in.
+## 1. New server function: `searchOperatorsServer`
+File: `src/lib/operators-search.functions.ts` (new)
 
-## Canonical list (id → label)
+Query `operators` joined with the cover `operator_photos` row, the `vessels` row, and the cheapest active `trip_packages` row. Returns plain DTOs:
 
-- `inshore` → Inshore
-- `nearshore` → Nearshore
-- `offshore` → Offshore / Deep Sea
-- `flats` → Flats
-- `freshwater` → Freshwater
-- `rivers_streams` → Rivers & Streams
-- `backcountry` → Backcountry
+```ts
+type OperatorCardDTO = {
+  id, slug, display_name,
+  city, state, country,
+  cover_image_url,           // first photo (is_cover, else position 0)
+  vessel: { length_ft, max_passenger_capacity } | null,
+  booking_type,              // 'instant' | 'inquiry'
+  verified: true,            // approved+published listings are "verified" for now
+  lowest_price: { minor, currency, label } | null,  // from cheapest published trip
+}
+```
 
-## Changes
+Filters accepted (all optional, AND-combined):
+- `city` (ilike on `default_departure_city`)
+- `category` (matches `fishing_environments @> {<env_id>}`, mapped from category name → env slug)
+- `instantBook` (booking_type = 'instant')
+- `q` (ilike on display_name)
 
-1. **Seed the `categories` table** with the 7 rows above (parent-level, no children). Each row gets:
-   - `name` = environment label (e.g. "Inshore")
-   - `slug` / id-style key kept in sync with the env id so we can map categories ↔ operator filter
-   - `is_featured = true` so all 7 surface on the homepage grid
-   - `image_url = null` for now (admin can upload images later from the Categories page)
-   
-   Done via a one-time `INSERT … ON CONFLICT DO NOTHING` so re-running is safe and existing edits aren't clobbered.
+Visibility rule: only `moderation_status='approved'` AND `status='published'`.
 
-2. **Admin Categories page** (`src/routes/_admin/admin.settings.categories.tsx`): no code change — it already lists everything in the table, so the 7 environments appear automatically after seeding and remain editable (rename / replace image / toggle featured).
+If a trip has no published package yet, fall back to the cheapest `draft` so the existing test listing still shows a price (toggle behind a flag we can flip later).
 
-3. **Homepage featured grid** (`src/routes/index.tsx`): already reads `listFeaturedCategories()` and links to `/search?category=<name>`. After seeding, the 7 environments show up automatically with placeholder imagery until the admin uploads photos.
+## 2. New `OperatorCard` component
+File: `src/components/listings/OperatorCard.tsx` (new)
 
-4. **Search page** (`src/routes/search.tsx` + `src/lib/journeys.functions.ts`): the category facet already filters by name. Replace the legacy journeys-only filter wiring so that when a fishing-environment category is selected, the operator/listing query also filters operators by `fishing_environments @> {<env_id>}`. Mapping uses the canonical id list above (label → id).
+Layout (matches `search_2.jpg`):
+- Cover image (16/10), rounded
+- Pill row over image bottom: `[🚤 30 ft]`  `[👥 6]`  `[✅ Verified]`
+- Title: `display_name`
+- Row: 📍 `City`
+- Row (if instant): ⚡ Instant Confirmation
+- Footer: "Trips from" + `From US $1,200` formatted via the trip's `currency`
 
-5. **Listing detail / category links**: ensure operator listings expose their primary environment as the category slug used in `/c/$categorySlug/$listingSlug` URLs (already supported by the route — just confirm slug generation uses the environment label).
+Use design tokens (no hardcoded colors). Click → `/c/$categorySlug/$listingSlug` using primary environment as category slug (same pattern already in `c.$categorySlug.$listingSlug.tsx`).
 
-6. **Operator onboarding (Step 4)**: no change — `FISHING_ENVIRONMENTS` stays the source of truth. We just mirror it into the `categories` table.
+## 3. Rebuild `/search` page
+File: `src/routes/search.tsx` (rewrite)
 
-## Out of scope
+### Search schema
+Drop `level`. Add:
+```
+q, city, category, instantBook,
+duration, priceMin, priceMax,
+departureTime, technique, species,
+tripDate, adults, children
+```
+All optional, with `fallback(...)`.
 
-- Building a brand-new public operator browse page (search currently still queries the legacy `journeys` table; we'll bolt the environment filter onto it but not redesign the page).
-- Sub-categories under environments.
-- Auto-uploading category cover images — admin can do that from the Categories page after seeding.
+### Layout
+```
+┌─────────────────────────────────────────────────────────────┐
+│  [📍 City ▼] [📅 Trip Date ▼] [👥 2 adults • 0 children ▼] [Search] │  ← top bar (sticky)
+├─────────────────────────────────────────────────────────────┤
+│  [↕ Sort] [⚙ Filters] [⚡ Instant Book] [Duration ▾] [Price ▾]   │
+│  [Departure Time ▾] [Fishing Technique ▾] [Target Fish ▾] [Category ▾]│
+├─────────────────────────────────────────────────────────────┤
+│  "{City}: N fishing charters available"                      │
+│  Grid of OperatorCard (1/2/3 cols responsive)                │
+└─────────────────────────────────────────────────────────────┘
+```
 
-## Question for you
+No left sidebar — sidebar code removed.
 
-Want me to **delete any existing non-environment categories** during seeding (clean slate), or just **add** the 7 environments alongside whatever is already there? The table is currently empty, so either way the visible result is the same — this is about what happens if you add other categories later.
+### Wiring (this turn)
+- City: free-text input with debounced URL sync → server filter.
+- Category pill: opens a popover listing the 7 fishing environments (from the seeded `categories` table); writes URL param; server filters by `fishing_environments` array.
+- Instant Book toggle pill → server filter.
+- `q` search input remains.
+- Trip Date / Adults+Children: render the controls but they're static for now (write to URL, don't filter — calendar/availability comes later).
+- Duration, Price, Departure Time, Fishing Technique, Target Fish: rendered as static popover pills with "Coming soon" content so the layout is real but they don't filter yet.
+- Sort: static "Recommended" for now.
+
+## 4. Homepage uses the same card
+File: `src/routes/index.tsx`
+
+Replace the "featured journeys" section's `LiveJourneyCard` usage with `OperatorCard`, backed by a new `listFeaturedOperators` server fn (same shape as search, no filters, ordered by `featured DESC, priority_order DESC, created_at DESC`, limit 6). `LiveJourneyCard` stays in the codebase for now but is no longer used on these surfaces.
+
+## 5. Heads-up on your existing test listing
+Your one approved listing (`Blue Ocean Charters`) currently has:
+- `default_departure_city = null`
+- only a `draft` trip package
+
+After this change:
+- It will appear on `/search` only when **no city filter** is set (or you populate the city in the operator profile).
+- Pricing pill will show "From US $200" using the draft trip (with the draft-fallback flag enabled). Once you publish the trip, the fallback is no longer needed.
+
+I won't edit the listing data — you can fill in city/publish the trip from the operator dashboard.
+
+## Out of scope (call out as future work)
+- Real availability/date filtering
+- Wiring Duration / Price / Departure Time / Technique / Species filters to the query
+- Map view ("Show on map")
+- Sort options other than Recommended
+- Ratings (you said use "Verified" badge for now)
+
+## Technical notes
+- New file path: `src/lib/operators-search.functions.ts` (client-safe, callable via `useServerFn`).
+- DTOs only — no Supabase client instances cross the RPC boundary.
+- All filter state lives in URL search params via `validateSearch` + `useNavigate({ search: prev => ... })`.
+- Price formatting uses `Intl.NumberFormat(undefined, { style: 'currency', currency })` server-side so the card just renders the label string.

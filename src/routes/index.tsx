@@ -14,11 +14,11 @@ import {
 import { useServerFn } from "@tanstack/react-start";
 import { useAuthStore } from "@/stores/useAuthStore";
 import { useQuery } from "@tanstack/react-query";
-import { listFeaturedJourneys } from "@/lib/journeys.functions";
+import { searchOperatorsServer } from "@/lib/operators-search.functions";
 import { listFeaturedCategories } from "@/lib/categories.functions";
 import { getCategoryPlaceholder } from "@/lib/category-placeholders";
 import type { JourneyCategory } from "@/data/lesson-paths";
-import { LiveJourneyCard } from "@/components/listings/LiveJourneyCard";
+import { OperatorCard } from "@/components/listings/OperatorCard";
 import { DESIGN_SYSTEM } from "@/lib/brand";
 import heroFishingAsset from "@/assets/hero-fishing.jpg.asset.json";
 const heroFishing = heroFishingAsset.url;
@@ -310,12 +310,12 @@ function Index() {
       : "Angler";
   const showGreeting = authInitialized && !!authUser;
 
-  const fetchFeatured = useServerFn(listFeaturedJourneys);
+  const fetchFeatured = useServerFn(searchOperatorsServer);
   const featuredQuery = useQuery({
-    queryKey: ["featured-journeys"],
-    queryFn: () => fetchFeatured(),
+    queryKey: ["featured-operators"],
+    queryFn: () => fetchFeatured({ data: { featuredOnly: false, limit: 6 } }),
   });
-  const featured = featuredQuery.data ?? [];
+  const featured = featuredQuery.data?.items ?? [];
 
 
   useEffect(() => {
@@ -410,7 +410,7 @@ function Index() {
               className="text-3xl text-foreground"
               style={{ fontFamily: "Lora, ui-serif, Georgia, serif" }}
             >
-              Featured Courses
+              Featured Charters
             </h2>
             {featuredQuery.isLoading ? (
               <div className="mt-6 grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
@@ -423,8 +423,8 @@ function Index() {
               </div>
             ) : (
               <ul className="mt-6 grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
-                {featured.map((j) => (
-                  <LiveJourneyCard key={j.id} journey={j} />
+                {featured.map((op) => (
+                  <OperatorCard key={op.id} operator={op} />
                 ))}
               </ul>
             )}
