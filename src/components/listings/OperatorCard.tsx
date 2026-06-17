@@ -14,16 +14,7 @@ export function OperatorCard({ operator }: { operator: OperatorCardDTO }) {
       key: "length",
       content: (
         <>
-          {operator.boat_type_icon_url ? (
-            <img
-              src={operator.boat_type_icon_url}
-              alt={operator.boat_type_name ?? "Boat"}
-              className="h-7 w-auto object-contain"
-              loading="lazy"
-            />
-          ) : (
-            <Sailboat className="h-7 w-7 text-foreground" />
-          )}
+          <Sailboat className="size-4 text-foreground" />
           <span>{operator.vessel_length_ft} ft</span>
         </>
       ),
@@ -35,7 +26,7 @@ export function OperatorCard({ operator }: { operator: OperatorCardDTO }) {
       key: "capacity",
       content: (
         <>
-          <Users className="h-3 w-3 text-foreground" />
+          <Users className="size-4 text-foreground" />
           <span>{operator.vessel_capacity}</span>
         </>
       ),
@@ -47,7 +38,7 @@ export function OperatorCard({ operator }: { operator: OperatorCardDTO }) {
       key: "verified",
       content: (
         <>
-          <Star className="h-3 w-3 fill-amber-400 text-amber-400" />
+          <Star className="size-4 fill-amber-400 text-amber-400" />
           <span>Verified</span>
         </>
       ),
@@ -115,8 +106,7 @@ export function OperatorCard({ operator }: { operator: OperatorCardDTO }) {
             </p>
           )}
 
-          <div className="mt-3 flex items-end justify-between gap-2">
-            <span className="text-xs text-muted-foreground">Trips from</span>
+          <div className="mt-3 flex items-end justify-end gap-2">
             {operator.lowest_price_label ? (
               <span className="text-base font-bold text-emerald-700">
                 {operator.lowest_price_label}

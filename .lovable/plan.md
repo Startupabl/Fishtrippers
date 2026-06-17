@@ -1,7 +1,7 @@
-In `src/components/listings/OperatorCard.tsx`, resize the capsule icons while keeping all three segments on one centered line:
+Edit `src/components/listings/OperatorCard.tsx`:
 
-- Boat icon: `h-5` → `h-7` (boat image and fallback `Sailboat` both move to `h-7 w-7` / `h-7 w-auto`) — ~30% larger
-- `Users` capacity icon: `h-5 w-5` → `h-3 w-3` — ~40% smaller
-- `Star` verified icon: `h-5 w-5` → `h-3 w-3`
+1. **Boat icon**: Remove the dynamic `boat_type_icon_url` image. Always render the static `Sailboat` lucide icon for every card (same one used originally).
+2. **Icon sizes**: Set all three capsule icons (`Sailboat`, `Users`, `Star`) to the same size as the white-section icons — `size-4` (matching `ShieldCheck` in the title row).
+3. **Remove "Trips from"**: Delete the `<span className="text-xs text-muted-foreground">Trips from</span>` line in the footer price row, leaving only the price (or "Contact for pricing" fallback).
 
-Alignment is preserved by the existing `flex items-center justify-center gap-1.5` per segment — the row's vertical center stays anchored regardless of icon height, so the larger boat icon visually pops without pushing labels onto a second line. No layout, width, or text-size changes.
+No other changes — layout, capsule width (90%), and one-line alignment remain intact.
