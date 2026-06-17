@@ -42,7 +42,7 @@ function startOf(period: "day" | "week" | "month"): string {
 }
 
 async function countSince(
-  table: "profiles" | "journeys" | "bookings",
+  table: "profiles" | "journeys" | "bookings" | "operators",
   column: "created_at",
   iso: string,
   extra?: (q: ReturnType<typeof supabaseAdmin.from>) => ReturnType<typeof supabaseAdmin.from>,
