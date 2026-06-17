@@ -239,13 +239,6 @@ export function TripsBlock({ trips }: Props) {
         Trip availability and prices
       </h2>
 
-      <div className="flex items-center gap-2 rounded-xl border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm text-emerald-900 dark:border-emerald-900 dark:bg-emerald-950/40 dark:text-emerald-200">
-        <CheckCircle2 className="h-4 w-4" />
-        <span>
-          <span className="font-semibold underline">Free cancellation</span> per
-          captain&apos;s policy.
-        </span>
-      </div>
 
       {trips.length === 0 ? (
         <div className="rounded-2xl border border-dashed bg-card p-10 text-center">
