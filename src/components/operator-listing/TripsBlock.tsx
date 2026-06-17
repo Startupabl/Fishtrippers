@@ -2,7 +2,6 @@ import { useState } from "react";
 import {
   Clock,
   Plus,
-  CheckCircle2,
   MapPin,
   Minus,
   Fish,
