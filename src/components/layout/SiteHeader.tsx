@@ -4,6 +4,7 @@ import { Logo } from "@/components/brand/Logo";
 import { Button } from "@/components/ui/button";
 import { useAuthStore } from "@/stores/useAuthStore";
 import { startNewMentorExpressListing } from "@/stores/useMentorExpressStore";
+import { useHasActiveListingStatus } from "@/hooks/useHasActiveListing";
 import { AlertsBellButton } from "./AlertsBellButton";
 import { MessagesIconButton } from "./MessagesIconButton";
 import { AlertsOnlyBellButton } from "./AlertsOnlyBellButton";
