@@ -240,7 +240,7 @@ function ShowcaseStudioPage() {
   return (
     <div className="min-h-screen bg-paper">
       <header className="border-b border-border/60 bg-card/60 backdrop-blur">
-        <div className="mx-auto flex max-w-[1400px] items-center justify-between px-4 md:px-8 py-4">
+        <div className="mx-auto flex max-w-[1600px] items-center justify-between px-4 md:px-6 lg:px-8 py-4">
           <Logo size="md" />
           <Button asChild variant="ghost">
             <Link to="/dashboard/aide/courses">
@@ -250,7 +250,7 @@ function ShowcaseStudioPage() {
         </div>
       </header>
 
-      <main className="mx-auto max-w-[1400px] px-4 md:px-8 py-8 md:py-12">
+      <main className="mx-auto max-w-[1600px] px-4 md:px-6 lg:px-8 py-8 md:py-12">
         <div className="mb-6">
           <h1 className="text-3xl text-foreground md:text-4xl" style={lora}>
             Welcome to your Showcase

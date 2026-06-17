@@ -68,7 +68,7 @@ function DashboardLayout() {
 function DashboardHeaderBar() {
   const { title } = useWorkspaceMode();
   return (
-    <div className="flex items-center gap-2 border-b border-border/60 bg-card/60 px-4 md:px-8 py-2 backdrop-blur">
+    <div className="flex items-center gap-2 border-b border-border/60 bg-card/60 px-4 md:px-6 lg:px-8 py-2 backdrop-blur">
       <SidebarTrigger />
       <span className="text-sm font-medium text-muted-foreground">{title}</span>
     </div>
@@ -101,7 +101,7 @@ function AideDashboardHome() {
   void stripeIds;
 
   return (
-    <div className="mx-auto w-full max-w-[1400px] px-4 md:px-8 py-8 md:py-12">
+    <div className="mx-auto w-full max-w-[1600px] px-4 md:px-6 lg:px-8 py-8 md:py-12">
       {profileGuardDialog}
       <ListingLiveCelebrationDialog />
 

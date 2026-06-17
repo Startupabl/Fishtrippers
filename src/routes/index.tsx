@@ -117,7 +117,7 @@ function FishTrippersProcess() {
 
   return (
     <section className="border-b border-border bg-card/40">
-      <div className="mx-auto max-w-[1400px] px-4 md:px-8 py-16">
+      <div className="mx-auto max-w-[1600px] px-4 md:px-6 lg:px-8 py-16">
         <h2
           className="mb-12 text-center text-2xl tracking-tight md:text-3xl"
           style={{ fontFamily: '"Plus Jakarta Sans", "Inter", system-ui, sans-serif', fontWeight: 800 }}
@@ -246,7 +246,7 @@ function CategoryGrid() {
 
   return (
     <section className="border-b border-border bg-background">
-      <div className="mx-auto max-w-[1400px] px-4 md:px-8 py-12 md:py-16">
+      <div className="mx-auto max-w-[1600px] px-4 md:px-6 lg:px-8 py-12 md:py-16">
         <h2
           className="text-2xl text-foreground md:text-3xl"
           style={{ fontFamily: "Lora, ui-serif, Georgia, serif" }}
@@ -355,7 +355,7 @@ function Index() {
           }}
         />
 
-        <div className="relative z-10 mx-auto flex max-w-[1400px] flex-col justify-center px-4 pb-10 pt-20 md:min-h-[760px] md:px-8 md:pb-16 md:pt-28">
+        <div className="relative z-10 mx-auto flex max-w-[1600px] flex-col justify-center px-4 pb-10 pt-20 md:min-h-[760px] md:px-8 md:pb-16 md:pt-28">
           {showGreeting && (
             <p
               className="mb-3 text-lg text-white/90 md:text-xl"
@@ -405,7 +405,7 @@ function Index() {
       {/* FEATURED COURSES */}
       {(featuredQuery.isLoading || featured.length > 0) && (
         <section className="border-b border-border">
-          <div className="mx-auto max-w-[1400px] px-4 md:px-8 py-16">
+          <div className="mx-auto max-w-[1600px] px-4 md:px-6 lg:px-8 py-16">
             <h2
               className="text-3xl text-foreground"
               style={{ fontFamily: "Lora, ui-serif, Georgia, serif" }}

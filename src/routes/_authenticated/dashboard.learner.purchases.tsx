@@ -83,7 +83,7 @@ function LearnerPurchases() {
   const learnerName = user.displayName || user.firstName || user.email;
 
   return (
-    <main className="mx-auto max-w-[1400px] px-4 md:px-8 py-12 print:hidden">
+    <main className="mx-auto max-w-[1600px] px-4 md:px-6 lg:px-8 py-12 print:hidden">
       <h1 className="text-3xl font-bold tracking-tight" style={display}>
         Purchase History
       </h1>

@@ -184,7 +184,7 @@ function MyListingPage() {
 
   if (operatorQ.isLoading) {
     return (
-      <div className="mx-auto w-full max-w-[1200px] px-4 md:px-8 py-10">
+      <div className="mx-auto w-full max-w-[1600px] px-4 md:px-6 lg:px-8 py-10">
         <p className="text-sm text-muted-foreground">Loading your listing…</p>
       </div>
     );
@@ -192,7 +192,7 @@ function MyListingPage() {
 
   if (!operator) {
     return (
-      <div className="mx-auto w-full max-w-[1200px] px-4 md:px-8 py-16 text-center">
+      <div className="mx-auto w-full max-w-[1600px] px-4 md:px-6 lg:px-8 py-16 text-center">
         <h1 className="text-3xl text-foreground" style={lora}>
           You don&apos;t have a listing yet
         </h1>
@@ -219,7 +219,7 @@ function MyListingPage() {
     (op.moderation_status === "pending" || op.moderation_status === "approved");
 
   return (
-    <div className="mx-auto w-full max-w-[1200px] px-4 md:px-8 py-8 md:py-10">
+    <div className="mx-auto w-full max-w-[1600px] px-4 md:px-6 lg:px-8 py-8 md:py-10">
       <div className="flex flex-wrap items-center justify-between gap-3">
         <div>
           <h1 className="text-3xl text-foreground md:text-4xl" style={lora}>
