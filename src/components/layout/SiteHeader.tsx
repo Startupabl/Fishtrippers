@@ -18,6 +18,7 @@ export function SiteHeader() {
   const isAuthenticated = !!user;
   const _navigate = useNavigate();
   void _navigate;
+  const { guard, dialog: profileGuardDialog } = useProfileGuard();
   const { hasListing } = useHasActiveListingStatus();
 
   if (pathname.startsWith("/checkout")) return null;
