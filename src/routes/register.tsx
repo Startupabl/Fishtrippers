@@ -263,7 +263,7 @@ function RegisterPage() {
               <p className="text-center text-xs text-muted-foreground">
                 By clicking Create Account, you agree to our{" "}
                 <Link
-                  to="/terms-of-service"
+                  to="/terms"
                   target="_blank"
                   rel="noopener noreferrer"
                   className="underline hover:text-info"
