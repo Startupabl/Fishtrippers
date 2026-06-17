@@ -326,15 +326,7 @@ function Index() {
             <HeroBookingBar />
           </div>
 
-          <div className="mt-6 flex flex-wrap items-center gap-3">
-            <button
-              type="button"
-              onClick={() => setQuizOpen(true)}
-              className="inline-flex items-center gap-1 rounded-full bg-white/15 px-3 py-1.5 text-xs font-semibold text-white backdrop-blur hover:bg-white/25"
-            >
-              <Sparkles className="size-3" />
-              Find your perfect guide
-            </button>
+          <div className="mt-6 flex flex-wrap items-center justify-start gap-3">
             <button
               type="button"
               onClick={() => setVideoOpen(true)}
@@ -346,6 +338,7 @@ function Index() {
               How FishTrippers works
             </button>
           </div>
+
         </div>
       </section>
 
