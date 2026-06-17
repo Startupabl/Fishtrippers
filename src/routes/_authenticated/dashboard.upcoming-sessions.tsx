@@ -502,20 +502,20 @@ function ScheduleTableRow({
             </a>
           )}
         </div>
-        <div className="text-xs text-muted-foreground">
-          {row.durationMinutes} min · {row.source === "custom_offer" ? "Custom offer" : "Live course"}
-        </div>
         {row.pendingReschedule && (
           <div className="mt-1 text-xs text-amber-600">
             Proposed → {fmtSessionTime(row.pendingReschedule.proposed_starts_at)} ({row.pendingReschedule.proposed_duration_minutes} min)
           </div>
         )}
       </TableCell>
+      <TableCell className="text-sm font-mono text-foreground whitespace-nowrap">
+        {formatHours(row.durationMinutes)}
+      </TableCell>
       <TableCell className="text-sm font-medium text-foreground max-w-[220px]">
         <div className="truncate" title={row.listingTitle}>{row.listingTitle}</div>
       </TableCell>
       <TableCell>
-        <StatusBadge status={row.status} />
+        <StatusBadge status={mode === "completed" ? "complete" : row.status} />
       </TableCell>
       <TableCell className="text-sm font-mono text-foreground whitespace-nowrap">
         {row.filledSeats}/{row.maxSeats}
