@@ -28,6 +28,7 @@ import { Route as GiftRouteImport } from './routes/gift'
 import { Route as ForgotPasswordRouteImport } from './routes/forgot-password'
 import { Route as FirstLessonGuideRouteImport } from './routes/first-lesson-guide'
 import { Route as DataHandlingRouteImport } from './routes/data-handling'
+import { Route as CreateListingRouteImport } from './routes/create-listing'
 import { Route as ContactRouteImport } from './routes/contact'
 import { Route as CheckoutRouteImport } from './routes/checkout'
 import { Route as CancellationPolicyRouteImport } from './routes/cancellation-policy'
@@ -196,6 +197,11 @@ const FirstLessonGuideRoute = FirstLessonGuideRouteImport.update({
 const DataHandlingRoute = DataHandlingRouteImport.update({
   id: '/data-handling',
   path: '/data-handling',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const CreateListingRoute = CreateListingRouteImport.update({
+  id: '/create-listing',
+  path: '/create-listing',
   getParentRoute: () => rootRouteImport,
 } as any)
 const ContactRoute = ContactRouteImport.update({
@@ -613,6 +619,7 @@ export interface FileRoutesByFullPath {
   '/cancellation-policy': typeof CancellationPolicyRoute
   '/checkout': typeof CheckoutRouteWithChildren
   '/contact': typeof ContactRoute
+  '/create-listing': typeof CreateListingRoute
   '/data-handling': typeof DataHandlingRoute
   '/first-lesson-guide': typeof FirstLessonGuideRoute
   '/forgot-password': typeof ForgotPasswordRoute
@@ -706,6 +713,7 @@ export interface FileRoutesByTo {
   '/cancellation-policy': typeof CancellationPolicyRoute
   '/checkout': typeof CheckoutRouteWithChildren
   '/contact': typeof ContactRoute
+  '/create-listing': typeof CreateListingRoute
   '/data-handling': typeof DataHandlingRoute
   '/first-lesson-guide': typeof FirstLessonGuideRoute
   '/forgot-password': typeof ForgotPasswordRoute
@@ -799,6 +807,7 @@ export interface FileRoutesById {
   '/cancellation-policy': typeof CancellationPolicyRoute
   '/checkout': typeof CheckoutRouteWithChildren
   '/contact': typeof ContactRoute
+  '/create-listing': typeof CreateListingRoute
   '/data-handling': typeof DataHandlingRoute
   '/first-lesson-guide': typeof FirstLessonGuideRoute
   '/forgot-password': typeof ForgotPasswordRoute
@@ -894,6 +903,7 @@ export interface FileRouteTypes {
     | '/cancellation-policy'
     | '/checkout'
     | '/contact'
+    | '/create-listing'
     | '/data-handling'
     | '/first-lesson-guide'
     | '/forgot-password'
@@ -987,6 +997,7 @@ export interface FileRouteTypes {
     | '/cancellation-policy'
     | '/checkout'
     | '/contact'
+    | '/create-listing'
     | '/data-handling'
     | '/first-lesson-guide'
     | '/forgot-password'
@@ -1079,6 +1090,7 @@ export interface FileRouteTypes {
     | '/cancellation-policy'
     | '/checkout'
     | '/contact'
+    | '/create-listing'
     | '/data-handling'
     | '/first-lesson-guide'
     | '/forgot-password'
@@ -1175,6 +1187,7 @@ export interface RootRouteChildren {
   CancellationPolicyRoute: typeof CancellationPolicyRoute
   CheckoutRoute: typeof CheckoutRouteWithChildren
   ContactRoute: typeof ContactRoute
+  CreateListingRoute: typeof CreateListingRoute
   DataHandlingRoute: typeof DataHandlingRoute
   FirstLessonGuideRoute: typeof FirstLessonGuideRoute
   ForgotPasswordRoute: typeof ForgotPasswordRoute
@@ -1339,6 +1352,13 @@ declare module '@tanstack/react-router' {
       path: '/data-handling'
       fullPath: '/data-handling'
       preLoaderRoute: typeof DataHandlingRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/create-listing': {
+      id: '/create-listing'
+      path: '/create-listing'
+      fullPath: '/create-listing'
+      preLoaderRoute: typeof CreateListingRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/contact': {
@@ -2126,6 +2146,7 @@ const rootRouteChildren: RootRouteChildren = {
   CancellationPolicyRoute: CancellationPolicyRoute,
   CheckoutRoute: CheckoutRouteWithChildren,
   ContactRoute: ContactRoute,
+  CreateListingRoute: CreateListingRoute,
   DataHandlingRoute: DataHandlingRoute,
   FirstLessonGuideRoute: FirstLessonGuideRoute,
   ForgotPasswordRoute: ForgotPasswordRoute,

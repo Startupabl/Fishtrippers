@@ -1,35 +1,18 @@
-import { Link, useRouterState } from "@tanstack/react-router";
+import { useRouterState } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
-import { Instagram, Linkedin, Youtube, Facebook, Music2 } from "lucide-react";
+import { Facebook, Instagram, Youtube, Music2 } from "lucide-react";
 import { Logo } from "@/components/brand/Logo";
 import { listLivePages } from "@/lib/site-pages.functions";
 
-type Category = "learning_teaching" | "support_safety" | "legal";
+type Category = "explore" | "resources" | "legal";
 
-const CATEGORY_ORDER: Category[] = ["learning_teaching", "support_safety", "legal"];
+const CATEGORY_ORDER: Category[] = ["explore", "resources", "legal"];
 const CATEGORY_LABEL: Record<Category, string> = {
-  learning_teaching: "Learning & Teaching",
-  support_safety: "Support & Safety",
+  explore: "Explore",
+  resources: "Resources",
   legal: "Legal",
 };
-
-const linkClass =
-  "group inline-flex min-h-11 items-center gap-2 px-1 text-base text-foreground transition-colors hover:text-primary hover:underline underline-offset-4 focus:outline-none focus-visible:ring-2 focus-visible:ring-ring";
-
-function PinterestIcon({ className }: { className?: string }) {
-  return (
-    <svg
-      xmlns="http://www.w3.org/2000/svg"
-      viewBox="0 0 24 24"
-      fill="currentColor"
-      aria-hidden="true"
-      className={className}
-    >
-      <path d="M12 2C6.477 2 2 6.477 2 12c0 4.237 2.636 7.855 6.356 9.312-.088-.791-.167-2.005.035-2.868.182-.78 1.172-4.97 1.172-4.97s-.299-.6-.299-1.486c0-1.39.806-2.428 1.81-2.428.853 0 1.265.641 1.265 1.41 0 .858-.546 2.142-.828 3.331-.235.996.499 1.808 1.481 1.808 1.778 0 3.144-1.874 3.144-4.58 0-2.393-1.72-4.068-4.177-4.068-2.845 0-4.515 2.134-4.515 4.34 0 .859.331 1.781.745 2.281a.3.3 0 0 1 .069.288c-.076.316-.245.996-.277 1.135-.044.183-.145.222-.334.134-1.249-.581-2.03-2.407-2.03-3.874 0-3.154 2.292-6.052 6.608-6.052 3.469 0 6.165 2.473 6.165 5.776 0 3.447-2.173 6.222-5.19 6.222-1.013 0-1.965-.527-2.291-1.148l-.623 2.378c-.226.869-.835 1.958-1.244 2.621.937.29 1.931.446 2.962.446 5.523 0 10-4.477 10-10S17.523 2 12 2z" />
-    </svg>
-  );
-}
 
 const SOCIALS: Array<{
   href: string;
@@ -38,11 +21,12 @@ const SOCIALS: Array<{
 }> = [
   { href: "https://www.facebook.com/fishtrippers", label: "Facebook", icon: Facebook },
   { href: "https://www.instagram.com/fishtrippers", label: "Instagram", icon: Instagram },
-  { href: "https://www.pinterest.com/fishtrippers/", label: "Pinterest", icon: PinterestIcon },
-  { href: "https://www.tiktok.com/@fishtrippers", label: "TikTok", icon: Music2 },
-  { href: "https://www.linkedin.com/company/fishtrippers", label: "LinkedIn", icon: Linkedin },
   { href: "https://www.youtube.com/@fishtrippers", label: "YouTube", icon: Youtube },
+  { href: "https://www.tiktok.com/@fishtrippers", label: "TikTok", icon: Music2 },
 ];
+
+const linkClass =
+  "inline-flex min-h-9 items-center text-sm text-slate-400 transition-colors hover:text-white focus:outline-none focus-visible:text-white";
 
 export function SiteFooter() {
   const pathname = useRouterState({ select: (s) => s.location.pathname });
@@ -57,8 +41,8 @@ export function SiteFooter() {
 
   type LivePage = NonNullable<typeof pages>[number];
   const byCategory: Record<Category, LivePage[]> = {
-    learning_teaching: [],
-    support_safety: [],
+    explore: [],
+    resources: [],
     legal: [],
   };
   for (const p of pages ?? []) {
@@ -66,77 +50,63 @@ export function SiteFooter() {
   }
 
   return (
-    <footer className="mt-16 border-t border-border bg-background text-base">
-      <div className="mx-auto flex max-w-[1600px] flex-col gap-10 px-4 md:px-6 lg:px-8 py-12">
-        <Logo size="md" showTagline />
+    <footer className="mt-16 bg-[#0A0F1A] text-slate-400">
+      <div className="mx-auto max-w-[1600px] px-4 md:px-6 lg:px-8 py-14">
+        <div className="mb-10">
+          <Logo size="md" showTagline />
+        </div>
 
         <nav
           aria-label="Footer"
-          className="grid grid-cols-1 gap-8 sm:grid-cols-2 lg:flex lg:flex-row lg:justify-between lg:gap-12"
+          className="grid grid-cols-1 gap-10 sm:grid-cols-2 lg:grid-cols-4"
         >
           {CATEGORY_ORDER.map((cat) => (
             <div key={cat}>
-              <h2 className="mb-2 text-sm font-semibold uppercase tracking-wide text-muted-foreground">
+              <h2 className="mb-4 text-xs font-semibold uppercase tracking-wider text-white">
                 {CATEGORY_LABEL[cat]}
               </h2>
-              <ul className="flex flex-col">
-                {(byCategory[cat] ?? []).map((p) => (
-                  <li key={p.id}>
-                    {p.is_external && p.external_url ? (
+              <ul className="flex flex-col gap-1">
+                {(byCategory[cat] ?? []).map((p) => {
+                  const href =
+                    p.is_external && p.external_url ? p.external_url : `/${p.slug}`;
+                  const external = p.is_external && p.external_url;
+                  return (
+                    <li key={p.id}>
                       <a
-                        href={p.external_url}
-                        target="_blank"
-                        rel="noopener noreferrer"
+                        href={href}
                         className={linkClass}
+                        {...(external
+                          ? { target: "_blank", rel: "noopener noreferrer" }
+                          : {})}
                       >
                         {p.title}
                       </a>
-                    ) : (
-                      <Link
-                        to="/pages/$slug"
-                        params={{ slug: p.slug }}
-                        className={linkClass}
-                      >
-                        {p.title}
-                      </Link>
-                    )}
-                  </li>
-                ))}
+                    </li>
+                  );
+                })}
               </ul>
             </div>
           ))}
 
-          {/* Column 4 — Social / brand */}
+          {/* Column 4 — Social icons */}
           <div>
-            <h2 className="mb-2 text-sm font-semibold uppercase tracking-wide text-muted-foreground">
-              Connect
+            <h2 className="mb-4 text-xs font-semibold uppercase tracking-wider text-white">
+              Follow Us
             </h2>
-            <ul className="flex flex-col">
+            <ul className="flex flex-wrap gap-3">
               {SOCIALS.map((s) => {
                 const Icon = s.icon;
-                const isExternal = s.href.startsWith("http");
-                const content = (
-                  <>
-                    <Icon className="size-4 shrink-0 text-muted-foreground transition-colors group-hover:text-primary" />
-                    {s.label}
-                  </>
-                );
                 return (
                   <li key={s.href}>
-                    {isExternal ? (
-                      <a
-                        href={s.href}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className={linkClass}
-                      >
-                        {content}
-                      </a>
-                    ) : (
-                      <a href={s.href} className={linkClass}>
-                        {content}
-                      </a>
-                    )}
+                    <a
+                      href={s.href}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      aria-label={s.label}
+                      className="inline-flex size-10 items-center justify-center rounded-lg border border-slate-700/60 text-slate-400 transition-colors hover:border-white hover:bg-white hover:text-[#0A0F1A] focus:outline-none focus-visible:ring-2 focus-visible:ring-white"
+                    >
+                      <Icon className="size-5" />
+                    </a>
                   </li>
                 );
               })}
@@ -144,9 +114,9 @@ export function SiteFooter() {
           </div>
         </nav>
 
-        <div className="border-t border-border/60 pt-6">
-          <p className="text-sm text-muted-foreground">
-            © {new Date().getFullYear()} FishTrippers
+        <div className="mt-12 border-t border-slate-800/70 pt-6">
+          <p className="text-sm text-slate-500">
+            © {new Date().getFullYear()} Fishtrippers. All rights reserved.
           </p>
         </div>
       </div>
