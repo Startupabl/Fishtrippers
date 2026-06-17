@@ -1,5 +1,5 @@
 import { Link } from "@tanstack/react-router";
-import { Sailboat, Users, ShieldCheck, MapPin, Zap, Star, Ship } from "lucide-react";
+import { Sailboat, Users, ShieldCheck, MapPin, Zap, Star, Ship, Footprints } from "lucide-react";
 import type { OperatorCardDTO } from "@/lib/operators-search.functions";
 
 export function OperatorCard({ operator }: { operator: OperatorCardDTO }) {
