@@ -56,7 +56,7 @@ interface FormState {
 const EMPTY_FORM: FormState = {
   slug: "",
   title: "",
-  category: "learning_teaching",
+  category: "explore",
   order_priority: 100,
   is_external: false,
   external_url: "",
