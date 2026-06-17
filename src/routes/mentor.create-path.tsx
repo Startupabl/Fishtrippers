@@ -5,6 +5,7 @@ import { useQuery } from "@tanstack/react-query";
 import { z } from "zod";
 
 import { useAuthStore } from "@/stores/useAuthStore";
+import { useHasActiveListingStatus } from "@/hooks/useHasActiveListing";
 import {
   useOperatorOnboardingStore,
   isProfileValid,
