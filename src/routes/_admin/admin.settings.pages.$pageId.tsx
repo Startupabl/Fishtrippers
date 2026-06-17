@@ -24,7 +24,7 @@ export const Route = createFileRoute("/_admin/admin/settings/pages/$pageId")({
   component: PageEditor,
 });
 
-type Category = "learning_teaching" | "support_safety" | "legal";
+type Category = "explore" | "resources" | "legal";
 type Status = "live" | "draft";
 
 interface PageRow {
