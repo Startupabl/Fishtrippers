@@ -161,7 +161,12 @@ export function useAuthListener() {
     }
 
     // 1. Subscribe FIRST so we never miss an event.
-    const { data: sub } = supabase.auth.onAuthStateChange((_event, session) => {
+    // Only react to identity transitions. TOKEN_REFRESHED (hourly + on tab
+    // focus) and INITIAL_SESSION (every mount) must NOT re-run applySession,
+    // or the user briefly flips to signed-out and back, causing protected
+    // routes to bounce through /auth.
+    const { data: sub } = supabase.auth.onAuthStateChange((event, session) => {
+      if (event !== "SIGNED_IN" && event !== "SIGNED_OUT" && event !== "USER_UPDATED") return;
       void applySession(session?.user ?? null);
     });
     // 2. Then hydrate.
