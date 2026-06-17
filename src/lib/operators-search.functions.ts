@@ -121,6 +121,7 @@ export const searchOperatorsServer = createServerFn({ method: "POST" })
         cover_image_url: row.cover_image_url ?? null,
         vessel_length_ft: vessel?.length_ft != null ? Number(vessel.length_ft) : null,
         vessel_capacity: vessel?.max_passenger_capacity ?? null,
+        business_type: row.business_type ?? null,
         boat_type_icon_url: boatType?.icon_url ?? null,
         boat_type_name: boatType?.subcategory_name ?? null,
         booking_type: row.booking_type ?? null,
