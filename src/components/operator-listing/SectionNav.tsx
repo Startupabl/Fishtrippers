@@ -1,11 +1,10 @@
-import { Anchor, Calendar, Fish, Info, MessageCircle, Sparkles } from "lucide-react";
+import { Anchor, Calendar, Info, MessageCircle, Sparkles } from "lucide-react";
 
 const ITEMS = [
   { href: "#trips", label: "Trips & prices", icon: Calendar },
-  { href: "#species", label: "Targeted species", icon: Fish },
-  { href: "#boat", label: "Boat info", icon: Anchor },
+  { href: "#boat", label: "Boat Specs", icon: Anchor },
   { href: "#biting", label: "What's biting", icon: Sparkles },
-  { href: "#included", label: "What's included", icon: Info },
+  { href: "#included", label: "Equipped with", icon: Info },
   { href: "#contact", label: "Contact captain", icon: MessageCircle },
 ];
 

@@ -11,7 +11,6 @@ import { HeaderGallery } from "@/components/operator-listing/HeaderGallery";
 import { SectionNav } from "@/components/operator-listing/SectionNav";
 import { AboutBlock } from "@/components/operator-listing/AboutBlock";
 import { CaptainCard } from "@/components/operator-listing/CaptainCard";
-import { FeaturesCard } from "@/components/operator-listing/FeaturesCard";
 import { TripsBlock } from "@/components/operator-listing/TripsBlock";
 import { SpeciesGrid } from "@/components/operator-listing/SpeciesGrid";
 import { BoatInfoBlock } from "@/components/operator-listing/BoatInfoBlock";
@@ -181,9 +180,6 @@ function OperatorPreviewPage() {
             />
             <TripsBlock trips={trips as any} />
             <SpeciesGrid species={(op?.target_species as string[]) ?? []} />
-            {op?.business_type === "charter" && (
-              <BoatInfoBlock vessel={vessel} boatType={boatType} />
-            )}
             <AmenitiesGrid features={vessel?.features} />
             <WhatsBitingStub />
             <PoliciesBlock cancellationPolicy={op?.cancellation_policy ?? null} />
@@ -195,7 +191,7 @@ function OperatorPreviewPage() {
               verified={approved}
             />
             {op?.business_type === "charter" && (
-              <FeaturesCard features={vessel?.features} />
+              <BoatInfoBlock vessel={vessel} boatType={boatType} />
             )}
           </aside>
         </div>
