@@ -508,13 +508,6 @@ function ListingRowView({
           <span className="font-medium text-red-600">
             {statusLabel(row.moderation_status)}
           </span>
-        ) : !row.mentor_is_payout_ready && row.moderation_status !== "approved" ? (
-          <span
-            className="cursor-not-allowed rounded-md font-medium text-muted-foreground/60"
-            title="Cannot approve—Aide has not connected a payout account."
-          >
-            {statusLabel(row.moderation_status)}
-          </span>
         ) : (
           <button
             type="button"
