@@ -297,7 +297,7 @@ function TripCard({
   );
 }
 
-export function TripsBlock({ trips }: Props) {
+export function TripsBlock({ trips, hostId, hostHasAvailability }: Props) {
   return (
     <section id="trips" className="scroll-mt-32 space-y-4">
       <h2 className="text-2xl font-bold tracking-tight">
@@ -320,7 +320,12 @@ export function TripsBlock({ trips }: Props) {
       ) : (
         <div className="space-y-4">
           {trips.map((t) => (
-            <TripCard key={t.id} trip={t} />
+            <TripCard
+              key={t.id}
+              trip={t}
+              hostId={hostId}
+              hostHasAvailability={hostHasAvailability}
+            />
           ))}
         </div>
       )}
