@@ -4,10 +4,9 @@ import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import {
   Sparkles,
   Play,
-  LayoutGrid,
-  Handshake,
-  GlassWater,
-  RefreshCw,
+  Search,
+  CalendarCheck,
+  Waves,
   ChevronLeft,
   ChevronRight,
 } from "lucide-react";
@@ -63,170 +62,60 @@ export const Route = createFileRoute("/")({
 
 const PROCESS_STEPS = [
   {
-    icon: LayoutGrid,
-    eyebrow: "Step 01",
-    title: "Select Your Flavor",
-    body: "Browse our catalog of AI-specialized courses. Pick the subject that sparks your curiosity, from creative strategy to technical execution.",
+    icon: Search,
+    title: "1. Find Your Perfect Trip",
+    body: "Browse the best local charters, fishing guides, and walk-and-wade experts. Filter by your favorite environment, target fish, or preferred style of fishing.",
   },
   {
-    icon: Handshake,
-    eyebrow: "Step 02",
-    title: "Stir in the Aide",
-    body: "Learn 1-on-1 or in a group course with a dedicated Aide. They handle the complex tech while keeping your progress smooth and refreshing.",
+    icon: CalendarCheck,
+    title: "2. Book Your Way",
+    body: "Lock in your dates instantly with Instant Booking, or message a captain directly to build a fully customized, tailor-made fishing adventure.",
   },
   {
-    icon: GlassWater,
-    eyebrow: "Step 03",
-    title: "Pour the Results",
-    body: "Graduate with a tangible project you've built. Share your high-quality results with your family, friends, or network.",
-  },
-  {
-    icon: RefreshCw,
-    eyebrow: "Step 04",
-    title: "Refill Your Glass",
-    body: "Keep the juice flowing. Unlock advanced courses and master new AI tools by enrolling in your next session.",
+    icon: Waves,
+    title: "3. Hit the Water",
+    body: "Show up at the dock or the shoreline, meet your expert guide, and enjoy a hassle-free day of world-class fishing!",
   },
 ] as const;
 
 function FishTrippersProcess() {
-  const [revealed, setRevealed] = useState(0);
-  const refs = useRef<Array<HTMLLIElement | null>>([]);
-
-  useEffect(() => {
-    const reduceMotion = window.matchMedia(
-      "(prefers-reduced-motion: reduce)",
-    ).matches;
-    if (reduceMotion) {
-      setRevealed(PROCESS_STEPS.length);
-      return;
-    }
-    const obs = new IntersectionObserver(
-      (entries) => {
-        entries.forEach((e) => {
-          if (e.isIntersecting) {
-            const idx = Number((e.target as HTMLElement).dataset.idx);
-            setRevealed((r) => Math.max(r, idx + 1));
-          }
-        });
-      },
-      { threshold: 0.5 },
-    );
-    refs.current.forEach((el) => el && obs.observe(el));
-    return () => obs.disconnect();
-  }, []);
-
-  const fillPct = (revealed / PROCESS_STEPS.length) * 100;
-
   return (
     <section className="border-b border-border bg-card/40">
       <div className="mx-auto max-w-[1600px] px-4 md:px-6 lg:px-8 py-16">
-        <h2
-          className="mb-12 text-center text-2xl tracking-tight md:text-3xl"
-          style={{ fontFamily: '"Plus Jakarta Sans", "Inter", system-ui, sans-serif', fontWeight: 800 }}
-        >
-          <span style={{ color: "#0A2540" }}>The </span>
-          <span style={{ color: "#E8B547" }}>Fish</span>
-          <span style={{ color: "#0A2540" }}>Trippers</span>
-          <span style={{ color: "#0A2540" }}> Process</span>
-        </h2>
+        <div className="mx-auto mb-12 max-w-2xl text-center">
+          <h2
+            className="text-2xl tracking-tight md:text-3xl"
+            style={{ fontFamily: '"Plus Jakarta Sans", "Inter", system-ui, sans-serif', fontWeight: 800 }}
+          >
+            <span style={{ color: "#0A2540" }}>How </span>
+            <span style={{ color: "#E8B547" }}>Fish</span>
+            <span style={{ color: "#0A2540" }}>trippers Works</span>
+          </h2>
+          <p className="mt-3 text-sm leading-relaxed text-muted-foreground md:text-base">
+            Three simple steps from dream trip to tight lines.
+          </p>
+        </div>
 
-        {/* Desktop: horizontal */}
-        <ol className="relative hidden md:grid md:grid-cols-4 md:gap-6">
-          <div
-            className="absolute left-0 right-0 top-7 -z-0 h-1 rounded-full bg-border"
-            aria-hidden
-          />
-          <div
-            className="absolute left-0 top-7 -z-0 h-1 rounded-full bg-gradient-to-r from-[#E8B547] to-[#0A2540] transition-[width] duration-700 ease-out"
-            style={{ width: `${fillPct}%` }}
-            aria-hidden
-          />
-          {PROCESS_STEPS.map((s, i) => {
+        <ol className="grid grid-cols-1 gap-6 md:grid-cols-3 lg:gap-8">
+          {PROCESS_STEPS.map((s) => {
             const Icon = s.icon;
-            const active = i < revealed;
             return (
               <li
                 key={s.title}
-                ref={(el) => {
-                  refs.current[i] = el;
-                }}
-                data-idx={i}
-                className="relative flex flex-col items-center text-center"
+                className="group flex flex-col items-center rounded-2xl border border-border bg-card p-8 text-center shadow-sm transition-all duration-300 hover:-translate-y-1 hover:shadow-lg"
               >
-                <span
-                  className={
-                    "relative z-10 inline-flex size-14 items-center justify-center rounded-full ring-4 ring-background transition-all duration-500 " +
-                    (active
-                      ? "bg-gradient-to-br from-[#E8B547] to-[#0A2540] text-white shadow-lg"
-                      : "bg-muted text-muted-foreground grayscale")
-                  }
-                >
+                <span className="inline-flex size-14 items-center justify-center rounded-full bg-gradient-to-br from-[#E8B547] to-[#0A2540] text-white shadow-md transition-transform duration-300 group-hover:scale-105">
                   <Icon className="size-6" aria-hidden />
                 </span>
-                <span className="mt-4 text-[10px] font-semibold uppercase tracking-[0.18em] text-muted-foreground">
-                  {s.eyebrow}
-                </span>
                 <h3
-                  className="mt-2 min-h-[2lh] text-balance text-xl font-bold md:text-2xl"
+                  className="mt-5 text-xl font-bold md:text-2xl"
                   style={{ fontFamily: "Lora, ui-serif, Georgia, serif", color: "#0A2540" }}
                 >
                   {s.title}
                 </h3>
-                <p className="mt-2 text-sm leading-relaxed text-muted-foreground">
+                <p className="mt-3 text-sm leading-relaxed text-muted-foreground">
                   {s.body}
                 </p>
-              </li>
-            );
-          })}
-        </ol>
-
-        {/* Mobile: vertical timeline */}
-        <ol className="relative md:hidden">
-          <div
-            className="absolute bottom-0 left-7 top-0 -z-0 w-1 rounded-full bg-border"
-            aria-hidden
-          />
-          <div
-            className="absolute left-7 top-0 -z-0 w-1 rounded-full bg-gradient-to-b from-[#E8B547] to-[#0A2540] transition-[height] duration-700 ease-out"
-            style={{ height: `${fillPct}%` }}
-            aria-hidden
-          />
-          {PROCESS_STEPS.map((s, i) => {
-            const Icon = s.icon;
-            const active = i < revealed;
-            return (
-              <li
-                key={s.title}
-                ref={(el) => {
-                  refs.current[i] = el;
-                }}
-                data-idx={i}
-                className="relative flex gap-5 pb-10 last:pb-0"
-              >
-                <span
-                  className={
-                    "relative z-10 inline-flex size-14 shrink-0 items-center justify-center rounded-full ring-4 ring-background transition-all duration-500 " +
-                    (active
-                      ? "bg-gradient-to-br from-[#E8B547] to-[#0A2540] text-white shadow-lg"
-                      : "bg-muted text-muted-foreground grayscale")
-                  }
-                >
-                  <Icon className="size-6" aria-hidden />
-                </span>
-                <div className="flex-1 pt-1">
-                  <span className="block text-[10px] font-semibold uppercase tracking-[0.18em] text-muted-foreground">
-                    {s.eyebrow}
-                  </span>
-                  <h3
-                    className="mt-1 text-2xl font-bold"
-                    style={{ fontFamily: "Lora, ui-serif, Georgia, serif", color: "#0A2540" }}
-                  >
-                    {s.title}
-                  </h3>
-                  <p className="mt-2 text-sm leading-relaxed text-muted-foreground">
-                    {s.body}
-                  </p>
-                </div>
               </li>
             );
           })}
