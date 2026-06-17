@@ -47,7 +47,7 @@ export function OperatorCard({ operator }: { operator: OperatorCardDTO }) {
       key: "verified",
       content: (
         <>
-          <Star className="h-5 w-5 fill-amber-400 text-amber-400" />
+          <Star className="h-3 w-3 fill-amber-400 text-amber-400" />
           <span>Verified</span>
         </>
       ),
