@@ -143,7 +143,7 @@ function OverviewPage() {
             { label: "Flagged content", value: String(data.queue.openFlags) },
           ]}
           manageTo="/admin/queue"
-          manageSearch={{ tab: "inquiries" }}
+          manageSearch={{ tab: "listings" }}
           alertRows
 
         />

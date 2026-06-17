@@ -10,14 +10,16 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
 import { ArrowLeft, Check, Mail, MessageSquare, CheckCircle2, Loader2, Eye, AlertTriangle, Archive, Ban } from "lucide-react";
 import {
-  listAdminJourneys,
-  setJourneyModeration,
-  archiveJourney,
   listReportedListings,
   dismissListingReport,
   sendReportedListingToDraft,
   suspendAndFreezeUser,
 } from "@/lib/admin.functions";
+import {
+  listAdminListings as listAdminJourneys,
+  setListingModeration as setJourneyModeration,
+  archiveListing as archiveJourney,
+} from "@/lib/admin-listings.functions";
 
 import {
   listSupportTickets,

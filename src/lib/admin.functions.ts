@@ -42,7 +42,7 @@ function startOf(period: "day" | "week" | "month"): string {
 }
 
 async function countSince(
-  table: "profiles" | "journeys" | "bookings",
+  table: "profiles" | "journeys" | "bookings" | "operators",
   column: "created_at",
   iso: string,
   extra?: (q: ReturnType<typeof supabaseAdmin.from>) => ReturnType<typeof supabaseAdmin.from>,
@@ -90,17 +90,17 @@ export const getAdminOverview = createServerFn({ method: "GET" })
       console.error("[admin] listUsers", e);
     }
 
-    // Listings (only approved+published count as "active")
+    // Listings (only approved+published count as "active") — operator listings
     const { count: totalListings } = await supabaseAdmin
-      .from("journeys")
+      .from("operators")
       .select("*", { count: "exact", head: true })
       .eq("status", "published")
       .eq("moderation_status", "approved");
 
     const [listingsToday, listingsWeek, listingsMonth] = await Promise.all([
-      countSince("journeys", "created_at", day),
-      countSince("journeys", "created_at", week),
-      countSince("journeys", "created_at", month),
+      countSince("operators", "created_at", day),
+      countSince("operators", "created_at", week),
+      countSince("operators", "created_at", month),
     ]);
 
     // Revenue — sum of bookings.total_price where status indicates paid
@@ -127,9 +127,10 @@ export const getAdminOverview = createServerFn({ method: "GET" })
       { count: openFlags },
     ] = await Promise.all([
       supabaseAdmin
-        .from("journeys")
+        .from("operators")
         .select("*", { count: "exact", head: true })
-        .eq("moderation_status", "pending"),
+        .eq("moderation_status", "pending")
+        .neq("status", "archived"),
       supabaseAdmin
         .from("support_tickets")
         .select("*", { count: "exact", head: true })
@@ -274,17 +275,16 @@ export const setJourneyModeration = createServerFn({ method: "POST" })
         .eq("id", data.journeyId)
         .single();
       if (cur) {
-        // Block approval if the Aide hasn't connected a payout account.
-        const { data: mentor } = await supabaseAdmin
-          .from("profiles")
-          .select("is_payout_ready")
-          .eq("id", cur.mentor_id)
-          .maybeSingle();
-        if (!mentor?.is_payout_ready) {
-          throw new Error(
-            "Cannot approve — Aide has not connected a payout account.",
-          );
-        }
+        // NOTE: Stripe-connected payout check temporarily disabled for design/testing.
+        // Re-enable before launch by restoring the is_payout_ready guard below.
+        // const { data: mentor } = await supabaseAdmin
+        //   .from("profiles")
+        //   .select("is_payout_ready")
+        //   .eq("id", cur.mentor_id)
+        //   .maybeSingle();
+        // if (!mentor?.is_payout_ready) {
+        //   throw new Error("Cannot approve — Aide has not connected a payout account.");
+        // }
         if (cur.status !== "published") updates.status = "published";
         if (!cur.slug) {
           const base =
