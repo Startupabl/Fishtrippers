@@ -76,7 +76,6 @@ export const submitTripRequest = createServerFn({ method: "POST" })
       thread_id: threadId,
       sender_id: userId,
       body,
-      attachment_type: "trip_request" as any,
     } as any);
     if (mErr) throw new Error(mErr.message);
 
