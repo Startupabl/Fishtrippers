@@ -17,7 +17,7 @@ import { SpeciesGrid } from "@/components/operator-listing/SpeciesGrid";
 import { BoatInfoBlock } from "@/components/operator-listing/BoatInfoBlock";
 import { AmenitiesGrid } from "@/components/operator-listing/AmenitiesGrid";
 import { PoliciesBlock } from "@/components/operator-listing/PoliciesBlock";
-import { WhatsBitingStub } from "@/components/operator-listing/WhatsBitingStub";
+
 import { MeetingPointMap } from "@/components/operator-listing/MeetingPointMap";
 import { Button } from "@/components/ui/button";
 import { Loader2 } from "lucide-react";
@@ -242,7 +242,7 @@ function OperatorPreviewPage() {
               hostId={op?.id ?? null}
               hostHasAvailability={data?.hostHasAvailability ?? false}
             />
-            <WhatsBitingStub />
+            
             <PoliciesBlock cancellationPolicy={op?.cancellation_policy ?? null} />
             <MeetingPointMap
               address={(op as any)?.default_departure_address ?? null}
