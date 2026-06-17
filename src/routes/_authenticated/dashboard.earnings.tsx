@@ -221,7 +221,7 @@ function EarningsPage() {
               <TableRow>
                 <TableCell colSpan={6} className="text-center text-muted-foreground py-10">
                   {orders.length === 0
-                    ? "No earnings yet — once a learner pays, the ledger will populate here."
+                    ? "No earnings yet — once an angler books a trip, the ledger will populate here."
                     : "No orders match the current filters."}
                 </TableCell>
               </TableRow>
