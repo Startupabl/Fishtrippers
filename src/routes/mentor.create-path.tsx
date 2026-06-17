@@ -58,12 +58,22 @@ function CreatePathPage() {
   const state = useOperatorOnboardingStore();
   const fetchMine = useServerFn(getMyOperator);
 
+  const { hasListing, isLoaded: listingLoaded } = useHasActiveListingStatus();
+
   // Redirect to /login if not authenticated.
   useEffect(() => {
     if (initialized && !authUser) {
       navigate({ to: "/login", search: { redirect: "/mentor/create-path" } as any });
     }
   }, [initialized, authUser, navigate]);
+
+  // If the user already has a listing, send them to the dashboard hub —
+  // the creation form is a one-time onboarding surface.
+  useEffect(() => {
+    if (initialized && authUser && listingLoaded && hasListing) {
+      navigate({ to: "/dashboard/my-listing" });
+    }
+  }, [initialized, authUser, listingLoaded, hasListing, navigate]);
 
   // Hydrate from server once.
   const { data: server } = useQuery({
