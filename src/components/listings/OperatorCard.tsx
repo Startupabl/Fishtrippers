@@ -1,11 +1,63 @@
 import { Link } from "@tanstack/react-router";
-import { Sailboat, Users, ShieldCheck, MapPin, Zap } from "lucide-react";
+import { Sailboat, Users, ShieldCheck, MapPin, Zap, Star } from "lucide-react";
 import type { OperatorCardDTO } from "@/lib/operators-search.functions";
 
 export function OperatorCard({ operator }: { operator: OperatorCardDTO }) {
   const categorySlug = operator.primary_environment ?? "listings";
   const listingSlug = operator.slug ?? operator.id;
   const cityLabel = [operator.city, operator.state].filter(Boolean).join(", ");
+
+  const segments: Array<{ key: string; content: React.ReactNode }> = [];
+
+  if (operator.vessel_length_ft != null) {
+    segments.push({
+      key: "length",
+      content: (
+        <>
+          {operator.boat_type_icon_url ? (
+            <img
+              src={operator.boat_type_icon_url}
+              alt={operator.boat_type_name ?? "Boat"}
+              className="size-4 object-contain"
+              loading="lazy"
+            />
+          ) : (
+            <Sailboat className="size-4 text-foreground" />
+          )}
+          <span>{operator.vessel_length_ft} ft</span>
+        </>
+      ),
+    });
+  }
+
+  if (operator.vessel_capacity != null) {
+    segments.push({
+      key: "capacity",
+      content: (
+        <>
+          <Users className="size-4 text-foreground" />
+          <span>{operator.vessel_capacity}</span>
+        </>
+      ),
+    });
+  }
+
+  if (operator.rating != null) {
+    segments.push({
+      key: "rating",
+      content: (
+        <>
+          <Star className="size-4 fill-amber-400 text-amber-400" />
+          <span>
+            {operator.rating.toFixed(1)}
+            {operator.review_count != null && (
+              <span className="ml-1 text-muted-foreground">({operator.review_count})</span>
+            )}
+          </span>
+        </>
+      ),
+    });
+  }
 
   return (
     <li className="group overflow-hidden rounded-2xl border border-border bg-card shadow-sm transition-shadow hover:shadow-md">
@@ -28,27 +80,22 @@ export function OperatorCard({ operator }: { operator: OperatorCardDTO }) {
             </div>
           )}
 
-          {/* Bottom info pill row */}
-          <div className="absolute inset-x-3 bottom-3 flex flex-wrap items-center gap-2">
-            {operator.vessel_length_ft != null && (
-              <span className="inline-flex items-center gap-1 rounded-full bg-card/95 px-2.5 py-1 text-xs font-medium text-foreground shadow-sm backdrop-blur">
-                <Sailboat className="size-3.5 text-muted-foreground" />
-                {operator.vessel_length_ft} ft
-              </span>
-            )}
-            {operator.vessel_capacity != null && (
-              <span className="inline-flex items-center gap-1 rounded-full bg-card/95 px-2.5 py-1 text-xs font-medium text-foreground shadow-sm backdrop-blur">
-                <Users className="size-3.5 text-muted-foreground" />
-                {operator.vessel_capacity}
-              </span>
-            )}
-            {operator.verified && (
-              <span className="inline-flex items-center gap-1 rounded-full bg-card/95 px-2.5 py-1 text-xs font-medium text-emerald-700 shadow-sm backdrop-blur">
-                <ShieldCheck className="size-3.5" />
-                Verified
-              </span>
-            )}
-          </div>
+          {segments.length > 0 && (
+            <div className="absolute inset-x-3 bottom-3 flex">
+              <div className="inline-flex items-stretch rounded-full bg-card/95 text-xs font-semibold text-foreground shadow-sm backdrop-blur">
+                {segments.map((seg, idx) => (
+                  <div
+                    key={seg.key}
+                    className={`flex items-center gap-1.5 px-3 py-1.5 ${
+                      idx > 0 ? "border-l border-border" : ""
+                    }`}
+                  >
+                    {seg.content}
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
         </div>
 
         <div className="p-4">

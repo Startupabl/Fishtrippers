@@ -13,10 +13,14 @@ export type OperatorCardDTO = {
   cover_image_url: string | null;
   vessel_length_ft: number | null;
   vessel_capacity: number | null;
+  boat_type_icon_url: string | null;
+  boat_type_name: string | null;
   booking_type: "instant" | "inquiry" | null;
   fishing_environments: string[];
   primary_environment: string | null;
   verified: boolean;
+  rating: number | null;
+  review_count: number | null;
   lowest_price_label: string | null; // e.g. "From US $200"
 };
 
@@ -62,7 +66,7 @@ export const searchOperatorsServer = createServerFn({ method: "POST" })
         id, slug, display_name,
         default_departure_city, default_departure_state, default_departure_country,
         cover_image_url, booking_type, fishing_environments, featured, priority_order, created_at,
-        vessels ( length_ft, max_passenger_capacity ),
+        vessels ( length_ft, max_passenger_capacity, boat_type_id, boat_types ( icon_url, subcategory_name ) ),
         trip_packages ( price_minor, currency, status )
       `,
       )
@@ -100,6 +104,11 @@ export const searchOperatorsServer = createServerFn({ method: "POST" })
         }
       }
 
+      const boatType = vessel?.boat_types
+        ? Array.isArray(vessel.boat_types)
+          ? vessel.boat_types[0]
+          : vessel.boat_types
+        : null;
       return {
         id: row.id,
         slug: row.slug ?? null,
@@ -110,11 +119,15 @@ export const searchOperatorsServer = createServerFn({ method: "POST" })
         cover_image_url: row.cover_image_url ?? null,
         vessel_length_ft: vessel?.length_ft != null ? Number(vessel.length_ft) : null,
         vessel_capacity: vessel?.max_passenger_capacity ?? null,
+        boat_type_icon_url: boatType?.icon_url ?? null,
+        boat_type_name: boatType?.subcategory_name ?? null,
         booking_type: row.booking_type ?? null,
         fishing_environments: row.fishing_environments ?? [],
         primary_environment:
           (row.fishing_environments && row.fishing_environments[0]) ?? null,
         verified: true,
+        rating: null,
+        review_count: null,
         lowest_price_label: cheapest
           ? formatPrice(cheapest.price_minor, cheapest.currency)
           : null,
