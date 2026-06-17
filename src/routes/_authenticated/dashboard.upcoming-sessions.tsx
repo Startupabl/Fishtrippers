@@ -418,12 +418,20 @@ function UpcomingSessionsPage() {
   );
 }
 
-function StatusBadge({ status }: { status: ScheduleRow["status"] }) {
+function StatusBadge({ status }: { status: ScheduleRow["status"] | "complete" }) {
   if (status === "unbooked")
-    return <Badge variant="secondary">Unbooked</Badge>;
+    return <Badge variant="secondary">unbooked</Badge>;
   if (status === "booked")
-    return <Badge className="bg-emerald-600 hover:bg-emerald-600 text-white">Booked</Badge>;
+    return <Badge className="bg-emerald-600 hover:bg-emerald-600 text-white">booked</Badge>;
+  if (status === "complete")
+    return <Badge className="bg-emerald-100 text-emerald-700 hover:bg-emerald-100 border border-emerald-200">complete</Badge>;
   return <Badge className="bg-amber-500 hover:bg-amber-500 text-white">Pending Reschedule</Badge>;
+}
+
+function formatHours(minutes: number): string {
+  const h = minutes / 60;
+  const rounded = Math.round(h * 100) / 100;
+  return `${rounded}h`;
 }
 
 function ScheduleTableRow({
