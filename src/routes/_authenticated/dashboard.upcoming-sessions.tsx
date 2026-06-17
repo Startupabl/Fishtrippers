@@ -329,12 +329,12 @@ function UpcomingSessionsPage() {
         <TabsContent value="upcoming">
           {renderTable(
             upcomingRows,
-            "No sessions yet. Schedule a live course or send a custom offer.",
+            "No booked trips yet. Share your listing on social media to increase traffic and bookings.",
             "upcoming",
           )}
         </TabsContent>
         <TabsContent value="completed">
-          {renderTable(completedRows, "No completed sessions yet.", "completed")}
+          {renderTable(completedRows, "No completed trips yet.", "completed")}
         </TabsContent>
       </Tabs>
 
