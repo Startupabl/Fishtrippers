@@ -1,75 +1,82 @@
-## 1. Database — new footer categories
+## 1. Smart footer links (column 1: Explore)
 
-One migration:
-- Rename enum `site_page_category` values: `learning_teaching` → `explore`, `support_safety` → `resources` (`legal` stays).
-- Seed 9 `site_pages` rows (all `status='live'`, `is_external=false`) so the footer is fully driven by admin out of the box:
+Update `src/components/layout/SiteFooter.tsx` so three slugs render with custom behavior instead of the default `<a href="/{slug}">`. All other DB-driven entries keep current rendering.
 
-| Category | Title | Slug |
-|---|---|---|
-| explore | About Fishtrippers | `about` |
-| explore | Create a Listing | `create-listing` |
-| explore | Search for Trips | `search` |
-| resources | How it Works for Trippers | `how-it-works-trippers` |
-| resources | How it Works for Hosts | `how-it-works-hosts` |
-| resources | Contact Us | `contact` |
-| legal | Terms of Service | `terms` |
-| legal | Privacy Policy | `privacy` |
-| legal | Pricing & Cancellation Policy | `cancellation-policy` |
+- **`create-listing`** — render a smart `<Link>`:
+  - Signed-out user → `/create-listing` (existing marketing page)
+  - Signed-in, no operator listing (uses `useHasActiveListingStatus`) → `/create-listing`
+  - Signed-in, has listing → `/dashboard/my-listing`
+  - While the auth/listing query is still loading, default to `/create-listing` to avoid a flash.
+- **`search`** — render `<Link to="/search">`.
+- **`contact`** — render `<Link to="/contact">` (page rebuilt below).
 
-## 2. Page Manager (admin) — label updates
+Implementation detail: small helper `renderFooterLink(page)` inside `SiteFooter.tsx` that switches on `page.slug`. Uses TanStack `<Link>` for internal routes (preload, type-safe).
 
-In `src/lib/site-pages.functions.ts` and `src/routes/_admin/admin.settings.pages.{index,$pageId}.tsx`:
-- Swap `CategoryEnum` to `["explore","resources","legal"]`.
-- Update `CATEGORY_LABEL` map → `Explore`, `Resources`, `Legal`.
+## 2. Contact page redesign (`/contact`)
 
-## 3. Footer — `src/components/layout/SiteFooter.tsx`
+Replace the current redirect in `src/routes/contact.tsx` with a real route. Fishtrippers-themed (deep navy/ocean accents, matching footer/site palette), responsive, accessible.
 
-- Keep dynamic fetch from `listLivePages`.
-- New layout: `grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-10`.
-- Columns 1–3: render Explore / Resources / Legal from DB rows (title + slug → `/<slug>` via plain `<a>` since slugs are real top-level routes, not `/pages/$slug`). External rows still honor `external_url`.
-- Column 4 — "Follow Us": icon-only grid (Facebook, Instagram, YouTube, TikTok) — rounded square buttons (`size-10 rounded-lg border border-border/40 hover:bg-primary hover:text-primary-foreground`), `aria-label` on each.
-- Theme: deep-slate footer (`bg-[#0A0F1A] text-slate-400`), headings `text-white font-semibold uppercase text-xs tracking-wider`, links `text-slate-400 hover:text-white`, thin `border-slate-800/70` separator.
-- Bottom bar: left-aligned `© 2026 Fishtrippers. All rights reserved.` (no flex-row jumble), small muted text.
+**Layout**
+- Hero band: H1 "Get in touch", subhead "Questions about a trip, your booking, or hosting on Fishtrippers? We're here to help."
+- Two-column section on desktop, stacked on mobile:
+  - Left: contact form card
+  - Right: info card with response-time note, support email, and social row (reuse footer socials)
 
-## 4. Routes — rename + create placeholders
+**Form fields** (all client + server validated with Zod)
+- Name (1–100)
+- Email (valid, ≤255)
+- Topic (select: General, Booking help, Hosting/Listing, Press, Other)
+- Message (10–2000)
+- Honeypot field (`website`) to deter bots
 
-Use `mv` for renames, then update `createFileRoute` strings and any internal links:
+**Submission flow**
+- New server function `submitContactMessage` in `src/lib/contact.functions.ts`.
+- Inserts into a new public table `contact_messages` (see Technical section).
+- Shows toast + inline success state ("Thanks — we'll reply within 1 business day.") and resets the form.
 
-| Old file | New file | Slug |
-|---|---|---|
-| `about-us.tsx` | `about.tsx` | `/about` |
-| `terms-of-service.tsx` | `terms.tsx` | `/terms` |
-| `privacy-policy.tsx` | `privacy.tsx` | `/privacy` |
-| `how-it-works.tsx` | `how-it-works-trippers.tsx` | `/how-it-works-trippers` |
-| (new) | `how-it-works-hosts.tsx` | `/how-it-works-hosts` |
-| (new) | `cancellation-policy.tsx` | `/cancellation-policy` |
-| (new) | `create-listing.tsx` | `/create-listing` |
+**SEO / head()**
+- Title: "Contact Fishtrippers — Trip & Hosting Support"
+- Description + og:title/og:description.
 
-`search.tsx` and `contact.tsx` already exist — leave them untouched.
+## 3. Technical section
 
-Update references to the old paths in: `register.tsx`, `_authenticated/booking-review.tsx`, `ProfileCompletionRedirector.tsx`, `sitemap[.]xml.ts`, `pages.$slug.tsx` redirects/fallbacks.
-
-### Placeholder page component
-
-All 7 new/renamed route pages render the same shell that pulls editable copy from `site_pages` by slug (so admin edits flow straight through):
-
-```tsx
-// inside component
-const { data } = useQuery({ queryKey:['site_pages','live',slug], queryFn: () => fetchPage({data:{slug}}) });
-return (
-  <main className="mx-auto max-w-3xl px-4 py-16">
-    <h1 className="text-4xl font-semibold tracking-tight">{data?.title ?? FALLBACK_TITLE}</h1>
-    {data?.description && <p className="mt-3 text-lg text-muted-foreground">{data.description}</p>}
-    <div className="mt-10 prose prose-neutral max-w-none"
-         dangerouslySetInnerHTML={{ __html: data?.content_html ?? '<p>Content coming soon. Edit this page from Admin → Settings → Pages.</p>' }} />
-  </main>
+### DB migration
+```sql
+create table public.contact_messages (
+  id uuid primary key default gen_random_uuid(),
+  created_at timestamptz not null default now(),
+  name text not null,
+  email text not null,
+  topic text not null,
+  message text not null,
+  user_id uuid references auth.users(id) on delete set null,
+  user_agent text,
+  status text not null default 'new'
 );
+
+grant insert on public.contact_messages to anon, authenticated;
+grant all on public.contact_messages to service_role;
+-- admins can read via has_role('admin') policy
+alter table public.contact_messages enable row level security;
+
+create policy "anyone can submit"
+  on public.contact_messages for insert
+  to anon, authenticated
+  with check (true);
+
+create policy "admins read all"
+  on public.contact_messages for select
+  to authenticated
+  using (public.has_role(auth.uid(), 'admin'));
 ```
 
-Each route sets its own `head()` with title + meta description.
+### Files
+- **edit** `src/components/layout/SiteFooter.tsx` — smart link rendering for explore slugs; import `useHasActiveListingStatus`, `useAuthStore`, `<Link>`.
+- **edit** `src/routes/contact.tsx` — replace redirect with full component + `head()`.
+- **new** `src/lib/contact.functions.ts` — `submitContactMessage` server function with Zod validation; uses server publishable Supabase client (anon insert allowed by RLS).
+- **new** `supabase/migrations/<ts>_contact_messages.sql` — table + grants + RLS.
 
-## 5. Cleanup
-
-- Keep `pages.$slug.tsx` for any future admin-only ad-hoc pages (legacy fallback).
-- Update `sitemap[.]xml.ts` slug list to the new URLs.
-- Old `INFO_PAGES` keys in `src/lib/content.ts` updated to match new slugs so the fallback prose stays intact.
+### Out of scope
+- No admin inbox UI in this pass (data is queryable; UI can come later).
+- No email notification (can layer in later via Resend if requested).
+- `/create-listing` marketing page content stays as-is (editable via Page Manager).

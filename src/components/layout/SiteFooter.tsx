@@ -1,9 +1,11 @@
-import { useRouterState } from "@tanstack/react-router";
+import { Link, useRouterState } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
 import { Facebook, Instagram, Youtube, Music2 } from "lucide-react";
 import { Logo } from "@/components/brand/Logo";
 import { listLivePages } from "@/lib/site-pages.functions";
+import { useHasActiveListingStatus } from "@/hooks/useHasActiveListing";
+import { useAuthStore } from "@/stores/useAuthStore";
 
 type Category = "explore" | "resources" | "legal";
 
@@ -28,6 +30,67 @@ const SOCIALS: Array<{
 const linkClass =
   "inline-flex min-h-9 items-center text-sm text-slate-400 transition-colors hover:text-white focus:outline-none focus-visible:text-white";
 
+type LivePage = {
+  id: string;
+  slug: string;
+  title: string;
+  category: string;
+  is_external: boolean;
+  external_url: string | null;
+};
+
+function CreateListingLink({ title }: { title: string }) {
+  const signedIn = useAuthStore((s) => !!s.user);
+  const { hasListing } = useHasActiveListingStatus();
+  const to = signedIn && hasListing ? "/dashboard/my-listing" : "/create-listing";
+  return (
+    <Link to={to} className={linkClass}>
+      {title}
+    </Link>
+  );
+}
+
+function FooterPageLink({ page }: { page: LivePage }) {
+  if (page.is_external && page.external_url) {
+    return (
+      <a
+        href={page.external_url}
+        target="_blank"
+        rel="noopener noreferrer"
+        className={linkClass}
+      >
+        {page.title}
+      </a>
+    );
+  }
+
+  // Slug-specific overrides
+  if (page.slug === "create-listing") {
+    return <CreateListingLink title={page.title} />;
+  }
+  if (page.slug === "search") {
+    return (
+      <Link to="/search" className={linkClass}>
+        {page.title}
+      </Link>
+    );
+  }
+  if (page.slug === "contact") {
+    return (
+      <Link to="/contact" className={linkClass}>
+        {page.title}
+      </Link>
+    );
+  }
+
+  // Default: render as standard anchor to /{slug} (covers legacy + CMS pages)
+  return (
+    <a href={`/${page.slug}`} className={linkClass}>
+      {page.title}
+    </a>
+  );
+}
+
 export function SiteFooter() {
   const pathname = useRouterState({ select: (s) => s.location.pathname });
   const fetchPages = useServerFn(listLivePages);
@@ -39,13 +102,12 @@ export function SiteFooter() {
 
   if (pathname.startsWith("/checkout")) return null;
 
-  type LivePage = NonNullable<typeof pages>[number];
   const byCategory: Record<Category, LivePage[]> = {
     explore: [],
     resources: [],
     legal: [],
   };
-  for (const p of pages ?? []) {
+  for (const p of (pages ?? []) as LivePage[]) {
     if (p.category in byCategory) byCategory[p.category as Category].push(p);
   }
 
@@ -66,24 +128,11 @@ export function SiteFooter() {
                 {CATEGORY_LABEL[cat]}
               </h2>
               <ul className="flex flex-col gap-1">
-                {(byCategory[cat] ?? []).map((p) => {
-                  const href =
-                    p.is_external && p.external_url ? p.external_url : `/${p.slug}`;
-                  const external = p.is_external && p.external_url;
-                  return (
-                    <li key={p.id}>
-                      <a
-                        href={href}
-                        className={linkClass}
-                        {...(external
-                          ? { target: "_blank", rel: "noopener noreferrer" }
-                          : {})}
-                      >
-                        {p.title}
-                      </a>
-                    </li>
-                  );
-                })}
+                {(byCategory[cat] ?? []).map((p) => (
+                  <li key={p.id}>
+                    <FooterPageLink page={p} />
+                  </li>
+                ))}
               </ul>
             </div>
           ))}
