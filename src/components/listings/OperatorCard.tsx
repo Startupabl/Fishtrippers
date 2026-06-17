@@ -93,9 +93,6 @@ export function OperatorCard({ operator }: { operator: OperatorCardDTO }) {
           )}
         </div>
 
-          )}
-        </div>
-
         <div className="p-4">
           <h3 className="flex items-center gap-1.5 text-base font-semibold text-foreground">
             <ShieldCheck className="size-4 text-info" aria-hidden />
