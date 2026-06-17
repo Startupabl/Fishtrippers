@@ -170,6 +170,8 @@ const ENV_TO_PRIMARY: Record<string, PrimaryCategory> = {
   offshore: "offshore",
   freshwater: "freshwater",
   rivers_streams: "freshwater",
+  shore_shoreline: "inshore",
+  walk_wade: "inshore",
 };
 
 export function primaryCategoryFromEnvironments(envs: string[]): PrimaryCategory {
