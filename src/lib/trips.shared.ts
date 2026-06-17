@@ -46,6 +46,11 @@ const timeStringSchema = z
   .nullable()
   .optional();
 
+export const BOOKING_TYPE_OPTIONS = [
+  { value: "instant_book", label: "Instant Book", hint: "Buyers see live calendar and book immediately." },
+  { value: "request_to_book", label: "Request to Book", hint: "Buyers send a request; you approve before payment." },
+] as const;
+
 export const tripInputSchema = z
   .object({
     id: z.string().uuid().nullable().optional(),
@@ -59,6 +64,7 @@ export const tripInputSchema = z
     max_party_size: z.number().int().min(1).max(50),
     currency: z.string().default("USD"),
     template_key: z.string().nullable().optional(),
+    booking_type: z.enum(["instant_book", "request_to_book"]).default("request_to_book"),
     target_species: z.array(z.string()).min(1, "Pick at least one target fish").max(50),
     environments: z.array(z.string()).min(1, "Pick at least one environment").max(2, "Max 2 environments per trip"),
     techniques: z.array(z.string()).min(1, "Pick at least one technique").max(10),
