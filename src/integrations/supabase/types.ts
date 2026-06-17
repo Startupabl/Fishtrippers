@@ -152,6 +152,7 @@ export type Database = {
           stripe_checkout_session_id: string | null
           thread_id: string
           total_price: number
+          trip_date: string | null
           updated_at: string
         }
         Insert: {
@@ -169,6 +170,7 @@ export type Database = {
           stripe_checkout_session_id?: string | null
           thread_id: string
           total_price: number
+          trip_date?: string | null
           updated_at?: string
         }
         Update: {
@@ -186,6 +188,7 @@ export type Database = {
           stripe_checkout_session_id?: string | null
           thread_id?: string
           total_price?: number
+          trip_date?: string | null
           updated_at?: string
         }
         Relationships: [
@@ -425,6 +428,51 @@ export type Database = {
           variables?: string[]
         }
         Relationships: []
+      }
+      host_availability: {
+        Row: {
+          booking_id: string | null
+          created_at: string
+          date: string
+          host_id: string
+          id: string
+          status: string
+          updated_at: string
+        }
+        Insert: {
+          booking_id?: string | null
+          created_at?: string
+          date: string
+          host_id: string
+          id?: string
+          status: string
+          updated_at?: string
+        }
+        Update: {
+          booking_id?: string | null
+          created_at?: string
+          date?: string
+          host_id?: string
+          id?: string
+          status?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "host_availability_booking_id_fkey"
+            columns: ["booking_id"]
+            isOneToOne: false
+            referencedRelation: "bookings"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "host_availability_host_id_fkey"
+            columns: ["host_id"]
+            isOneToOne: false
+            referencedRelation: "operators"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       inquiries: {
         Row: {
@@ -1569,6 +1617,7 @@ export type Database = {
       }
       trip_packages: {
         Row: {
+          booking_type: Database["public"]["Enums"]["trip_booking_type"]
           created_at: string
           currency: string
           departure_address: string | null
@@ -1595,6 +1644,7 @@ export type Database = {
           vessel_id: string | null
         }
         Insert: {
+          booking_type?: Database["public"]["Enums"]["trip_booking_type"]
           created_at?: string
           currency?: string
           departure_address?: string | null
@@ -1621,6 +1671,7 @@ export type Database = {
           vessel_id?: string | null
         }
         Update: {
+          booking_type?: Database["public"]["Enums"]["trip_booking_type"]
           created_at?: string
           currency?: string
           departure_address?: string | null
@@ -1861,6 +1912,7 @@ export type Database = {
       order_status_t: "active" | "completed" | "refunded" | "paid"
       site_page_category: "explore" | "resources" | "legal"
       site_page_status: "live" | "draft"
+      trip_booking_type: "instant_book" | "request_to_book"
       trip_package_status: "draft" | "active" | "archived"
       user_alert_kind:
         | "listing_pending"
@@ -2017,6 +2069,7 @@ export const Constants = {
       order_status_t: ["active", "completed", "refunded", "paid"],
       site_page_category: ["explore", "resources", "legal"],
       site_page_status: ["live", "draft"],
+      trip_booking_type: ["instant_book", "request_to_book"],
       trip_package_status: ["draft", "active", "archived"],
       user_alert_kind: [
         "listing_pending",
