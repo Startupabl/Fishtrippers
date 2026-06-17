@@ -35,7 +35,7 @@ const SANITIZE_OPTS: sanitizeHtml.IOptions = {
   },
 };
 
-const CategoryEnum = z.enum(["learning_teaching", "support_safety", "legal"]);
+const CategoryEnum = z.enum(["explore", "resources", "legal"]);
 const StatusEnum = z.enum(["live", "draft"]);
 
 const UpsertSchema = z
