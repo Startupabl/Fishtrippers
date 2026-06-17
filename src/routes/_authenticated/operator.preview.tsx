@@ -213,9 +213,9 @@ function OperatorPreviewPage() {
     <div className="min-h-screen bg-background">
       <PreviewBanner
         status={status}
-        canSubmit={canSubmit}
+        canSubmit={isEditMode ? false : canSubmit}
         submitting={submitting}
-        onSubmit={handleSubmit}
+        onSubmit={isEditMode ? undefined : handleSubmit}
       />
 
       <main className="mx-auto max-w-6xl px-4 pb-24">
@@ -254,7 +254,24 @@ function OperatorPreviewPage() {
           </aside>
         </div>
 
-        {(status === "draft" || status === "rejected") && (
+        {isEditMode ? (
+          <div className="mt-12 rounded-2xl border bg-card p-6 text-center">
+            <h2 className="text-xl font-bold">Save your changes</h2>
+            <p className="mx-auto mt-2 max-w-md text-sm text-muted-foreground">
+              Updates to your live listing are saved instantly — no admin
+              review needed.
+            </p>
+            <Button
+              size="lg"
+              className="mt-4"
+              onClick={handleSaveUpdates}
+              disabled={saving}
+            >
+              {saving ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : null}
+              Save updates
+            </Button>
+          </div>
+        ) : (status === "draft" || status === "rejected") && (
           <div className="mt-12 rounded-2xl border bg-card p-6 text-center">
             <h2 className="text-xl font-bold">Ready to go live?</h2>
             <p className="mx-auto mt-2 max-w-md text-sm text-muted-foreground">
