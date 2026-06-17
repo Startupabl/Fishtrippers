@@ -179,8 +179,6 @@ function OperatorPreviewPage() {
               about={op?.about}
             />
             <TripsBlock trips={trips as any} />
-            <SpeciesGrid species={(op?.target_species as string[]) ?? []} />
-            <AmenitiesGrid features={vessel?.features} />
             <WhatsBitingStub />
             <PoliciesBlock cancellationPolicy={op?.cancellation_policy ?? null} />
           </div>
@@ -190,9 +188,11 @@ function OperatorPreviewPage() {
               avatarUrl={owner?.avatar_url}
               verified={approved}
             />
+            <SpeciesGrid species={(op?.target_species as string[]) ?? []} />
             {op?.business_type === "charter" && (
               <BoatInfoBlock vessel={vessel} boatType={boatType} />
             )}
+            <AmenitiesGrid features={vessel?.features} />
           </aside>
         </div>
 
