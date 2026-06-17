@@ -13,11 +13,6 @@ import {
   Trash2,
   MoreHorizontal,
   CalendarDays,
-  Banknote as _Banknote_placeholder,
-} from "lucide-react";
-type _Drop = typeof _Banknote_placeholder;
-// real imports kept below
-import {
   Banknote,
 } from "lucide-react";
 import { toast } from "sonner";
