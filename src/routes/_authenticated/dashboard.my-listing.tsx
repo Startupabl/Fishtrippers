@@ -159,9 +159,20 @@ function MyListingPage() {
     queryFn: () => fetchStripeIds(),
   });
 
+  const fetchAvail = useServerFn(listMyHostAvailability);
+  const availQ = useQuery({
+    queryKey: ["my-host-availability"],
+    queryFn: () => fetchAvail(),
+  });
+
   const operator = operatorQ.data?.operator ?? null;
   const trips = tripsQ.data?.trips ?? [];
   const isPayoutReady = !!stripeQ.data?.is_payout_ready;
+  const hasInstantTrip = trips.some(
+    (t: any) => t.booking_type === "instant_book",
+  );
+  const hasCalendarEntry = (availQ.data?.length ?? 0) > 0;
+  const showCalendarBanner = hasInstantTrip && !hasCalendarEntry;
 
   const [editing, setEditing] = useState<TripEditorState | null>(null);
   const [dialogOpen, setDialogOpen] = useState(false);
