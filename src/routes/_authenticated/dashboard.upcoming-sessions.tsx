@@ -561,11 +561,7 @@ function ScheduleTableRow({
         )}
       </TableCell>
       <TableCell className="text-sm">
-        {mode === "completed" ? (
-          <Badge className="bg-emerald-100 text-emerald-700 hover:bg-emerald-100 border border-emerald-200">
-            Completed
-          </Badge>
-        ) : (
+        {mode === "completed" ? null : (
           <div className="flex flex-wrap items-center gap-1">
             {row.status === "unbooked" && (
               <>
