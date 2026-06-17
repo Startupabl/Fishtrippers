@@ -266,24 +266,25 @@ function UpcomingSessionsPage() {
       <Table className="w-full">
         <TableHeader>
           <TableRow>
-            <TableHead className="font-bold">Session Time</TableHead>
-            <TableHead className="font-bold">Course Title</TableHead>
+            <TableHead className="font-bold">Trip Time</TableHead>
+            <TableHead className="font-bold">Total Hours</TableHead>
+            <TableHead className="font-bold">Trip Title</TableHead>
             <TableHead className="font-bold">Status</TableHead>
             <TableHead className="font-bold">Seats</TableHead>
-            <TableHead className="font-bold">Student(s)</TableHead>
+            <TableHead className="font-bold">Client(s)</TableHead>
             <TableHead className="font-bold">Action</TableHead>
           </TableRow>
         </TableHeader>
         <TableBody>
           {isLoading ? (
             <TableRow>
-              <TableCell colSpan={6} className="text-center text-muted-foreground py-10">
+              <TableCell colSpan={7} className="text-center text-muted-foreground py-10">
                 Loading…
               </TableCell>
             </TableRow>
           ) : data.length === 0 ? (
             <TableRow>
-              <TableCell colSpan={6} className="text-center text-muted-foreground py-10">
+              <TableCell colSpan={7} className="text-center text-muted-foreground py-10">
                 {emptyText}
               </TableCell>
             </TableRow>
