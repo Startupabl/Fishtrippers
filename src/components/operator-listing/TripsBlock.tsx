@@ -19,6 +19,8 @@ import {
   fishingEnvironmentLabel,
 } from "@/lib/operators.shared";
 import { CurrencyDisclaimer } from "./CurrencyDisclaimer";
+import { CheckDatesDialog } from "./CheckDatesDialog";
+import { RequestToBookDialog } from "./RequestToBookDialog";
 
 interface Trip {
   id: string;
@@ -35,10 +37,13 @@ interface Trip {
   environments?: string[] | null;
   techniques?: string[] | null;
   departure_address?: string | null;
+  booking_type?: "instant_book" | "request_to_book" | null;
 }
 
 interface Props {
   trips: Trip[];
+  hostId?: string | null;
+  hostHasAvailability?: boolean;
 }
 
 function formatDuration(mins: number) {
