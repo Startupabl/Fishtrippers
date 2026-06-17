@@ -35,7 +35,7 @@ export function OperatorCard({ operator }: { operator: OperatorCardDTO }) {
       key: "capacity",
       content: (
         <>
-          <Users className="h-5 w-5 text-foreground" />
+          <Users className="h-3 w-3 text-foreground" />
           <span>{operator.vessel_capacity}</span>
         </>
       ),
