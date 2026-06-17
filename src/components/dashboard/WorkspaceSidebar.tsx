@@ -2,9 +2,9 @@ import { Link, useRouterState } from "@tanstack/react-router";
 import {
   LayoutDashboard,
   Calendar,
+  CalendarDays,
   Wallet,
   BookOpen,
-  Clock,
   Receipt,
   Plus,
   Search,
