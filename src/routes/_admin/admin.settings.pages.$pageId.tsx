@@ -277,8 +277,8 @@ function PageEditor() {
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="learning_teaching">Learning & Teaching</SelectItem>
-                  <SelectItem value="support_safety">Support & Safety</SelectItem>
+                  <SelectItem value="explore">Explore</SelectItem>
+                  <SelectItem value="resources">Resources</SelectItem>
                   <SelectItem value="legal">Legal</SelectItem>
                 </SelectContent>
               </Select>
