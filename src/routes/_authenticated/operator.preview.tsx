@@ -80,7 +80,59 @@ function OperatorPreviewPage() {
   const ready = useMemo(() => isReadyToSubmit(state), [state]);
 
   const [submitting, setSubmitting] = useState(false);
+  const [saving, setSaving] = useState(false);
   const [payoutsOpen, setPayoutsOpen] = useState(false);
+
+  const handleSaveUpdates = async () => {
+    setSaving(true);
+    try {
+      await saveDraft({
+        data: {
+          operator: {
+            business_type: state.business_type ?? null,
+            display_name: state.display_name || null,
+            location: state.location || null,
+            about: state.about || null,
+            booking_type: state.booking_type ?? null,
+            advance_notice_hours: state.advance_notice_hours ?? null,
+            cancellation_policy: state.cancellation_policy ?? null,
+            primary_category: state.primary_category ?? null,
+            target_species: state.target_species ?? [],
+          },
+          vessel:
+            state.business_type === "charter"
+              ? {
+                  boat_type_id: state.vessel.boat_type_id || null,
+                  manufacturer: state.vessel.manufacturer || null,
+                  year: state.vessel.year ? Number(state.vessel.year) : null,
+                  length_ft: state.vessel.length_ft ? Number(state.vessel.length_ft) : null,
+                  restored: state.vessel.restored,
+                  num_engines: state.vessel.num_engines ? Number(state.vessel.num_engines) : null,
+                  horsepower_per_engine: state.vessel.horsepower_per_engine
+                    ? Number(state.vessel.horsepower_per_engine)
+                    : null,
+                  max_cruising_speed_knots: state.vessel.max_cruising_speed_knots
+                    ? Number(state.vessel.max_cruising_speed_knots)
+                    : null,
+                  engine_type: state.vessel.engine_manufacturer || null,
+                  max_passenger_capacity: state.vessel.max_passenger_capacity
+                    ? Number(state.vessel.max_passenger_capacity)
+                    : null,
+                  features: state.vessel.features ?? {},
+                }
+              : null,
+        },
+      } as any);
+      await qc.invalidateQueries({ queryKey: ["operator-listing-preview"] });
+      await qc.invalidateQueries({ queryKey: ["my-operator"] });
+      toast.success("Listing updated");
+      navigate({ to: "/dashboard/my-listing" });
+    } catch (e: any) {
+      toast.error(e?.message || "Could not save updates");
+    } finally {
+      setSaving(false);
+    }
+  };
 
   if (isLoading) {
     return (
