@@ -173,6 +173,7 @@ export function TripFormDialog({ open, onOpenChange, initial }: Props) {
           max_party_size: form.max_party_size!,
           currency: captainCurrency,
           template_key: form.template_key ?? null,
+          booking_type: form.booking_type,
           target_species: form.target_species,
           environments: form.environments,
           techniques: form.techniques,
