@@ -32,7 +32,7 @@ export function SiteHeader() {
           : "sticky top-0 border-b border-border/40 bg-white",
       )}
     >
-      <div className="mx-auto flex h-20 max-w-[1400px] items-center justify-between gap-6 px-4 sm:px-6 md:px-8 md:h-24">
+      <div className="mx-auto flex h-20 max-w-[1600px] items-center justify-between gap-6 px-4 sm:px-6 md:px-8 md:h-24">
         <div className="flex shrink-0 items-center gap-6">
           <Logo size="lg" showMark={!isHome} tone={isHome ? "light" : "default"} />
         </div>

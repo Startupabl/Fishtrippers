@@ -67,7 +67,7 @@ export function SiteFooter() {
 
   return (
     <footer className="mt-16 border-t border-border bg-background text-base">
-      <div className="mx-auto flex max-w-[1400px] flex-col gap-10 px-4 md:px-8 py-12">
+      <div className="mx-auto flex max-w-[1600px] flex-col gap-10 px-4 md:px-6 lg:px-8 py-12">
         <Logo size="md" showTagline />
 
         <nav

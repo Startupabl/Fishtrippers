@@ -247,7 +247,7 @@ function MyCoursesPage() {
     <div className="min-h-screen bg-paper">
       {profileGuardDialog}
       <header className="border-b border-border/60 bg-card/60 backdrop-blur">
-        <div className="mx-auto flex max-w-[1400px] items-center justify-between px-4 md:px-8 py-4">
+        <div className="mx-auto flex max-w-[1600px] items-center justify-between px-4 md:px-6 lg:px-8 py-4">
           <Logo size="md" />
           <Button asChild variant="ghost">
             <Link to="/dashboard">Dashboard</Link>
@@ -255,7 +255,7 @@ function MyCoursesPage() {
         </div>
       </header>
 
-      <main className="mx-auto max-w-[1400px] px-4 md:px-8 py-8 md:py-12">
+      <main className="mx-auto max-w-[1600px] px-4 md:px-6 lg:px-8 py-8 md:py-12">
         {/* Stripe payout banner suppressed — payments temporarily disabled. */}
         <div className="flex flex-wrap items-end justify-between gap-3">
           <div>

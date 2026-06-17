@@ -30,7 +30,7 @@ function FavoritesPage() {
   }, [data, favoriteIds, removing]);
 
   return (
-    <main className="mx-auto max-w-[1400px] px-4 py-12 md:px-8">
+    <main className="mx-auto max-w-[1600px] px-4 py-12 md:px-8">
       <h1 className="text-3xl font-bold tracking-tight">Favorites</h1>
       <p className="mt-2 text-muted-foreground">Save Courses and Aides you want to revisit.</p>
 

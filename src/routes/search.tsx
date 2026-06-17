@@ -110,7 +110,7 @@ function SearchPage() {
     : `${results.length} fishing ${results.length === 1 ? "charter" : "charters"} available`;
 
   return (
-    <main className="mx-auto max-w-[1400px] px-4 md:px-8 py-6">
+    <main className="mx-auto max-w-[1600px] px-4 md:px-6 lg:px-8 py-6">
       {/* TOP SEARCH BAR */}
       <section className="rounded-2xl border border-border bg-card p-3 shadow-sm">
         <form

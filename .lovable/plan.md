@@ -1,25 +1,49 @@
-## Refine info capsule on OperatorCard
+## Goal
 
-Edit only `src/components/listings/OperatorCard.tsx`.
+Make every page feel less cramped by widening the standard content container and trimming side padding, applied consistently across the catalog, dashboard pages, hero, header, and footer.
 
-### Positioning (capsule straddles image bottom edge)
-- Move the capsule container OUT of the image div so it can overlap both the image (upper half) and the white card body (lower half).
-- Restructure: wrap the image div + capsule + body in a `relative` parent. Capsule absolutely positioned with `left-1/2 -translate-x-1/2` and placed so its vertical center sits on the image/body boundary (e.g. `top-[calc(theme-image-height)] -translate-y-1/2`). Simpler: keep image as before, then render capsule as a sibling with `-mt-5 relative z-10` centered, and add `pt-8` to the body to make room.
+## Change
 
-### Width
-- Change `w-[66%] min-w-[220px] max-w-[320px]` → `w-[90%] max-w-none` so it spans nearly full card width.
+Replace the shared container pattern globally:
 
-### Segments — single line, icons same height
-- Use `h-5` for all icons (boat img and Lucide) so they align on one line.
-  - Boat icon: `<img className="h-5 w-auto object-contain" />` (fallback `Sailboat className="h-5 w-5"`).
-  - Users icon: `h-5 w-5`.
-  - Star: `h-5 w-5`.
-- Each segment: `flex items-center justify-center gap-1.5 whitespace-nowrap px-2 py-2 text-sm font-semibold`. Add `whitespace-nowrap` to prevent the "Verified" label wrapping.
-- Keep `divide` via `border-l border-border/70` on segments after the first.
+- `max-w-[1400px]` → `max-w-[1600px]` (≈100rem; bigger than `max-w-7xl` (80rem), close to your `max-w-[90rem]` suggestion but a bit roomier so 1440-px laptops feel spacious without edge-to-edge stretch on 27" monitors)
+- `max-w-[1200px]` (only used on `dashboard.my-listing`) → `max-w-[1600px]` for consistency
+- Horizontal padding pattern `px-4 md:px-8` → `px-4 md:px-6 lg:px-8` so md screens (768–1023) get tighter side gutters and only very large screens keep the 8-unit padding
 
-### Capsule styling
-- `rounded-full bg-card shadow-md border border-border/60` (solid bg since it now sits over white too).
-- `flex items-stretch` with segments using `flex-1`.
+This pattern appears in ~24 spots across `src/routes/**` and `src/components/layout/SiteHeader.tsx` + `SiteFooter.tsx`. All of them get the same swap so header, hero, search/trip catalog, all dashboard pages, footer, and auth-only pages line up.
 
-### Out of scope
-No data changes, no title/price/image changes.
+## Files touched (search/replace, no logic changes)
+
+Layout shell:
+- `src/components/layout/SiteHeader.tsx`
+- `src/components/layout/SiteFooter.tsx`
+
+Home / hero / search:
+- `src/routes/index.tsx` (4 occurrences incl. hero block at line 358 and CTA sections)
+- `src/routes/search.tsx`
+
+Dashboard + authenticated pages:
+- `src/routes/_authenticated/dashboard.tsx`
+- `src/routes/_authenticated/dashboard.learner.tsx`
+- `src/routes/_authenticated/dashboard.learner.purchases.tsx`
+- `src/routes/_authenticated/dashboard.learner.schedule.tsx`
+- `src/routes/_authenticated/dashboard.favorites.tsx`
+- `src/routes/_authenticated/dashboard.earnings.tsx`
+- `src/routes/_authenticated/dashboard.upcoming-sessions.tsx`
+- `src/routes/_authenticated/dashboard.messages.tsx`
+- `src/routes/_authenticated/dashboard.aide.courses.tsx`
+- `src/routes/_authenticated/dashboard.my-listing.tsx` (also 1200→1600)
+- `src/routes/_authenticated/dashboard.listings.$journeyId.showcase.tsx`
+
+## Out of scope
+
+- Narrower content surfaces that are intentionally reading-width: `m.$mentorSlug` (5xl article), `booking-review` (5xl form + 6xl header bar), `checkout.success`, `journey-welcome`, `operator.preview`, `mentor.create-path`, `dashboard.listings.$journeyId.coupons` (4xl form), `HeroBookingBar` (5xl pill), `BottomNav`. These are constrained by content type (forms, single-column reading), not by the global page chrome, so we leave them alone.
+- No changes to card grids, typography, or per-section internal padding.
+
+## Verification
+
+After the swap, spot-check at 1440px and 1920px:
+- Header logo + nav align with the page content below (same gutter)
+- `/search` trip catalog grid extends further toward the edges
+- `/dashboard` and `/dashboard/earnings` match the catalog width
+- Hero image content block on `/` lines up with the rest of the homepage

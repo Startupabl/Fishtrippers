@@ -97,7 +97,7 @@ function MessagesLayout() {
   }
 
   return (
-    <div className="mx-auto flex h-[calc(100vh-6rem)] min-w-0 w-full max-w-[1400px] overflow-x-hidden">
+    <div className="mx-auto flex h-[calc(100vh-6rem)] min-w-0 w-full max-w-[1600px] overflow-x-hidden">
       <aside
         className={cn(
           "min-w-0 max-w-full flex-col overflow-x-hidden border-r border-border bg-paper",
