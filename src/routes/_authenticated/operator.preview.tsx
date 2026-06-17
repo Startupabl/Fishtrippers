@@ -18,6 +18,7 @@ import { BoatInfoBlock } from "@/components/operator-listing/BoatInfoBlock";
 import { AmenitiesGrid } from "@/components/operator-listing/AmenitiesGrid";
 import { PoliciesBlock } from "@/components/operator-listing/PoliciesBlock";
 import { WhatsBitingStub } from "@/components/operator-listing/WhatsBitingStub";
+import { MeetingPointMap } from "@/components/operator-listing/MeetingPointMap";
 import { Button } from "@/components/ui/button";
 import { Loader2 } from "lucide-react";
 import {
@@ -243,6 +244,11 @@ function OperatorPreviewPage() {
             />
             <WhatsBitingStub />
             <PoliciesBlock cancellationPolicy={op?.cancellation_policy ?? null} />
+            <MeetingPointMap
+              address={(op as any)?.default_departure_address ?? null}
+              lat={(op as any)?.default_departure_lat ?? null}
+              lng={(op as any)?.default_departure_lng ?? null}
+            />
           </div>
           <aside className="space-y-4 lg:sticky lg:top-32 lg:self-start">
             <CaptainCard

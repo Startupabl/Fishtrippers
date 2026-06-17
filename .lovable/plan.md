@@ -1,35 +1,35 @@
-## Goal
+# Departure & Meeting Point map on Listing page
 
-Add a "How Bookings Work" link next to the **Trip availability and prices** heading on the operator listing (preview / edit / view). Clicking it opens an in-page popup with angler-focused copy, fully editable from the existing Admin → Settings → Pages CMS.
+Wire up the currently non-working "Show map" link next to the address by adding a real Google Map section to the listing detail page, anchored to `#map`.
 
-## Changes
+## What you'll see
 
-### 1. Seed CMS page (migration)
-Insert one row into `site_pages` (idempotent `ON CONFLICT DO NOTHING`):
-- slug: `how-it-works-for-anglers`
-- title: `How Bookings Work for Anglers`
-- category: `resources`
-- status: `live`
-- content_html: full provided copy marked up with `<h2>`, `<h3>`, `<p>`, `<ul>`, `<li>`, `<strong>` (sections: Browse and Choose, Check the Booking Type — Instant Book / Request to Book, Double-Booking Protection)
+- Below the existing listing sections (after Policies, before footer) a new **Departure & Meeting Point** card with:
+  - Heading + the saved meeting-point address (e.g. marina, ramp, tackle shop name).
+  - An interactive Google Map (~360px tall, rounded, bordered) centered on the meeting point at zoom 15.
+  - A clean pin marker on the exact location.
+  - A small label/info window over the pin reading **"Trip Departure / Meeting Point"** (open by default; user can close and click the pin to reopen).
+- The "Show map" link in the header smooth-scrolls to this new section.
+- If the operator has no saved meeting point coordinates yet, the section shows a friendly placeholder ("Meeting point not set yet") instead of a broken map — never an empty grey box.
 
-Editable anytime from Admin → Settings → Pages.
+## Technical details
 
-### 2. Generalize the existing dialog
-Rename `src/components/dashboard/HowBookingsWorkDialog.tsx` → `src/components/HowBookingsWorkDialog.tsx` and add two optional props:
-- `slug?: string` (default keeps the captain slug for backward compat)
-- `title?: string` (dialog header)
+1. **New component** `src/components/operator-listing/MeetingPointMap.tsx`
+   - Props: `address: string | null`, `lat: number | null`, `lng: number | null`.
+   - Uses the existing Google Maps browser key (`VITE_LOVABLE_CONNECTOR_GOOGLE_MAPS_BROWSER_KEY`) and tracking ID, loaded via the standard async `<script>` injection pattern with a global `initMeetingPointMap` callback (singleton loader so multiple instances don't re-inject).
+   - Renders `google.maps.Map` (no `mapId`) at zoom 15, disables `mapTypeControl` and `streetViewControl` for a clean look, keeps zoom + fullscreen.
+   - Adds a `google.maps.Marker` at `{lat, lng}` plus a `google.maps.InfoWindow` with the text **"Trip Departure / Meeting Point"** opened on mount; clicking the marker re-opens it.
+   - Renders a header row above the map: section title + the address text.
+   - When `lat`/`lng` missing: render the placeholder card (no script load).
 
-Update the one existing import in `dashboard.master-calendar.tsx` to the new path. Behavior unchanged — still fetches via `useServerFn(getLivePageBySlug)` keyed by slug, renders sanitized HTML, Close button.
+2. **Wire into the listing page** `src/routes/_authenticated/operator.preview.tsx`
+   - Import `MeetingPointMap` and render `<section id="map">…</section>` after the existing `PoliciesBlock` (or near the bottom of the main content stack — same horizontal padding as siblings).
+   - Pass `address={operator.default_departure_address}`, `lat={operator.default_departure_lat}`, `lng={operator.default_departure_lng}` from the loaded operator record.
 
-### 3. Wire the angler link into `TripsBlock`
-In `src/components/operator-listing/TripsBlock.tsx`:
-- Import `HelpCircle`, `Button`, and `HowBookingsWorkDialog`.
-- Convert the `TripsBlock` function to include local `open` state (small refactor — add a tiny wrapper or convert to a component with `useState`).
-- Render the heading row as a flex row: heading on the left, a small ghost `Button` with `HelpCircle` icon labeled **"How Bookings Work"** on the right (stacks under heading on mobile).
-- Mount `<HowBookingsWorkDialog open={open} onOpenChange={setOpen} slug="how-it-works-for-anglers" title="How Bookings Work for Anglers" />`.
+3. **Header link** `src/components/operator-listing/HeaderGallery.tsx`
+   - The existing `<a href="#map">Show map</a>` already points to the right anchor — no change needed beyond adding the `id="map"` section. Browser-native smooth scroll already works because the global CSS sets `scroll-behavior: smooth` (verify; if not, add `scroll-mt-20` on the section to clear the sticky nav).
 
-Because `TripsBlock` is shared, the link appears automatically on preview, edit, and public view pages — no per-route wiring needed.
+4. **Optional polish** `src/components/operator-listing/SectionNav.tsx`
+   - Add a new nav item `{ href: "#map", label: "Meeting point", icon: MapPin }` so users can jump there from the sticky section nav too.
 
-## Result
-
-One angler-facing "How Bookings Work" link beside the Trip availability heading on every listing surface, opening an in-page modal users can dismiss to stay on the page. Copy editable from Pages CMS via slug `how-it-works-for-anglers`. No schema changes beyond seeding one row, no new routes.
+No DB migrations, no new server functions, no new secrets — the meeting-point coordinates already exist on `operators` (`default_departure_address`, `default_departure_lat`, `default_departure_lng`), and the Google Maps browser key is already provisioned via the connector.
