@@ -3,9 +3,10 @@ import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useServerFn } from "@tanstack/react-start";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
+import { z } from "zod";
 
 import { getMyOperatorListing } from "@/lib/operator-listing.functions";
-import { getMyOperator, submitOperatorForReview } from "@/lib/operators.functions";
+import { getMyOperator, submitOperatorForReview, upsertOperatorDraft } from "@/lib/operators.functions";
 import { PreviewBanner } from "@/components/operator-listing/PreviewBanner";
 import { HeaderGallery } from "@/components/operator-listing/HeaderGallery";
 import { SectionNav } from "@/components/operator-listing/SectionNav";
@@ -27,6 +28,8 @@ import { submitOperatorSchema } from "@/lib/operators.shared";
 import { ConnectPayoutsDialog } from "@/components/operator-onboarding/ConnectPayoutsDialog";
 
 export const Route = createFileRoute("/_authenticated/operator/preview")({
+  validateSearch: (search) =>
+    z.object({ edit: z.boolean().optional() }).parse(search),
   head: () => ({
     meta: [
       { title: "Listing preview" },
@@ -51,6 +54,9 @@ function OperatorPreviewPage() {
   const fetcher = useServerFn(getMyOperatorListing);
   const fetchMine = useServerFn(getMyOperator);
   const submit = useServerFn(submitOperatorForReview);
+  const saveDraft = useServerFn(upsertOperatorDraft);
+  const search = Route.useSearch();
+  const isEditMode = !!search.edit;
   const navigate = useNavigate();
   const qc = useQueryClient();
 
