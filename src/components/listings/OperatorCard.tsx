@@ -1,5 +1,5 @@
 import { Link } from "@tanstack/react-router";
-import { Sailboat, Users, ShieldCheck, MapPin, Zap, Star } from "lucide-react";
+import { Sailboat, Users, ShieldCheck, MapPin, Zap, Star, Ship } from "lucide-react";
 import type { OperatorCardDTO } from "@/lib/operators-search.functions";
 
 export function OperatorCard({ operator }: { operator: OperatorCardDTO }) {
@@ -91,6 +91,13 @@ export function OperatorCard({ operator }: { operator: OperatorCardDTO }) {
             <ShieldCheck className="size-4 text-info" aria-hidden />
             <span className="line-clamp-1">{operator.display_name}</span>
           </h3>
+
+          {operator.trip_count > 0 && (
+            <p className="mt-1.5 flex items-center gap-1.5 text-sm text-muted-foreground">
+              <Ship className="size-3.5" />
+              {operator.trip_count} Trip{operator.trip_count === 1 ? "" : "s"} Available
+            </p>
+          )}
 
           {cityLabel && (
             <p className="mt-1.5 flex items-center gap-1.5 text-sm text-muted-foreground">
