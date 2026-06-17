@@ -204,8 +204,8 @@ function EarningsPage() {
                 </button>
               </TableHead>
               <TableHead className="font-bold">Order Number</TableHead>
-              <TableHead className="font-bold">Course Title</TableHead>
-              <TableHead className="font-bold">Student</TableHead>
+              <TableHead className="font-bold">Trip Title</TableHead>
+              <TableHead className="font-bold">Angler</TableHead>
               <TableHead className="font-bold">Money Earned</TableHead>
               <TableHead className="font-bold">Actions</TableHead>
             </TableRow>
