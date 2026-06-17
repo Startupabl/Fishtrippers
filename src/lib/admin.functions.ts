@@ -127,9 +127,10 @@ export const getAdminOverview = createServerFn({ method: "GET" })
       { count: openFlags },
     ] = await Promise.all([
       supabaseAdmin
-        .from("journeys")
+        .from("operators")
         .select("*", { count: "exact", head: true })
-        .eq("moderation_status", "pending"),
+        .eq("moderation_status", "pending")
+        .neq("status", "archived"),
       supabaseAdmin
         .from("support_tickets")
         .select("*", { count: "exact", head: true })
