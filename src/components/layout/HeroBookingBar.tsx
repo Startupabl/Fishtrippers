@@ -24,7 +24,7 @@ export function HeroBookingBar() {
   return (
     <form
       onSubmit={handleSubmit}
-      className="grid w-full max-w-5xl grid-cols-1 gap-2 rounded-2xl bg-white p-2 shadow-2xl ring-1 ring-black/5 md:grid-cols-[1.4fr_1fr_1fr_auto] md:items-center md:gap-0 md:rounded-full md:p-1.5"
+      className="grid w-full grid-cols-1 gap-2 rounded-2xl bg-white p-2 shadow-2xl ring-1 ring-black/5 md:grid-cols-[1.4fr_1fr_1fr_auto] md:items-center md:gap-0 md:rounded-full md:p-1.5"
     >
       {/* Location */}
       <label className="flex items-center gap-3 rounded-xl px-4 py-3 md:rounded-full md:border-r md:border-border">
