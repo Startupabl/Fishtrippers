@@ -36,6 +36,7 @@ export const Route = createFileRoute("/mentor/create-path")({
     z
       .object({
         new: z.boolean().optional(),
+        edit: z.boolean().optional(),
       })
       .parse(search),
   component: CreatePathPage,
@@ -52,6 +53,8 @@ const STEP_ORDER: StepId[] = [
 
 function CreatePathPage() {
   const navigate = useNavigate();
+  const search = Route.useSearch();
+  const isEditMode = !!search.edit;
   const initialized = useAuthStore((s) => s.initialized);
   const authUser = useAuthStore((s) => s.user);
 
@@ -67,13 +70,13 @@ function CreatePathPage() {
     }
   }, [initialized, authUser, navigate]);
 
-  // If the user already has a listing, send them to the dashboard hub —
-  // the creation form is a one-time onboarding surface.
+  // If the user already has a listing AND they aren't explicitly editing,
+  // send them to the dashboard hub — the creation form is one-time onboarding.
   useEffect(() => {
-    if (initialized && authUser && listingLoaded && hasListing) {
+    if (initialized && authUser && listingLoaded && hasListing && !isEditMode) {
       navigate({ to: "/dashboard/my-listing" });
     }
-  }, [initialized, authUser, listingLoaded, hasListing, navigate]);
+  }, [initialized, authUser, listingLoaded, hasListing, isEditMode, navigate]);
 
   // Hydrate from server once.
   const { data: server } = useQuery({
@@ -207,8 +210,9 @@ function CreatePathPage() {
       scrollFormToTop();
     } else {
       // Final step finished → go to the preview, where the operator
-      // uploads gallery photos and submits for admin approval.
-      navigate({ to: "/operator/preview" });
+      // uploads gallery photos and submits for admin approval (or saves
+      // updates when editing an already-live listing).
+      navigate({ to: "/operator/preview", search: isEditMode ? { edit: true } : undefined as any });
     }
   };
   const back = () => {
@@ -240,11 +244,13 @@ function CreatePathPage() {
       <header className="border-b">
         <div className="mx-auto flex h-14 max-w-6xl items-center justify-between px-4">
           <Logo />
-          <span className="text-sm text-muted-foreground">List your trip</span>
+          <span className="text-sm text-muted-foreground">
+            {isEditMode ? "Edit your listing" : "List your trip"}
+          </span>
         </div>
       </header>
 
-      {!hasListing && (
+      {!hasListing && !isEditMode && (
         <div className="mx-auto max-w-6xl px-4 pt-6">
           <div
             role="status"
