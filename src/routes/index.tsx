@@ -310,12 +310,12 @@ function Index() {
       : "Angler";
   const showGreeting = authInitialized && !!authUser;
 
-  const fetchFeatured = useServerFn(listFeaturedJourneys);
+  const fetchFeatured = useServerFn(searchOperatorsServer);
   const featuredQuery = useQuery({
-    queryKey: ["featured-journeys"],
-    queryFn: () => fetchFeatured(),
+    queryKey: ["featured-operators"],
+    queryFn: () => fetchFeatured({ data: { featuredOnly: false, limit: 6 } }),
   });
-  const featured = featuredQuery.data ?? [];
+  const featured = featuredQuery.data?.items ?? [];
 
 
   useEffect(() => {
