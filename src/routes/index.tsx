@@ -18,7 +18,7 @@ import { searchOperatorsServer } from "@/lib/operators-search.functions";
 import { listFeaturedCategories } from "@/lib/categories.functions";
 import { getCategoryPlaceholder } from "@/lib/category-placeholders";
 import type { JourneyCategory } from "@/data/lesson-paths";
-import { LiveJourneyCard } from "@/components/listings/LiveJourneyCard";
+import { OperatorCard } from "@/components/listings/OperatorCard";
 import { DESIGN_SYSTEM } from "@/lib/brand";
 import heroFishingAsset from "@/assets/hero-fishing.jpg.asset.json";
 const heroFishing = heroFishingAsset.url;
