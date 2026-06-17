@@ -90,17 +90,17 @@ export const getAdminOverview = createServerFn({ method: "GET" })
       console.error("[admin] listUsers", e);
     }
 
-    // Listings (only approved+published count as "active")
+    // Listings (only approved+published count as "active") — operator listings
     const { count: totalListings } = await supabaseAdmin
-      .from("journeys")
+      .from("operators")
       .select("*", { count: "exact", head: true })
       .eq("status", "published")
       .eq("moderation_status", "approved");
 
     const [listingsToday, listingsWeek, listingsMonth] = await Promise.all([
-      countSince("journeys", "created_at", day),
-      countSince("journeys", "created_at", week),
-      countSince("journeys", "created_at", month),
+      countSince("operators", "created_at", day),
+      countSince("operators", "created_at", week),
+      countSince("operators", "created_at", month),
     ]);
 
     // Revenue — sum of bookings.total_price where status indicates paid
