@@ -18,11 +18,11 @@ export function OperatorCard({ operator }: { operator: OperatorCardDTO }) {
             <img
               src={operator.boat_type_icon_url}
               alt={operator.boat_type_name ?? "Boat"}
-              className="h-5 w-auto object-contain"
+              className="h-7 w-auto object-contain"
               loading="lazy"
             />
           ) : (
-            <Sailboat className="h-5 w-5 text-foreground" />
+            <Sailboat className="h-7 w-7 text-foreground" />
           )}
           <span>{operator.vessel_length_ft} ft</span>
         </>
