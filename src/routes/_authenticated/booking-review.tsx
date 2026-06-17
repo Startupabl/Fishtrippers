@@ -367,7 +367,7 @@ function BookingReviewPage() {
                   </div>
                   <p className="text-xs text-muted-foreground text-left">
                     Includes FishTrippers service fee ({feeLabel}): {fmt(fee)}. By enrolling in this course, you agree to our{" "}
-                    <Link to="/terms-of-service" className="text-accent hover:underline">
+                    <Link to="/terms" className="text-accent hover:underline">
                       Terms of Service
                     </Link>
                     .
