@@ -410,7 +410,7 @@ function Index() {
               className="text-3xl text-foreground"
               style={{ fontFamily: "Lora, ui-serif, Georgia, serif" }}
             >
-              Featured Courses
+              Featured Charters
             </h2>
             {featuredQuery.isLoading ? (
               <div className="mt-6 grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
@@ -423,9 +423,10 @@ function Index() {
               </div>
             ) : (
               <ul className="mt-6 grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
-                {featured.map((j) => (
-                  <LiveJourneyCard key={j.id} journey={j} />
+                {featured.map((op) => (
+                  <OperatorCard key={op.id} operator={op} />
                 ))}
+              </ul>
               </ul>
             )}
           </div>
