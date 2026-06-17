@@ -22,6 +22,7 @@ import { Route as MentorAgreementRouteImport } from './routes/mentor-agreement'
 import { Route as LoginRouteImport } from './routes/login'
 import { Route as LearnerFaqsRouteImport } from './routes/learner-faqs'
 import { Route as JourneyWelcomeRouteImport } from './routes/journey-welcome'
+import { Route as HowItWorksTrippersRouteImport } from './routes/how-it-works-trippers'
 import { Route as GiftRouteImport } from './routes/gift'
 import { Route as ForgotPasswordRouteImport } from './routes/forgot-password'
 import { Route as FirstLessonGuideRouteImport } from './routes/first-lesson-guide'
@@ -163,6 +164,11 @@ const LearnerFaqsRoute = LearnerFaqsRouteImport.update({
 const JourneyWelcomeRoute = JourneyWelcomeRouteImport.update({
   id: '/journey-welcome',
   path: '/journey-welcome',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const HowItWorksTrippersRoute = HowItWorksTrippersRouteImport.update({
+  id: '/how-it-works-trippers',
+  path: '/how-it-works-trippers',
   getParentRoute: () => rootRouteImport,
 } as any)
 const GiftRoute = GiftRouteImport.update({
@@ -598,6 +604,7 @@ export interface FileRoutesByFullPath {
   '/first-lesson-guide': typeof FirstLessonGuideRoute
   '/forgot-password': typeof ForgotPasswordRoute
   '/gift': typeof GiftRouteWithChildren
+  '/how-it-works-trippers': typeof HowItWorksTrippersRoute
   '/journey-welcome': typeof JourneyWelcomeRoute
   '/learner-faqs': typeof LearnerFaqsRoute
   '/login': typeof LoginRoute
@@ -688,6 +695,7 @@ export interface FileRoutesByTo {
   '/first-lesson-guide': typeof FirstLessonGuideRoute
   '/forgot-password': typeof ForgotPasswordRoute
   '/gift': typeof GiftRouteWithChildren
+  '/how-it-works-trippers': typeof HowItWorksTrippersRoute
   '/journey-welcome': typeof JourneyWelcomeRoute
   '/learner-faqs': typeof LearnerFaqsRoute
   '/login': typeof LoginRoute
@@ -778,6 +786,7 @@ export interface FileRoutesById {
   '/first-lesson-guide': typeof FirstLessonGuideRoute
   '/forgot-password': typeof ForgotPasswordRoute
   '/gift': typeof GiftRouteWithChildren
+  '/how-it-works-trippers': typeof HowItWorksTrippersRoute
   '/journey-welcome': typeof JourneyWelcomeRoute
   '/learner-faqs': typeof LearnerFaqsRoute
   '/login': typeof LoginRoute
@@ -870,6 +879,7 @@ export interface FileRouteTypes {
     | '/first-lesson-guide'
     | '/forgot-password'
     | '/gift'
+    | '/how-it-works-trippers'
     | '/journey-welcome'
     | '/learner-faqs'
     | '/login'
@@ -960,6 +970,7 @@ export interface FileRouteTypes {
     | '/first-lesson-guide'
     | '/forgot-password'
     | '/gift'
+    | '/how-it-works-trippers'
     | '/journey-welcome'
     | '/learner-faqs'
     | '/login'
@@ -1049,6 +1060,7 @@ export interface FileRouteTypes {
     | '/first-lesson-guide'
     | '/forgot-password'
     | '/gift'
+    | '/how-it-works-trippers'
     | '/journey-welcome'
     | '/learner-faqs'
     | '/login'
@@ -1142,6 +1154,7 @@ export interface RootRouteChildren {
   FirstLessonGuideRoute: typeof FirstLessonGuideRoute
   ForgotPasswordRoute: typeof ForgotPasswordRoute
   GiftRoute: typeof GiftRouteWithChildren
+  HowItWorksTrippersRoute: typeof HowItWorksTrippersRoute
   JourneyWelcomeRoute: typeof JourneyWelcomeRoute
   LearnerFaqsRoute: typeof LearnerFaqsRoute
   LoginRoute: typeof LoginRoute
@@ -1258,6 +1271,13 @@ declare module '@tanstack/react-router' {
       path: '/journey-welcome'
       fullPath: '/journey-welcome'
       preLoaderRoute: typeof JourneyWelcomeRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/how-it-works-trippers': {
+      id: '/how-it-works-trippers'
+      path: '/how-it-works-trippers'
+      fullPath: '/how-it-works-trippers'
+      preLoaderRoute: typeof HowItWorksTrippersRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/gift': {
@@ -2069,6 +2089,7 @@ const rootRouteChildren: RootRouteChildren = {
   FirstLessonGuideRoute: FirstLessonGuideRoute,
   ForgotPasswordRoute: ForgotPasswordRoute,
   GiftRoute: GiftRouteWithChildren,
+  HowItWorksTrippersRoute: HowItWorksTrippersRoute,
   JourneyWelcomeRoute: JourneyWelcomeRoute,
   LearnerFaqsRoute: LearnerFaqsRoute,
   LoginRoute: LoginRoute,
