@@ -18,11 +18,11 @@ export function OperatorCard({ operator }: { operator: OperatorCardDTO }) {
             <img
               src={operator.boat_type_icon_url}
               alt={operator.boat_type_name ?? "Boat"}
-              className="size-7 object-contain"
+              className="h-5 w-auto object-contain"
               loading="lazy"
             />
           ) : (
-            <Sailboat className="size-6 text-foreground" />
+            <Sailboat className="h-5 w-5 text-foreground" />
           )}
           <span>{operator.vessel_length_ft} ft</span>
         </>
@@ -35,7 +35,7 @@ export function OperatorCard({ operator }: { operator: OperatorCardDTO }) {
       key: "capacity",
       content: (
         <>
-          <Users className="size-5 text-foreground" />
+          <Users className="h-5 w-5 text-foreground" />
           <span>{operator.vessel_capacity}</span>
         </>
       ),
@@ -47,7 +47,7 @@ export function OperatorCard({ operator }: { operator: OperatorCardDTO }) {
       key: "verified",
       content: (
         <>
-          <Star className="size-5 fill-amber-400 text-amber-400" />
+          <Star className="h-5 w-5 fill-amber-400 text-amber-400" />
           <span>Verified</span>
         </>
       ),
@@ -61,27 +61,29 @@ export function OperatorCard({ operator }: { operator: OperatorCardDTO }) {
         params={{ categorySlug, listingSlug }}
         className="block"
       >
-        <div className="relative aspect-[16/10] w-full overflow-hidden bg-muted">
-          {operator.cover_image_url ? (
-            <img
-              src={operator.cover_image_url}
-              alt={operator.display_name}
-              className="h-full w-full object-cover transition-transform duration-300 group-hover:scale-[1.03]"
-              loading="lazy"
-            />
-          ) : (
-            <div className="flex h-full w-full items-center justify-center text-sm text-muted-foreground">
-              No photo
-            </div>
-          )}
+        <div className="relative">
+          <div className="relative aspect-[16/10] w-full overflow-hidden bg-muted">
+            {operator.cover_image_url ? (
+              <img
+                src={operator.cover_image_url}
+                alt={operator.display_name}
+                className="h-full w-full object-cover transition-transform duration-300 group-hover:scale-[1.03]"
+                loading="lazy"
+              />
+            ) : (
+              <div className="flex h-full w-full items-center justify-center text-sm text-muted-foreground">
+                No photo
+              </div>
+            )}
+          </div>
 
           {segments.length > 0 && (
-            <div className="absolute inset-x-0 bottom-4 flex justify-center px-4">
-              <div className="inline-flex w-[66%] min-w-[220px] max-w-[320px] items-stretch justify-around rounded-full bg-card/95 text-sm font-semibold text-foreground shadow-md backdrop-blur">
+            <div className="pointer-events-none absolute inset-x-0 bottom-0 z-10 flex translate-y-1/2 justify-center px-4">
+              <div className="pointer-events-auto flex w-[90%] items-stretch rounded-full border border-border/60 bg-card text-sm font-semibold text-foreground shadow-md">
                 {segments.map((seg, idx) => (
                   <div
                     key={seg.key}
-                    className={`flex flex-1 items-center justify-center gap-2 px-3 py-2.5 ${
+                    className={`flex flex-1 items-center justify-center gap-1.5 whitespace-nowrap px-2 py-2 ${
                       idx > 0 ? "border-l border-border/70" : ""
                     }`}
                   >
@@ -93,7 +95,7 @@ export function OperatorCard({ operator }: { operator: OperatorCardDTO }) {
           )}
         </div>
 
-        <div className="p-4">
+        <div className="p-4 pt-8">
           <h3 className="flex items-center gap-1.5 text-base font-semibold text-foreground">
             <ShieldCheck className="size-4 text-info" aria-hidden />
             <span className="line-clamp-1">{operator.display_name}</span>
@@ -128,3 +130,4 @@ export function OperatorCard({ operator }: { operator: OperatorCardDTO }) {
     </li>
   );
 }
+
