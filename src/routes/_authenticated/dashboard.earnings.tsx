@@ -167,14 +167,14 @@ function EarningsPage() {
         </div>
         <div className="flex items-center gap-2">
           <span className="text-xs uppercase tracking-wide text-muted-foreground">
-            Course
+            Trip
           </span>
           <Select value={courseFilter} onValueChange={setCourseFilter}>
             <SelectTrigger className="w-[220px]">
               <SelectValue />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="all">All Courses</SelectItem>
+              <SelectItem value="all">All Trips</SelectItem>
               {courseOptions.map((t) => (
                 <SelectItem key={t} value={t}>
                   {t}
