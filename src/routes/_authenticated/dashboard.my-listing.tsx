@@ -293,6 +293,29 @@ function MyListingPage() {
         </Card>
       ) : null}
 
+      {showCalendarBanner ? (
+        <Card className="mt-4 rounded-2xl border-amber-200 bg-amber-50/60 p-4">
+          <div className="flex flex-wrap items-center justify-between gap-3">
+            <div className="flex items-start gap-3">
+              <div className="mt-0.5 flex h-9 w-9 items-center justify-center rounded-full bg-amber-100">
+                <CalendarDays className="size-4 text-amber-900" />
+              </div>
+              <div>
+                <p className="text-sm font-semibold text-amber-900">
+                  Action Required: Configure your Master Calendar
+                </p>
+                <p className="text-xs text-amber-900/80">
+                  You have instant-book trips. Set up your availability so guests can book automatically.
+                </p>
+              </div>
+            </div>
+            <Button asChild size="sm">
+              <Link to="/dashboard/master-calendar">Manage Availability</Link>
+            </Button>
+          </div>
+        </Card>
+      ) : null}
+
       {/* Listing table */}
       <section className="mt-6">
         <h2 className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
