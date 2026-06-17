@@ -18,6 +18,7 @@ import { BoatInfoBlock } from "@/components/operator-listing/BoatInfoBlock";
 import { AmenitiesGrid } from "@/components/operator-listing/AmenitiesGrid";
 import { PoliciesBlock } from "@/components/operator-listing/PoliciesBlock";
 import { WhatsBitingStub } from "@/components/operator-listing/WhatsBitingStub";
+import { MeetingPointMap } from "@/components/operator-listing/MeetingPointMap";
 import { Button } from "@/components/ui/button";
 import { Loader2 } from "lucide-react";
 import {
