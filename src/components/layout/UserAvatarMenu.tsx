@@ -185,7 +185,7 @@ export function UserAvatarMenuItems({
             className="flex w-full cursor-pointer items-center gap-2 px-3 py-2"
           >
             <Sprout className="size-4" style={{ color: DESIGN_SYSTEM.colors.leafGreen }} />
-            List Your Trip
+            Create a Listing
           </Link>
         </DropdownMenuItem>
       )}

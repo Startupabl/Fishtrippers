@@ -5,6 +5,7 @@ import { useQuery } from "@tanstack/react-query";
 import { z } from "zod";
 
 import { useAuthStore } from "@/stores/useAuthStore";
+import { useHasActiveListingStatus } from "@/hooks/useHasActiveListing";
 import {
   useOperatorOnboardingStore,
   isProfileValid,
@@ -57,12 +58,22 @@ function CreatePathPage() {
   const state = useOperatorOnboardingStore();
   const fetchMine = useServerFn(getMyOperator);
 
+  const { hasListing, isLoaded: listingLoaded } = useHasActiveListingStatus();
+
   // Redirect to /login if not authenticated.
   useEffect(() => {
     if (initialized && !authUser) {
       navigate({ to: "/login", search: { redirect: "/mentor/create-path" } as any });
     }
   }, [initialized, authUser, navigate]);
+
+  // If the user already has a listing, send them to the dashboard hub —
+  // the creation form is a one-time onboarding surface.
+  useEffect(() => {
+    if (initialized && authUser && listingLoaded && hasListing) {
+      navigate({ to: "/dashboard/my-listing" });
+    }
+  }, [initialized, authUser, listingLoaded, hasListing, navigate]);
 
   // Hydrate from server once.
   const { data: server } = useQuery({
@@ -232,6 +243,23 @@ function CreatePathPage() {
           <span className="text-sm text-muted-foreground">List your trip</span>
         </div>
       </header>
+
+      {!hasListing && (
+        <div className="mx-auto max-w-6xl px-4 pt-6">
+          <div
+            role="status"
+            className="rounded-2xl border border-emerald-200 bg-emerald-50 px-5 py-4 text-sm leading-relaxed text-emerald-900 shadow-sm sm:text-base"
+          >
+            <span aria-hidden="true" className="mr-1">⚓</span>
+            <span className="font-semibold">Let's launch your profile!</span>{" "}
+            Fill out your business details below to build your primary listing.
+            During this setup, you can also add your first few trips right away.
+            Don't worry if you aren't ready yet—once your listing is live, you
+            can always add, edit, or manage unlimited trips from your Captain's
+            Dashboard!
+          </div>
+        </div>
+      )}
 
       <div className="mx-auto grid max-w-6xl gap-6 px-4 py-8 lg:grid-cols-[260px_minmax(0,1fr)]">
         <aside className="hidden lg:block">
