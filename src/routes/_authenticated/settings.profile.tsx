@@ -294,7 +294,7 @@ function ProfileSettingsPage() {
           style={{ backgroundColor: DESIGN_SYSTEM.colors.leafGreen }}
         />
         <AlertDescription className="text-foreground text-[15px] leading-relaxed">
-          👋 Welcome to FishTrippers! Before continuing to your dashboard, let's finish setting up your account. Having your correct name, photo, and time zone ensures your scheduled sessions and interactions sync perfectly. Fill out the quick details below to unlock your workspace!
+          👋 Welcome to FishTrippers! Before continuing, let's finish setting up your account so your name, photo, and time zone are right before you book or list a fishing trip.
         </AlertDescription>
         <Button
           type="button"
@@ -369,7 +369,7 @@ function ProfileSettingsPage() {
             <p className="mt-2 text-xs text-destructive">{errors.avatar}</p>
           ) : (
             <p className="mt-1 text-muted-foreground text-sm py-[6px]">
-              This photo and your display name will be used when you send messages or list courses.
+              This photo and your display name will be used when you send messages or list new trips.
             </p>
           )}
         </div>
@@ -439,7 +439,7 @@ function ProfileSettingsPage() {
           <p className="mt-1 text-xs text-destructive">{errors.displayName}</p>
         ) : (
           <p className="text-muted-foreground py-[6px] text-sm">
-            Shown publicly on your Course pages instead of your real name. Recommended: first name + last initial.
+            Shown publicly on your trip pages instead of your real name. Recommended: first name + last initial.
           </p>
         )}
       </div>
@@ -509,7 +509,7 @@ function ProfileSettingsPage() {
           <p className="mt-1 text-xs text-destructive">{errors.timezone}</p>
         ) : (
           <p className="text-muted-foreground py-[6px] text-sm">
-            Used to show class times in your local time.
+            Used to show trip times in your local time.
           </p>
         )}
       </div>
@@ -530,7 +530,7 @@ function ProfileSettingsPage() {
           onLocalChange={setPhoneLocal}
         />
         <p className="text-muted-foreground py-[6px] text-sm">
-          Used strictly for urgent class reminders and schedule updates. We will never spam you.
+          Used strictly for urgent trip reminders and scheduled updates. We will never spam you.
         </p>
       </div>
 
@@ -561,9 +561,9 @@ function ProfileSettingsPage() {
 
     {showLabHours ? (
       <Card id="lab-hours" className="p-6">
-        <h2 className="text-xl font-semibold">Lab Hours</h2>
+        <h2 className="text-xl font-semibold">Trip Availability</h2>
         <p className="mt-1 text-muted-foreground text-sm py-[6px]">
-          Set when you're usually free. This shows on your Course pages and stays in
+          Set when you're usually free. This shows on your trip listings and stays in
           sync with the "Manage Availability" shortcut.
         </p>
         <div className="mt-6">

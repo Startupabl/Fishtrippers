@@ -65,8 +65,8 @@ export function useProfileGuard() {
             <AlertDialogHeader>
               <AlertDialogTitle>👋 Sign in to continue</AlertDialogTitle>
               <AlertDialogDescription>
-                Create a free account (or log in) to message Aides, check
-                availability, and list your own AI course. It only takes a moment.
+                Create a free account (or log in) to message guides, check
+                availability, and list your own fishing trips. It only takes a moment.
               </AlertDialogDescription>
             </AlertDialogHeader>
             <AlertDialogFooter className="gap-2 sm:gap-0">
@@ -102,9 +102,9 @@ export function useProfileGuard() {
             <AlertDialogHeader>
               <AlertDialogTitle>🔒 Complete Your Profile First</AlertDialogTitle>
               <AlertDialogDescription>
-                Before you can list a course or use the platform, we need a few mandatory details
+                Before you can list a trip or book one, we need a few mandatory details
                 (like your name, location & timezone<span className="text-destructive">*</span>, and
-                avatar) to ensure your calendar schedules and classrooms sync correctly.
+                photo) so your trip schedules and messages sync correctly.
               </AlertDialogDescription>
             </AlertDialogHeader>
             <AlertDialogFooter>
