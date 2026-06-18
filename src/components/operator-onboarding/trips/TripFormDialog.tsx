@@ -184,7 +184,11 @@ export function TripFormDialog({ open, onOpenChange, initial }: Props) {
           price_minor: form.price_minor!,
           per_extra_minor: form.per_extra_minor ?? 0,
           min_party_size: form.min_party_size ?? 1,
-          max_party_size: form.max_party_size!,
+          max_party_size:
+            form.charter_type === "shared_tour"
+              ? (form.seats_available ?? 1)
+              : form.max_party_size!,
+
           currency: captainCurrency,
           template_key: form.template_key ?? null,
           booking_type: form.booking_type,
