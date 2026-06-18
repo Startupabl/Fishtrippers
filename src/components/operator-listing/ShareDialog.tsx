@@ -56,8 +56,8 @@ export function ShareDialog({ open, onOpenChange, title, location, url }: ShareD
       href: `https://www.facebook.com/dialog/send?app_id=140586622674265&link=${enc(shareUrl)}&redirect_uri=${enc(shareUrl)}`,
     },
     {
-      label: "X (formerly Twitter)",
-      icon: Twitter,
+      label: "X",
+      icon: XIcon,
       href: `https://twitter.com/intent/tweet?url=${enc(shareUrl)}&text=${enc(message)}`,
     },
     {
