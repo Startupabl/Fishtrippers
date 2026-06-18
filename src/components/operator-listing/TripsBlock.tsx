@@ -452,6 +452,8 @@ function TripCard({
           hostId={hostId}
           tripTitle={trip.title}
           guests={guests}
+          onDateAvailability={handleDateAvailability}
+
         />
       ) : null}
 
