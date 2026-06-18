@@ -1670,6 +1670,7 @@ export type Database = {
           itinerary: string | null
           max_party_size: number | null
           min_party_size: number
+          min_seats_to_sail: number | null
           operator_id: string
           per_extra_minor: number
           price_minor: number
@@ -1699,6 +1700,7 @@ export type Database = {
           itinerary?: string | null
           max_party_size?: number | null
           min_party_size?: number
+          min_seats_to_sail?: number | null
           operator_id: string
           per_extra_minor?: number
           price_minor?: number
@@ -1728,6 +1730,7 @@ export type Database = {
           itinerary?: string | null
           max_party_size?: number | null
           min_party_size?: number
+          min_seats_to_sail?: number | null
           operator_id?: string
           per_extra_minor?: number
           price_minor?: number
