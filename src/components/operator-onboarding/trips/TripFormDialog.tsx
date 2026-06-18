@@ -156,8 +156,11 @@ export function TripFormDialog({ open, onOpenChange, initial }: Props) {
       if (!form.duration_minutes) throw new Error("Pick a duration");
       if (form.price_minor == null || form.price_minor < 0)
         throw new Error("Enter a base price");
-      if (form.max_party_size == null || form.max_party_size < 1)
-        throw new Error("Enter max party size");
+      if (form.charter_type === "private_charter") {
+        if (form.max_party_size == null || form.max_party_size < 1)
+          throw new Error("Enter max party size");
+      }
+
       if (form.description.trim().length < 10)
         throw new Error("Description is too short");
       if (form.target_species.length === 0) throw new Error("Pick at least one target fish");
