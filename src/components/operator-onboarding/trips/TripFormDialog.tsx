@@ -38,7 +38,7 @@ import { toast } from "sonner";
 import { X } from "lucide-react";
 import { upsertTrip, getMyCapabilities } from "@/lib/trips.functions";
 import { saveDefaultDeparture } from "@/lib/operators.functions";
-import { DURATION_OPTIONS, BOOKING_TYPE_OPTIONS } from "@/lib/trips.shared";
+import { DURATION_OPTIONS, BOOKING_TYPE_OPTIONS, CHARTER_TYPE_OPTIONS } from "@/lib/trips.shared";
 import {
   FISHING_ENVIRONMENTS,
   FISHING_TECHNIQUES,
@@ -60,6 +60,9 @@ export interface TripEditorState {
   max_party_size: number | null;
   template_key?: string | null;
   booking_type: "instant_book" | "request_to_book";
+  charter_type: "private_charter" | "shared_tour";
+  seats_available: number | null;
+
   target_species: string[];
   environments: string[];
   techniques: string[];
@@ -87,6 +90,9 @@ const empty: TripEditorState = {
   max_party_size: null,
   template_key: null,
   booking_type: "request_to_book",
+  charter_type: "private_charter",
+  seats_available: null,
+
   target_species: [],
   environments: [],
   techniques: [],
@@ -174,6 +180,10 @@ export function TripFormDialog({ open, onOpenChange, initial }: Props) {
           currency: captainCurrency,
           template_key: form.template_key ?? null,
           booking_type: form.booking_type,
+          charter_type: form.charter_type,
+          seats_available:
+            form.charter_type === "shared_tour" ? form.seats_available : null,
+
           target_species: form.target_species,
           environments: form.environments,
           techniques: form.techniques,
