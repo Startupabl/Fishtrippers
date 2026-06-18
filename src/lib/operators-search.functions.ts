@@ -171,6 +171,7 @@ export const searchOperatorsServer = createServerFn({ method: "POST" })
       return {
         id: row.id,
         slug: row.slug ?? null,
+        location_slug: row.location_slug ?? null,
         display_name: row.display_name ?? "Untitled listing",
         city: row.default_departure_city ?? null,
         state: row.default_departure_state ?? null,
