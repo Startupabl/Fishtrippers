@@ -114,23 +114,33 @@ function AideDashboardHome() {
             Your hub for managing your listing, schedule, and earnings.
           </p>
         </div>
-        <Button
-          asChild
-          className="gap-2 rounded-2xl text-white hover:opacity-90"
-          style={{ backgroundColor: LEAF }}
-        >
-          <Link
-            to="/create-listing/new"
-            search={{ new: true }}
-            onClick={guard(startNewMentorExpressListing)}
-          >
-            <Plus className="size-4" /> Create New Listing
-          </Link>
-        </Button>
       </div>
 
-      {/* Row 1 — Operations */}
+      {/* Row 1 — Studio */}
       <section className="mt-10">
+        <h2 className="mb-3 text-xs font-semibold uppercase tracking-wide text-muted-foreground">
+          Studio
+        </h2>
+        <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
+          <NavCard
+            to="/dashboard/my-listing"
+            icon={<BookOpen className="size-5" />}
+            title="My Listing & Trips"
+            desc="View, edit, and manage your listing and trips."
+            tint={`${YELLOW}33`}
+          />
+          <NavCard
+            to="/dashboard/master-calendar"
+            icon={<CalendarDays className="size-5" />}
+            title="Manage Availability"
+            desc="Set your weekly availability and block-out dates."
+            tint={`${LEAF}33`}
+          />
+        </div>
+      </section>
+
+      {/* Row 2 — Operations */}
+      <section className="mt-8">
         <h2 className="mb-3 text-xs font-semibold uppercase tracking-wide text-muted-foreground">
           Operations
         </h2>
@@ -152,28 +162,6 @@ function AideDashboardHome() {
         </div>
       </section>
 
-      {/* Row 2 — Studio */}
-      <section className="mt-8">
-        <h2 className="mb-3 text-xs font-semibold uppercase tracking-wide text-muted-foreground">
-          Studio
-        </h2>
-        <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
-          <NavCard
-            to="/dashboard/my-listing"
-            icon={<BookOpen className="size-5" />}
-            title="My Listing"
-            desc="View, edit, and manage your listing and trips."
-            tint={`${YELLOW}33`}
-          />
-          <NavCard
-            to="/dashboard/master-calendar"
-            icon={<CalendarDays className="size-5" />}
-            title="Manage Availability"
-            desc="Set your weekly availability and block-out dates."
-            tint={`${LEAF}33`}
-          />
-        </div>
-      </section>
     </div>
   );
 }
