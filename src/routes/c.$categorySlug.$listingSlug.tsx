@@ -85,8 +85,8 @@ export const Route = createFileRoute("/c/$categorySlug/$listingSlug")({
           replace: true,
         });
       }
-    } catch (e: any) {
-      if (e && typeof e === "object" && "isRedirect" in e) throw e;
+    } catch (e: unknown) {
+      if (isRedirect(e)) throw e;
     }
     return { kind: "draft" as const, path: null, mentor: null, slug: params.listingSlug, categorySlug: params.categorySlug };
   },
