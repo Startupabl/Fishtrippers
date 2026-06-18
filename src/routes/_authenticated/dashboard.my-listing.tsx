@@ -490,6 +490,7 @@ function MyListingPage() {
               <TableHeader>
                 <TableRow>
                   <TableHead>Title</TableHead>
+                  <TableHead>Status</TableHead>
                   <TableHead>Start</TableHead>
                   <TableHead>Duration</TableHead>
                   <TableHead>Party</TableHead>
@@ -504,9 +505,21 @@ function MyListingPage() {
                   const startStr = t.start_time
                     ? String(t.start_time).slice(0, 5)
                     : "—";
+                  const isActive = t.status === "active";
                   return (
                   <TableRow key={t.id}>
                     <TableCell className="font-medium">{t.title}</TableCell>
+                    <TableCell>
+                      <span
+                        className={`inline-flex items-center rounded-full px-2 py-0.5 text-xs font-medium ${
+                          isActive
+                            ? "bg-emerald-100 text-emerald-800 dark:bg-emerald-900/40 dark:text-emerald-200"
+                            : "bg-muted text-muted-foreground"
+                        }`}
+                      >
+                        {isActive ? "Published" : "Draft"}
+                      </span>
+                    </TableCell>
                     <TableCell className="text-muted-foreground">{startStr}</TableCell>
                     <TableCell>
                       {t.duration_minutes ? `${t.duration_minutes} min` : "—"}
