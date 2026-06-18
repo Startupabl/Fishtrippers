@@ -1,15 +1,18 @@
+import { useState } from "react";
 import { ShieldCheck, MessageCircle } from "lucide-react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
-import { toast } from "sonner";
+import { ContactCaptainDialog } from "./ContactCaptainDialog";
 
 interface Props {
   name: string;
   avatarUrl?: string | null;
   verified?: boolean;
+  operatorId: string;
 }
 
-export function CaptainCard({ name, avatarUrl, verified }: Props) {
+export function CaptainCard({ name, avatarUrl, verified, operatorId }: Props) {
+  const [open, setOpen] = useState(false);
   const initials = (name || "C")
     .split(/\s+/)
     .map((p) => p[0])
@@ -34,13 +37,16 @@ export function CaptainCard({ name, avatarUrl, verified }: Props) {
           ID &amp; credentials verified
         </div>
       )}
-      <Button
-        className="mt-4 w-full"
-        onClick={() => toast.info("Contact captain — available after approval")}
-      >
+      <Button className="mt-4 w-full" onClick={() => setOpen(true)}>
         <MessageCircle className="mr-2 h-4 w-4" />
         Contact captain
       </Button>
+      <ContactCaptainDialog
+        open={open}
+        onOpenChange={setOpen}
+        operatorId={operatorId}
+        captainName={name}
+      />
     </div>
   );
 }
