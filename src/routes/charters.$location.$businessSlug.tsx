@@ -93,6 +93,15 @@ function OperatorListingPage() {
     initialData: initial,
   });
 
+  const photosFetcher = useServerFn(getOperatorPhotosPublic);
+  const operatorId =
+    data && data.kind === "ok" ? data.operator?.id ?? null : null;
+  const { data: photos = [], isLoading: photosLoading } = useQuery({
+    queryKey: ["public-operator-photos", operatorId],
+    queryFn: () => photosFetcher({ data: { operatorId: operatorId! } }),
+    enabled: !!operatorId,
+  });
+
   if (!data || data.kind !== "ok") return null;
 
   const op = data.operator;
@@ -111,6 +120,9 @@ function OperatorListingPage() {
             title={op?.display_name ?? ""}
             location={op?.default_departure_address || op?.location || ""}
             verified={approved}
+            canManage={false}
+            photos={photos}
+            photosLoading={photosLoading}
           />
         </div>
 
