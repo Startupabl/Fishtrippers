@@ -351,7 +351,7 @@ function Index() {
               className="text-3xl text-foreground"
               style={{ fontFamily: "Lora, ui-serif, Georgia, serif" }}
             >
-              Featured Charters
+              Featured Charters & Guides
             </h2>
             {featuredQuery.isLoading ? (
               <div className="mt-6 grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
