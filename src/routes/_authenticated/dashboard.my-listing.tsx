@@ -166,6 +166,13 @@ function MyListingPage() {
     queryFn: () => fetchAvail(),
   });
 
+  const fetchUndersold = useServerFn(listUndersoldSharedTrips);
+  const undersoldQ = useQuery({
+    queryKey: ["my-undersold-shared-trips"],
+    queryFn: () => fetchUndersold(),
+    refetchInterval: 5 * 60 * 1000,
+  });
+
   const operator = operatorQ.data?.operator ?? null;
   const trips = tripsQ.data?.trips ?? [];
   const isPayoutReady = !!stripeQ.data?.is_payout_ready;
@@ -174,6 +181,7 @@ function MyListingPage() {
   );
   const hasCalendarEntry = (availQ.data?.length ?? 0) > 0;
   const showCalendarBanner = hasInstantTrip && !hasCalendarEntry;
+  const undersold = undersoldQ.data ?? [];
 
   const [editing, setEditing] = useState<TripEditorState | null>(null);
   const [dialogOpen, setDialogOpen] = useState(false);
