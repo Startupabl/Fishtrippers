@@ -1,16 +1,15 @@
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useServerFn } from "@tanstack/react-start";
 import { useQuery } from "@tanstack/react-query";
-import { useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import {
   Search,
   MapPin,
   Calendar,
   Users,
-  SlidersHorizontal,
-  ArrowUpDown,
   Zap,
   ChevronDown,
+  X,
 } from "lucide-react";
 import { z } from "zod";
 import { fallback, zodValidator } from "@tanstack/zod-adapter";
@@ -26,7 +25,21 @@ import {
   PopoverTrigger,
 } from "@/components/ui/popover";
 import { LocationAutocomplete } from "@/components/search/LocationAutocomplete";
+import { Checkbox } from "@/components/ui/checkbox";
+import { Slider } from "@/components/ui/slider";
 import { cn } from "@/lib/utils";
+import {
+  DURATION_OPTIONS,
+  DEPARTURE_TIME_OPTIONS,
+  PRICE_PRESETS,
+  PRICE_MIN,
+  PRICE_MAX,
+  PRICE_STEP,
+  TECHNIQUE_OPTIONS,
+  SPECIES_OPTIONS,
+  csvToList,
+  listToCsv,
+} from "@/lib/trip-filters";
 
 const searchSchema = z.object({
   q: fallback(z.string(), "").default(""),
@@ -39,8 +52,9 @@ const searchSchema = z.object({
   adults: fallback(z.number().int().min(1).max(20), 2).default(2),
   children: fallback(z.number().int().min(0).max(20), 0).default(0),
   duration: fallback(z.string(), "").default(""),
-  priceRange: fallback(z.string(), "").default(""),
   departureTime: fallback(z.string(), "").default(""),
+  priceMin: fallback(z.number().int().min(0).max(PRICE_MAX), PRICE_MIN).default(PRICE_MIN),
+  priceMax: fallback(z.number().int().min(0).max(PRICE_MAX), PRICE_MAX).default(PRICE_MAX),
   technique: fallback(z.string(), "").default(""),
   species: fallback(z.string(), "").default(""),
 });
@@ -66,8 +80,13 @@ function SearchPage() {
   const navigate = useNavigate();
   const search = Route.useSearch();
 
-  // Local input state — only commit to URL on Search / Enter / pick
   const [cityInput, setCityInput] = useState(search.city);
+
+  const techniqueList = useMemo(() => csvToList(search.technique), [search.technique]);
+  const speciesList = useMemo(() => csvToList(search.species), [search.species]);
+  const priceMinActive = search.priceMin > PRICE_MIN;
+  const priceMaxActive = search.priceMax < PRICE_MAX;
+  const priceActive = priceMinActive || priceMaxActive;
 
   const searchFn = useServerFn(searchOperatorsServer);
   const liveQuery = useQuery({
@@ -79,6 +98,12 @@ function SearchPage() {
       search.country,
       search.category,
       search.instantBook,
+      search.duration,
+      search.departureTime,
+      search.priceMin,
+      search.priceMax,
+      search.technique,
+      search.species,
     ],
     queryFn: () =>
       searchFn({
@@ -89,6 +114,12 @@ function SearchPage() {
           country: search.country || null,
           category: search.category || null,
           instantBook: search.instantBook || null,
+          durationMinutes: search.duration ? Number(search.duration) * 60 : null,
+          departureTime: search.departureTime || null,
+          priceMinMinor: priceMinActive ? search.priceMin * 100 : null,
+          priceMaxMinor: priceMaxActive ? search.priceMax * 100 : null,
+          techniques: techniqueList.length ? techniqueList : null,
+          species: speciesList.length ? speciesList : null,
         },
       }),
   });
@@ -104,13 +135,61 @@ function SearchPage() {
   }
 
   function submitTopBar() {
-    // Free-text fallback: treat raw input as a city filter, clear state/country.
     setSearch({ city: cityInput, state: "", country: "" });
   }
+
+  function clearAllTripFilters() {
+    setSearch({
+      duration: "",
+      departureTime: "",
+      priceMin: PRICE_MIN,
+      priceMax: PRICE_MAX,
+      technique: "",
+      species: "",
+    });
+  }
+
+  const anyTripFilter =
+    !!search.duration ||
+    !!search.departureTime ||
+    priceActive ||
+    techniqueList.length > 0 ||
+    speciesList.length > 0;
 
   const activeCategoryLabel =
     FISHING_ENVIRONMENTS.find((e) => e.id === search.category)?.label ??
     "All categories";
+
+  const durationLabel = search.duration
+    ? DURATION_OPTIONS.find((o) => o.value === search.duration)?.label ?? "Duration"
+    : "Duration";
+
+  const departureLabel = search.departureTime
+    ? DEPARTURE_TIME_OPTIONS.find((o) => o.value === search.departureTime)?.label ??
+      "Departure Time"
+    : "Departure Time";
+
+  const priceLabel = (() => {
+    if (!priceActive) return "Price";
+    const min = `$${search.priceMin.toLocaleString()}`;
+    if (search.priceMax >= PRICE_MAX) return `${min}+`;
+    return `${min} – $${search.priceMax.toLocaleString()}`;
+  })();
+
+  const techniqueLabel =
+    techniqueList.length === 0
+      ? "Fishing Technique"
+      : techniqueList.length === 1
+        ? TECHNIQUE_OPTIONS.find((o) => o.slug === techniqueList[0])?.label ??
+          "1 selected"
+        : `${techniqueList.length} selected`;
+
+  const speciesLabel =
+    speciesList.length === 0
+      ? "Target Fish"
+      : speciesList.length === 1
+        ? SPECIES_OPTIONS.find((o) => o.slug === speciesList[0])?.label ?? "1 selected"
+        : `${speciesList.length} selected`;
 
   const locationLabel = [search.city, search.state].filter(Boolean).join(", ");
   const headerLabel = locationLabel
@@ -202,9 +281,6 @@ function SearchPage() {
 
       {/* FILTER PILL ROW */}
       <section className="mt-4 flex flex-wrap items-center gap-2">
-        <FilterPill label="Sort by Recommended" icon={<ArrowUpDown className="size-3.5" />} disabled />
-        <FilterPill label="Filters" icon={<SlidersHorizontal className="size-3.5" />} disabled />
-
         <button
           type="button"
           onClick={() => setSearch({ instantBook: !search.instantBook })}
@@ -254,11 +330,149 @@ function SearchPage() {
           </div>
         </PopoverPill>
 
-        <FilterPill label="Duration" comingSoon />
-        <FilterPill label="Price Range" comingSoon />
-        <FilterPill label="Departure Time" comingSoon />
-        <FilterPill label="Fishing Technique" comingSoon />
-        <FilterPill label="Target Fish" comingSoon />
+        {/* DURATION */}
+        <PopoverPill
+          label={durationLabel}
+          active={!!search.duration}
+          onClear={search.duration ? () => setSearch({ duration: "" }) : undefined}
+        >
+          <div className="w-52 p-2 max-h-72 overflow-y-auto">
+            <button
+              type="button"
+              onClick={() => setSearch({ duration: "" })}
+              className={cn(
+                "block w-full rounded-md px-3 py-1.5 text-left text-sm",
+                !search.duration
+                  ? "bg-info/15 font-medium text-info"
+                  : "text-foreground hover:bg-accent",
+              )}
+            >
+              Any duration
+            </button>
+            {DURATION_OPTIONS.map((opt) => (
+              <button
+                key={opt.value}
+                type="button"
+                onClick={() => setSearch({ duration: opt.value })}
+                className={cn(
+                  "block w-full rounded-md px-3 py-1.5 text-left text-sm",
+                  search.duration === opt.value
+                    ? "bg-info/15 font-medium text-info"
+                    : "text-foreground hover:bg-accent",
+                )}
+              >
+                {opt.label}
+              </button>
+            ))}
+          </div>
+        </PopoverPill>
+
+        {/* DEPARTURE TIME */}
+        <PopoverPill
+          label={departureLabel}
+          active={!!search.departureTime}
+          onClear={
+            search.departureTime ? () => setSearch({ departureTime: "" }) : undefined
+          }
+        >
+          <div className="w-52 p-2 max-h-72 overflow-y-auto">
+            <button
+              type="button"
+              onClick={() => setSearch({ departureTime: "" })}
+              className={cn(
+                "block w-full rounded-md px-3 py-1.5 text-left text-sm",
+                !search.departureTime
+                  ? "bg-info/15 font-medium text-info"
+                  : "text-foreground hover:bg-accent",
+              )}
+            >
+              Any time
+            </button>
+            {DEPARTURE_TIME_OPTIONS.map((opt) => (
+              <button
+                key={opt.value}
+                type="button"
+                onClick={() => setSearch({ departureTime: opt.value })}
+                className={cn(
+                  "block w-full rounded-md px-3 py-1.5 text-left text-sm",
+                  search.departureTime === opt.value
+                    ? "bg-info/15 font-medium text-info"
+                    : "text-foreground hover:bg-accent",
+                )}
+              >
+                {opt.label}
+              </button>
+            ))}
+          </div>
+        </PopoverPill>
+
+        {/* PRICE */}
+        <PopoverPill
+          label={priceLabel}
+          active={priceActive}
+          onClear={
+            priceActive
+              ? () => setSearch({ priceMin: PRICE_MIN, priceMax: PRICE_MAX })
+              : undefined
+          }
+        >
+          <PricePopover
+            min={search.priceMin}
+            max={search.priceMax}
+            onChange={(min, max) => setSearch({ priceMin: min, priceMax: max })}
+          />
+        </PopoverPill>
+
+        {/* TECHNIQUE */}
+        <PopoverPill
+          label={techniqueLabel}
+          active={techniqueList.length > 0}
+          onClear={
+            techniqueList.length > 0 ? () => setSearch({ technique: "" }) : undefined
+          }
+        >
+          <CheckboxList
+            options={TECHNIQUE_OPTIONS}
+            selected={techniqueList}
+            onToggle={(slug) => {
+              const next = techniqueList.includes(slug)
+                ? techniqueList.filter((s) => s !== slug)
+                : [...techniqueList, slug];
+              setSearch({ technique: listToCsv(next) });
+            }}
+            onClear={() => setSearch({ technique: "" })}
+          />
+        </PopoverPill>
+
+        {/* TARGET FISH */}
+        <PopoverPill
+          label={speciesLabel}
+          active={speciesList.length > 0}
+          onClear={speciesList.length > 0 ? () => setSearch({ species: "" }) : undefined}
+        >
+          <CheckboxList
+            options={SPECIES_OPTIONS}
+            selected={speciesList}
+            onToggle={(slug) => {
+              const next = speciesList.includes(slug)
+                ? speciesList.filter((s) => s !== slug)
+                : [...speciesList, slug];
+              setSearch({ species: listToCsv(next) });
+            }}
+            onClear={() => setSearch({ species: "" })}
+            searchable
+          />
+        </PopoverPill>
+
+        {anyTripFilter && (
+          <button
+            type="button"
+            onClick={clearAllTripFilters}
+            className="ml-1 text-sm font-medium text-muted-foreground underline-offset-2 hover:text-foreground hover:underline"
+          >
+            Clear all
+          </button>
+        )}
       </section>
 
       {/* RESULTS HEADER */}
@@ -296,55 +510,15 @@ function SearchPage() {
   );
 }
 
-function FilterPill({
-  label,
-  icon,
-  disabled,
-  comingSoon,
-}: {
-  label: string;
-  icon?: React.ReactNode;
-  disabled?: boolean;
-  comingSoon?: boolean;
-}) {
-  if (comingSoon) {
-    return (
-      <Popover>
-        <PopoverTrigger asChild>
-          <button
-            type="button"
-            className="inline-flex items-center gap-1.5 rounded-full border border-border bg-card px-3.5 py-1.5 text-sm font-medium text-foreground hover:bg-accent"
-          >
-            {label}
-            <ChevronDown className="size-3.5 text-muted-foreground" />
-          </button>
-        </PopoverTrigger>
-        <PopoverContent className="w-56 p-3 text-sm text-muted-foreground">
-          Coming soon — this filter is still being wired up.
-        </PopoverContent>
-      </Popover>
-    );
-  }
-  return (
-    <button
-      type="button"
-      disabled={disabled}
-      className="inline-flex items-center gap-1.5 rounded-full border border-border bg-card px-3.5 py-1.5 text-sm font-medium text-foreground hover:bg-accent disabled:cursor-default disabled:opacity-90"
-    >
-      {icon}
-      {label}
-      {!icon && <ChevronDown className="size-3.5 text-muted-foreground" />}
-    </button>
-  );
-}
-
 function PopoverPill({
   label,
   active,
+  onClear,
   children,
 }: {
   label: string;
   active?: boolean;
+  onClear?: () => void;
   children: React.ReactNode;
 }) {
   return (
@@ -360,13 +534,159 @@ function PopoverPill({
           )}
         >
           {label}
-          <ChevronDown className="size-3.5" />
+          {active && onClear ? (
+            <span
+              role="button"
+              aria-label={`Clear ${label}`}
+              onClick={(e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                onClear();
+              }}
+              className="ml-0.5 inline-flex size-4 items-center justify-center rounded-full hover:bg-info-foreground/20"
+            >
+              <X className="size-3" />
+            </span>
+          ) : (
+            <ChevronDown className="size-3.5" />
+          )}
         </button>
       </PopoverTrigger>
       <PopoverContent align="start" className="p-0">
         {children}
       </PopoverContent>
     </Popover>
+  );
+}
+
+function PricePopover({
+  min,
+  max,
+  onChange,
+}: {
+  min: number;
+  max: number;
+  onChange: (min: number, max: number) => void;
+}) {
+  const [local, setLocal] = useState<[number, number]>([min, max]);
+  // Sync local state when upstream URL state changes (e.g. external Clear).
+  useEffect(() => {
+    setLocal([min, max]);
+  }, [min, max]);
+
+  function commit(next: [number, number]) {
+    setLocal(next);
+    onChange(next[0], next[1]);
+  }
+
+  return (
+    <div className="w-72 p-4">
+      <div className="mb-3 grid grid-cols-2 gap-2">
+        {PRICE_PRESETS.map((preset) => {
+          const active = min === preset.min && max === preset.max;
+          return (
+            <button
+              key={preset.id}
+              type="button"
+              onClick={() => commit([preset.min, preset.max])}
+              className={cn(
+                "rounded-full border px-3 py-1.5 text-xs font-medium transition-colors",
+                active
+                  ? "border-info bg-info text-info-foreground"
+                  : "border-border bg-card text-foreground hover:bg-accent",
+              )}
+            >
+              {preset.label}
+            </button>
+          );
+        })}
+      </div>
+      <Slider
+        value={local}
+        min={PRICE_MIN}
+        max={PRICE_MAX}
+        step={PRICE_STEP}
+        minStepsBetweenThumbs={1}
+        onValueChange={(v) => setLocal([v[0], v[1]] as [number, number])}
+        onValueCommit={(v) => commit([v[0], v[1]] as [number, number])}
+        className="my-4"
+      />
+      <div className="flex items-center justify-between text-xs text-muted-foreground">
+        <span>${local[0].toLocaleString()}</span>
+        <span>
+          ${local[1].toLocaleString()}
+          {local[1] >= PRICE_MAX ? "+" : ""}
+        </span>
+      </div>
+    </div>
+  );
+}
+
+
+
+
+function CheckboxList({
+  options,
+  selected,
+  onToggle,
+  onClear,
+  searchable,
+}: {
+  options: { slug: string; label: string }[];
+  selected: string[];
+  onToggle: (slug: string) => void;
+  onClear: () => void;
+  searchable?: boolean;
+}) {
+  const [q, setQ] = useState("");
+  const filtered = useMemo(() => {
+    if (!searchable || !q.trim()) return options;
+    const needle = q.trim().toLowerCase();
+    return options.filter((o) => o.label.toLowerCase().includes(needle));
+  }, [options, q, searchable]);
+
+  return (
+    <div className="w-64 p-2">
+      {searchable && (
+        <input
+          type="text"
+          value={q}
+          onChange={(e) => setQ(e.target.value)}
+          placeholder="Search species…"
+          className="mb-2 w-full rounded-md border border-border bg-background px-2.5 py-1.5 text-sm outline-none focus:border-info"
+        />
+      )}
+      <ul className="max-h-64 overflow-y-auto">
+        {filtered.map((opt) => {
+          const checked = selected.includes(opt.slug);
+          return (
+            <li key={opt.slug}>
+              <label className="flex cursor-pointer items-center gap-2 rounded-md px-2 py-1.5 hover:bg-accent">
+                <Checkbox
+                  checked={checked}
+                  onCheckedChange={() => onToggle(opt.slug)}
+                />
+                <span className="text-sm text-foreground">{opt.label}</span>
+              </label>
+            </li>
+          );
+        })}
+        {filtered.length === 0 && (
+          <li className="px-2 py-3 text-center text-xs text-muted-foreground">
+            No matches
+          </li>
+        )}
+      </ul>
+      {selected.length > 0 && (
+        <button
+          type="button"
+          onClick={onClear}
+          className="mt-2 w-full rounded-md border border-border px-2 py-1.5 text-xs font-medium text-muted-foreground hover:bg-accent"
+        >
+          Clear selection
+        </button>
+      )}
+    </div>
   );
 }
 

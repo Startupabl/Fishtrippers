@@ -35,6 +35,13 @@ const searchSchema = z.object({
   instantBook: z.boolean().optional().nullable(),
   limit: z.number().int().min(1).max(60).optional().nullable(),
   featuredOnly: z.boolean().optional().nullable(),
+  // Trip-level filters (all optional)
+  durationMinutes: z.number().int().positive().optional().nullable(),
+  departureTime: z.string().regex(/^\d{2}:\d{2}$/).optional().nullable(),
+  priceMinMinor: z.number().int().nonnegative().optional().nullable(),
+  priceMaxMinor: z.number().int().nonnegative().optional().nullable(),
+  techniques: z.array(z.string()).optional().nullable(),
+  species: z.array(z.string()).optional().nullable(),
 });
 
 const resolvePlacePublicSchema = z.object({ placeId: z.string().min(1) });
@@ -47,7 +54,6 @@ function formatPrice(minor: number, currency: string): string {
       currency,
       maximumFractionDigits: major % 1 === 0 ? 0 : 2,
     }).format(major);
-    // Intl returns "$200.00" for USD; prefix region tag like "US"
     if (currency === "USD") return `From US ${formatted}`;
     return `From ${formatted}`;
   } catch {
@@ -64,6 +70,16 @@ export const searchOperatorsServer = createServerFn({ method: "POST" })
       { auth: { storage: undefined, persistSession: false, autoRefreshToken: false } },
     );
 
+    const hasTripFilter =
+      data.durationMinutes != null ||
+      (data.departureTime && data.departureTime.length > 0) ||
+      data.priceMinMinor != null ||
+      data.priceMaxMinor != null ||
+      (data.techniques && data.techniques.length > 0) ||
+      (data.species && data.species.length > 0);
+
+    // Use !inner when filtering on trip fields so operators with no matching trip are excluded.
+    const tripJoin = hasTripFilter ? "trip_packages!inner" : "trip_packages";
 
     let query = supabase
       .from("operators")
@@ -73,7 +89,7 @@ export const searchOperatorsServer = createServerFn({ method: "POST" })
         default_departure_city, default_departure_state, default_departure_country,
         cover_image_url, booking_type, fishing_environments, featured, priority_order, created_at,
         vessels ( length_ft, max_passenger_capacity, boat_type_id, boat_types ( icon_url, subcategory_name ) ),
-        trip_packages ( price_minor, currency, status )
+        ${tripJoin} ( price_minor, currency, status, duration_minutes, start_time, techniques, target_species )
       `,
       )
       .eq("moderation_status", "approved")
@@ -91,6 +107,28 @@ export const searchOperatorsServer = createServerFn({ method: "POST" })
       query = query.contains("fishing_environments", [data.category.trim()]);
     if (data.instantBook) query = query.eq("booking_type", "instant");
 
+    // Trip-level filters via PostgREST nested filter syntax.
+    if (hasTripFilter) {
+      if (data.durationMinutes != null) {
+        query = query.eq("trip_packages.duration_minutes", data.durationMinutes);
+      }
+      if (data.departureTime) {
+        query = query.eq("trip_packages.start_time", `${data.departureTime}:00`);
+      }
+      if (data.priceMinMinor != null) {
+        query = query.gte("trip_packages.price_minor", data.priceMinMinor);
+      }
+      if (data.priceMaxMinor != null) {
+        query = query.lte("trip_packages.price_minor", data.priceMaxMinor);
+      }
+      if (data.techniques && data.techniques.length > 0) {
+        query = query.overlaps("trip_packages.techniques", data.techniques);
+      }
+      if (data.species && data.species.length > 0) {
+        query = query.overlaps("trip_packages.target_species", data.species);
+      }
+    }
+
     query = query
       .order("featured", { ascending: false })
       .order("priority_order", { ascending: false })
@@ -104,7 +142,6 @@ export const searchOperatorsServer = createServerFn({ method: "POST" })
       const vessel = Array.isArray(row.vessels) ? row.vessels[0] : row.vessels;
       const trips: Array<{ price_minor: number; currency: string; status: string }> =
         row.trip_packages ?? [];
-      // prefer active trips, fall back to draft so newly approved listings still surface a price
       const active = trips.filter((t) => t.status === "active");
       const candidates = active.length > 0 ? active : trips;
       let cheapest: { price_minor: number; currency: string } | null = null;
@@ -150,8 +187,6 @@ export const searchOperatorsServer = createServerFn({ method: "POST" })
   });
 
 // Public Google Place resolver (no auth) — used by homepage hero and /search bar.
-// Server-side call through the connector gateway; the browser only sees the
-// extracted address components, never the API key.
 export const resolvePlacePublic = createServerFn({ method: "POST" })
   .inputValidator((d: z.input<typeof resolvePlacePublicSchema>) =>
     resolvePlacePublicSchema.parse(d),
@@ -204,4 +239,3 @@ export const resolvePlacePublic = createServerFn({ method: "POST" })
       country,
     };
   });
-
