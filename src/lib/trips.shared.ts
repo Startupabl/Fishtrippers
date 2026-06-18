@@ -83,5 +83,14 @@ export type TripInput = z.infer<typeof tripInputSchema>;
 export const deleteTripSchema = z.object({ id: z.string().uuid() });
 export type DeleteTripInput = z.infer<typeof deleteTripSchema>;
 
+export const tripStatusSchema = z.enum(["draft", "active", "archived"]);
+export type TripStatus = z.infer<typeof tripStatusSchema>;
+
+export const setTripStatusSchema = z.object({
+  id: z.string().uuid(),
+  status: tripStatusSchema,
+});
+export type SetTripStatusInput = z.infer<typeof setTripStatusSchema>;
+
 export const resolvePlaceSchema = z.object({ placeId: z.string().min(1) });
 export type ResolvePlaceInput = z.infer<typeof resolvePlaceSchema>;
