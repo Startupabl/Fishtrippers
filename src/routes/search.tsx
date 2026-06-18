@@ -30,7 +30,7 @@ import { Slider } from "@/components/ui/slider";
 import { cn } from "@/lib/utils";
 import {
   DURATION_BUCKETS,
-  DEPARTURE_TIME_OPTIONS,
+  DEPARTURE_BUCKETS,
   PRICE_PRESETS,
   PRICE_MIN,
   PRICE_MAX,
@@ -118,7 +118,10 @@ function SearchPage() {
             DURATION_BUCKETS.find((b) => b.value === search.duration)?.minMinutes ?? null,
           durationMaxMinutes:
             DURATION_BUCKETS.find((b) => b.value === search.duration)?.maxMinutes ?? null,
-          departureTime: search.departureTime || null,
+          departureStart:
+            DEPARTURE_BUCKETS.find((b) => b.value === search.departureTime)?.startTime ?? null,
+          departureEnd:
+            DEPARTURE_BUCKETS.find((b) => b.value === search.departureTime)?.endTime ?? null,
           priceMinMinor: priceMinActive ? search.priceMin * 100 : null,
           priceMaxMinor: priceMaxActive ? search.priceMax * 100 : null,
           techniques: techniqueList.length ? techniqueList : null,
@@ -168,7 +171,7 @@ function SearchPage() {
     : "Duration";
 
   const departureLabel = search.departureTime
-    ? DEPARTURE_TIME_OPTIONS.find((o) => o.value === search.departureTime)?.label ??
+    ? DEPARTURE_BUCKETS.find((o) => o.value === search.departureTime)?.label ??
       "Departure Time"
     : "Departure Time";
 
@@ -391,7 +394,7 @@ function SearchPage() {
             >
               Any time
             </button>
-            {DEPARTURE_TIME_OPTIONS.map((opt) => (
+            {DEPARTURE_BUCKETS.map((opt) => (
               <button
                 key={opt.value}
                 type="button"
