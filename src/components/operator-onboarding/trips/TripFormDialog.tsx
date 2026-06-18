@@ -256,7 +256,47 @@ export function TripFormDialog({ open, onOpenChange, initial }: Props) {
         </DialogHeader>
 
         <div className="space-y-6">
+          {/* 0. Booking type (charter vs shared) */}
+          <section className="space-y-3 rounded-xl border-2 border-primary/20 bg-primary/5 p-4">
+            <h3 className="text-sm font-semibold uppercase tracking-wide text-primary">
+              Booking type
+            </h3>
+            <div className="grid gap-3 sm:grid-cols-2">
+              {CHARTER_TYPE_OPTIONS.map((opt) => {
+                const selected = form.charter_type === opt.value;
+                return (
+                  <button
+                    key={opt.value}
+                    type="button"
+                    onClick={() =>
+                      setForm((f) => ({
+                        ...f,
+                        charter_type: opt.value,
+                        ...(opt.value === "shared_tour"
+                          ? {
+                              per_extra_minor: 0,
+                              seats_available:
+                                f.seats_available ?? f.max_party_size ?? null,
+                            }
+                          : {}),
+                      }))
+                    }
+                    className={`rounded-lg border p-4 text-left transition-colors ${
+                      selected
+                        ? "border-primary bg-background ring-2 ring-primary"
+                        : "border-border bg-background hover:border-primary/40"
+                    }`}
+                  >
+                    <div className="text-base font-semibold">{opt.label}</div>
+                    <div className="mt-1 text-xs text-muted-foreground">{opt.hint}</div>
+                  </button>
+                );
+              })}
+            </div>
+          </section>
+
           {/* 1. Title */}
+
           <div className="space-y-2">
             <Label htmlFor="trip-title">Trip title</Label>
             <Input
