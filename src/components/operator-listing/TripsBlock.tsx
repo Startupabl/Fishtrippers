@@ -1,12 +1,12 @@
 import { useId, useState } from "react";
 import {
   Plus,
-  MapPin,
   Minus,
   
   HelpCircle,
   ChevronDown,
 } from "lucide-react";
+
 import { HowBookingsWorkDialog } from "@/components/HowBookingsWorkDialog";
 import { Link } from "@tanstack/react-router";
 import { Button } from "@/components/ui/button";
@@ -133,28 +133,40 @@ function TripCard({
               {formatCurrency(baseDisplay, display)}
             </div>
           </div>
-          {/* Bottom row: species + capacity */}
-          <div className="mt-1 flex items-center justify-between gap-3">
-            <p className="min-w-0 truncate text-sm text-muted-foreground">
-              {speciesPreview ? `Fishing for: ${speciesPreview}` : ""}
-            </p>
-            {maxParty > 0 && (
-              <p className="whitespace-nowrap text-sm text-muted-foreground">
-                Shared trip: Up to {maxParty} guests
+          {/* Experience + capacity */}
+          {(envs.length > 0 || techs.length > 0 || maxParty > 0) && (
+            <div className="mt-1 flex items-center justify-between gap-3">
+              <p className="min-w-0 truncate text-sm text-muted-foreground">
+                {(envs.length > 0 || techs.length > 0)
+                  ? `Experience: ${[
+                      ...envs.map((e) => fishingEnvironmentLabel(e)),
+                      ...techs,
+                    ].filter(Boolean).join(", ")}`
+                  : ""}
               </p>
-            )}
-          </div>
-          {(envs.length > 0 || techs.length > 0) && (
+              {maxParty > 0 && (
+                <p className="whitespace-nowrap text-sm text-muted-foreground">
+                  Shared trip: Up to {maxParty} guests
+                </p>
+              )}
+            </div>
+          )}
+          {speciesPreview && (
             <p className="mt-0.5 truncate text-sm text-muted-foreground">
-              Experience:{" "}
-              {[
-                ...envs.map((e) => fishingEnvironmentLabel(e)),
-                ...techs,
-              ]
-                .filter(Boolean)
-                .join(", ")}
+              Fishing for: {speciesPreview}
             </p>
           )}
+          {formatStartTime(trip.start_time) && (
+            <p className="mt-0.5 truncate text-sm text-muted-foreground">
+              Begins at: {formatStartTime(trip.start_time)}
+            </p>
+          )}
+          {trip.departure_address && (
+            <p className="mt-0.5 truncate text-sm text-muted-foreground">
+              Meet at: {trip.departure_address}
+            </p>
+          )}
+
         </div>
         <ChevronDown
           className={`h-5 w-5 shrink-0 self-center text-muted-foreground transition-transform duration-300 ${
@@ -173,21 +185,13 @@ function TripCard({
       >
         <div className="overflow-hidden">
           <div className="border-t bg-card px-5 pb-6 pt-5 lg:px-6 lg:min-w-[380px]">
-            {/* Description + meeting location */}
-            <div className="space-y-3">
-              {trip.description && (
-                <p className="whitespace-pre-line text-sm text-foreground/80">
-                  {trip.description}
-                </p>
-              )}
+            {/* Description */}
+            {trip.description && (
+              <p className="whitespace-pre-line text-sm text-foreground/80">
+                {trip.description}
+              </p>
+            )}
 
-              {trip.departure_address && (
-                <div className="flex items-start gap-1.5 text-sm text-muted-foreground">
-                  <MapPin className="mt-0.5 h-3.5 w-3.5 shrink-0" />
-                  <span className="line-clamp-2">{trip.departure_address}</span>
-                </div>
-              )}
-            </div>
 
             {/* Guests stepper */}
             <div className="mt-5">

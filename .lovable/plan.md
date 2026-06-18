@@ -1,24 +1,28 @@
-Refactor the TripCard header and expanded body in `src/components/operator-listing/TripsBlock.tsx` to move category/style info into the header and simplify the body.
+## Plan: Reorder TripCard header lines and move meeting details up
 
-Plan:
+### What we will change
+In `src/components/operator-listing/TripsBlock.tsx`, restructure the collapsed `TripCard` header so the lines below the title read in this order, and move the meeting location out of the expanded body.
 
-1. Add an "Experience" line to the header
-   - Add a third full-width row below the existing `Fishing for:` / capacity row.
-   - Format it as: `Experience: ${environmentLabel}, ${technique}` (using the existing `fishingEnvironmentLabel` helper and raw technique strings).
-   - Use the same `text-sm text-muted-foreground` styling as the `Fishing for:` line.
-   - Hide the line when no environments or techniques are present.
+#### New header layout (below the title/price row)
+| Line | Left side | Right side |
+|------|-----------|------------|
+| 2 | **Experience:** [environment/technique labels] | Shared trip: Up to [maxParty] guests |
+| 3 | **Fishing for:** [species list] | — |
+| 4 | **Begins at:** [formatted start time] | — |
+| 5 | **Meet at:** [departure address] | — |
 
-2. Remove the moved content from the expanded body
-   - Remove the environment and technique chips from the body.
-   - Remove the `Targeting:` species chip section from the body (species remain visible in the header preview only).
+- The "Experience:" line uses the existing `fishingEnvironmentLabel` and technique mapping, conditionally hidden when both environments and techniques are empty.
+- The "Fishing for:" line keeps the existing species preview.
+- The "Begins at:" line uses the existing `formatStartTime` helper and is hidden when `start_time` is missing.
+- The "Meet at:" line uses `trip.departure_address` and is hidden when the address is missing.
+- The capacity text ("Shared trip: Up to X guests") moves from the species line to right-align on the "Experience:" line.
 
-3. Reorder the expanded body
-   - Move the trip `description` to the very top of the expanded body.
-   - Place the departure address / meeting location icon row directly after the description.
-   - Keep the guest stepper, payment summary, currency disclaimer, and CTA buttons unchanged after that.
+#### Expanded body changes
+- Remove the `MapPin` + departure address block from the expanded body.
+- The expanded body will then read: description → guests stepper → payment summary → currency disclaimer → CTA buttons.
 
-4. Scope
-   - Frontend-only refactor; no data shape, pricing math, or currency changes.
-   - No new dependencies.
-
-File changed: `src/components/operator-listing/TripsBlock.tsx`.
+### What we will NOT change
+- No data model or API changes.
+- No pricing, currency, or booking logic changes.
+- No new dependencies.
+- No changes to the species, environment, or technique helpers.
