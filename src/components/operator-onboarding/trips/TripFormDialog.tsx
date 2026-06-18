@@ -539,24 +539,62 @@ export function TripFormDialog({ open, onOpenChange, initial }: Props) {
                 )}
               </div>
               {isShared ? (
-                <div className="space-y-2">
-                  <Label htmlFor="trip-seats">Total Seats Available</Label>
-                  <Input
-                    id="trip-seats"
-                    type="number"
-                    min={1}
-                    max={50}
-                    step="1"
-                    value={form.seats_available ?? ""}
-                    onChange={(e) => {
-                      const n = parseInt(e.target.value, 10);
-                      setForm({ ...form, seats_available: Number.isFinite(n) ? n : null });
-                    }}
-                    placeholder="e.g. 6"
-                  />
-                  <p className="text-xs text-muted-foreground">
-                    Enter the maximum number of individual seats you can sell in total for this shared trip (e.g., 6).
-                  </p>
+                <div className="space-y-4">
+                  <div className="space-y-2">
+                    <Label htmlFor="trip-seats">Total Seats Available</Label>
+                    <Input
+                      id="trip-seats"
+                      type="number"
+                      min={1}
+                      max={50}
+                      step="1"
+                      value={form.seats_available ?? ""}
+                      onChange={(e) => {
+                        const n = parseInt(e.target.value, 10);
+                        setForm({ ...form, seats_available: Number.isFinite(n) ? n : null });
+                      }}
+                      placeholder="e.g. 6"
+                    />
+                    <p className="text-xs text-muted-foreground">
+                      Enter the maximum number of individual seats you can sell in total for this shared trip (e.g., 6).
+                    </p>
+                  </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="trip-min-sail">Minimum Seats to Sail (optional)</Label>
+                    <Input
+                      id="trip-min-sail"
+                      type="number"
+                      min={1}
+                      max={form.seats_available ?? 50}
+                      step="1"
+                      value={form.min_seats_to_sail ?? ""}
+                      onChange={(e) => {
+                        const raw = e.target.value;
+                        if (raw === "") {
+                          setForm({ ...form, min_seats_to_sail: null });
+                          return;
+                        }
+                        const n = parseInt(raw, 10);
+                        setForm({
+                          ...form,
+                          min_seats_to_sail: Number.isFinite(n) ? n : null,
+                        });
+                      }}
+                      placeholder="e.g. 3"
+                    />
+                    <p className="text-xs text-muted-foreground">
+                      If this number isn&apos;t reached 24 hours before the trip,
+                      we&apos;ll warn you on your dashboard so you can decide to
+                      cancel/refund or run it anyway. Leave blank to always run.
+                    </p>
+                    {form.min_seats_to_sail != null &&
+                      form.seats_available != null &&
+                      form.min_seats_to_sail > form.seats_available && (
+                        <p className="text-xs text-destructive">
+                          Minimum can&apos;t exceed total seats ({form.seats_available}).
+                        </p>
+                      )}
+                  </div>
                 </div>
               ) : (
                 <div className="space-y-2">
