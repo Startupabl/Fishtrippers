@@ -1,12 +1,19 @@
-## Update home page hero intro video
+## Replace auth hero image
 
-In `src/routes/index.tsx` (the modal triggered by the "How FishTrippers works" link in the hero):
+The current hero (`src/assets/login-hero.jpg`) is portrait 2:3 (1024×1536) and fills the left half of `/login` and `/register` on desktop via `object-cover`. The uploaded photo is landscape ~1024×768, so it needs to be cropped to portrait before swapping in — otherwise `object-cover` will zoom in heavily and chop off most of the boat scene.
 
-1. **Replace the iframe video source** (line 418) with the new Bunny Stream video:
-   - From: `https://iframe.mediadelivery.net/embed/683194/aa5f7090-2922-4ba8-a2c8-0d11de0d09f2?autoplay=true&loop=false&muted=true&color=FF5733`
-   - To: `https://iframe.mediadelivery.net/embed/683194/4a27c961-f4c0-4b88-b463-e507b24032fa?autoplay=true&loop=false&muted=true&color=FF5733`
-   (Converted your `player.mediadelivery.net/play/...` link to the matching `iframe.mediadelivery.net/embed/...` embed URL, keeping the same playback options.)
+### Steps
 
-2. **Update the dialog title text** (line 400) from `What is FishTrippers?` to `How FishTrippers Works`. Also update the iframe `title` attribute (line 419) to match for accessibility.
+1. Crop the uploaded `test.jfif` to a 2:3 portrait (target 1024×1536, upscaled from the source) centered on the anglers and boat — keep the boat roughly in the middle third, preserve the misty water foreground and the tree line above. Save as JPG.
+2. Upload the cropped JPG via `lovable-assets` and write `src/assets/login-hero.jpg.asset.json` (CDN pointer).
+3. Update `src/components/auth/AuthLayout.tsx`:
+   - Import the new `.asset.json` pointer instead of the local `login-hero.jpg`.
+   - Use `asset.url` as the `<img src>`.
+   - Update the `alt` text to describe the fishing scene (anglers in a boat on a misty river).
+4. Delete the old `src/assets/login-hero.jpg`.
+5. Verify on `/register` at desktop width that the image fills the left column cleanly with the boat visible and no awkward cropping.
 
-No other files need changes — the hero trigger button already reads "How FishTrippers works", and the background hero image stays the same.
+### Notes
+
+- Cropping a 1024×768 source to 2:3 portrait means the output's pixel width will be ~512px wide before upscaling. I'll upscale to 1024×1536 with high-quality resampling so it stays crisp on the auth page; quality will be good but not retina-sharp. If you have a higher-resolution original, sending it would yield a sharper result.
+- No code changes outside `AuthLayout.tsx` and the asset files.
