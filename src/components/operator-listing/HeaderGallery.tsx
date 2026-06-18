@@ -160,7 +160,9 @@ export function HeaderGallery({
             </div>
             <h3 className="text-lg font-semibold">No photos yet</h3>
             <p className="max-w-sm text-sm text-muted-foreground">
-              Add boat photos and catch shots so guests can see what to expect.
+              {canManage
+                ? "Add boat photos and catch shots so guests can see what to expect."
+                : "This charter hasn't added photos yet."}
             </p>
             {canManage && (
               <Button
