@@ -46,7 +46,7 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { DESIGN_SYSTEM } from "@/lib/brand";
 import { getMyOperator } from "@/lib/operators.functions";
-import { listMyTrips, deleteTrip } from "@/lib/trips.functions";
+import { listMyTrips, deleteTrip, setTripStatus } from "@/lib/trips.functions";
 import { getMyStripeIds } from "@/lib/payouts.functions";
 import { listMyHostAvailability } from "@/lib/host-availability.functions";
 import {
