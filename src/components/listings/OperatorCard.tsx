@@ -3,9 +3,10 @@ import { Sailboat, Users, ShieldCheck, MapPin, Zap, Star, Ship, Footprints } fro
 import type { OperatorCardDTO } from "@/lib/operators-search.functions";
 
 export function OperatorCard({ operator }: { operator: OperatorCardDTO }) {
-  const categorySlug = operator.primary_environment ?? "listings";
-  const listingSlug = operator.slug ?? operator.id;
+  const businessSlug = operator.slug ?? operator.id;
+  const location = operator.location_slug ?? "charters";
   const cityLabel = [operator.city, operator.state].filter(Boolean).join(", ");
+
 
   const segments: Array<{ key: string; content: React.ReactNode }> = [];
 

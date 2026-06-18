@@ -57,6 +57,7 @@ import { Route as AdminAdminIndexRouteImport } from './routes/_admin/admin.index
 import { Route as OnboardingLearnerResultsRouteImport } from './routes/onboarding.learner.results'
 import { Route as OnboardingLearnerPaceRouteImport } from './routes/onboarding.learner.pace'
 import { Route as OnboardingLearnerDeviceRouteImport } from './routes/onboarding.learner.device'
+import { Route as ChartersLocationBusinessSlugRouteImport } from './routes/charters.$location.$businessSlug'
 import { Route as CCategorySlugListingSlugRouteImport } from './routes/c.$categorySlug.$listingSlug'
 import { Route as AuthenticatedSettingsSecurityRouteImport } from './routes/_authenticated/settings.security'
 import { Route as AuthenticatedSettingsProfileRouteImport } from './routes/_authenticated/settings.profile'
@@ -345,6 +346,12 @@ const OnboardingLearnerDeviceRoute = OnboardingLearnerDeviceRouteImport.update({
   path: '/device',
   getParentRoute: () => OnboardingLearnerRoute,
 } as any)
+const ChartersLocationBusinessSlugRoute =
+  ChartersLocationBusinessSlugRouteImport.update({
+    id: '/charters/$location/$businessSlug',
+    path: '/charters/$location/$businessSlug',
+    getParentRoute: () => rootRouteImport,
+  } as any)
 const CCategorySlugListingSlugRoute =
   CCategorySlugListingSlugRouteImport.update({
     id: '/c/$categorySlug/$listingSlug',
@@ -685,6 +692,7 @@ export interface FileRoutesByFullPath {
   '/settings/profile': typeof AuthenticatedSettingsProfileRoute
   '/settings/security': typeof AuthenticatedSettingsSecurityRoute
   '/c/$categorySlug/$listingSlug': typeof CCategorySlugListingSlugRoute
+  '/charters/$location/$businessSlug': typeof ChartersLocationBusinessSlugRoute
   '/onboarding/learner/device': typeof OnboardingLearnerDeviceRoute
   '/onboarding/learner/pace': typeof OnboardingLearnerPaceRoute
   '/onboarding/learner/results': typeof OnboardingLearnerResultsRoute
@@ -777,6 +785,7 @@ export interface FileRoutesByTo {
   '/settings/profile': typeof AuthenticatedSettingsProfileRoute
   '/settings/security': typeof AuthenticatedSettingsSecurityRoute
   '/c/$categorySlug/$listingSlug': typeof CCategorySlugListingSlugRoute
+  '/charters/$location/$businessSlug': typeof ChartersLocationBusinessSlugRoute
   '/onboarding/learner/device': typeof OnboardingLearnerDeviceRoute
   '/onboarding/learner/pace': typeof OnboardingLearnerPaceRoute
   '/onboarding/learner/results': typeof OnboardingLearnerResultsRoute
@@ -875,6 +884,7 @@ export interface FileRoutesById {
   '/_authenticated/settings/profile': typeof AuthenticatedSettingsProfileRoute
   '/_authenticated/settings/security': typeof AuthenticatedSettingsSecurityRoute
   '/c/$categorySlug/$listingSlug': typeof CCategorySlugListingSlugRoute
+  '/charters/$location/$businessSlug': typeof ChartersLocationBusinessSlugRoute
   '/onboarding/learner/device': typeof OnboardingLearnerDeviceRoute
   '/onboarding/learner/pace': typeof OnboardingLearnerPaceRoute
   '/onboarding/learner/results': typeof OnboardingLearnerResultsRoute
@@ -972,6 +982,7 @@ export interface FileRouteTypes {
     | '/settings/profile'
     | '/settings/security'
     | '/c/$categorySlug/$listingSlug'
+    | '/charters/$location/$businessSlug'
     | '/onboarding/learner/device'
     | '/onboarding/learner/pace'
     | '/onboarding/learner/results'
@@ -1064,6 +1075,7 @@ export interface FileRouteTypes {
     | '/settings/profile'
     | '/settings/security'
     | '/c/$categorySlug/$listingSlug'
+    | '/charters/$location/$businessSlug'
     | '/onboarding/learner/device'
     | '/onboarding/learner/pace'
     | '/onboarding/learner/results'
@@ -1161,6 +1173,7 @@ export interface FileRouteTypes {
     | '/_authenticated/settings/profile'
     | '/_authenticated/settings/security'
     | '/c/$categorySlug/$listingSlug'
+    | '/charters/$location/$businessSlug'
     | '/onboarding/learner/device'
     | '/onboarding/learner/pace'
     | '/onboarding/learner/results'
@@ -1228,6 +1241,7 @@ export interface RootRouteChildren {
   PPathSlugRoute: typeof PPathSlugRoute
   PagesSlugRoute: typeof PagesSlugRoute
   CCategorySlugListingSlugRoute: typeof CCategorySlugListingSlugRoute
+  ChartersLocationBusinessSlugRoute: typeof ChartersLocationBusinessSlugRoute
   ApiPublicHooksCleanupOldMessagesRoute: typeof ApiPublicHooksCleanupOldMessagesRoute
   ApiPublicStripeWebhookRoute: typeof ApiPublicStripeWebhookRoute
 }
@@ -1569,6 +1583,13 @@ declare module '@tanstack/react-router' {
       fullPath: '/onboarding/learner/device'
       preLoaderRoute: typeof OnboardingLearnerDeviceRouteImport
       parentRoute: typeof OnboardingLearnerRoute
+    }
+    '/charters/$location/$businessSlug': {
+      id: '/charters/$location/$businessSlug'
+      path: '/charters/$location/$businessSlug'
+      fullPath: '/charters/$location/$businessSlug'
+      preLoaderRoute: typeof ChartersLocationBusinessSlugRouteImport
+      parentRoute: typeof rootRouteImport
     }
     '/c/$categorySlug/$listingSlug': {
       id: '/c/$categorySlug/$listingSlug'
@@ -2197,6 +2218,7 @@ const rootRouteChildren: RootRouteChildren = {
   PPathSlugRoute: PPathSlugRoute,
   PagesSlugRoute: PagesSlugRoute,
   CCategorySlugListingSlugRoute: CCategorySlugListingSlugRoute,
+  ChartersLocationBusinessSlugRoute: ChartersLocationBusinessSlugRoute,
   ApiPublicHooksCleanupOldMessagesRoute: ApiPublicHooksCleanupOldMessagesRoute,
   ApiPublicStripeWebhookRoute: ApiPublicStripeWebhookRoute,
 }
