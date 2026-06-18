@@ -144,6 +144,7 @@ export type Database = {
           course_id: string | null
           created_at: string
           currency: string
+          guests: number
           id: string
           learner_id: string
           promo_code_id: string | null
@@ -162,6 +163,7 @@ export type Database = {
           course_id?: string | null
           created_at?: string
           currency?: string
+          guests?: number
           id?: string
           learner_id: string
           promo_code_id?: string | null
@@ -180,6 +182,7 @@ export type Database = {
           course_id?: string | null
           created_at?: string
           currency?: string
+          guests?: number
           id?: string
           learner_id?: string
           promo_code_id?: string | null
@@ -1934,6 +1937,13 @@ export type Database = {
       next_course_id_slug: { Args: never; Returns: string }
       purge_unused_custom_tags: { Args: never; Returns: number }
       slugify: { Args: { _input: string }; Returns: string }
+      trip_seats_booked_by_date: {
+        Args: { _trip_id: string }
+        Returns: {
+          seats_booked: number
+          trip_date: string
+        }[]
+      }
       unaccent: { Args: { "": string }; Returns: string }
     }
     Enums: {
