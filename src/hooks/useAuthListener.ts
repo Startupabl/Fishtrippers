@@ -7,6 +7,7 @@ import { recordSessionIp } from "@/lib/session.functions";
 import { useAuthStore, type AuthUser } from "@/stores/useAuthStore";
 import { useMentorExpressStore } from "@/stores/useMentorExpressStore";
 import { useMentorProfileStore } from "@/stores/useMentorProfileStore";
+import { useOperatorOnboardingStore } from "@/stores/useOperatorOnboardingStore";
 import { useProfileStore } from "@/stores/useProfileStore";
 import { useFavoritesStore } from "@/stores/useFavoritesStore";
 
