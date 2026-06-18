@@ -90,7 +90,14 @@ export function HeaderGallery({
         </div>
       </div>
 
-      {hasPhotos ? (
+      {isLoading ? (
+        <div className="relative grid h-[260px] grid-cols-4 grid-rows-2 gap-2 overflow-hidden rounded-2xl sm:h-[420px]">
+          <div className="col-span-4 row-span-2 animate-pulse bg-muted sm:col-span-2 sm:row-span-2" />
+          {[1, 2, 3, 4].map((i) => (
+            <div key={i} className="hidden animate-pulse bg-muted sm:block" aria-hidden />
+          ))}
+        </div>
+      ) : hasPhotos ? (
         <div className="relative grid h-[260px] grid-cols-4 grid-rows-2 gap-2 overflow-hidden rounded-2xl sm:h-[420px]">
           {/* Big hero tile (first photo) */}
           <button
