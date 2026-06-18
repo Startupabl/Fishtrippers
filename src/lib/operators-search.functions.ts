@@ -38,7 +38,8 @@ const searchSchema = z.object({
   // Trip-level filters (all optional)
   durationMinMinutes: z.number().int().positive().optional().nullable(),
   durationMaxMinutes: z.number().int().positive().optional().nullable(),
-  departureTime: z.string().regex(/^\d{2}:\d{2}$/).optional().nullable(),
+  departureStart: z.string().regex(/^\d{2}:\d{2}:\d{2}$/).optional().nullable(),
+  departureEnd: z.string().regex(/^\d{2}:\d{2}:\d{2}$/).optional().nullable(),
   priceMinMinor: z.number().int().nonnegative().optional().nullable(),
   priceMaxMinor: z.number().int().nonnegative().optional().nullable(),
   techniques: z.array(z.string()).optional().nullable(),
@@ -74,7 +75,8 @@ export const searchOperatorsServer = createServerFn({ method: "POST" })
     const hasTripFilter =
       data.durationMinMinutes != null ||
       data.durationMaxMinutes != null ||
-      (data.departureTime && data.departureTime.length > 0) ||
+      !!data.departureStart ||
+      !!data.departureEnd ||
       data.priceMinMinor != null ||
       data.priceMaxMinor != null ||
       (data.techniques && data.techniques.length > 0) ||
@@ -117,8 +119,11 @@ export const searchOperatorsServer = createServerFn({ method: "POST" })
       if (data.durationMaxMinutes != null) {
         query = query.lte("trip_packages.duration_minutes", data.durationMaxMinutes);
       }
-      if (data.departureTime) {
-        query = query.eq("trip_packages.start_time", `${data.departureTime}:00`);
+      if (data.departureStart) {
+        query = query.gte("trip_packages.start_time", data.departureStart);
+      }
+      if (data.departureEnd) {
+        query = query.lt("trip_packages.start_time", data.departureEnd);
       }
       if (data.priceMinMinor != null) {
         query = query.gte("trip_packages.price_minor", data.priceMinMinor);
