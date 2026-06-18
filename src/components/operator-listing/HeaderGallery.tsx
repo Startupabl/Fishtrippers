@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/button";
 import { listMyOperatorPhotos, type OperatorPhoto } from "@/lib/operator-photos.functions";
 import { GalleryManager } from "./GalleryManager";
 import { LightboxModal } from "./LightboxModal";
+import { ShareDialog } from "./ShareDialog";
 
 interface Props {
   title: string;
@@ -37,6 +38,7 @@ export function HeaderGallery({
   const [managerOpen, setManagerOpen] = useState(false);
   const [lightboxOpen, setLightboxOpen] = useState(false);
   const [lightboxStart, setLightboxStart] = useState(0);
+  const [shareOpen, setShareOpen] = useState(false);
 
   const photoList = (usingProp ? photosProp! : (ownPhotos as OperatorPhoto[])) as OperatorPhoto[];
   const isLoading = usingProp ? !!photosLoadingProp : (canManage && ownLoading);
@@ -75,9 +77,15 @@ export function HeaderGallery({
           </div>
         </div>
         <div className="flex items-center gap-2">
-          <Button variant="outline" size="icon" aria-label="Share">
+          <Button variant="outline" size="icon" aria-label="Share" onClick={() => setShareOpen(true)}>
             <Share2 className="h-4 w-4" />
           </Button>
+          <ShareDialog
+            open={shareOpen}
+            onOpenChange={setShareOpen}
+            title={title}
+            location={location}
+          />
           {canManage && hasPhotos && (
             <Button variant="outline" onClick={() => setManagerOpen(true)}>
               <Camera className="mr-2 h-4 w-4" />
