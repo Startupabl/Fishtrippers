@@ -497,7 +497,9 @@ export function TripFormDialog({ open, onOpenChange, initial }: Props) {
             </h3>
             <div className="grid grid-cols-2 gap-3">
               <div className="space-y-2">
-                <Label htmlFor="trip-price">Base price (1st angler)</Label>
+                <Label htmlFor="trip-price">
+                  {isShared ? "Price per Seat" : "Base price (1st angler)"}
+                </Label>
                 <div className="relative">
                   <span className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-sm text-muted-foreground">
                     {captainCurrency}
@@ -518,26 +520,53 @@ export function TripFormDialog({ open, onOpenChange, initial }: Props) {
                         price_minor: Number.isFinite(n) ? Math.round(n * 100) : null,
                       });
                     }}
-                    placeholder="e.g. 650"
+                    placeholder={isShared ? "e.g. 220" : "e.g. 650"}
                   />
                 </div>
+                {isShared && (
+                  <p className="text-xs text-muted-foreground">
+                    Enter the cost for an individual seat on this trip.
+                  </p>
+                )}
               </div>
-              <div className="space-y-2">
-                <Label htmlFor="trip-party">Max trip size</Label>
-                <Input
-                  id="trip-party"
-                  type="number"
-                  min={1}
-                  max={50}
-                  step="1"
-                  value={form.max_party_size ?? ""}
-                  onChange={(e) => {
-                    const n = parseInt(e.target.value, 10);
-                    setForm({ ...form, max_party_size: Number.isFinite(n) ? n : null });
-                  }}
-                  placeholder="e.g. 6"
-                />
-              </div>
+              {isShared ? (
+                <div className="space-y-2">
+                  <Label htmlFor="trip-seats">Total Seats Available</Label>
+                  <Input
+                    id="trip-seats"
+                    type="number"
+                    min={1}
+                    max={50}
+                    step="1"
+                    value={form.seats_available ?? ""}
+                    onChange={(e) => {
+                      const n = parseInt(e.target.value, 10);
+                      setForm({ ...form, seats_available: Number.isFinite(n) ? n : null });
+                    }}
+                    placeholder="e.g. 6"
+                  />
+                  <p className="text-xs text-muted-foreground">
+                    Enter the maximum number of individual seats you can sell in total for this shared trip (e.g., 6).
+                  </p>
+                </div>
+              ) : (
+                <div className="space-y-2">
+                  <Label htmlFor="trip-party">Max trip size</Label>
+                  <Input
+                    id="trip-party"
+                    type="number"
+                    min={1}
+                    max={50}
+                    step="1"
+                    value={form.max_party_size ?? ""}
+                    onChange={(e) => {
+                      const n = parseInt(e.target.value, 10);
+                      setForm({ ...form, max_party_size: Number.isFinite(n) ? n : null });
+                    }}
+                    placeholder="e.g. 6"
+                  />
+                </div>
+              )}
             </div>
             <div className="space-y-2 max-w-[50%] pr-1.5">
               <Label htmlFor="trip-min-party">Min trip size</Label>
@@ -558,35 +587,38 @@ export function TripFormDialog({ open, onOpenChange, initial }: Props) {
                 The trip requires at least this many guests to run.
               </p>
             </div>
-            <div className="space-y-2">
-              <Label htmlFor="trip-extra">Price per additional angler</Label>
-              <div className="relative">
-                <span className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-sm text-muted-foreground">
-                  {captainCurrency}
-                </span>
-                <Input
-                  id="trip-extra"
-                  type="number"
-                  inputMode="decimal"
-                  min={0}
-                  step="1"
-                  className="pl-14"
-                  value={extraInput}
-                  onChange={(e) => {
-                    setExtraInput(e.target.value);
-                    const n = Number(e.target.value);
-                    setForm({
-                      ...form,
-                      per_extra_minor: Number.isFinite(n) ? Math.round(n * 100) : 0,
-                    });
-                  }}
-                  placeholder="e.g. 75"
-                />
+            {!isShared && (
+              <div className="space-y-2">
+                <Label htmlFor="trip-extra">Price per additional angler</Label>
+                <div className="relative">
+                  <span className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-sm text-muted-foreground">
+                    {captainCurrency}
+                  </span>
+                  <Input
+                    id="trip-extra"
+                    type="number"
+                    inputMode="decimal"
+                    min={0}
+                    step="1"
+                    className="pl-14"
+                    value={extraInput}
+                    onChange={(e) => {
+                      setExtraInput(e.target.value);
+                      const n = Number(e.target.value);
+                      setForm({
+                        ...form,
+                        per_extra_minor: Number.isFinite(n) ? Math.round(n * 100) : 0,
+                      });
+                    }}
+                    placeholder="e.g. 75"
+                  />
+                </div>
+                <p className="text-xs text-muted-foreground">
+                  Charged for each extra guest beyond the first, up to your max party size.
+                </p>
               </div>
-              <p className="text-xs text-muted-foreground">
-                Charged for each extra guest beyond the first, up to your max party size.
-              </p>
-            </div>
+            )}
+
             {totalPreview != null && (() => {
               const depositMinor = Math.round(totalPreview * 0.1);
               const takeHomeMinor = totalPreview - depositMinor;
