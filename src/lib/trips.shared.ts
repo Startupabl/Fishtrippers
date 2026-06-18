@@ -51,6 +51,19 @@ export const BOOKING_TYPE_OPTIONS = [
   { value: "request_to_book", label: "Request to Book", hint: "Buyers send a request; you approve before payment." },
 ] as const;
 
+export const CHARTER_TYPE_OPTIONS = [
+  {
+    value: "private_charter",
+    label: "Private Charter (Book the entire boat)",
+    hint: "One group books the whole boat. Set a base price plus an extra-angler fee.",
+  },
+  {
+    value: "shared_tour",
+    label: "Shared Tour (Book per seat)",
+    hint: "Guests book individual seats. Set a price per seat and total seats available.",
+  },
+] as const;
+
 export const tripInputSchema = z
   .object({
     id: z.string().uuid().nullable().optional(),
@@ -65,6 +78,8 @@ export const tripInputSchema = z
     currency: z.string().default("USD"),
     template_key: z.string().nullable().optional(),
     booking_type: z.enum(["instant_book", "request_to_book"]).default("request_to_book"),
+    charter_type: z.enum(["private_charter", "shared_tour"]).default("private_charter"),
+    seats_available: z.number().int().min(1).max(50).nullable().optional(),
     target_species: z.array(z.string()).min(1, "Pick at least one target fish").max(50),
     environments: z.array(z.string()).min(1, "Pick at least one environment").max(2, "Max 2 environments per trip"),
     techniques: z.array(z.string()).min(1, "Pick at least one fishing style").max(10),
@@ -76,7 +91,12 @@ export const tripInputSchema = z
   .refine((d) => d.min_party_size <= d.max_party_size, {
     message: "Min trip size must be less than or equal to max trip size",
     path: ["min_party_size"],
-  });
+  })
+  .refine(
+    (d) => d.charter_type !== "shared_tour" || (d.seats_available != null && d.seats_available >= 1),
+    { message: "Enter total seats available for this shared trip", path: ["seats_available"] },
+  );
+
 
 export type TripInput = z.infer<typeof tripInputSchema>;
 

@@ -78,6 +78,10 @@ export const upsertTrip = createServerFn({ method: "POST" })
       currency: data.currency ?? "USD",
       template_key: data.template_key ?? null,
       booking_type: data.booking_type ?? "request_to_book",
+      charter_type: data.charter_type ?? "private_charter",
+      seats_available:
+        data.charter_type === "shared_tour" ? data.seats_available ?? null : null,
+
       target_species: data.target_species,
       environments: data.environments,
       techniques: data.techniques,
