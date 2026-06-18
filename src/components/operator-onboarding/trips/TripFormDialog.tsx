@@ -238,10 +238,15 @@ export function TripFormDialog({ open, onOpenChange, initial }: Props) {
     onError: (e: any) => toast.error(e?.message ?? "Could not save trip"),
   });
 
-  const totalPreview =
-    form.price_minor != null && form.max_party_size && form.max_party_size > 0
+  const isShared = form.charter_type === "shared_tour";
+  const totalPreview = isShared
+    ? form.price_minor != null && form.seats_available && form.seats_available > 0
+      ? form.price_minor * form.seats_available
+      : null
+    : form.price_minor != null && form.max_party_size && form.max_party_size > 0
       ? form.price_minor + Math.max(0, form.max_party_size - 1) * (form.per_extra_minor ?? 0)
       : null;
+
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
