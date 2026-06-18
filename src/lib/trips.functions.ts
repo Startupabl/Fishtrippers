@@ -4,9 +4,11 @@ import {
   tripInputSchema,
   deleteTripSchema,
   resolvePlaceSchema,
+  setTripStatusSchema,
   type TripInput,
   type DeleteTripInput,
   type ResolvePlaceInput,
+  type SetTripStatusInput,
 } from "./trips.shared";
 
 async function resolveOperatorId(supabase: any, userId: string) {
