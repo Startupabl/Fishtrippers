@@ -1,35 +1,26 @@
-## Root cause
+## Why the trip isn't showing
 
-`HeaderGallery` always fetches photos via `listMyOperatorPhotos` — a server function gated by `requireSupabaseAuth` that returns the photos of the **viewer's own** operator. For a public visitor on `/charters/:location/:businessSlug`:
+Your trip "Full Day Trip" exists in the database but its `status` is `draft`. The public listing page (`/charters/.../...`) only renders trips with `status = 'active'`, so visitors (and you when logged in as a non-owner) don't see it.
 
-- If logged out → the call 401s → `photos = []` → "No photos yet" placeholder appears.
-- If logged in as a non-owner → returns the visitor's own (or none), never the listing's photos.
+The trip status enum supports: `draft`, `active`, `archived`. New trips currently default to `draft`, and there's no UI yet for the owner to publish/activate a trip — so every trip stays hidden from the public.
 
-The component also defaults `canManage = true`, so the public route renders owner-only controls (Upload / Manage photos).
+## Fix
 
-Additionally, the empty state renders during the initial loading window before the query resolves, causing a flash of "No photos yet".
+1. **`src/lib/trips.functions.ts`** — extend `upsertTrip` to accept an optional `status` field (`'draft' | 'active'`) and persist it on insert/update. Also add a small `setTripStatus({ id, status })` server function so the dashboard can toggle publish without re-submitting the whole form.
 
-A public reader already exists: `getOperatorPhotosPublic({ operatorId })` in `src/lib/operator-photos.functions.ts`, and the `operator_photos` table has a public SELECT policy, so no DB changes are needed.
+2. **`src/lib/trips.shared.ts`** — add `status` to the Zod input schema (optional, defaults to `'draft'` on create; on update preserves existing).
 
-## Changes
+3. **Owner trips dashboard** (the page that lists/edits trips under `_authenticated`) — for each trip row, show its status as a badge and add a primary action:
+   - If `draft` → "Publish" button → calls `setTripStatus({ status: 'active' })`.
+   - If `active` → "Unpublish" button → sets back to `draft`.
+   After success, invalidate the trips query so the badge updates.
 
-**1. `src/routes/charters.$location.$businessSlug.tsx`**
-- After the listing resolves, fetch photos with `getOperatorPhotosPublic({ operatorId: op.id })` via `useQuery` (keyed on operator id).
-- Pass `photos`, `photosLoading`, and `canManage={false}` to `<HeaderGallery />`.
+4. **One-off fix for your existing trip** — flip the current `Full Day Trip` row from `draft` to `active` via a migration so it appears immediately on the public listing without you needing to click publish first.
 
-**2. `src/components/operator-listing/HeaderGallery.tsx`**
-- New props: `photos?: OperatorPhoto[]`, `photosLoading?: boolean`.
-- When `photos` is provided, use it directly and skip the internal `listMyOperatorPhotos` query.
-- When `canManage` is true and no `photos` prop is given (owner contexts: `_authenticated/operator.preview.tsx`, dashboard), keep current behavior using `listMyOperatorPhotos`.
-- Loading UX:
-  - While `photosLoading` (or the internal query is loading), render a skeleton placeholder grid (same dimensions as the photo grid, animated `bg-muted` tiles). Do **not** show the "No photos yet" empty state.
-  - Only render the "No photos yet" empty state when loading has finished and `photos.length === 0`.
-- Hide the owner-only "Upload Gallery Images" button in the empty state when `canManage` is false (public visitor just sees a neutral empty placeholder, or we hide the whole section — we'll keep a neutral empty state without the upload CTA).
+5. No RLS or public-fetch changes needed — `operator-public.functions.ts` already correctly filters to `status='active'`.
 
-**3. No changes** to `_authenticated/operator.preview.tsx` or `dashboard.my-listing.tsx` — they continue to work via the existing `listMyOperatorPhotos` path.
+## Out of scope
 
-## Verification
-
-- Visit a published charter URL while logged out → gallery shows the operator's photos (no flash of "No photos yet"; skeleton briefly, then images).
-- Visit the same URL while logged in as a different user → same result.
-- Owner preview / dashboard still shows the owner's photos and "Manage photos" controls.
+- No changes to the create-listing flow itself.
+- No changes to public listing fetch logic.
+- No archive UI in this pass (status enum supports it but we'll leave it for later).
