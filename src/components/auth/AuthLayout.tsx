@@ -1,5 +1,5 @@
 import type { ReactNode } from "react";
-import loginHeroAsset from "@/assets/login-hero.jpg.asset.json";
+import loginHeroAsset from "@/assets/login-hero.png.asset.json";
 
 interface AuthLayoutProps {
   children: ReactNode;
@@ -18,7 +18,7 @@ export function AuthLayout({ children }: AuthLayoutProps) {
       <aside className="relative hidden lg:block lg:w-1/2">
         <img
           src={loginHeroAsset.url}
-          alt="Anglers fishing from a jon boat on a misty, tree-lined river at dawn."
+          alt="Two anglers fly fishing from a small boat on a calm mountain lake at dawn."
           width={1024}
           height={1536}
           className="absolute inset-0 h-full w-full object-cover"
