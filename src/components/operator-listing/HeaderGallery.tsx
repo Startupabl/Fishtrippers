@@ -13,21 +13,33 @@ interface Props {
   verified: boolean;
   /** When true, owner-only controls (Upload / Manage photos) are shown. */
   canManage?: boolean;
+  /** Pre-fetched photos (public viewer path). When provided, internal owner-only query is skipped. */
+  photos?: OperatorPhoto[];
+  photosLoading?: boolean;
 }
 
-export function HeaderGallery({ title, location, verified, canManage = true }: Props) {
+export function HeaderGallery({
+  title,
+  location,
+  verified,
+  canManage = true,
+  photos: photosProp,
+  photosLoading: photosLoadingProp,
+}: Props) {
+  const usingProp = photosProp !== undefined;
   const list = useServerFn(listMyOperatorPhotos);
-  const { data: photos = [] } = useQuery({
+  const { data: ownPhotos = [], isLoading: ownLoading } = useQuery({
     queryKey: ["operator-photos-mine"],
     queryFn: () => list(),
-    enabled: canManage,
+    enabled: canManage && !usingProp,
   });
 
   const [managerOpen, setManagerOpen] = useState(false);
   const [lightboxOpen, setLightboxOpen] = useState(false);
   const [lightboxStart, setLightboxStart] = useState(0);
 
-  const photoList = photos as OperatorPhoto[];
+  const photoList = (usingProp ? photosProp! : (ownPhotos as OperatorPhoto[])) as OperatorPhoto[];
+  const isLoading = usingProp ? !!photosLoadingProp : (canManage && ownLoading);
   const hasPhotos = photoList.length > 0;
   const grid = photoList.slice(0, 5);
 
