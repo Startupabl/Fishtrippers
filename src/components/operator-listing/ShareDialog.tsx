@@ -1,5 +1,18 @@
 import { useEffect, useMemo, useState } from "react";
-import { Facebook, Mail, MessageCircle, Twitter, Check, Copy } from "lucide-react";
+import { Facebook, Mail, MessageCircle, Check, Copy } from "lucide-react";
+
+function XIcon({ className }: { className?: string }) {
+  return (
+    <svg
+      className={className}
+      viewBox="0 0 24 24"
+      fill="currentColor"
+      aria-hidden="true"
+    >
+      <path d="M18.244 2H21.5l-7.5 8.57L23 22h-6.797l-5.32-6.51L4.8 22H1.54l8.02-9.166L1 2h6.94l4.81 5.95L18.244 2Zm-1.193 18h1.88L7.04 4H5.05l12 16Z" />
+    </svg>
+  );
+}
 import {
   Dialog,
   DialogContent,
@@ -43,8 +56,8 @@ export function ShareDialog({ open, onOpenChange, title, location, url }: ShareD
       href: `https://www.facebook.com/dialog/send?app_id=140586622674265&link=${enc(shareUrl)}&redirect_uri=${enc(shareUrl)}`,
     },
     {
-      label: "X (formerly Twitter)",
-      icon: Twitter,
+      label: "X",
+      icon: XIcon,
       href: `https://twitter.com/intent/tweet?url=${enc(shareUrl)}&text=${enc(message)}`,
     },
     {
