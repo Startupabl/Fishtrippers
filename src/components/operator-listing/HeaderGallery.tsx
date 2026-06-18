@@ -87,7 +87,7 @@ export function HeaderGallery({
             open={shareOpen}
             onOpenChange={setShareOpen}
             title={title}
-            location={location}
+            location={shareLocation ?? location}
           />
           {canManage && hasPhotos && (
             <Button variant="outline" onClick={() => setManagerOpen(true)}>
