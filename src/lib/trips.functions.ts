@@ -198,3 +198,74 @@ export const resolvePlace = createServerFn({ method: "POST" })
       country,
     };
   });
+
+export interface UndersoldSharedTrip {
+  trip_id: string;
+  title: string;
+  trip_date: string; // YYYY-MM-DD
+  seats_booked: number;
+  min_seats_to_sail: number;
+  seats_available: number | null;
+  hours_to_departure: number;
+}
+
+// Lists shared-tour trip dates owned by the caller where the
+// confirmed/pending seats are still below `min_seats_to_sail`, within the
+// next 48 hours. Used to render the "Below minimum to sail" dashboard banner.
+export const listUndersoldSharedTrips = createServerFn({ method: "GET" })
+  .middleware([requireSupabaseAuth])
+  .handler(async ({ context }): Promise<UndersoldSharedTrip[]> => {
+    const { supabase, userId } = context;
+    const { data: op } = await supabase
+      .from("operators")
+      .select("id")
+      .eq("owner_id", userId)
+      .maybeSingle();
+    if (!op) return [];
+
+    const { data: trips, error: tripErr } = await supabase
+      .from("trip_packages")
+      .select("id, title, min_seats_to_sail, seats_available")
+      .eq("operator_id", op.id)
+      .eq("charter_type", "shared_tour")
+      .not("min_seats_to_sail", "is", null);
+    if (tripErr) throw new Error(tripErr.message);
+    if (!trips || trips.length === 0) return [];
+
+    const now = new Date();
+    const horizon = new Date(now.getTime() + 48 * 60 * 60 * 1000);
+    const today = now.toISOString().slice(0, 10);
+    const cutoff = horizon.toISOString().slice(0, 10);
+
+    const results: UndersoldSharedTrip[] = [];
+    for (const t of trips as any[]) {
+      const { data: counts, error: cntErr } = await supabase.rpc(
+        "trip_seats_booked_by_date" as any,
+        { _trip_id: t.id },
+      );
+      if (cntErr) throw new Error(cntErr.message);
+      for (const row of (counts ?? []) as any[]) {
+        const date = row.trip_date as string;
+        if (date < today || date > cutoff) continue;
+        const booked = Number(row.seats_booked ?? 0);
+        const min = Number(t.min_seats_to_sail ?? 0);
+        if (booked >= min) continue;
+        const departureMs = new Date(`${date}T00:00:00Z`).getTime();
+        const hours = Math.max(
+          0,
+          Math.round((departureMs - now.getTime()) / (60 * 60 * 1000)),
+        );
+        results.push({
+          trip_id: t.id,
+          title: t.title,
+          trip_date: date,
+          seats_booked: booked,
+          min_seats_to_sail: min,
+          seats_available: t.seats_available ?? null,
+          hours_to_departure: hours,
+        });
+      }
+    }
+    results.sort((a, b) => a.trip_date.localeCompare(b.trip_date));
+    return results;
+  });
