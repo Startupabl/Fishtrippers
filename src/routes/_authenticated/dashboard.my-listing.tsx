@@ -46,7 +46,7 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { DESIGN_SYSTEM } from "@/lib/brand";
 import { getMyOperator } from "@/lib/operators.functions";
-import { listMyTrips, deleteTrip } from "@/lib/trips.functions";
+import { listMyTrips, deleteTrip, setTripStatus } from "@/lib/trips.functions";
 import { getMyStripeIds } from "@/lib/payouts.functions";
 import { listMyHostAvailability } from "@/lib/host-availability.functions";
 import {
@@ -143,6 +143,7 @@ function MyListingPage() {
   const fetchTrips = useServerFn(listMyTrips);
   const fetchStripeIds = useServerFn(getMyStripeIds);
   const removeTrip = useServerFn(deleteTrip);
+  const updateTripStatus = useServerFn(setTripStatus);
 
   const operatorQ = useQuery({
     queryKey: ["my-operator-full"],
@@ -185,6 +186,16 @@ function MyListingPage() {
       toast.success("Trip deleted");
       qc.invalidateQueries({ queryKey: ["my-trips"] });
       setPendingDelete(null);
+    },
+    onError: (e: Error) => toast.error(e.message),
+  });
+
+  const statusMut = useMutation({
+    mutationFn: (v: { id: string; status: "draft" | "active" }) =>
+      updateTripStatus({ data: v }),
+    onSuccess: (_d, v) => {
+      toast.success(v.status === "active" ? "Trip published" : "Trip unpublished");
+      qc.invalidateQueries({ queryKey: ["my-trips"] });
     },
     onError: (e: Error) => toast.error(e.message),
   });
@@ -479,6 +490,7 @@ function MyListingPage() {
               <TableHeader>
                 <TableRow>
                   <TableHead>Title</TableHead>
+                  <TableHead>Status</TableHead>
                   <TableHead>Start</TableHead>
                   <TableHead>Duration</TableHead>
                   <TableHead>Party</TableHead>
@@ -493,9 +505,21 @@ function MyListingPage() {
                   const startStr = t.start_time
                     ? String(t.start_time).slice(0, 5)
                     : "—";
+                  const isActive = t.status === "active";
                   return (
                   <TableRow key={t.id}>
                     <TableCell className="font-medium">{t.title}</TableCell>
+                    <TableCell>
+                      <span
+                        className={`inline-flex items-center rounded-full px-2 py-0.5 text-xs font-medium ${
+                          isActive
+                            ? "bg-emerald-100 text-emerald-800 dark:bg-emerald-900/40 dark:text-emerald-200"
+                            : "bg-muted text-muted-foreground"
+                        }`}
+                      >
+                        {isActive ? "Published" : "Draft"}
+                      </span>
+                    </TableCell>
                     <TableCell className="text-muted-foreground">{startStr}</TableCell>
                     <TableCell>
                       {t.duration_minutes ? `${t.duration_minutes} min` : "—"}
@@ -522,6 +546,19 @@ function MyListingPage() {
                     <TableCell className="text-right">
 
                       <div className="flex justify-end gap-1">
+                        <Button
+                          size="sm"
+                          variant={isActive ? "outline" : "default"}
+                          disabled={statusMut.isPending}
+                          onClick={() =>
+                            statusMut.mutate({
+                              id: t.id,
+                              status: isActive ? "draft" : "active",
+                            })
+                          }
+                        >
+                          {isActive ? "Unpublish" : "Publish"}
+                        </Button>
                         <Button
                           size="icon"
                           variant="ghost"
