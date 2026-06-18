@@ -95,6 +95,7 @@ const USER_SCOPED_STORAGE_KEYS = [
   "aimentor-chat",
   "aimentor-gift-cards-v1",
   "aimentor-earnings",
+  "operator-onboarding-draft-v2",
 ];
 const LAST_USER_KEY = "aimentor-last-user-id";
 
@@ -107,6 +108,7 @@ function purgeUserScopedStorage() {
   // leak into the new user's session before a reload.
   useMentorExpressStore.getState().reset();
   useMentorProfileStore.getState().reset();
+  useOperatorOnboardingStore.getState().reset();
 }
 
 
