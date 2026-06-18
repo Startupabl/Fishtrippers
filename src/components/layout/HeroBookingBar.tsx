@@ -6,19 +6,36 @@ import { MapPin, Calendar as CalendarIcon, Users, ChevronDown, Minus, Plus } fro
 import { Button } from "@/components/ui/button";
 import { Calendar } from "@/components/ui/calendar";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import { LocationAutocomplete, type PickedLocation } from "@/components/search/LocationAutocomplete";
 import { cn } from "@/lib/utils";
 
 export function HeroBookingBar() {
   const navigate = useNavigate();
   const [location, setLocation] = useState("");
+  const [picked, setPicked] = useState<PickedLocation | null>(null);
   const [date, setDate] = useState<Date | undefined>();
   const [adults, setAdults] = useState(2);
   const [children, setChildren] = useState(0);
 
+  const submit = () => {
+    const params: Record<string, string> = {};
+    if (picked) {
+      if (picked.city) params.city = picked.city;
+      if (picked.state) params.state = picked.state;
+      if (picked.country) params.country = picked.country;
+    } else if (location.trim()) {
+      // Treat free-text as a city query so it still hits the search.
+      params.city = location.trim();
+    }
+    if (date) params.tripDate = format(date, "yyyy-MM-dd");
+    if (adults) params.adults = String(adults);
+    if (children) params.children = String(children);
+    navigate({ to: "/search", search: params as never });
+  };
+
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    const q = location.trim();
-    navigate({ to: "/search", search: q ? { q } : undefined } as never);
+    submit();
   };
 
   return (
@@ -27,17 +44,24 @@ export function HeroBookingBar() {
       className="grid w-full grid-cols-1 gap-2 rounded-2xl bg-white p-2 shadow-2xl ring-1 ring-black/5 md:grid-cols-[1.4fr_1fr_1fr_auto] md:items-center md:gap-0 md:rounded-full md:p-1.5"
     >
       {/* Location */}
-      <label className="flex items-center gap-3 rounded-xl px-4 py-3 md:rounded-full md:border-r md:border-border">
-        <MapPin className="size-5 shrink-0 text-ocean" />
-        <input
-          type="text"
+      <div className="rounded-xl px-4 py-3 md:rounded-full md:border-r md:border-border">
+        <LocationAutocomplete
           value={location}
-          onChange={(e) => setLocation(e.target.value)}
+          onChangeText={(v) => {
+            setLocation(v);
+            if (!v.trim()) setPicked(null);
+          }}
+          onPick={(loc) => {
+            setLocation(loc.address);
+            setPicked(loc);
+          }}
+          onSubmitFreeText={submit}
           placeholder="Fishing near me"
-          aria-label="Where do you want to fish?"
-          className="w-full bg-transparent text-base text-ocean-deep placeholder:text-muted-foreground focus:outline-none"
+          ariaLabel="Where do you want to fish?"
+          leadingIcon={<MapPin className="size-5 shrink-0 text-ocean" />}
         />
-      </label>
+      </div>
+
 
       {/* Date */}
       <Popover>
