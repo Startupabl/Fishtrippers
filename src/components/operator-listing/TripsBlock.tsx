@@ -93,7 +93,11 @@ function TripCard({
   const perExtra = trip.per_extra_minor ?? 0;
   const totalMinorBase =
     trip.price_minor + perExtra * Math.max(0, guests - 1);
+  const depositMinorBase = Math.round(totalMinorBase * 0.1);
+  const balanceMinorBase = totalMinorBase - depositMinorBase;
   const totalDisplay = convertMinor(totalMinorBase, base, display);
+  const depositDisplay = convertMinor(depositMinorBase, base, display);
+  const balanceDisplay = convertMinor(balanceMinorBase, base, display);
   const baseDisplay = convertMinor(trip.price_minor, base, display);
   const extraDisplay = convertMinor(perExtra, base, display);
 
@@ -223,21 +227,46 @@ function TripCard({
             </div>
           </div>
 
-          <div className="mt-4 border-t pt-3">
-            <div className="flex items-baseline justify-between">
-              <span className="text-xs text-muted-foreground">
-                Total for {guests} {guests === 1 ? "guest" : "guests"}
-              </span>
-              <span className="text-lg font-bold">
-                {formatCurrency(totalDisplay, display)}
-              </span>
+          <div className="mt-4 overflow-hidden rounded-lg border">
+            <div className="bg-gold/20 px-3 py-2.5 text-ocean-deep">
+              <div className="flex items-baseline justify-between gap-2">
+                <span className="text-[11px] font-bold uppercase tracking-wide">
+                  Due now to book
+                </span>
+                <span className="text-xl font-extrabold">
+                  {formatCurrency(depositDisplay, display)}
+                </span>
+              </div>
+              <div className="text-[11px] opacity-80">
+                Charged today to secure your spot
+              </div>
             </div>
-            <CurrencyDisclaimer
-              baseCurrency={base}
-              displayCurrency={display}
-              className="mt-1"
-            />
+            <div className="space-y-1.5 px-3 py-2.5 text-sm">
+              <div className="flex items-baseline justify-between">
+                <span className="text-muted-foreground">
+                  Total trip cost ({guests} {guests === 1 ? "guest" : "guests"})
+                </span>
+                <span className="font-semibold">
+                  {formatCurrency(totalDisplay, display)}
+                </span>
+              </div>
+              <div className="flex items-baseline justify-between">
+                <span className="text-muted-foreground">Remaining balance</span>
+                <span className="font-semibold">
+                  {formatCurrency(balanceDisplay, display)}
+                </span>
+              </div>
+              <p className="text-[11px] text-muted-foreground">
+                Paid directly to your guide when you meet.
+              </p>
+            </div>
           </div>
+          <CurrencyDisclaimer
+            baseCurrency={base}
+            displayCurrency={display}
+            className="mt-2"
+          />
+
 
           {(() => {
             const bt = trip.booking_type ?? "request_to_book";
