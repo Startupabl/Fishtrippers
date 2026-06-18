@@ -190,6 +190,16 @@ function MyListingPage() {
     onError: (e: Error) => toast.error(e.message),
   });
 
+  const statusMut = useMutation({
+    mutationFn: (v: { id: string; status: "draft" | "active" }) =>
+      updateTripStatus({ data: v }),
+    onSuccess: (_d, v) => {
+      toast.success(v.status === "active" ? "Trip published" : "Trip unpublished");
+      qc.invalidateQueries({ queryKey: ["my-trips"] });
+    },
+    onError: (e: Error) => toast.error(e.message),
+  });
+
   const publicHref = useMemo(() => {
     const op: any = operator;
     if (!op?.slug || !op?.location_slug) return null;
