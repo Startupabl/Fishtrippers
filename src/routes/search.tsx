@@ -29,7 +29,7 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { Slider } from "@/components/ui/slider";
 import { cn } from "@/lib/utils";
 import {
-  DURATION_OPTIONS,
+  DURATION_BUCKETS,
   DEPARTURE_TIME_OPTIONS,
   PRICE_PRESETS,
   PRICE_MIN,
@@ -114,7 +114,10 @@ function SearchPage() {
           country: search.country || null,
           category: search.category || null,
           instantBook: search.instantBook || null,
-          durationMinutes: search.duration ? Number(search.duration) * 60 : null,
+          durationMinMinutes:
+            DURATION_BUCKETS.find((b) => b.value === search.duration)?.minMinutes ?? null,
+          durationMaxMinutes:
+            DURATION_BUCKETS.find((b) => b.value === search.duration)?.maxMinutes ?? null,
           departureTime: search.departureTime || null,
           priceMinMinor: priceMinActive ? search.priceMin * 100 : null,
           priceMaxMinor: priceMaxActive ? search.priceMax * 100 : null,
@@ -161,7 +164,7 @@ function SearchPage() {
     "All trip types";
 
   const durationLabel = search.duration
-    ? DURATION_OPTIONS.find((o) => o.value === search.duration)?.label ?? "Duration"
+    ? DURATION_BUCKETS.find((o) => o.value === search.duration)?.label ?? "Duration"
     : "Duration";
 
   const departureLabel = search.departureTime
@@ -349,7 +352,7 @@ function SearchPage() {
             >
               Any duration
             </button>
-            {DURATION_OPTIONS.map((opt) => (
+            {DURATION_BUCKETS.map((opt) => (
               <button
                 key={opt.value}
                 type="button"
