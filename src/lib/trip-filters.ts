@@ -4,13 +4,20 @@ import { SPECIES_LIST, speciesIdFromLabel, FISHING_TECHNIQUES } from "@/lib/oper
 
 export type FilterOption = { slug: string; label: string };
 
-export const DURATION_OPTIONS: { value: string; label: string }[] = Array.from(
-  { length: 14 },
-  (_, i) => {
-    const h = i + 1;
-    return { value: String(h), label: `${h} hr${h === 1 ? "" : "s"}` };
-  },
-);
+// Duration buckets based on trip hours (trip_packages.duration_minutes).
+// Half Day: 1–5 hrs, Full Day: 6–9 hrs, Extended Day: 10+ hrs.
+export type DurationBucket = {
+  value: "half" | "full" | "extended";
+  label: string;
+  minMinutes: number;
+  maxMinutes: number | null;
+};
+
+export const DURATION_BUCKETS: DurationBucket[] = [
+  { value: "half", label: "Half Day (1–5 hrs)", minMinutes: 1, maxMinutes: 5 * 60 },
+  { value: "full", label: "Full Day (6–9 hrs)", minMinutes: 5 * 60 + 1, maxMinutes: 9 * 60 },
+  { value: "extended", label: "Extended Day (10–14 hrs)", minMinutes: 9 * 60 + 1, maxMinutes: null },
+];
 
 export const DEPARTURE_TIME_OPTIONS: { value: string; label: string }[] = [
   { value: "05:00", label: "5:00 AM" },

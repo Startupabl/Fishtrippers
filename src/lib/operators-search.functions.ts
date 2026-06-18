@@ -36,7 +36,8 @@ const searchSchema = z.object({
   limit: z.number().int().min(1).max(60).optional().nullable(),
   featuredOnly: z.boolean().optional().nullable(),
   // Trip-level filters (all optional)
-  durationMinutes: z.number().int().positive().optional().nullable(),
+  durationMinMinutes: z.number().int().positive().optional().nullable(),
+  durationMaxMinutes: z.number().int().positive().optional().nullable(),
   departureTime: z.string().regex(/^\d{2}:\d{2}$/).optional().nullable(),
   priceMinMinor: z.number().int().nonnegative().optional().nullable(),
   priceMaxMinor: z.number().int().nonnegative().optional().nullable(),
@@ -71,7 +72,8 @@ export const searchOperatorsServer = createServerFn({ method: "POST" })
     );
 
     const hasTripFilter =
-      data.durationMinutes != null ||
+      data.durationMinMinutes != null ||
+      data.durationMaxMinutes != null ||
       (data.departureTime && data.departureTime.length > 0) ||
       data.priceMinMinor != null ||
       data.priceMaxMinor != null ||
@@ -109,8 +111,11 @@ export const searchOperatorsServer = createServerFn({ method: "POST" })
 
     // Trip-level filters via PostgREST nested filter syntax.
     if (hasTripFilter) {
-      if (data.durationMinutes != null) {
-        query = query.eq("trip_packages.duration_minutes", data.durationMinutes);
+      if (data.durationMinMinutes != null) {
+        query = query.gte("trip_packages.duration_minutes", data.durationMinMinutes);
+      }
+      if (data.durationMaxMinutes != null) {
+        query = query.lte("trip_packages.duration_minutes", data.durationMaxMinutes);
       }
       if (data.departureTime) {
         query = query.eq("trip_packages.start_time", `${data.departureTime}:00`);
