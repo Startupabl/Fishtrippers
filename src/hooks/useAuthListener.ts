@@ -7,6 +7,7 @@ import { recordSessionIp } from "@/lib/session.functions";
 import { useAuthStore, type AuthUser } from "@/stores/useAuthStore";
 import { useMentorExpressStore } from "@/stores/useMentorExpressStore";
 import { useMentorProfileStore } from "@/stores/useMentorProfileStore";
+import { useOperatorOnboardingStore } from "@/stores/useOperatorOnboardingStore";
 import { useProfileStore } from "@/stores/useProfileStore";
 import { useFavoritesStore } from "@/stores/useFavoritesStore";
 
@@ -94,6 +95,7 @@ const USER_SCOPED_STORAGE_KEYS = [
   "aimentor-chat",
   "aimentor-gift-cards-v1",
   "aimentor-earnings",
+  "operator-onboarding-draft-v2",
 ];
 const LAST_USER_KEY = "aimentor-last-user-id";
 
@@ -106,6 +108,7 @@ function purgeUserScopedStorage() {
   // leak into the new user's session before a reload.
   useMentorExpressStore.getState().reset();
   useMentorProfileStore.getState().reset();
+  useOperatorOnboardingStore.getState().reset();
 }
 
 

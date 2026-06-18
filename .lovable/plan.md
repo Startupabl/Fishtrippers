@@ -1,47 +1,27 @@
-## Move "Create a Listing" wizard from `/mentor/create-path` → `/create-listing/new`
+## Root cause
 
-The route at `/mentor/create-path` is the listing-creation wizard. We'll move it under the existing `/create-listing` informational landing page so the URL reads clean to public users and the landing page stays intact. Sidebar label also gets updated.
+The "Create a Listing" wizard is backed by a Zustand store (`useOperatorOnboardingStore`) that **persists to `localStorage` under the key `operator-onboarding-draft-v2`**. When a different user signs in on the same browser, that cached draft is read straight into the form before the server hydrates, so the previous user's display name, about text, vessel, species, departure, etc. appear pre-populated.
 
-### 1. Promote `/create-listing` to a layout
+The app already has a "purge on user switch" mechanism in `src/hooks/useAuthListener.ts` (`USER_SCOPED_STORAGE_KEYS` + `purgeUserScopedStorage`) — but `operator-onboarding-draft-v2` was never added to it when this wizard was built, so it is the one user-scoped draft that survives sign-out / account switch.
 
-Rename `src/routes/create-listing.tsx` → `src/routes/create-listing.index.tsx` (no other change). This makes `/create-listing` an index leaf and frees the parent path for nesting.
+Server side is fine: `getMyOperator` and `upsertOperatorDraft` both go through `requireSupabaseAuth` and filter by `owner_id = userId`. RLS is not the leak.
 
-> Note: TanStack flat-file routing automatically treats `create-listing.tsx` as a leaf and `create-listing.index.tsx` + `create-listing.new.tsx` as siblings under the path prefix — no explicit layout file is required.
+## Fix
 
-### 2. Move the wizard
+In `src/hooks/useAuthListener.ts`:
 
-Rename `src/routes/mentor.create-path.tsx` → `src/routes/create-listing.new.tsx`.
+1. Add `"operator-onboarding-draft-v2"` to `USER_SCOPED_STORAGE_KEYS` so it is removed from `localStorage` whenever `reconcileUserScopedStorage` detects the signed-in user id has changed (including sign-out → new sign-in, and sign-in as a different account on the same browser).
+2. In `purgeUserScopedStorage`, also reset the in-memory store via `useOperatorOnboardingStore.getState().reset()` (mirroring the existing `useMentorExpressStore` / `useMentorProfileStore` resets), so the leak is gone even before a page reload.
 
-Inside the file:
-- `createFileRoute("/mentor/create-path")` → `createFileRoute("/create-listing/new")`
-- The internal redirect `navigate({ to: "/login", search: { redirect: "/mentor/create-path" } })` → use `"/create-listing/new"`
+That's the only code change required to close the leak in the listing creation flow.
 
-### 3. Update every reference in the codebase
+## Verification
 
-Replace `"/mentor/create-path"` with `"/create-listing/new"` in:
+- New user signs up → opens `/create-listing/new` → all fields empty, sidebar steps all "upcoming".
+- Existing user with a draft signs out, second user signs in on same browser → second user sees an empty wizard, not the first user's data.
+- Existing user with a real listing still sees their own data hydrated from the server (the `useQuery(["my-operator", authUser.id])` call is keyed by user id and runs after auth is ready, so server hydration still works).
 
-- `src/lib/content.ts` (footer/nav link)
-- `src/lib/admin.functions.ts` (2 email edit URLs)
-- `src/routes/sitemap[.]xml.ts`
-- `src/routes/c.$categorySlug.$listingSlug.tsx`
-- `src/routes/onboarding.choice.tsx`
-- `src/routes/_authenticated/dashboard.tsx`
-- `src/routes/_authenticated/dashboard.my-listing.tsx` (4 instances)
-- `src/routes/_authenticated/dashboard.aide.courses.tsx` (5 instances)
-- `src/components/dashboard/WorkspaceSidebar.tsx`
-- `src/components/layout/UserAvatarMenu.tsx`
-- `src/components/layout/SiteHeader.tsx`
-- `src/components/layout/BottomNav.tsx`
-- `src/components/operator-listing/PreviewBanner.tsx`
+## Out of scope (flagging, not changing)
 
-The auto-generated `src/routeTree.gen.ts` will regenerate on the next build — not touched manually.
-
-### 4. Sidebar label
-
-In `src/components/dashboard/WorkspaceSidebar.tsx` line 50, change `title: "List Your Trip"` → `title: "Listing Details"` (same line where we update the `to` path).
-
-### Out of scope
-
-- No redirect from old `/mentor/create-path` URL (any existing email edit links sent before this change won't resolve; admin emails get the new URL going forward).
-- No copy changes on the landing page itself.
-- No changes to other `/mentor/*` routes (`mentor-faqs`, `mentor-agreement`, `become-a-mentor`, `m.$mentorSlug`).
+- `cart-v1` (from `useCartStore`) is also persisted and not in the purge list. It's a learner cart, not part of this bug, but it has the same cross-account leak shape. Happy to fix in a follow-up if you want — say the word.
+- No RLS changes needed; existing policies already scope operators/vessels/trips to `owner_id = auth.uid()`.
