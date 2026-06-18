@@ -627,10 +627,15 @@ export function TripFormDialog({ open, onOpenChange, initial }: Props) {
                   <div className="rounded-lg border bg-background p-3 text-sm space-y-3">
                     <div className="flex items-start justify-between gap-3">
                       <div>
-                        <div className="font-medium">Total Trip Price (Full Boat)</div>
-                        <div className="text-xs text-muted-foreground">
-                          Assumes the trip is booked to your max party size of {form.max_party_size} guests.
+                        <div className="font-medium">
+                          {isShared ? "Total if fully booked" : "Total Trip Price (Full Boat)"}
                         </div>
+                        <div className="text-xs text-muted-foreground">
+                          {isShared
+                            ? `Assumes all ${form.seats_available ?? 0} seats are sold.`
+                            : `Assumes the trip is booked to your max party size of ${form.max_party_size} guests.`}
+                        </div>
+
                       </div>
                       <span className="font-semibold whitespace-nowrap">
                         {formatMoney(totalPreview, captainCurrency)}
