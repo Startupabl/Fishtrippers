@@ -114,3 +114,69 @@ export const getPublicHostAvailability = createServerFn({ method: "GET" })
     if (error) throw new Error(error.message);
     return (rows ?? []).map((r: any) => ({ date: r.date, status: r.status }));
   });
+
+export interface TripDateAvailability {
+  charter_type: "private_charter" | "shared_tour";
+  seats_available: number | null;
+  max_party_size: number | null;
+  bookedByDate: Record<string, number>;
+  blockedDates: string[];
+}
+
+// Public: combined trip + per-date seat availability for the booking calendar.
+export const getTripDateAvailability = createServerFn({ method: "GET" })
+  .inputValidator((input: unknown) =>
+    z
+      .object({
+        trip_id: z.string().uuid(),
+        host_id: z.string().uuid(),
+      })
+      .parse(input),
+  )
+  .handler(async ({ data }): Promise<TripDateAvailability> => {
+    const url = process.env.SUPABASE_URL!;
+    const key = process.env.SUPABASE_PUBLISHABLE_KEY!;
+    const client = createClient<Database>(url, key, {
+      auth: { storage: undefined, persistSession: false, autoRefreshToken: false },
+    });
+
+    const { data: trip, error: tripErr } = await client
+      .from("trip_packages")
+      .select("charter_type, seats_available, max_party_size")
+      .eq("id", data.trip_id)
+      .maybeSingle();
+    if (tripErr) throw new Error(tripErr.message);
+
+    const { data: avail, error: availErr } = await client
+      .from("host_availability")
+      .select("date, status")
+      .eq("host_id", data.host_id);
+    if (availErr) throw new Error(availErr.message);
+
+    const blockedDates = (avail ?? []).map((r: any) => r.date as string);
+    const charter_type =
+      ((trip as any)?.charter_type as "private_charter" | "shared_tour" | null) ??
+      "private_charter";
+    const seats_available = (trip as any)?.seats_available ?? null;
+    const max_party_size = (trip as any)?.max_party_size ?? null;
+
+    const bookedByDate: Record<string, number> = {};
+    if (charter_type === "shared_tour") {
+      const { data: counts, error: cntErr } = await client.rpc(
+        "trip_seats_booked_by_date" as any,
+        { _trip_id: data.trip_id },
+      );
+      if (cntErr) throw new Error(cntErr.message);
+      for (const row of (counts ?? []) as any[]) {
+        bookedByDate[row.trip_date as string] = Number(row.seats_booked ?? 0);
+      }
+    }
+
+    return {
+      charter_type,
+      seats_available,
+      max_party_size,
+      bookedByDate,
+      blockedDates,
+    };
+  });
