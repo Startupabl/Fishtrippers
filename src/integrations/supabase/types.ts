@@ -1653,6 +1653,7 @@ export type Database = {
       trip_packages: {
         Row: {
           booking_type: Database["public"]["Enums"]["trip_booking_type"]
+          charter_type: Database["public"]["Enums"]["trip_charter_type"]
           created_at: string
           currency: string
           departure_address: string | null
@@ -1669,6 +1670,7 @@ export type Database = {
           operator_id: string
           per_extra_minor: number
           price_minor: number
+          seats_available: number | null
           start_time: string | null
           status: Database["public"]["Enums"]["trip_package_status"]
           target_species: string[]
@@ -1680,6 +1682,7 @@ export type Database = {
         }
         Insert: {
           booking_type?: Database["public"]["Enums"]["trip_booking_type"]
+          charter_type?: Database["public"]["Enums"]["trip_charter_type"]
           created_at?: string
           currency?: string
           departure_address?: string | null
@@ -1696,6 +1699,7 @@ export type Database = {
           operator_id: string
           per_extra_minor?: number
           price_minor?: number
+          seats_available?: number | null
           start_time?: string | null
           status?: Database["public"]["Enums"]["trip_package_status"]
           target_species?: string[]
@@ -1707,6 +1711,7 @@ export type Database = {
         }
         Update: {
           booking_type?: Database["public"]["Enums"]["trip_booking_type"]
+          charter_type?: Database["public"]["Enums"]["trip_charter_type"]
           created_at?: string
           currency?: string
           departure_address?: string | null
@@ -1723,6 +1728,7 @@ export type Database = {
           operator_id?: string
           per_extra_minor?: number
           price_minor?: number
+          seats_available?: number | null
           start_time?: string | null
           status?: Database["public"]["Enums"]["trip_package_status"]
           target_species?: string[]
@@ -1950,6 +1956,7 @@ export type Database = {
       site_page_category: "explore" | "resources" | "legal"
       site_page_status: "live" | "draft"
       trip_booking_type: "instant_book" | "request_to_book"
+      trip_charter_type: "private_charter" | "shared_tour"
       trip_package_status: "draft" | "active" | "archived"
       user_alert_kind:
         | "listing_pending"
@@ -2107,6 +2114,7 @@ export const Constants = {
       site_page_category: ["explore", "resources", "legal"],
       site_page_status: ["live", "draft"],
       trip_booking_type: ["instant_book", "request_to_book"],
+      trip_charter_type: ["private_charter", "shared_tour"],
       trip_package_status: ["draft", "active", "archived"],
       user_alert_kind: [
         "listing_pending",
