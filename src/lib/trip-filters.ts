@@ -1,5 +1,6 @@
 // Shared filter option lists for the search directory.
 // Slugs are stored in trip_packages.techniques / target_species arrays.
+import { SPECIES_LIST, speciesIdFromLabel, FISHING_TECHNIQUES } from "@/lib/operators.shared";
 
 export type FilterOption = { slug: string; label: string };
 
