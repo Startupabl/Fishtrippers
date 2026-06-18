@@ -173,6 +173,11 @@ export function TripFormDialog({ open, onOpenChange, initial }: Props) {
       if (form.charter_type === "shared_tour") {
         if (form.seats_available == null || form.seats_available < 1)
           throw new Error("Enter total seats available");
+        if (
+          form.min_seats_to_sail != null &&
+          form.min_seats_to_sail > (form.seats_available ?? 0)
+        )
+          throw new Error("Minimum seats to sail can't exceed total seats available");
       }
 
 
@@ -197,6 +202,8 @@ export function TripFormDialog({ open, onOpenChange, initial }: Props) {
           charter_type: form.charter_type,
           seats_available:
             form.charter_type === "shared_tour" ? form.seats_available : null,
+          min_seats_to_sail:
+            form.charter_type === "shared_tour" ? form.min_seats_to_sail ?? null : null,
 
           target_species: form.target_species,
           environments: form.environments,
