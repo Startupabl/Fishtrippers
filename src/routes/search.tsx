@@ -25,11 +25,14 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from "@/components/ui/popover";
+import { LocationAutocomplete } from "@/components/search/LocationAutocomplete";
 import { cn } from "@/lib/utils";
 
 const searchSchema = z.object({
   q: fallback(z.string(), "").default(""),
   city: fallback(z.string(), "").default(""),
+  state: fallback(z.string(), "").default(""),
+  country: fallback(z.string(), "").default(""),
   category: fallback(z.string(), "").default(""),
   instantBook: fallback(z.boolean(), false).default(false),
   tripDate: fallback(z.string(), "").default(""),
@@ -63,9 +66,8 @@ function SearchPage() {
   const navigate = useNavigate();
   const search = Route.useSearch();
 
-  // Local input state for city — only commit to URL on Search click / Enter
+  // Local input state — only commit to URL on Search / Enter / pick
   const [cityInput, setCityInput] = useState(search.city);
-  const [qInput, setQInput] = useState(search.q);
 
   const searchFn = useServerFn(searchOperatorsServer);
   const liveQuery = useQuery({
@@ -73,6 +75,8 @@ function SearchPage() {
       "search-operators",
       search.q,
       search.city,
+      search.state,
+      search.country,
       search.category,
       search.instantBook,
     ],
@@ -81,6 +85,8 @@ function SearchPage() {
         data: {
           q: search.q || null,
           city: search.city || null,
+          state: search.state || null,
+          country: search.country || null,
           category: search.category || null,
           instantBook: search.instantBook || null,
         },
@@ -98,15 +104,17 @@ function SearchPage() {
   }
 
   function submitTopBar() {
-    setSearch({ city: cityInput, q: qInput });
+    // Free-text fallback: treat raw input as a city filter, clear state/country.
+    setSearch({ city: cityInput, state: "", country: "" });
   }
 
   const activeCategoryLabel =
     FISHING_ENVIRONMENTS.find((e) => e.id === search.category)?.label ??
     "All categories";
 
-  const headerLabel = search.city
-    ? `${search.city}: ${results.length} fishing ${results.length === 1 ? "charter" : "charters"} available`
+  const locationLabel = [search.city, search.state].filter(Boolean).join(", ");
+  const headerLabel = locationLabel
+    ? `${locationLabel}: ${results.length} fishing ${results.length === 1 ? "charter" : "charters"} available`
     : `${results.length} fishing ${results.length === 1 ? "charter" : "charters"} available`;
 
   return (
@@ -120,17 +128,25 @@ function SearchPage() {
           }}
           className="grid grid-cols-1 gap-2 md:grid-cols-[1.5fr_1fr_1fr_auto]"
         >
-          <label className="flex items-center gap-2 rounded-xl border border-border bg-background px-3 py-2.5">
-            <MapPin className="size-4 text-muted-foreground" />
-            <input
-              type="text"
+          <div className="flex items-center gap-2 rounded-xl border border-border bg-background px-3 py-2.5">
+            <LocationAutocomplete
               value={cityInput}
-              onChange={(e) => setCityInput(e.target.value)}
-              placeholder="City (e.g. San Francisco)"
-              className="w-full bg-transparent text-sm outline-none placeholder:text-muted-foreground"
-              aria-label="City"
+              onChangeText={setCityInput}
+              onPick={(loc) => {
+                setCityInput(loc.address);
+                setSearch({
+                  city: loc.city ?? "",
+                  state: loc.state ?? "",
+                  country: loc.country ?? "",
+                });
+              }}
+              onSubmitFreeText={submitTopBar}
+              placeholder="City, region, or country"
+              ariaLabel="Location"
+              leadingIcon={<MapPin className="size-4 text-muted-foreground" />}
+              inputClassName="text-sm"
             />
-          </label>
+          </div>
 
           <label className="flex items-center gap-2 rounded-xl border border-border bg-background px-3 py-2.5 text-muted-foreground">
             <Calendar className="size-4" />

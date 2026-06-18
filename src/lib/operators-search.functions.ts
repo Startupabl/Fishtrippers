@@ -29,11 +29,15 @@ export type OperatorCardDTO = {
 const searchSchema = z.object({
   q: z.string().optional().nullable(),
   city: z.string().optional().nullable(),
+  state: z.string().optional().nullable(),
+  country: z.string().optional().nullable(),
   category: z.string().optional().nullable(), // fishing_environment id (e.g. "inshore")
   instantBook: z.boolean().optional().nullable(),
   limit: z.number().int().min(1).max(60).optional().nullable(),
   featuredOnly: z.boolean().optional().nullable(),
 });
+
+const resolvePlacePublicSchema = z.object({ placeId: z.string().min(1) });
 
 function formatPrice(minor: number, currency: string): string {
   const major = minor / 100;
@@ -79,6 +83,10 @@ export const searchOperatorsServer = createServerFn({ method: "POST" })
     if (data.q && data.q.trim()) query = query.ilike("display_name", `%${data.q.trim()}%`);
     if (data.city && data.city.trim())
       query = query.ilike("default_departure_city", `%${data.city.trim()}%`);
+    if (data.state && data.state.trim())
+      query = query.ilike("default_departure_state", `%${data.state.trim()}%`);
+    if (data.country && data.country.trim())
+      query = query.ilike("default_departure_country", `%${data.country.trim()}%`);
     if (data.category && data.category.trim())
       query = query.contains("fishing_environments", [data.category.trim()]);
     if (data.instantBook) query = query.eq("booking_type", "instant");
@@ -140,3 +148,60 @@ export const searchOperatorsServer = createServerFn({ method: "POST" })
 
     return { items };
   });
+
+// Public Google Place resolver (no auth) — used by homepage hero and /search bar.
+// Server-side call through the connector gateway; the browser only sees the
+// extracted address components, never the API key.
+export const resolvePlacePublic = createServerFn({ method: "POST" })
+  .inputValidator((d: z.input<typeof resolvePlacePublicSchema>) =>
+    resolvePlacePublicSchema.parse(d),
+  )
+  .handler(async ({ data }) => {
+    const lovableKey = process.env.LOVABLE_API_KEY;
+    const mapsKey = process.env.GOOGLE_MAPS_API_KEY;
+    if (!lovableKey || !mapsKey) {
+      throw new Error("Google Maps connector not configured");
+    }
+    const res = await fetch(
+      `https://connector-gateway.lovable.dev/google_maps/places/v1/places/${encodeURIComponent(data.placeId)}`,
+      {
+        headers: {
+          Authorization: `Bearer ${lovableKey}`,
+          "X-Connection-Api-Key": mapsKey,
+          "X-Goog-FieldMask": "id,displayName,formattedAddress,location,addressComponents",
+        },
+      },
+    );
+    if (!res.ok) {
+      const text = await res.text();
+      throw new Error(`Place lookup failed (${res.status}): ${text.slice(0, 200)}`);
+    }
+    const json: any = await res.json();
+    const components: any[] = Array.isArray(json.addressComponents)
+      ? json.addressComponents
+      : [];
+    const findComp = (type: string, short = false): string | null => {
+      const c = components.find((x) => Array.isArray(x.types) && x.types.includes(type));
+      if (!c) return null;
+      return (short ? c.shortText : c.longText) ?? c.longText ?? c.shortText ?? null;
+    };
+    const city =
+      findComp("locality") ||
+      findComp("postal_town") ||
+      findComp("sublocality") ||
+      findComp("administrative_area_level_2") ||
+      null;
+    const state = findComp("administrative_area_level_1", true);
+    const country = findComp("country", true);
+    return {
+      placeId: json.id as string,
+      address: (json.formattedAddress as string) ?? "",
+      name: (json.displayName?.text as string) ?? "",
+      lat: (json.location?.latitude as number) ?? null,
+      lng: (json.location?.longitude as number) ?? null,
+      city,
+      state,
+      country,
+    };
+  });
+
