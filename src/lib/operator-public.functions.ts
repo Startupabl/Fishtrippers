@@ -90,11 +90,7 @@ export const getPublicOperatorListing = createServerFn({ method: "POST" })
     ]);
 
     const vessel = vRes.data ?? null;
-    let boatType: PublicOperatorListing extends infer T
-      ? T extends { kind: "ok"; boatType: infer B }
-        ? B
-        : never
-      : never = null as any;
+    let boatType: { id: string; subcategory_name: string; icon_url: string | null } | null = null;
     if (vessel?.boat_type_id) {
       const { data: bt } = await supabase
         .from("boat_types" as any)
