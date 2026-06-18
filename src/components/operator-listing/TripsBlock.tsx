@@ -93,7 +93,11 @@ function TripCard({
   const perExtra = trip.per_extra_minor ?? 0;
   const totalMinorBase =
     trip.price_minor + perExtra * Math.max(0, guests - 1);
+  const depositMinorBase = Math.round(totalMinorBase * 0.1);
+  const balanceMinorBase = totalMinorBase - depositMinorBase;
   const totalDisplay = convertMinor(totalMinorBase, base, display);
+  const depositDisplay = convertMinor(depositMinorBase, base, display);
+  const balanceDisplay = convertMinor(balanceMinorBase, base, display);
   const baseDisplay = convertMinor(trip.price_minor, base, display);
   const extraDisplay = convertMinor(perExtra, base, display);
 
