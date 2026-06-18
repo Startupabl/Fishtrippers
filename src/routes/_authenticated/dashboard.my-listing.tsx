@@ -547,6 +547,19 @@ function MyListingPage() {
 
                       <div className="flex justify-end gap-1">
                         <Button
+                          size="sm"
+                          variant={isActive ? "outline" : "default"}
+                          disabled={statusMut.isPending}
+                          onClick={() =>
+                            statusMut.mutate({
+                              id: t.id,
+                              status: isActive ? "draft" : "active",
+                            })
+                          }
+                        >
+                          {isActive ? "Unpublish" : "Publish"}
+                        </Button>
+                        <Button
                           size="icon"
                           variant="ghost"
                           onClick={() => {
