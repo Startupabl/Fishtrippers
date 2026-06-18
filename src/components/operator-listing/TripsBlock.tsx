@@ -248,10 +248,23 @@ function TripCard({
                   : ""}
               </p>
               {capacity > 0 && (
-                <p className="whitespace-nowrap text-sm text-muted-foreground">
-                  {charterLabel}: Up to {capacity} guests
-                </p>
+                isShared && selectedDate && remainingSeats !== null ? (
+                  remainingSeats <= 0 ? (
+                    <span className="whitespace-nowrap rounded-md bg-destructive/10 px-2 py-0.5 text-sm font-semibold text-destructive">
+                      Sold Out for this date
+                    </span>
+                  ) : (
+                    <p className="whitespace-nowrap text-sm font-bold text-emerald-700">
+                      {charterLabel}: {remainingSeats} spot{remainingSeats === 1 ? "" : "s"} left!
+                    </p>
+                  )
+                ) : (
+                  <p className="whitespace-nowrap text-sm text-muted-foreground">
+                    {charterLabel}: Up to {capacity} guests
+                  </p>
+                )
               )}
+
             </div>
           )}
           {speciesPreview && (
