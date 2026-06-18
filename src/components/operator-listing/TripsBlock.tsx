@@ -250,9 +250,6 @@ function TripCard({
                 <div className="text-sm font-bold uppercase tracking-wide text-emerald-900">
                   Due Now to Book
                 </div>
-                <div className="mt-0.5 text-xs text-emerald-900/70">
-                  Charged today to secure your spot
-                </div>
                 <div className="mt-2 whitespace-nowrap text-4xl font-extrabold leading-none text-emerald-700 sm:text-5xl">
                   {formatCurrency(depositDisplay, display)}
                 </div>
