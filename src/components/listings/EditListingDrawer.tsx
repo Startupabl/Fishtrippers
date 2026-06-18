@@ -110,7 +110,7 @@ export function EditListingDrawer({ open, onOpenChange, journey, onSaved, initia
       } else if (review_reason === "critical") {
         toast.message("Your price or category change is pending a quick admin review. Your listing will be back live shortly!");
       } else {
-        toast.success("Your Course is refreshed.");
+        toast.success("Your Fishing Trip is refreshed.");
       }
       onSaved(row);
     } catch (err) {
@@ -151,7 +151,7 @@ export function EditListingDrawer({ open, onOpenChange, journey, onSaved, initia
               Refine Your Juice
             </h2>
             <p className="text-sm text-muted-foreground">
-              Update your Course in place.
+              Update your Fishing Trip in place.
             </p>
           </div>
         </div>
@@ -168,7 +168,7 @@ export function EditListingDrawer({ open, onOpenChange, journey, onSaved, initia
           {section === "basics" && (
             <div className="space-y-5">
               <div>
-                <Label>Course title</Label>
+                <Label>Fishing Trip title</Label>
                 <Input
                   value={title}
                   onChange={(e) => setTitle(e.target.value)}
@@ -203,20 +203,20 @@ export function EditListingDrawer({ open, onOpenChange, journey, onSaved, initia
               <div className="rounded-2xl border border-border/60 bg-muted/30 p-4 space-y-3">
                 <div>
                   <h3 className="text-sm font-semibold text-foreground" style={serif}>
-                    Aide Profile Info
+                    Guide Profile Info
                   </h3>
                   <p className="text-sm text-muted-foreground">
-                    Shown on your live listing under "About the Aide".
+                    Shown on your live listing under "About the Guide".
                   </p>
                 </div>
                 <div>
-                  <Label>About the Aide</Label>
+                  <Label>About the Guide</Label>
                   <Textarea
                     value={mentorBio}
                     onChange={(e) => setMentorBio(e.target.value)}
                     rows={5}
                     maxLength={1000}
-                    placeholder="Tell your students a bit about your expertise and why you're the perfect Aide to guide them through this course!"
+                    placeholder="Tell your students a bit about your expertise and why you're the perfect Guide to guide them through this fishing trip!"
                     className={`mt-1 ${fieldFocus}`}
                     style={focusStyle}
                   />
@@ -233,7 +233,7 @@ export function EditListingDrawer({ open, onOpenChange, journey, onSaved, initia
                   <span className="text-xs text-foreground">
                     <span className="font-medium">Make this my standard greeting.</span>
                     <span className="block text-muted-foreground">
-                      Checking this will update your "Meet the Aide" section across all your current courses.
+                      Checking this will update your "Meet the Guide" section across all your current trips.
                     </span>
                   </span>
                 </label>
@@ -263,9 +263,9 @@ export function EditListingDrawer({ open, onOpenChange, journey, onSaved, initia
                 />
               </div>
               <div className="border-t border-border/60 pt-4">
-                <Label>Course Roadmap</Label>
+                <Label>Fishing Trip Roadmap</Label>
                 <p className="mt-1 text-sm text-muted-foreground">
-                  Give each session a clear title so learners can see the path ahead.
+                  Give each session a clear title so anglers can see the path ahead.
                 </p>
                 <div className="mt-3 space-y-3">
                   {sessionTitles.map((title, i) => (
@@ -317,7 +317,7 @@ export function EditListingDrawer({ open, onOpenChange, journey, onSaved, initia
 
               <div className="grid grid-cols-2 gap-3">
                 <div>
-                  <Label>Learner Capacity</Label>
+                  <Label>Angler Capacity</Label>
                   <Input
                     type="number"
                     min={1}
@@ -328,7 +328,7 @@ export function EditListingDrawer({ open, onOpenChange, journey, onSaved, initia
                     style={focusStyle}
                   />
                   <p className="mt-1 text-sm text-muted-foreground">
-                    How many learners can join this course session?
+                    How many anglers can join this fishing trip session?
                   </p>
                 </div>
                 <div>

@@ -96,8 +96,8 @@ const CATEGORY_SKILL_QUESTIONS: Record<Category, [string, string, string]> = {
     "I build scraping or analysis pipelines — writing AI-assisted scripts, running predictive models, or wiring AI into a data stack.",
   ],
   "Education & Coaching": [
-    "I've used AI to look up a fact, brainstorm a lesson idea, or draft a quick quiz question.",
-    "I regularly use AI to build full lesson plans, curricula, study guides, or rubrics for my students or clients.",
+    "I've used AI to look up a fact, brainstorm a trip idea, or draft a quick quiz question.",
+    "I regularly use AI to build full trip plans, curricula, study guides, or rubrics for my students or clients.",
     "I build interactive AI study bots, custom tutoring tools, or analyze learning data with AI to improve outcomes.",
   ],
   "Professional Services": [
@@ -115,19 +115,19 @@ const LEVEL_META: Record<
     flavor: "Fresh Squeezed",
     label: "Beginner",
     icon: Sprout,
-    blurb: "You're starting fresh — we'll match you with welcoming, foundational Aides.",
+    blurb: "You're starting fresh — we'll match you with welcoming, foundational Guides.",
   },
   intermediate: {
     flavor: "Zesty",
     label: "Intermediate",
     icon: Zap,
-    blurb: "You've got real momentum — we'll match you with Aides who'll sharpen your craft.",
+    blurb: "You've got real momentum — we'll match you with Guides who'll sharpen your craft.",
   },
   advanced: {
     flavor: "Tart",
     label: "Advanced",
     icon: Flame,
-    blurb: "You're operating at a pro level — we'll match you with expert Aides for deep work.",
+    blurb: "You're operating at a pro level — we'll match you with expert Guides for deep work.",
   },
 };
 
@@ -222,10 +222,10 @@ export function MissionMatchQuiz({ open, onOpenChange }: Props) {
             className="text-2xl"
             style={{ fontFamily: "Lora, ui-serif, Georgia, serif" }}
           >
-            Meet Your Perfect Aide
+            Meet Your Perfect Guide
           </DialogTitle>
           <DialogDescription>
-            Answer a couple of quick questions and we'll match you with the ideal AI course and Aide. 
+            Answer a couple of quick questions and we'll match you with the ideal AI fishing trip and Guide. 
           </DialogDescription>
         </DialogHeader>
 
@@ -325,7 +325,7 @@ export function MissionMatchQuiz({ open, onOpenChange }: Props) {
               </div>
               <p className="max-w-md text-sm text-foreground/80">{meta.blurb}</p>
               <Button size="lg" onClick={handleSeeAides} className="mt-2">
-                See My Perfect Aides
+                See My Perfect Guides
               </Button>
               <button
                 type="button"

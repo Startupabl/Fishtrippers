@@ -154,7 +154,7 @@ function LearnerSchedule() {
       const cohort = cohortQueries[i]?.data;
       const fallbackDuration = o.snapshot_session_duration ?? 60;
       const title =
-        cohort?.listing_title ?? o.snapshot_course_title ?? "Course session";
+        cohort?.listing_title ?? o.snapshot_course_title ?? "Fishing Trip session";
 
       const unified =
         cohort && (cohort.session_dates_times_array?.length ?? 0) > 0
@@ -297,7 +297,7 @@ function ScheduleTable({
         <TableHeader>
           <TableRow>
             <TableHead className="font-bold">Session Time</TableHead>
-            <TableHead className="font-bold">Course Title</TableHead>
+            <TableHead className="font-bold">Fishing Trip Title</TableHead>
             <TableHead className="font-bold">Instructor</TableHead>
             <TableHead className="font-bold">Actions</TableHead>
           </TableRow>
@@ -431,7 +431,7 @@ function ScheduleRow({
       <TableCell>
         {mode === "enrolled" ? (
           <Button size="sm" onClick={onLaunch}>
-            Join Classroom
+            Join Trip room
           </Button>
         ) : isFinal && isCourseComplete ? (
           <div className="flex items-center gap-2">

@@ -13,7 +13,7 @@ const LEAF = DESIGN_SYSTEM.colors.leafGreen;
 const YELLOW = DESIGN_SYSTEM.colors.sunnyYellow;
 
 export const Route = createFileRoute("/_authenticated/dashboard/learner")({
-  head: () => ({ meta: [{ title: "My Learning Hub — FishTrippers" }] }),
+  head: () => ({ meta: [{ title: "My Trips Hub — FishTrippers" }] }),
   component: LearnerWorkspace,
 });
 
@@ -29,7 +29,7 @@ function LearnerHome() {
     <div className="mx-auto w-full max-w-[1600px] px-4 md:px-6 lg:px-8 py-8 md:py-12">
       <div>
         <h1 className="text-3xl text-foreground md:text-4xl" style={lora}>
-          My Learning Hub
+          My Trips Hub
         </h1>
         <p className="mt-1 text-sm text-muted-foreground">
           Your scheduled sessions and your full purchase history — all in one place.
