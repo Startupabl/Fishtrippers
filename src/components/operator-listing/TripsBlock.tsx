@@ -46,6 +46,8 @@ interface Trip {
   techniques?: string[] | null;
   departure_address?: string | null;
   booking_type?: "instant_book" | "request_to_book" | null;
+  charter_type?: "private_charter" | "shared_tour" | null;
+  seats_available?: number | null;
 }
 
 interface Props {
@@ -108,6 +110,10 @@ function TripCard({
   const envs = trip.environments ?? [];
   const techs = trip.techniques ?? [];
   const species = trip.target_species ?? [];
+
+  const isShared = trip.charter_type === "shared_tour";
+  const capacity = isShared ? (trip.seats_available ?? maxParty) : maxParty;
+  const charterLabel = isShared ? "Shared trip" : "Private trip";
 
 
   const durationLabel = formatDuration(trip.duration_minutes);
@@ -182,9 +188,9 @@ function TripCard({
                           {formatCurrency(baseDisplay, display)}
                         </span>
                       </div>
-                      {maxParty > 0 && (
+                      {capacity > 0 && (
                         <div className="mt-0.5 text-xs text-muted-foreground">
-                          Shared trip, up to {maxParty} guests
+                          {charterLabel}, up to {capacity} guests
                         </div>
                       )}
                     </div>
@@ -206,7 +212,7 @@ function TripCard({
 
           </div>
           {/* Experience + capacity */}
-          {(envs.length > 0 || techs.length > 0 || maxParty > 0) && (
+          {(envs.length > 0 || techs.length > 0 || capacity > 0) && (
             <div className="mt-1 flex items-center justify-between gap-3">
               <p className="min-w-0 truncate text-sm text-muted-foreground">
                 {(envs.length > 0 || techs.length > 0)
@@ -216,9 +222,9 @@ function TripCard({
                     ].filter(Boolean).join(", ")}`
                   : ""}
               </p>
-              {maxParty > 0 && (
+              {capacity > 0 && (
                 <p className="whitespace-nowrap text-sm text-muted-foreground">
-                  Shared trip: Up to {maxParty} guests
+                  {charterLabel}: Up to {capacity} guests
                 </p>
               )}
             </div>

@@ -1,91 +1,60 @@
-## Add `charter_type` (Private Charter vs Shared Tour) to trip form
+## Goal
 
-### 1. Database migration
+On the public/preview listing's Trips section, replace the hard-coded
+"Shared trip: Up to {N} guests" header label with one that reflects the
+trip's `charter_type` chosen during trip creation.
 
-Add a new enum + column on `trip_packages`:
+- `charter_type = "shared_tour"` → **"Shared trip: Up to {N} guests"**
+- `charter_type = "private_charter"` (default) → **"Private trip: Up to {N} guests"**
 
-```sql
-CREATE TYPE public.trip_charter_type AS ENUM ('private_charter', 'shared_tour');
+The DB column already exists (`trip_packages.charter_type`) and is
+already returned by both `getPublicOperatorListing` and
+`getMyOperatorListing` (they `select("*")`), so no server or schema
+changes are needed.
 
-ALTER TABLE public.trip_packages
-  ADD COLUMN charter_type public.trip_charter_type NOT NULL DEFAULT 'private_charter',
-  ADD COLUMN seats_available integer;
-```
+## Files to edit
 
-- `charter_type` defaults to `private_charter` so existing rows are valid.
-- `seats_available` is nullable; only meaningful when `charter_type = 'shared_tour'`. Used by the shared calendar seat-countdown logic to know the total seats per trip date.
-- The existing `booking_type` column (instant_book / request_to_book) is left untouched — different concept (booking flow).
+**`src/components/operator-listing/TripsBlock.tsx`** — only file touched.
 
-### 2. Schema / shared types (`src/lib/trips.shared.ts`)
+1. Extend the local `Trip` interface to include the two new fields the
+   server already returns:
+   ```ts
+   charter_type?: "private_charter" | "shared_tour" | null;
+   seats_available?: number | null;
+   ```
 
-- Add `CHARTER_TYPE_OPTIONS`:
-  - `private_charter` — `"Private Charter (Book the entire boat)"`, hint about whole-boat pricing.
-  - `shared_tour` — `"Shared Tour (Book per seat)"`, hint about per-seat pricing.
-- Extend `tripInputSchema`:
-  - `charter_type: z.enum(["private_charter", "shared_tour"]).default("private_charter")`
-  - `seats_available: z.number().int().min(1).max(50).nullable().optional()`
-  - Refine: when `charter_type === "shared_tour"`, `seats_available` is required (>= 1).
+2. In `TripCard`, derive:
+   ```ts
+   const isShared = trip.charter_type === "shared_tour";
+   const capacity = isShared
+     ? (trip.seats_available ?? maxParty)
+     : maxParty;
+   const charterLabel = isShared ? "Shared trip" : "Private trip";
+   ```
 
-### 3. Server function (`src/lib/trips.functions.ts`)
+3. Update the header line (currently line 221):
+   ```tsx
+   {capacity > 0 && (
+     <p className="whitespace-nowrap text-sm text-muted-foreground">
+       {charterLabel}: Up to {capacity} guests
+     </p>
+   )}
+   ```
 
-In `upsertTrip` payload:
-- `charter_type: data.charter_type ?? "private_charter"`
-- `seats_available: data.charter_type === "shared_tour" ? (data.seats_available ?? null) : null`
+4. Update the price-details popover line (currently line 187) to use
+   the same `charterLabel` and `capacity` so it stays consistent:
+   ```tsx
+   {capacity > 0 && (
+     <div className="mt-0.5 text-xs text-muted-foreground">
+       {charterLabel}, up to {capacity} guests
+     </div>
+   )}
+   ```
 
-### 4. Trip form UI (`src/components/operator-onboarding/trips/TripFormDialog.tsx`)
+## Out of scope
 
-State:
-- Add to `TripEditorState`: `charter_type: "private_charter" | "shared_tour"` and `seats_available: number | null`.
-- `empty` defaults: `charter_type: "private_charter"`, `seats_available: null`.
-- When loading `initial`, fall back to `"private_charter"` if missing — form always opens with Private Charter pre-selected.
-
-Layout — at the absolute top of the dialog, BEFORE the "Trip title" input, add a new prominent section:
-
-```
-┌──────────────────────────────────────────────────────────────┐
-│ BOOKING TYPE                                                 │
-│ ┌────────────────────────────┐ ┌────────────────────────────┐│
-│ │ ● Private Charter          │ │ ○ Shared Tour              ││
-│ │   Book the entire boat     │ │   Book per seat            ││
-│ └────────────────────────────┘ └────────────────────────────┘│
-└──────────────────────────────────────────────────────────────┘
-```
-
-Styling: reuse the selected/unselected tile pattern from the existing "Booking method" section (primary ring on selected), rendered larger — two-column grid on sm+, full-width on mobile, section header "Booking type" using the same uppercase-tracking style as other section headers.
-
-Dynamic pricing / capacity behavior:
-
-**Private Charter (default)** — pricing UI unchanged:
-- "Base price (1st angler)" stays.
-- "Max trip size" / "Min trip size" stay.
-- "Price per additional angler" stays.
-- Totals preview stays as "Total Trip Price (Full Boat)".
-
-**Shared Tour**:
-- **Pricing field**: keep the single price input, relabel to **"Price per Seat"** with helper text **"Enter the cost for an individual seat on this trip."** (still bound to `price_minor`).
-- **Capacity field**:
-  - Hide the "Max trip size" (max party size) input entirely.
-  - Reveal a new numeric input **"Total Seats Available"** bound to `seats_available` (integer, min 1, max 50, placeholder `6`).
-  - Helper text: **"Enter the maximum number of individual seats you can sell in total for this shared trip (e.g., 6)."**
-  - On save, this value is persisted to `trip_packages.seats_available` and is what the shared calendar uses for the seat countdown.
-- Hide "Price per additional angler" and force `per_extra_minor = 0` on toggle into Shared Tour.
-- "Min trip size" stays (minimum guests required to run the trip).
-- Totals preview becomes **"Total if fully booked"** = `price_minor * seats_available`, with the same 10% deposit / 90% take-home math.
-
-Toggle side-effects (single `setForm` per click):
-- → `shared_tour`: `per_extra_minor = 0`; if `seats_available` is null, seed it from current `max_party_size`.
-- → `private_charter`: leave `seats_available` in state but don't send it.
-
-Submit mutation validation:
-- `charter_type === "private_charter"` → existing `max_party_size >= 1` check.
-- `charter_type === "shared_tour"` → `seats_available >= 1` check; skip the max_party_size check.
-- Pass `charter_type` and `seats_available` through `upsertFn`.
-
-### 5. Files touched
-
-- New migration (via migration tool).
-- `src/lib/trips.shared.ts`
-- `src/lib/trips.functions.ts`
-- `src/components/operator-onboarding/trips/TripFormDialog.tsx`
-
-No changes to public listing / booking pages in this plan — follow-up once captains start setting the new field.
+- No changes to booking/checkout logic, per-seat pricing math, or
+  shared-tour seat countdowns — this PR is just the header wording.
+- No DB migration; `charter_type` + `seats_available` already exist.
+- No changes to server functions, since `select("*")` already includes
+  the new columns.
