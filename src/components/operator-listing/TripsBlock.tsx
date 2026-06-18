@@ -151,6 +151,17 @@ function TripCard({
               </p>
             )}
           </div>
+          {(envs.length > 0 || techs.length > 0) && (
+            <p className="mt-0.5 truncate text-sm text-muted-foreground">
+              Experience:{" "}
+              {[
+                ...envs.map((e) => fishingEnvironmentLabel(e)),
+                ...techs,
+              ]
+                .filter(Boolean)
+                .join(", ")}
+            </p>
+          )}
         </div>
         <ChevronDown
           className={`h-5 w-5 shrink-0 self-center text-muted-foreground transition-transform duration-300 ${
