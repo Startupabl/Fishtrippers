@@ -2,6 +2,7 @@ import { createFileRoute, notFound, redirect } from "@tanstack/react-router";
 import { useServerFn } from "@tanstack/react-start";
 import { useQuery } from "@tanstack/react-query";
 import { getPublicOperatorListing } from "@/lib/operator-public.functions";
+import { getOperatorPhotosPublic } from "@/lib/operator-photos.functions";
 import { HeaderGallery } from "@/components/operator-listing/HeaderGallery";
 import { SectionNav } from "@/components/operator-listing/SectionNav";
 import { AboutBlock } from "@/components/operator-listing/AboutBlock";
