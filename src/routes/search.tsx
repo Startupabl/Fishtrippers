@@ -184,7 +184,7 @@ function SearchPage() {
 
   const techniqueLabel =
     techniqueList.length === 0
-      ? "Fishing Technique"
+      ? "Fishing Style"
       : techniqueList.length === 1
         ? TECHNIQUE_OPTIONS.find((o) => o.slug === techniqueList[0])?.label ??
           "1 selected"

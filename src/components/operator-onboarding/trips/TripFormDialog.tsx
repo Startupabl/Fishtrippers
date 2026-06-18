@@ -157,7 +157,7 @@ export function TripFormDialog({ open, onOpenChange, initial }: Props) {
       if (form.target_species.length === 0) throw new Error("Pick at least one target fish");
       if (form.environments.length === 0) throw new Error("Pick at least one environment");
       if (form.environments.length > 2) throw new Error("Max 2 environments per trip");
-      if (form.techniques.length === 0) throw new Error("Pick at least one technique");
+      if (form.techniques.length === 0) throw new Error("Pick at least one fishing style");
       if (!form.departure_address.trim()) throw new Error("Pick a departure point");
 
       const result = await upsertFn({
@@ -362,7 +362,7 @@ export function TripFormDialog({ open, onOpenChange, initial }: Props) {
 
             {/* Techniques */}
             <div className="space-y-2">
-              <Label>Fishing techniques</Label>
+              <Label>Fishing Style</Label>
               <div className="flex flex-wrap gap-2">
                 {FISHING_TECHNIQUES.map((t) => {
                   const selected = form.techniques.includes(t);
