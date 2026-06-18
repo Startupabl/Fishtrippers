@@ -1,50 +1,55 @@
-## Goal
-Drastically improve the readability and layout of the Trip Pricing / Payment Summary box inside each trip card on the listing page, matching the Fishtrippers reference image while keeping the existing 10% deposit / 90% balance math and site color palette.
+## Refactor TripsBlock into Accordion Cards
 
-## Target file
-- `src/components/operator-listing/TripsBlock.tsx` (the `TripCard` inner component, specifically the right `aside` pricing block)
+Single file change: `src/components/operator-listing/TripsBlock.tsx`. No backend, no pricing math changes (the per-trip deposit/total/balance calc already exists and stays local to each card so other trips are unaffected).
 
-## Changes to make
+### 1. Accordion behavior
+- Each `TripCard` owns its own `open` state via `useState`. First card defaults to open, the rest collapsed.
+- Toggle via a `<button>` wrapping the header (full-width, keyboard accessible, `aria-expanded`, `aria-controls`).
+- Body uses a CSS grid-rows transition (`grid-rows-[0fr]` ↔ `grid-rows-[1fr]` with `overflow-hidden`) for smooth slide. No external lib.
+- Each card's state is independent — guests/currency changes in one card never touch another.
 
-### 1. Widen the pricing column
-- Change the parent grid from `lg:grid-cols-[minmax(0,1fr)_260px]` to `lg:grid-cols-[minmax(0,1fr)_360px]` so the pricing block has room to breathe on desktop.
-- Add `min-w-[360px]` (or `min-w-[320px] sm:min-w-[360px]`) to the right `aside` to satisfy the requested 360–400px minimum width.
+### 2. Collapsed header (always visible)
+Two-line flex layout inside the toggle button:
 
-### 2. Increase padding
-- Increase the right `aside` padding from `p-4` to `p-5` (20px).
-- Increase the payment summary container padding so it is no longer cramped.
+```text
+[ Trip Title (bold 16px) .................... From $XXX  ⌄ ]
+[ Up to N guests · Departs 7:00 AM · Marina Name · 4h trip (Inshore) ]
+```
 
-### 3. Fix typography hierarchy
-- Remove all `text-[11px]` and `text-xs` inside the payment summary area.
-- Set the base summary text to `text-sm` (≈14px) or `text-[15px]`.
-- "DUE NOW TO BOOK" text: `text-sm`/`font-bold`/`uppercase`/`tracking-wide`.
-- Deposit price: `text-2xl`/`font-extrabold` (≈20px+).
-- Total cost / remaining balance rows: `text-sm`/`font-medium` labels with `font-semibold` prices.
+- Top row: `flex justify-between items-center`. Left: title. Right: "From {baseDisplay}" + animated `ChevronDown` (rotates 180° when open).
+- Meta row: small muted text with `·` separators. Pieces only render if data present: max guests, departure time, departure_location/address (truncated), duration + first environment/technique label in parens.
 
-### 4. Restructure the payment summary as a distinct callout card
-- Wrap the whole payment summary in a rounded bordered container (`rounded-xl border`).
-- Give the deposit section its own full-width highlighted background card (`bg-gold/20 text-ocean-deep`) with generous internal padding.
-- Stack "DUE NOW TO BOOK" label above the large deposit price, not side-by-side, to match the reference image and avoid wrapping.
-- Keep the "Charged today to secure your spot" sub-line below the deposit price.
+### 3. Expanded body
+- Slides down below the header inside the same card.
+- Inner container: `p-5 lg:p-6` with `lg:min-w-[380px]` so prices don't wrap.
+- Order: description + species/env chips (left/top) → **Guest selector** → **Payment summary** → **Check Dates / Request to Book button** → helper note.
+- Drop the two-column grid; stack vertically so the payment box gets full card width on desktop.
 
-### 5. Prevent awkward text wrapping
-- For the "Total Trip Cost" and "Remaining Balance" rows, use `flex items-center justify-between`.
-- Place the descriptive text on the left and the converted price on the right.
-- Apply `whitespace-nowrap` to each price element so it never breaks onto a second line.
-- Remove the `({guests} guest…)` detail from the label or keep it compact so the label itself does not fight the price for space.
+### 4. Dynamic pricing
+Already wired: `guests` state + `useCurrencyStore` + `convertMinor` + `formatCurrency`. Keep as-is. Recalc happens on every render so guest or currency change updates instantly, only for that card.
 
-### 6. Match site colors
-- Deposit callout uses existing brand tokens: `bg-gold/20` (or `bg-gold/15`) + `text-ocean-deep`.
-- Keep the gold CTA button (`bg-gold text-ocean-deep`) and the existing `CurrencyDisclaimer` below unchanged.
-- Do not introduce new hardcoded colors; rely on existing `gold`/`ocean-deep`/`muted-foreground` tokens already defined in `src/styles.css`.
+### 5. Payment summary visual hierarchy
 
-## Out of scope
-- No changes to deposit/balance math (already 10% / 90%).
-- No changes to currency conversion, booking dialogs, or server functions.
-- No changes to the left-side trip content or the `TripsBlock` list wrapper.
+```text
+┌────────────────────────────────────────────────┐
+│  DUE NOW TO BOOK                               │  ← green band
+│  (Charged today to secure your spot)           │
+│                                                │
+│  $XX.XX     ← massive, bold, green             │
+└────────────────────────────────────────────────┘
+  Total Trip Cost:                       $XXX.XX
+  Remaining Balance                      $XXX.XX
+  (Paid directly to guide at boat)
+```
 
-## Acceptance criteria
-- On desktop, the pricing block is ≥360px wide, padding is 20px, and no summary text is smaller than 14px.
-- The deposit price is large and bold; the deposit callout is visually distinct.
-- "Total Trip Cost" and "Remaining Balance" rows sit on single lines with price on the right and no wrapping.
-- The UI still matches the site's gold + navy color scheme.
+- Replace current gold-themed callout with a green theme: `bg-emerald-50 border-emerald-200`, label `text-emerald-900 font-bold uppercase tracking-wide text-sm`, deposit price `text-4xl font-extrabold text-emerald-600` (or `text-emerald-700` for AA contrast).
+- Rows below: `flex justify-between items-baseline`, prices `whitespace-nowrap font-semibold`.
+- Remaining-balance helper text sits inline (smaller) under the row label, matching the spec.
+
+### 6. Checkout button + footer note
+- Keep existing Check Dates / Request to Book button logic untouched.
+- Add below the button: `<p class="mt-2 text-xs text-muted-foreground text-center">You are only paying a 10% deposit online today. The remaining 90% balance is paid directly to your captain at the dock.</p>`
+
+### Out of scope
+- Pricing formulas, currency hook, CheckDates/RequestToBook dialogs, booking-type branching, parent `TripsBlock` header.
+- No new dependencies (no Radix Accordion needed — local state keeps each card truly independent and avoids shared-context resets).
