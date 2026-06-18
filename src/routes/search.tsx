@@ -296,7 +296,7 @@ function SearchPage() {
         </button>
 
         <PopoverPill
-          label={activeCategoryLabel === "All categories" ? "Category" : activeCategoryLabel}
+          label={activeCategoryLabel === "All trip types" ? "Trip Type" : activeCategoryLabel}
           active={!!search.category}
         >
           <div className="w-60 p-2">
