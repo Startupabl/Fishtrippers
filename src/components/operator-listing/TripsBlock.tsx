@@ -305,7 +305,7 @@ function TripCard({
                         : setRequestOpen(true)
                     }
                   >
-                    {instantReady ? "Check Dates" : "Request to Book"}
+                  {instantReady ? "View Availability" : "Request to Book"}
                   </Button>
                   <p className="mt-2 text-center text-xs text-muted-foreground">
                     You are only paying a 10% deposit online today. The
