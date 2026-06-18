@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { createFileRoute, Link, notFound, useNavigate } from "@tanstack/react-router";
+import { createFileRoute, Link, notFound, redirect, isRedirect, useNavigate } from "@tanstack/react-router";
 import { useServerFn } from "@tanstack/react-start";
 import { useQuery } from "@tanstack/react-query";
 import { listPublicUpcomingCohorts } from "@/lib/bookings.functions";
@@ -66,12 +66,27 @@ export const Route = createFileRoute("/c/$categorySlug/$listingSlug")({
   validateSearch: (search: Record<string, unknown>) => ({
     admin: search.admin === 1 || search.admin === "1" ? 1 : undefined,
   }),
-  loader: ({ params }) => {
+  loader: async ({ params }) => {
     const path = getPathBySlug(params.listingSlug);
     if (path) {
       const mentor = getMentorBySlug(path.mentorSlug);
       if (!mentor) throw notFound();
       return { kind: "fixture" as const, path, mentor, slug: params.listingSlug, categorySlug: params.categorySlug };
+    }
+    // If this slug points at an operator (current or historical), 301 to /charters/...
+    try {
+      const { lookupOperatorRedirectBySlug } = await import("@/lib/operator-redirect.functions");
+      const target = await lookupOperatorRedirectBySlug({ data: { slug: params.listingSlug } });
+      if (target) {
+        throw redirect({
+          to: "/charters/$location/$businessSlug",
+          params: { location: target.location, businessSlug: target.businessSlug },
+          statusCode: 301,
+          replace: true,
+        });
+      }
+    } catch (e: unknown) {
+      if (isRedirect(e)) throw e;
     }
     return { kind: "draft" as const, path: null, mentor: null, slug: params.listingSlug, categorySlug: params.categorySlug };
   },

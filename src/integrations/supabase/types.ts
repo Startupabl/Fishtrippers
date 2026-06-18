@@ -936,6 +936,38 @@ export type Database = {
           },
         ]
       }
+      operator_slug_history: {
+        Row: {
+          created_at: string
+          id: string
+          old_business_slug: string
+          old_location_slug: string
+          operator_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          old_business_slug: string
+          old_location_slug: string
+          operator_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          old_business_slug?: string
+          old_location_slug?: string
+          operator_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "operator_slug_history_operator_id_fkey"
+            columns: ["operator_id"]
+            isOneToOne: false
+            referencedRelation: "operators"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       operators: {
         Row: {
           about: string | null
@@ -965,6 +997,7 @@ export type Database = {
           id: string
           listing_number: string | null
           location: string | null
+          location_slug: string | null
           moderation_note: string | null
           moderation_status: Database["public"]["Enums"]["journey_moderation_status"]
           owner_id: string
@@ -1006,6 +1039,7 @@ export type Database = {
           id?: string
           listing_number?: string | null
           location?: string | null
+          location_slug?: string | null
           moderation_note?: string | null
           moderation_status?: Database["public"]["Enums"]["journey_moderation_status"]
           owner_id: string
@@ -1047,6 +1081,7 @@ export type Database = {
           id?: string
           listing_number?: string | null
           location?: string | null
+          location_slug?: string | null
           moderation_note?: string | null
           moderation_status?: Database["public"]["Enums"]["journey_moderation_status"]
           owner_id?: string
@@ -1892,6 +1927,8 @@ export type Database = {
       }
       next_course_id_slug: { Args: never; Returns: string }
       purge_unused_custom_tags: { Args: never; Returns: number }
+      slugify: { Args: { _input: string }; Returns: string }
+      unaccent: { Args: { "": string }; Returns: string }
     }
     Enums: {
       app_role: "mentor" | "learner" | "admin"

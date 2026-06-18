@@ -93,6 +93,23 @@ export const Route = createFileRoute("/sitemap.xml")({
               priority: "0.8",
             });
           }
+
+          // Published + approved operators (charters/guides)
+          const { data: operators } = await supabaseAdmin
+            .from("operators")
+            .select("location_slug, slug, updated_at")
+            .eq("status", "published")
+            .eq("moderation_status", "approved");
+
+          for (const op of operators ?? []) {
+            if (!op.location_slug || !op.slug) continue;
+            entries.push({
+              path: `/charters/${op.location_slug}/${op.slug}`,
+              lastmod: op.updated_at ? new Date(op.updated_at).toISOString().split("T")[0] : undefined,
+              changefreq: "weekly",
+              priority: "0.9",
+            });
+          }
         } catch (err) {
           console.error("[sitemap] dynamic entries failed:", err);
         }

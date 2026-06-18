@@ -6,6 +6,7 @@ import { z } from "zod";
 export type OperatorCardDTO = {
   id: string;
   slug: string | null;
+  location_slug: string | null;
   display_name: string;
   city: string | null;
   state: string | null;
@@ -25,6 +26,7 @@ export type OperatorCardDTO = {
   lowest_price_label: string | null; // e.g. "From US $200"
   trip_count: number;
 };
+
 
 const searchSchema = z.object({
   q: z.string().optional().nullable(),
@@ -89,7 +91,7 @@ export const searchOperatorsServer = createServerFn({ method: "POST" })
       .from("operators")
       .select(
         `
-        id, slug, display_name, business_type,
+        id, slug, location_slug, display_name, business_type,
         default_departure_city, default_departure_state, default_departure_country,
         cover_image_url, booking_type, fishing_environments, featured, priority_order, created_at,
         vessels ( length_ft, max_passenger_capacity, boat_type_id, boat_types ( icon_url, subcategory_name ) ),
@@ -169,6 +171,7 @@ export const searchOperatorsServer = createServerFn({ method: "POST" })
       return {
         id: row.id,
         slug: row.slug ?? null,
+        location_slug: row.location_slug ?? null,
         display_name: row.display_name ?? "Untitled listing",
         city: row.default_departure_city ?? null,
         state: row.default_departure_state ?? null,
