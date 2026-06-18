@@ -1,26 +1,39 @@
-## Why the trip isn't showing
+# Functional Share Button on Listing Page
 
-Your trip "Full Day Trip" exists in the database but its `status` is `draft`. The public listing page (`/charters/.../...`) only renders trips with `status = 'active'`, so visitors (and you when logged in as a non-owner) don't see it.
+Currently the Share icon in `HeaderGallery` is a non-functional button. We'll make it open a share dialog matching the reference design.
 
-The trip status enum supports: `draft`, `active`, `archived`. New trips currently default to `draft`, and there's no UI yet for the owner to publish/activate a trip — so every trip stays hidden from the public.
+## What gets built
 
-## Fix
+A "Share this experience" modal triggered by the existing Share icon, containing:
 
-1. **`src/lib/trips.functions.ts`** — extend `upsertTrip` to accept an optional `status` field (`'draft' | 'active'`) and persist it on insert/update. Also add a small `setTripStatus({ id, status })` server function so the dashboard can toggle publish without re-submitting the whole form.
+- **Title:** "Share this experience" with a close (X) button.
+- **Prefilled message:** `I just found this {Listing Name} in {City, Region} on FishTrippers. Check it out!`
+- **Share links** (stacked rows with icon + label, divider between each):
+  - Facebook → `https://www.facebook.com/sharer/sharer.php?u={url}&quote={text}`
+  - Messenger → `fb-messenger://share?link={url}` (falls back to `https://www.facebook.com/dialog/send?...`)
+  - X (formerly Twitter) → `https://twitter.com/intent/tweet?url={url}&text={text}`
+  - Email → `mailto:?subject=...&body={text}%20{url}`
+- **"or" divider**
+- **"Share this link"** label + read-only input with the page URL
+- **"Copy link"** primary button (shows "Copied!" state briefly on success)
 
-2. **`src/lib/trips.shared.ts`** — add `status` to the Zod input schema (optional, defaults to `'draft'` on create; on update preserves existing).
+Each share link opens in a new tab (`target="_blank" rel="noopener"`).
 
-3. **Owner trips dashboard** (the page that lists/edits trips under `_authenticated`) — for each trip row, show its status as a badge and add a primary action:
-   - If `draft` → "Publish" button → calls `setTripStatus({ status: 'active' })`.
-   - If `active` → "Unpublish" button → sets back to `draft`.
-   After success, invalidate the trips query so the badge updates.
+## Files to change
 
-4. **One-off fix for your existing trip** — flip the current `Full Day Trip` row from `draft` to `active` via a migration so it appears immediately on the public listing without you needing to click publish first.
+1. **New:** `src/components/operator-listing/ShareDialog.tsx`
+   - Props: `open`, `onOpenChange`, `title` (listing name), `location` (city, region), `url`.
+   - Uses existing `Dialog` from `@/components/ui/dialog` and `Button` / `Input`.
+   - Icons from `lucide-react`: `Facebook`, `MessageCircle`, `Twitter` (or `X`), `Mail`.
+   - Computes share URL client-side: prefer `window.location.href`, fallback to passed-in `url`.
+   - `navigator.clipboard.writeText` for Copy link.
 
-5. No RLS or public-fetch changes needed — `operator-public.functions.ts` already correctly filters to `status='active'`.
+2. **Edit:** `src/components/operator-listing/HeaderGallery.tsx`
+   - Add `const [shareOpen, setShareOpen] = useState(false)`.
+   - Wire existing Share button `onClick={() => setShareOpen(true)}`.
+   - Render `<ShareDialog open={shareOpen} onOpenChange={setShareOpen} title={title} location={location} />` at the bottom of the section.
 
 ## Out of scope
 
-- No changes to the create-listing flow itself.
-- No changes to public listing fetch logic.
-- No archive UI in this pass (status enum supports it but we'll leave it for later).
+- No backend changes, no analytics tracking, no QR code, no SMS/WhatsApp.
+- Styling stays consistent with existing shadcn dialog patterns; not pixel-cloning FishingBooker's modal, just matching its structure (title, message, link rows with dividers, "or", URL input, Copy button).
