@@ -1,5 +1,6 @@
 // Shared filter option lists for the search directory.
 // Slugs are stored in trip_packages.techniques / target_species arrays.
+import { SPECIES_LIST, speciesIdFromLabel, FISHING_TECHNIQUES } from "@/lib/operators.shared";
 
 export type FilterOption = { slug: string; label: string };
 
@@ -39,35 +40,14 @@ export const PRICE_MIN = 0;
 export const PRICE_MAX = 5000;
 export const PRICE_STEP = 50;
 
-export const TECHNIQUE_OPTIONS: FilterOption[] = [
-  { slug: "fly-fishing", label: "Fly Fishing" },
-  { slug: "trolling", label: "Trolling" },
-  { slug: "jigging", label: "Jigging" },
-  { slug: "bottom-fishing", label: "Bottom Fishing" },
-  { slug: "deep-drop", label: "Deep Drop" },
-  { slug: "casting", label: "Casting" },
-  { slug: "drift-fishing", label: "Drift Fishing" },
-  { slug: "live-bait", label: "Live Bait" },
-  { slug: "spearfishing", label: "Spearfishing" },
-  { slug: "kite-fishing", label: "Kite Fishing" },
-];
+export const TECHNIQUE_OPTIONS: FilterOption[] = FISHING_TECHNIQUES.map((t) => ({
+  slug: t,
+  label: t,
+}));
 
-export const SPECIES_OPTIONS: FilterOption[] = [
-  { slug: "redfish", label: "Redfish" },
-  { slug: "speckled-trout", label: "Speckled Trout" },
-  { slug: "tarpon", label: "Tarpon" },
-  { slug: "snook", label: "Snook" },
-  { slug: "tuna", label: "Tuna" },
-  { slug: "marlin", label: "Marlin" },
-  { slug: "kingfish", label: "Kingfish" },
-  { slug: "mahi-mahi", label: "Mahi Mahi" },
-  { slug: "snapper", label: "Snapper" },
-  { slug: "grouper", label: "Grouper" },
-  { slug: "cobia", label: "Cobia" },
-  { slug: "bass", label: "Bass" },
-  { slug: "sailfish", label: "Sailfish" },
-  { slug: "wahoo", label: "Wahoo" },
-];
+export const SPECIES_OPTIONS: FilterOption[] = SPECIES_LIST
+  .map((label) => ({ slug: speciesIdFromLabel(label), label }))
+  .sort((a, b) => a.label.localeCompare(b.label));
 
 export function csvToList(s: string | null | undefined): string[] {
   if (!s) return [];

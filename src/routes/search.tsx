@@ -158,7 +158,7 @@ function SearchPage() {
 
   const activeCategoryLabel =
     FISHING_ENVIRONMENTS.find((e) => e.id === search.category)?.label ??
-    "All categories";
+    "All trip types";
 
   const durationLabel = search.duration
     ? DURATION_OPTIONS.find((o) => o.value === search.duration)?.label ?? "Duration"
@@ -296,7 +296,7 @@ function SearchPage() {
         </button>
 
         <PopoverPill
-          label={activeCategoryLabel === "All categories" ? "Category" : activeCategoryLabel}
+          label={activeCategoryLabel === "All trip types" ? "Trip Type" : activeCategoryLabel}
           active={!!search.category}
         >
           <div className="w-60 p-2">
@@ -310,7 +310,7 @@ function SearchPage() {
                   : "text-foreground hover:bg-accent",
               )}
             >
-              All categories
+              All trip types
             </button>
             {FISHING_ENVIRONMENTS.map((env) => (
               <button
