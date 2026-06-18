@@ -338,15 +338,24 @@ function TripCard({
                   size="icon"
                   variant="outline"
                   className="h-9 w-9"
-                  disabled={guests >= maxParty}
-                  onClick={() => setGuests((g) => Math.min(maxParty, g + 1))}
+                  disabled={guests >= guestUpperBound}
+                  onClick={() => {
+                    if (guests >= guestUpperBound) {
+                      if (isShared && remainingSeats !== null) {
+                        toast(`Only ${remainingSeats} seat${remainingSeats === 1 ? "" : "s"} left.`);
+                      }
+                      return;
+                    }
+                    setGuests((g) => Math.min(guestUpperBound, g + 1));
+                  }}
                   aria-label="Increase guests"
                 >
                   <Plus className="h-4 w-4" />
                 </Button>
                 <span className="ml-1 text-sm text-muted-foreground">
-                  of {maxParty}
+                  of {guestUpperBound}
                 </span>
+
                 {perExtra > 0 && (
                   <span className="ml-auto text-xs text-muted-foreground">
                     +{formatCurrency(extraDisplay, display)} / extra guest
