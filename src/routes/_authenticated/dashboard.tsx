@@ -37,7 +37,7 @@ export const Route = createFileRoute("/_authenticated/dashboard")({
   head: () => ({
     meta: [
       { title: "Dashboard — FishTrippers" },
-      { name: "description", content: "Manage your Courses, availability, and earnings." },
+      { name: "description", content: "Manage your Trips, availability, and earnings." },
     ],
   }),
   component: DashboardLayout,

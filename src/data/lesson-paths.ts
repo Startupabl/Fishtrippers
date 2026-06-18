@@ -69,8 +69,8 @@ export const JOURNEY_THUMBNAIL_FALLBACK =
         <path d='M0 560 C 200 500, 400 620, 600 560 S 1000 500, 1200 560'/>
       </g>
       <g font-family='Inter, system-ui, sans-serif' fill='#333333' fill-opacity='0.55'>
-        <text x='60' y='110' font-size='28' font-weight='600' letter-spacing='4'>AIMENTORING.IO</text>
-        <text x='60' y='150' font-size='18' font-weight='400'>Live, Aide-Guided AI</text>
+        <text x='60' y='110' font-size='28' font-weight='600' letter-spacing='4'>AIGUIDING.IO</text>
+        <text x='60' y='150' font-size='18' font-weight='400'>Live, Guide-Guided AI</text>
       </g>
     </svg>`,
   );
@@ -87,8 +87,8 @@ const DEFAULT_WEEKS = 2;
 export function formatJourneyContents(p: PathFixture): string {
   const lessons = p.totalLessons ?? DEFAULT_LESSONS;
   const sessions = p.totalMentorSessions ?? DEFAULT_SESSIONS;
-  const lessonWord = lessons === 1 ? "Lesson" : "Lessons";
-  const sessionWord = sessions === 1 ? "Mentoring Session" : "Mentoring Sessions";
+  const lessonWord = lessons === 1 ? "Trip" : "Trips";
+  const sessionWord = sessions === 1 ? "Guiding Session" : "Guiding Sessions";
   return `Includes ${lessons} ${lessonWord} + ${sessions} ${sessionWord}`;
 }
 
@@ -118,7 +118,7 @@ export const MENTORS: MentorFixture[] = [
     avatarUrl:
       "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=400&auto=format&fit=crop&q=80",
     bio: "Senior ML engineer. Helps career-switchers land their first AI role.",
-    tagline: "Career mentor for aspiring AI pros.",
+    tagline: "Career guide for aspiring AI pros.",
     goals: ["work"],
     devices: ["computer"],
     pace: ["fast"],

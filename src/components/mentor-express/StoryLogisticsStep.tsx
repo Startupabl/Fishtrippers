@@ -148,10 +148,10 @@ export function StoryLogisticsStep({
     >
       <header>
         <h2 className="text-2xl text-foreground" style={lora}>
-          Course Description
+          Fishing Trip Description
         </h2>
         <p className="mt-1 text-sm text-muted-foreground">
-          Describe what learners will create, set the pace, and price the journey.
+          Describe what anglers will create, set the pace, and price the journey.
         </p>
       </header>
 
@@ -160,7 +160,7 @@ export function StoryLogisticsStep({
         <div>
           <div className="flex items-baseline justify-between">
             <label className="text-sm font-medium text-foreground">
-              Describe Your Course
+              Describe Your Fishing Trip
             </label>
             <span className="text-xs text-muted-foreground">
               {description.length}/800
@@ -169,7 +169,7 @@ export function StoryLogisticsStep({
           <Textarea
             value={description}
             onChange={(e) => setDescription(e.target.value)}
-            placeholder="What will learners create or master? Who is this for?"
+            placeholder="What will anglers create or master? Who is this for?"
             className="mt-1 min-h-32 rounded-xl"
             maxLength={800}
           />
@@ -183,10 +183,10 @@ export function StoryLogisticsStep({
       <Card className="rounded-3xl border-border/60 bg-card p-6 md:p-8 space-y-4">
         <div>
           <h3 className="text-lg text-foreground" style={lora}>
-            The Course Roadmap
+            The Fishing Trip Roadmap
           </h3>
           <p className="mt-1 text-sm text-muted-foreground">
-            Give each session a clear title so learners can see the path ahead.
+            Give each session a clear title so anglers can see the path ahead.
           </p>
         </div>
 
@@ -223,7 +223,7 @@ export function StoryLogisticsStep({
             Contact Hours
           </h3>
           <p className="mt-1 text-sm text-muted-foreground">
-            Total engagement hours included in this course.
+            Total engagement hours included in this fishing trip.
           </p>
         </div>
 
@@ -250,7 +250,7 @@ export function StoryLogisticsStep({
 
         <div>
           <label className="text-sm font-medium text-foreground">
-            Learner Capacity
+            Angler Capacity
           </label>
           <Input
             type="number"
@@ -262,7 +262,7 @@ export function StoryLogisticsStep({
             required
           />
           <p className="mt-1 text-sm text-muted-foreground">
-            How many learners can join this course session?
+            How many anglers can join this fishing trip session?
           </p>
         </div>
 
@@ -282,7 +282,7 @@ export function StoryLogisticsStep({
             Discovery Tags
           </h3>
           <p className="mt-1 text-sm text-muted-foreground">
-            Add up to 10 keywords learners might search for (e.g. "ChatGPT", "Midjourney", "resume").
+            Add up to 10 keywords anglers might search for (e.g. "ChatGPT", "Midjourney", "resume").
           </p>
         </div>
         <TagCombobox value={tags} onChange={setTags} max={10} maxLength={30} />
@@ -388,7 +388,7 @@ const SessionRow = memo(function SessionRow({
         <Textarea
           value={description}
           onChange={(e) => onDescriptionChange(index, e.target.value)}
-          placeholder="Add a short description of what learners will explore in this session."
+          placeholder="Add a short description of what anglers will explore in this session."
           maxLength={600}
           className="mt-1 min-h-20 rounded-xl text-sm"
         />

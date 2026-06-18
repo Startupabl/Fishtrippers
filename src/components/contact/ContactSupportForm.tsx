@@ -21,13 +21,13 @@ import { submitSupportTicket } from "@/lib/support-tickets.functions";
 const TOPIC_OPTIONS = [
   { value: "general_question", label: "General Question" },
   { value: "billing_stripe", label: "Billing & Stripe Connect" },
-  { value: "virtual_classroom_tech", label: "Virtual Classroom Tech Issue" },
+  { value: "virtual_classroom_tech", label: "Virtual Trip room Tech Issue" },
   { value: "booking_no_show", label: "Report a Booking/No-Show Issue" },
 ] as const;
 
 const USER_TYPE_OPTIONS = [
-  { value: "learner", label: "Learner" },
-  { value: "aide", label: "Aide" },
+  { value: "angler", label: "Angler" },
+  { value: "guide", label: "Guide" },
   { value: "visitor", label: "Visitor" },
 ] as const;
 
@@ -196,9 +196,9 @@ export function ContactSupportForm() {
         </div>
 
         <Field
-          label="Booking ID / Course Name"
+          label="Booking ID / Fishing Trip Name"
           htmlFor="cs-booking"
-          hint="Only required if reporting an issue with a specific lesson"
+          hint="Only required if reporting an issue with a specific trip"
           error={errors.booking_id}
         >
           <div className="relative">
@@ -220,7 +220,7 @@ export function ContactSupportForm() {
           </div>
           {isBookingTopic && (
             <p className="mt-1 text-xs font-medium text-[#B8860B]">
-              Please include the Booking ID or Course Name so we can investigate.
+              Please include the Booking ID or Fishing Trip Name so we can investigate.
             </p>
           )}
         </Field>

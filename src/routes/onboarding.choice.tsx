@@ -1,6 +1,6 @@
 import { useEffect } from "react";
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
-import { GraduationCap, Sparkles } from "lucide-react";
+import { Anchor, Fish } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useAuthStore } from "@/stores/useAuthStore";
 import { startNewMentorExpressListing } from "@/stores/useMentorExpressStore";
@@ -10,10 +10,10 @@ import { useProfileGuard } from "@/components/onboarding/ProfileCompletionGuard"
 export const Route = createFileRoute("/onboarding/choice")({
   head: () => ({
     meta: [
-      { title: "Choose your path — FishTrippers" },
+      { title: "How would you like to start? — FishTrippers" },
       {
         name: "description",
-        content: "Tell us how you want to use FishTrippers.",
+        content: "Tell us how you want to use FishTrippers — book a fishing trip or list your own.",
       },
     ],
   }),
@@ -72,36 +72,27 @@ function ChoicePage() {
 
       <div className="mt-8 grid grid-cols-1 gap-4 sm:grid-cols-2">
         <Link
-          to="/"
-          onClick={() => {
-            try {
-              localStorage.setItem("fishtrippers_quiz_open", "1");
-            } catch {
-              // ignore
-            }
-          }}
+          to="/search"
           aria-disabled={!ready}
           className={
             "group flex flex-col gap-3 rounded-2xl border border-border bg-card p-6 transition-colors hover:border-info hover:bg-accent " +
             (ready ? "" : "pointer-events-none opacity-60")
           }
         >
-
-          <Sparkles className="size-6 text-info" />
+          <Fish className="size-6 text-info" />
           <span
             className="text-xl text-foreground"
             style={{ fontFamily: "Lora, ui-serif, Georgia, serif" }}
           >
-            I want to learn
+            I want to Fish
           </span>
           <span className="text-sm text-muted-foreground">
-            Take the 30-Second Flavor Quiz and meet your perfect Aide.
+            Browse fishing trips and book with a local guide.
           </span>
         </Link>
 
         <Link
-          to="/mentor/create-path"
-          search={{ new: true }}
+          to="/create-listing"
           onClick={guard(startNewMentorExpressListing)}
           aria-disabled={!ready}
           className={
@@ -109,15 +100,15 @@ function ChoicePage() {
             (ready ? "" : "pointer-events-none opacity-60")
           }
         >
-          <GraduationCap className="size-6 text-info" />
+          <Anchor className="size-6 text-info" />
           <span
             className="text-xl text-foreground"
             style={{ fontFamily: "Lora, ui-serif, Georgia, serif" }}
           >
-            I want to be an Aide
+            I want to list my fishing trips
           </span>
           <span className="text-sm text-muted-foreground">
-            Introduce yourself once, then publish your first Course.
+            Set up your guide profile and publish your first fishing trip.
           </span>
         </Link>
       </div>

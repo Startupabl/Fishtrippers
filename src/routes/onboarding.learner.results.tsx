@@ -24,7 +24,7 @@ export const Route = createFileRoute("/onboarding/learner/results")({
       { title: "Your perfect AI guides — FishTrippers" },
       {
         name: "description",
-        content: "Your top 3 Aide matches, hand-picked from your answers.",
+        content: "Your top 3 Guide matches, hand-picked from your answers.",
       },
     ],
   }),

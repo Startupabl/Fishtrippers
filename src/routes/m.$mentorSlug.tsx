@@ -21,7 +21,7 @@ export const Route = createFileRoute("/m/$mentorSlug")({
     const origin =
       typeof window !== "undefined" ? window.location.origin : "https://FishTrippers";
     const url = `${origin}/m/${mentor.slug}`;
-    const title = `${displayMentorName(mentor.name)} — Aide on FishTrippers`;
+    const title = `${displayMentorName(mentor.name)} — Guide on FishTrippers`;
     const description = mentor.bio.slice(0, 155);
 
     return {
@@ -29,14 +29,14 @@ export const Route = createFileRoute("/m/$mentorSlug")({
         { title },
         { name: "description", content: description },
         { property: "og:type", content: "profile" },
-        { property: "og:title", content: `${displayMentorName(mentor.name)} — Aide on FishTrippers` },
+        { property: "og:title", content: `${displayMentorName(mentor.name)} — Guide on FishTrippers` },
         { property: "og:description", content: description },
         { property: "og:image", content: mentor.avatarUrl },
         { property: "og:image:alt", content: mentor.name },
         { property: "og:url", content: url },
         { property: "og:site_name", content: "FishTrippers" },
         { name: "twitter:card", content: "summary_large_image" },
-        { name: "twitter:title", content: `${displayMentorName(mentor.name)} — Aide on FishTrippers` },
+        { name: "twitter:title", content: `${displayMentorName(mentor.name)} — Guide on FishTrippers` },
         { name: "twitter:description", content: description },
         { name: "twitter:image", content: mentor.avatarUrl },
       ],
@@ -51,7 +51,7 @@ export const Route = createFileRoute("/m/$mentorSlug")({
             image: mentor.avatarUrl,
             description,
             url,
-            jobTitle: "Aide",
+            jobTitle: "Guide",
           }),
         },
       ],
@@ -86,7 +86,7 @@ function MentorPage() {
               >
                 {displayMentorName(mentor.name)}
               </h1>
-              <p className="mt-1 text-sm text-muted-foreground">Aide</p>
+              <p className="mt-1 text-sm text-muted-foreground">Guide</p>
             </div>
           </div>
           <ContactMentorButton mentorName={displayMentorName(mentor.name)} />
@@ -99,7 +99,7 @@ function MentorPage() {
             className="text-xl text-foreground"
             style={{ fontFamily: "Lora, ui-serif, Georgia, serif" }}
           >
-            Courses {displayMentorName(mentor.name)} teaches
+            Trips {displayMentorName(mentor.name)} teaches
           </h2>
           <ul className="mt-3 space-y-3">
             {paths.map((p: typeof paths[number]) => (
@@ -123,7 +123,7 @@ function MentorPage() {
       <aside className="lg:pt-2">
         <SharePath
           url={url}
-          title={`${displayMentorName(mentor.name)}'s mentor profile`}
+          title={`${displayMentorName(mentor.name)}'s guide profile`}
           mentorName={displayMentorName(mentor.name)}
           compact
         />

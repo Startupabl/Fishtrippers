@@ -131,7 +131,7 @@ function UpcomingSessionsPage() {
   }, [user, navigate]);
 
   const { data: rows, isLoading } = useQuery({
-    queryKey: ["aide-schedule-rows", user?.id],
+    queryKey: ["guide-schedule-rows", user?.id],
     queryFn: () => fetchRows(),
     enabled: !!user,
   });
@@ -149,7 +149,7 @@ function UpcomingSessionsPage() {
   }, [allRows]);
 
   const { data: completions } = useQuery({
-    queryKey: ["aide-session-completions", user?.id, orderIds.sort().join(",")],
+    queryKey: ["guide-session-completions", user?.id, orderIds.sort().join(",")],
     queryFn: () => listCompletionsFn({ data: { order_ids: orderIds } }),
     enabled: !!user && orderIds.length > 0,
   });
@@ -164,8 +164,8 @@ function UpcomingSessionsPage() {
 
   const refresh = async () => {
     await Promise.all([
-      queryClient.invalidateQueries({ queryKey: ["aide-schedule-rows"] }),
-      queryClient.invalidateQueries({ queryKey: ["aide-session-completions"] }),
+      queryClient.invalidateQueries({ queryKey: ["guide-schedule-rows"] }),
+      queryClient.invalidateQueries({ queryKey: ["guide-session-completions"] }),
     ]);
   };
 
@@ -190,7 +190,7 @@ function UpcomingSessionsPage() {
       }
       toast.success(
         isFinal
-          ? "Course completed — certificate issued."
+          ? "Fishing Trip completed — certificate issued."
           : "Session marked complete.",
       );
       await refresh();
@@ -208,7 +208,7 @@ function UpcomingSessionsPage() {
         await deleteEntireFn({
           data: { class_session_id: deleteTarget.classSessionId },
         });
-        toast.success("Course removed.");
+        toast.success("Fishing Trip removed.");
       } else {
         await deleteFn({
           data: {
@@ -397,19 +397,19 @@ function UpcomingSessionsPage() {
           <AlertDialogHeader>
             <AlertDialogTitle>
               {deleteTarget && deleteTarget.sessionSlotCount > 1
-                ? "Remove this multi-session course?"
+                ? "Remove this multi-session fishing trip?"
                 : "Delete this session?"}
             </AlertDialogTitle>
             <AlertDialogDescription>
               {deleteTarget && deleteTarget.sessionSlotCount > 1
-                ? "This session is part of a complete multi-session course package. Deleting it will remove the entire scheduled course and all of its associated sessions from the platform. Do you wish to proceed?"
-                : "This slot will be removed from your schedule. If no learner has booked yet, the listing or offer will no longer be available at this time."}
+                ? "This session is part of a complete multi-session fishing trip package. Deleting it will remove the entire scheduled fishing trip and all of its associated sessions from the platform. Do you wish to proceed?"
+                : "This slot will be removed from your schedule. If no angler has booked yet, the listing or offer will no longer be available at this time."}
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
             <AlertDialogCancel>Cancel</AlertDialogCancel>
             <AlertDialogAction onClick={(e) => { e.preventDefault(); handleDelete(); }}>
-              {deleteTarget && deleteTarget.sessionSlotCount > 1 ? "Remove course" : "Delete"}
+              {deleteTarget && deleteTarget.sessionSlotCount > 1 ? "Remove fishing trip" : "Delete"}
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>
@@ -575,7 +575,7 @@ function ScheduleTableRow({
               <>
                 {joinOrderId && (
                   <Button size="sm" onClick={onJoin}>
-                    Join Classroom
+                    Join Trip room
                   </Button>
                 )}
                 <DropdownMenu>
@@ -692,7 +692,7 @@ function RescheduleDialog({
           <DialogTitle>Request a reschedule</DialogTitle>
           <DialogDescription>
             To ensure a smooth reschedule, please confirm the new date/time
-            with your learners via message first. Once submitted, we'll send
+            with your anglers via message first. Once submitted, we'll send
             your request to them for approval; the current time will remain
             in place until they accept.
           </DialogDescription>
@@ -748,7 +748,7 @@ function StudentNameWithMessage({
   const navigate = useNavigate();
   const ensureThreadFn = useServerFn(ensureThreadForAideWithLearner);
   const [busy, setBusy] = useState(false);
-  const firstName = (student.name || "").trim().split(/\s+/)[0] || "learner";
+  const firstName = (student.name || "").trim().split(/\s+/)[0] || "angler";
 
   async function openThread() {
     if (!journeyId || busy) return;

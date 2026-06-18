@@ -52,7 +52,7 @@ export const Route = createFileRoute("/_authenticated/dashboard/aide/courses")({
   head: () => ({
     meta: [
       { title: "My Listings — FishTrippers" },
-      { name: "description", content: "Manage the listings you offer as an Aide." },
+      { name: "description", content: "Manage the listings you offer as an Guide." },
     ],
   }),
   component: MyCoursesPage,
@@ -230,10 +230,10 @@ function MyCoursesPage() {
     try {
       if (confirm.kind === "archive") {
         await archiveFn({ data: { id: confirm.row.row.id } });
-        toast.success("Course archived");
+        toast.success("Fishing Trip archived");
       } else {
         await deleteFn({ data: { id: confirm.row.row.id } });
-        toast.success("Course deleted");
+        toast.success("Fishing Trip deleted");
       }
       refetch();
     } catch (e) {
@@ -263,7 +263,7 @@ function MyCoursesPage() {
               My Listings
             </h1>
             <p className="mt-1 text-sm text-muted-foreground">
-              Manage every listing you offer as an Aide.
+              Manage every listing you offer as an Guide.
             </p>
           </div>
           <div className="flex gap-2">
@@ -571,8 +571,8 @@ function MyCoursesPage() {
           <AlertDialogHeader>
             <AlertDialogTitle>
               {confirm?.kind === "archive"
-                ? "Archive this Course?"
-                : "Permanently delete this Course?"}
+                ? "Archive this Fishing Trip?"
+                : "Permanently delete this Fishing Trip?"}
             </AlertDialogTitle>
             <AlertDialogDescription>
               {confirm?.kind === "archive"

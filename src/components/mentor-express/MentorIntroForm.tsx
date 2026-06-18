@@ -84,7 +84,7 @@ export function MentorIntroForm({
           Introduce Yourself
         </h1>
         <p className="mt-2 text-sm text-muted-foreground">
-          This bio will appear on all your Courses so learners can get to know
+          This bio will appear on all your Trips so anglers can get to know
           you. You only need to do this once.
         </p>
       </header>
@@ -94,7 +94,7 @@ export function MentorIntroForm({
           {/* LEFT — Aide Profile Photo */}
           <div className="flex flex-col items-start gap-3">
             <label className="text-sm font-medium text-foreground">
-              Aide Profile Photo
+              Guide Profile Photo
             </label>
             <button
               type="button"
@@ -123,8 +123,8 @@ export function MentorIntroForm({
               onChange={handleFile}
             />
             <p className="text-sm text-muted-foreground">
-              This is your personal Aide Avatar for your profile and messages.
-              You will upload your specific Course Card/Banner photo in a later
+              This is your personal Guide Avatar for your profile and messages.
+              You will upload your specific Fishing Trip Card/Banner photo in a later
               step.
             </p>
           </div>
@@ -152,7 +152,7 @@ export function MentorIntroForm({
         <div className="mt-6">
           <div className="flex items-baseline justify-between">
             <label className="text-sm font-medium text-foreground">
-              Aide Bio
+              Guide Bio
             </label>
             <span
               className={`text-xs ${
@@ -169,12 +169,12 @@ export function MentorIntroForm({
           <Textarea
             value={bio}
             onChange={(e) => setBio(e.target.value)}
-            placeholder="Tell learners about your background, what you teach, and why you love being an Aide."
+            placeholder="Tell anglers about your background, what you teach, and why you love being an Guide."
             className="mt-1 min-h-32 rounded-xl"
             maxLength={600}
           />
           <p className="mt-1 text-sm text-muted-foreground">
-            80–600 characters. This appears at the bottom of every Course you
+            80–600 characters. This appears at the bottom of every Fishing Trip you
             publish.
           </p>
 
@@ -187,7 +187,7 @@ export function MentorIntroForm({
             <span className="text-sm text-foreground">
               <span className="font-medium">Make this my standard greeting.</span>
               <span className="block text-sm text-muted-foreground">
-                Checking this will update your "Meet the Aide" section across all your current courses.
+                Checking this will update your "Meet the Guide" section across all your current trips.
               </span>
             </span>
           </label>

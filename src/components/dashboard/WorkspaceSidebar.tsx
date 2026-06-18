@@ -48,7 +48,7 @@ const learnerItems: Item[] = [
 
 const guestItems: Item[] = [
   { title: "List Your Trip", to: "/mentor/create-path", search: { new: true }, icon: Plus },
-  { title: "Book a Course", to: "/search", icon: Search },
+  { title: "Book a Trip", to: "/search", icon: Search },
 ];
 
 export type WorkspaceMode = "aide" | "learner" | "both" | "none" | "loading";
@@ -63,7 +63,7 @@ export function useWorkspaceMode(): { mode: WorkspaceMode; title: string } {
   }
   if (hasListing && hasOrders) return { mode: "both", title: "My Dashboard" };
   if (hasListing) return { mode: "aide", title: `${roleLabel} Workspace` };
-  if (hasOrders) return { mode: "learner", title: "Learner Hub" };
+  if (hasOrders) return { mode: "learner", title: "Angler Hub" };
   return { mode: "none", title: "Get Started" };
 }
 
@@ -127,7 +127,7 @@ export function WorkspaceSidebar() {
               </SidebarGroupContent>
             </SidebarGroup>
             <SidebarGroup>
-              <SidebarGroupLabel>Learner Hub</SidebarGroupLabel>
+              <SidebarGroupLabel>Angler Hub</SidebarGroupLabel>
               <SidebarGroupContent>
                 <ItemsMenu items={learnerItems} />
               </SidebarGroupContent>

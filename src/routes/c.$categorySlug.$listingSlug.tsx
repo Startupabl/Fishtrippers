@@ -373,7 +373,7 @@ function PathPage() {
           title,
           description: (dbJourney.session_descriptions ?? [])[i] ?? "",
         })).filter((it) => it.title.trim().length > 0),
-        durationLine: `The Mix : ${dbJourney.session_count} live Aide session${dbJourney.session_count === 1 ? "" : "s"}`,
+        durationLine: `The Mix : ${dbJourney.session_count} live Guide session${dbJourney.session_count === 1 ? "" : "s"}`,
         isFixture: false,
         sessionCount: dbJourney.session_count,
         sessionLengthMinutes: dbJourney.session_length_minutes,
@@ -394,16 +394,16 @@ function PathPage() {
             return full ? displayMentorName(full) : "";
           })() ||
           (isOwner ? profile.displayName : "") ||
-          "Your Aide",
+          "Your Guide",
         avatarUrl:
           mentorProfile?.avatar_url ||
           (isOwner ? profile.photoDataUrl : undefined) ||
-          `https://api.dicebear.com/7.x/initials/svg?seed=${encodeURIComponent(mentorProfile?.display_name || mentorProfile?.first_name || "Aide")}`,
+          `https://api.dicebear.com/7.x/initials/svg?seed=${encodeURIComponent(mentorProfile?.display_name || mentorProfile?.first_name || "Guide")}`,
         bio:
           dbJourney.mentor_bio?.trim() ||
           mentorProfile?.bio?.trim() ||
           (isOwner ? profile.bio?.trim() : "") ||
-          "Aide bio coming soon.",
+          "Guide bio coming soon.",
         motto: mentorProfile?.motto ?? null,
       },
       dbJourneyId: dbJourney.id,
@@ -422,9 +422,9 @@ function PathPage() {
         thumbnail: fallbackThumb,
         syllabus: userPath.sessionTitles?.filter((t) => t.trim().length > 0) ?? [],
         syllabusItems: (userPath.sessionTitles ?? []).filter((t) => t.trim().length > 0).map((title) => ({ title, description: "" })),
-        durationLine: `Includes ${userPath.totalLessons ?? 4} lessons + ${
+        durationLine: `Includes ${userPath.totalLessons ?? 4} trips + ${
           userPath.totalMentorSessions ?? 1
-        } mentor sessions over ${userPath.durationWeeks ?? 2} weeks`,
+        } guide sessions over ${userPath.durationWeeks ?? 2} weeks`,
         isFixture: false,
         sessionCount: userPath.totalMentorSessions ?? 1,
         sessionLengthMinutes: 45,
@@ -447,7 +447,7 @@ function PathPage() {
   if (dbLoading && !display) {
     return (
       <div className="mx-auto max-w-3xl px-4 py-16 text-center text-sm text-muted-foreground">
-        Loading Course…
+        Loading Trip…
       </div>
     );
   }
@@ -458,7 +458,7 @@ function PathPage() {
   if (!display && adminParam && !adminCheckDone) {
     return (
       <div className="mx-auto max-w-3xl px-4 py-16 text-center text-sm text-muted-foreground">
-        Loading Course…
+        Loading Trip…
       </div>
     );
   }
@@ -470,10 +470,10 @@ function PathPage() {
           className="text-2xl text-foreground"
           style={{ fontFamily: "Lora, ui-serif, Georgia, serif" }}
         >
-          Course not found
+          Fishing trip not found
         </h1>
         <p className="mt-2 text-sm text-muted-foreground">
-          This Course may have been removed, or the link is incorrect.
+          This Fishing Trip may have been removed, or the link is incorrect.
         </p>
         <div className="mt-6">
           <Button asChild variant="info">
@@ -629,7 +629,7 @@ function PathPage() {
               <DropdownMenuSeparator />
               <DropdownMenuItem onSelect={() => setPreviewMode(true)} style={menuItemStyle}>
                 <Eye className="size-4" />
-                View as Learner
+                View as Angler
               </DropdownMenuItem>
             </DropdownMenuContent>
           </DropdownMenu>
@@ -752,7 +752,7 @@ function PathPage() {
           {/* About This Course */}
           <section className="rounded-2xl border border-border bg-card p-6">
             <h2 className="text-2xl md:text-3xl font-bold text-foreground" style={serif}>
-              Course Description
+              Trip Description
             </h2>
             {(path.category || path.experience_level) && (
               <div className="mt-2 flex flex-wrap items-center gap-2">
@@ -826,7 +826,7 @@ function PathPage() {
           {dbJourney && (dbJourney.portfolio_assets?.length ?? 0) > 0 && (
             <PortfolioSection
               journeyId={dbJourney.id}
-              firstName={(mentor.name || "Aide").split(" ")[0] || "Aide"}
+              firstName={(mentor.name || "Guide").split(" ")[0] || "Guide"}
               assets={(dbJourney.portfolio_assets ?? []) as PortfolioAsset[]}
               intro={dbJourney.showcase_intro ?? null}
             />
@@ -950,7 +950,7 @@ function PathContentBlock({
   const { guard, dialog: profileGuardDialog } = useProfileGuard();
   const [starting, setStarting] = useState(false);
 
-  const firstName = (mentor.name || "Aide").trim().split(/\s+/)[0] || "Aide";
+  const firstName = (mentor.name || "Guide").trim().split(/\s+/)[0] || "Guide";
   const isOwner = !!user && !!mentorUserId && user.id === mentorUserId && !previewMode;
   const canContact = !!journeyId && !isOwner;
 
@@ -972,12 +972,12 @@ function PathContentBlock({
       {/* About the Aide */}
       <section className="rounded-2xl border border-border bg-card p-6">
         <h2 className="text-2xl md:text-3xl font-bold text-foreground" style={serif}>
-          About the Aide
+          About the Guide
         </h2>
         {showBioNudge && (
           <div className="mt-3 flex flex-wrap items-center justify-between gap-3 rounded-xl border border-amber-300 bg-amber-50 p-3 text-sm text-amber-900">
             <span>
-              Your About the Aide section is empty. Add a short intro so learners know who they're booking.
+              Your About the Guide section is empty. Add a short intro so anglers know who they're booking.
             </span>
             <Button size="sm" variant="outline" onClick={() => onAddBio?.()}>
               Add your bio
@@ -1174,7 +1174,7 @@ function PathBookingSidebar({
         )}
         {paused && (
           <p className="text-sm text-muted-foreground">
-            This Aide is currently paused. Check back soon!
+            This Guide is currently paused. Check back soon!
           </p>
         )}
       </section>
@@ -1502,14 +1502,14 @@ function HowBookingsWorkAccordion({ courseId }: { courseId: string }) {
                 <li className="flex gap-2">
                   <span aria-hidden="true">💬</span>
                   <span>
-                    Need a different time or a 1-on-1? Click <strong>'Message Aide'</strong> to coordinate a custom schedule.
+                    Need a different time or a 1-on-1? Click <strong>'Message Guide'</strong> to coordinate a custom schedule.
                   </span>
                 </li>
               ) : (
                 <li className="flex gap-2">
                   <span aria-hidden="true">💬</span>
                   <span>
-                    No sessions currently scheduled? Click <strong>'Message Aide'</strong> directly to request a 1-on-1 session or inquire about joining the next upcoming group cohort. Once you and the Aide agree on a time, they will send a personal booking link straight to your chat inbox.
+                    No sessions currently scheduled? Click <strong>'Message Guide'</strong> directly to request a 1-on-1 session or inquire about joining the next upcoming group cohort. Once you and the Guide agree on a time, they will send a personal booking link straight to your chat inbox.
                   </span>
                 </li>
               )}

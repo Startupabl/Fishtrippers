@@ -39,7 +39,7 @@ export function ReviewYourPath({ selection }: { selection: CheckoutSelection }) 
   return (
     <Card className="rounded-3xl border-border/60 bg-card p-6 md:p-8">
       <h2 className="text-2xl text-foreground" style={lora}>
-        Review your Course
+        Review your Fishing Trip
       </h2>
 
       <div className="mt-6 flex items-center gap-4">
@@ -51,7 +51,7 @@ export function ReviewYourPath({ selection }: { selection: CheckoutSelection }) 
           <div className="text-lg text-foreground" style={lora}>
             {displayMentorName(selection.mentorName)}
           </div>
-          <div className="text-sm text-muted-foreground">Verified Aide · 4.9 ★</div>
+          <div className="text-sm text-muted-foreground">Verified Guide · 4.9 ★</div>
         </div>
       </div>
 

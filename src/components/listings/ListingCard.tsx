@@ -78,7 +78,7 @@ export function ListingCard({ path }: ListingCardProps) {
             className="min-w-0 leading-tight"
           >
             <span className="block text-[10px] uppercase tracking-wide text-muted-foreground">
-              Aide
+              Guide
             </span>
             <span className="block truncate text-xs font-medium text-foreground hover:underline">
               {displayMentorName(mentor.name)}

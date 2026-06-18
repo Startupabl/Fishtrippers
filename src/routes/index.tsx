@@ -38,17 +38,17 @@ import { MissionMatchQuiz } from "@/components/onboarding/MissionMatchQuiz";
 export const Route = createFileRoute("/")({
   head: () => ({
     meta: [
-      { title: "FishTrippers™ — Learn AI Tools 1:1 with an Expert Aide" },
+      { title: "FishTrippers™ — Learn AI Tools 1:1 with an Expert Guide" },
       {
         name: "description",
         content:
-          "Get paired with an expert Aide for live, 1:1 Courses on ChatGPT, Midjourney, and more. AI Made Refreshing™.",
+          "Get paired with an expert Guide for live, 1:1 trips on ChatGPT, Midjourney, and more. AI Made Refreshing™.",
       },
-      { property: "og:title", content: "FishTrippers™ — Learn AI Tools 1:1 with an Expert Aide" },
+      { property: "og:title", content: "FishTrippers™ — Learn AI Tools 1:1 with an Expert Guide" },
       {
         property: "og:description",
         content:
-          "Get paired with an expert Aide for live, 1:1 Courses on ChatGPT, Midjourney, and more.",
+          "Get paired with an expert Guide for live, 1:1 trips on ChatGPT, Midjourney, and more.",
       },
       { property: "og:url", content: "https://fishtrippers.com/" },
     ],
@@ -175,7 +175,7 @@ function CategoryGrid() {
           Explore by Category
         </h2>
         <p className="mt-2 text-sm text-muted-foreground">
-          Pick a flavor and find the perfect Aide-led course.
+          Pick a flavor and find the perfect Guide-led trip.
         </p>
 
         <div className="relative mt-8">

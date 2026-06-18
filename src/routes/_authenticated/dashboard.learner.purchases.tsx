@@ -88,7 +88,7 @@ function LearnerPurchases() {
         Purchase History
       </h1>
       <p className="mt-2 text-muted-foreground">
-        Every booking and receipt — sorted newest to oldest. Expand any row to view sessions, add them to your calendar, or launch the classroom.
+        Every booking and receipt — sorted newest to oldest. Expand any row to view sessions, add them to your calendar, or launch the trip room.
       </p>
 
       <div className="mt-6 w-full overflow-x-auto rounded-md border border-border">
@@ -97,7 +97,7 @@ function LearnerPurchases() {
             <TableRow>
               <TableHead className="font-bold">Date</TableHead>
               <TableHead className="font-bold">Order Number</TableHead>
-              <TableHead className="font-bold">Course Title</TableHead>
+              <TableHead className="font-bold">Fishing Trip Title</TableHead>
               <TableHead className="font-bold">Instructor</TableHead>
               <TableHead className="font-bold">Schedule</TableHead>
               <TableHead className="font-bold">Amount Paid</TableHead>

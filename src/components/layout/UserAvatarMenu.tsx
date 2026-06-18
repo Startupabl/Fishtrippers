@@ -159,7 +159,7 @@ export function UserAvatarMenuItems({
       {hasLearnerOrders && (
         <DropdownMenuItem asChild>
           <Link to="/dashboard/learner" className="flex w-full cursor-pointer items-center gap-2 px-3 py-2">
-            <GraduationCap className="size-4" /> My Learning Hub
+            <GraduationCap className="size-4" /> My Trips Hub
           </Link>
         </DropdownMenuItem>
       )}
