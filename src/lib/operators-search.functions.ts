@@ -29,11 +29,15 @@ export type OperatorCardDTO = {
 const searchSchema = z.object({
   q: z.string().optional().nullable(),
   city: z.string().optional().nullable(),
+  state: z.string().optional().nullable(),
+  country: z.string().optional().nullable(),
   category: z.string().optional().nullable(), // fishing_environment id (e.g. "inshore")
   instantBook: z.boolean().optional().nullable(),
   limit: z.number().int().min(1).max(60).optional().nullable(),
   featuredOnly: z.boolean().optional().nullable(),
 });
+
+const resolvePlacePublicSchema = z.object({ placeId: z.string().min(1) });
 
 function formatPrice(minor: number, currency: string): string {
   const major = minor / 100;
@@ -79,6 +83,10 @@ export const searchOperatorsServer = createServerFn({ method: "POST" })
     if (data.q && data.q.trim()) query = query.ilike("display_name", `%${data.q.trim()}%`);
     if (data.city && data.city.trim())
       query = query.ilike("default_departure_city", `%${data.city.trim()}%`);
+    if (data.state && data.state.trim())
+      query = query.ilike("default_departure_state", `%${data.state.trim()}%`);
+    if (data.country && data.country.trim())
+      query = query.ilike("default_departure_country", `%${data.country.trim()}%`);
     if (data.category && data.category.trim())
       query = query.contains("fishing_environments", [data.category.trim()]);
     if (data.instantBook) query = query.eq("booking_type", "instant");
