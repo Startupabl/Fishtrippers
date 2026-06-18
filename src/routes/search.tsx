@@ -569,8 +569,10 @@ function PricePopover({
   onChange: (min: number, max: number) => void;
 }) {
   const [local, setLocal] = useState<[number, number]>([min, max]);
-  // Keep local in sync if upstream changes (preset click)
-  useMemoSync(local, [min, max], setLocal);
+  // Sync local state when upstream URL state changes (e.g. external Clear).
+  useEffect(() => {
+    setLocal([min, max]);
+  }, [min, max]);
 
   function commit(next: [number, number]) {
     setLocal(next);
