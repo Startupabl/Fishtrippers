@@ -3,7 +3,7 @@ import {
   Plus,
   MapPin,
   Minus,
-  Fish,
+  
   HelpCircle,
   ChevronDown,
 } from "lucide-react";
