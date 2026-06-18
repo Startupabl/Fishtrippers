@@ -1,11 +1,11 @@
-import { useState } from "react";
+import { useId, useState } from "react";
 import {
-  Clock,
   Plus,
   MapPin,
   Minus,
   Fish,
   HelpCircle,
+  ChevronDown,
 } from "lucide-react";
 import { HowBookingsWorkDialog } from "@/components/HowBookingsWorkDialog";
 import { Link } from "@tanstack/react-router";
@@ -77,16 +77,20 @@ function TripCard({
   trip,
   hostId,
   hostHasAvailability,
+  defaultOpen,
 }: {
   trip: Trip;
   hostId?: string | null;
   hostHasAvailability?: boolean;
+  defaultOpen?: boolean;
 }) {
   const minParty = Math.max(1, trip.min_party_size ?? 1);
   const maxParty = Math.max(minParty, trip.max_party_size ?? 1);
   const [guests, setGuests] = useState(minParty);
+  const [open, setOpen] = useState(!!defaultOpen);
   const [checkDatesOpen, setCheckDatesOpen] = useState(false);
   const [requestOpen, setRequestOpen] = useState(false);
+  const panelId = useId();
 
   const display = useCurrencyStore((s) => s.currency);
   const base = ((trip.currency || "USD").toUpperCase()) as CurrencyCode;
@@ -105,200 +109,230 @@ function TripCard({
   const envs = trip.environments ?? [];
   const techs = trip.techniques ?? [];
   const species = trip.target_species ?? [];
+  const styleLabel = envs[0]
+    ? fishingEnvironmentLabel(envs[0])
+    : techs[0] ?? null;
+
+  const metaParts: string[] = [];
+  if (maxParty) metaParts.push(`Up to ${maxParty} guests`);
+  if (startLabel) metaParts.push(`Departs ${startLabel}`);
+  if (trip.departure_address) metaParts.push(trip.departure_address);
+  if (trip.duration_minutes) {
+    const dur = formatDuration(trip.duration_minutes);
+    metaParts.push(styleLabel ? `${dur} (${styleLabel})` : dur);
+  }
 
   return (
-    <article className="rounded-2xl border bg-card p-5">
-      <div className="grid gap-5 lg:grid-cols-[minmax(0,1fr)_380px]">
-        {/* LEFT: trip content */}
-        <div className="min-w-0 space-y-3">
-          <div>
-            <h3 className="text-lg font-semibold">{trip.title}</h3>
-            <div className="mt-1 flex flex-wrap items-center gap-x-3 gap-y-1 text-sm text-muted-foreground">
-              {startLabel && (
-                <span className="flex items-center gap-1">
-                  <Clock className="h-3.5 w-3.5" />
-                  Departs {startLabel}
-                </span>
-              )}
-              {trip.duration_minutes ? (
-                <span>· {formatDuration(trip.duration_minutes)}</span>
-              ) : null}
-              {maxParty ? <span>· Up to {maxParty} guests</span> : null}
+    <article className="overflow-hidden rounded-2xl border bg-card">
+      {/* Header / toggle */}
+      <button
+        type="button"
+        onClick={() => setOpen((o) => !o)}
+        aria-expanded={open}
+        aria-controls={panelId}
+        className="flex w-full items-start justify-between gap-4 px-5 py-4 text-left transition-colors hover:bg-muted/30"
+      >
+        <div className="min-w-0 flex-1">
+          <div className="flex items-start justify-between gap-3">
+            <h3 className="text-base font-bold text-foreground sm:text-[17px]">
+              {trip.title}
+            </h3>
+            <div className="flex shrink-0 items-center gap-2">
+              <div className="text-right">
+                <div className="text-[11px] uppercase tracking-wide text-muted-foreground">
+                  From
+                </div>
+                <div className="whitespace-nowrap text-base font-bold text-ocean-deep sm:text-lg">
+                  {formatCurrency(baseDisplay, display)}
+                </div>
+              </div>
+              <ChevronDown
+                className={`h-5 w-5 text-muted-foreground transition-transform duration-300 ${
+                  open ? "rotate-180" : ""
+                }`}
+              />
             </div>
           </div>
-
-          {(envs.length > 0 || techs.length > 0) && (
-            <div className="flex flex-wrap gap-1.5">
-              {envs.map((e) => (
-                <Chip key={`e-${e}`}>{fishingEnvironmentLabel(e)}</Chip>
-              ))}
-              {techs.map((t) => (
-                <Chip key={`t-${t}`}>{t}</Chip>
-              ))}
-            </div>
-          )}
-
-          {trip.description && (
-            <p className="whitespace-pre-line text-sm text-foreground/80">
-              {trip.description}
+          {metaParts.length > 0 && (
+            <p className="mt-1 truncate text-xs text-muted-foreground sm:text-sm">
+              {metaParts.join("  •  ")}
             </p>
-          )}
-
-          {species.length > 0 && (
-            <div className="flex flex-wrap items-center gap-1.5 text-sm">
-              <Fish className="h-3.5 w-3.5 text-muted-foreground" />
-              <span className="text-muted-foreground">Targeting:</span>
-              {species.slice(0, 8).map((s) => (
-                <Chip key={`s-${s}`}>{speciesLabel(s)}</Chip>
-              ))}
-              {species.length > 8 && (
-                <span className="text-xs text-muted-foreground">
-                  +{species.length - 8} more
-                </span>
-              )}
-            </div>
-          )}
-
-          {trip.departure_address && (
-            <div className="flex items-start gap-1.5 text-sm text-muted-foreground">
-              <MapPin className="mt-0.5 h-3.5 w-3.5 shrink-0" />
-              <span className="line-clamp-2">{trip.departure_address}</span>
-            </div>
           )}
         </div>
+      </button>
 
-        {/* RIGHT: price + guests selector */}
-        <aside className="rounded-xl border bg-muted/20 p-5 lg:min-w-[360px]">
-          <div className="text-xs uppercase tracking-wide text-muted-foreground">
-            From
-          </div>
-          <div className="text-2xl font-bold text-ocean-deep">
-            {formatCurrency(baseDisplay, display)}
-          </div>
-          <div className="text-sm text-muted-foreground">
-            base · 1 guest
-          </div>
+      {/* Collapsible body */}
+      <div
+        id={panelId}
+        className={`grid transition-all duration-300 ease-in-out ${
+          open ? "grid-rows-[1fr] opacity-100" : "grid-rows-[0fr] opacity-0"
+        }`}
+      >
+        <div className="overflow-hidden">
+          <div className="border-t bg-card px-5 pb-6 pt-5 lg:px-6 lg:min-w-[380px]">
+            {/* Description + chips */}
+            <div className="space-y-3">
+              {(envs.length > 0 || techs.length > 0) && (
+                <div className="flex flex-wrap gap-1.5">
+                  {envs.map((e) => (
+                    <Chip key={`e-${e}`}>{fishingEnvironmentLabel(e)}</Chip>
+                  ))}
+                  {techs.map((t) => (
+                    <Chip key={`t-${t}`}>{t}</Chip>
+                  ))}
+                </div>
+              )}
 
-          {perExtra > 0 && (
-            <p className="mt-2 text-sm text-muted-foreground">
-              The base price is for 1 person. After that it&apos;s{" "}
-              {formatCurrency(extraDisplay, display)} per each additional person per day.
-            </p>
-          )}
+              {trip.description && (
+                <p className="whitespace-pre-line text-sm text-foreground/80">
+                  {trip.description}
+                </p>
+              )}
 
-          {minParty > 1 && (
-            <p className="mt-2 text-sm font-medium text-foreground">
-              This trip requires a minimum of {minParty} people.
-            </p>
-          )}
+              {species.length > 0 && (
+                <div className="flex flex-wrap items-center gap-1.5 text-sm">
+                  <Fish className="h-3.5 w-3.5 text-muted-foreground" />
+                  <span className="text-muted-foreground">Targeting:</span>
+                  {species.slice(0, 8).map((s) => (
+                    <Chip key={`s-${s}`}>{speciesLabel(s)}</Chip>
+                  ))}
+                  {species.length > 8 && (
+                    <span className="text-xs text-muted-foreground">
+                      +{species.length - 8} more
+                    </span>
+                  )}
+                </div>
+              )}
 
-          {/* Guests stepper */}
-          <div className="mt-4">
-            <div className="mb-1.5 text-sm font-medium">Guests</div>
-            <div className="flex items-center gap-2">
-              <Button
-                type="button"
-                size="icon"
-                variant="outline"
-                className="h-9 w-9"
-                disabled={guests <= minParty}
-                onClick={() => setGuests((g) => Math.max(minParty, g - 1))}
-                aria-label="Decrease guests"
-              >
-                <Minus className="h-4 w-4" />
-              </Button>
-              <span className="min-w-[2ch] text-center text-base font-semibold">
-                {guests}
-              </span>
-              <Button
-                type="button"
-                size="icon"
-                variant="outline"
-                className="h-9 w-9"
-                disabled={guests >= maxParty}
-                onClick={() => setGuests((g) => Math.min(maxParty, g + 1))}
-                aria-label="Increase guests"
-              >
-                <Plus className="h-4 w-4" />
-              </Button>
-              <span className="ml-1 text-sm text-muted-foreground">
-                of {maxParty}
-              </span>
+              {trip.departure_address && (
+                <div className="flex items-start gap-1.5 text-sm text-muted-foreground">
+                  <MapPin className="mt-0.5 h-3.5 w-3.5 shrink-0" />
+                  <span className="line-clamp-2">{trip.departure_address}</span>
+                </div>
+              )}
             </div>
-          </div>
 
-          <div className="mt-4 overflow-hidden rounded-xl border-2 border-gold/60 bg-card">
-            {/* Due Now callout */}
-            <div className="bg-gold/15 px-5 py-4 text-center text-ocean-deep">
-              <div className="text-sm font-bold uppercase tracking-wide">
-                Due now to book
-              </div>
-              <div className="mt-1 text-3xl font-extrabold leading-tight">
-                {formatCurrency(depositDisplay, display)}
-              </div>
-              <div className="mt-1 text-sm opacity-80">
-                (Charged today to secure your spot)
-              </div>
-            </div>
-            {/* Breakdown rows */}
-            <div className="space-y-2 px-5 py-4 text-sm">
-              <div className="flex items-center justify-between gap-3">
-                <span className="text-foreground/80">Total trip cost:</span>
-                <span className="whitespace-nowrap font-semibold text-foreground">
-                  {formatCurrency(totalDisplay, display)}
-                </span>
-              </div>
-              <div className="flex items-center justify-between gap-3">
-                <span className="text-foreground/80">Remaining balance:</span>
-                <span className="whitespace-nowrap font-semibold text-foreground">
-                  {formatCurrency(balanceDisplay, display)}
-                </span>
-              </div>
-              <p className="pt-1 text-xs text-muted-foreground">
-                Paid directly to your guide when you meet.
-              </p>
-            </div>
-          </div>
-          <CurrencyDisclaimer
-            baseCurrency={base}
-            displayCurrency={display}
-            className="mt-3"
-          />
-
-
-          {(() => {
-            const bt = trip.booking_type ?? "request_to_book";
-            const instantReady = bt === "instant_book" && hostHasAvailability && !!hostId;
-            const instantNotReady = bt === "instant_book" && (!hostHasAvailability || !hostId);
-
-            if (instantReady) {
-              return (
+            {/* Guests stepper */}
+            <div className="mt-5">
+              <div className="mb-1.5 text-sm font-medium">Guests</div>
+              <div className="flex items-center gap-2">
                 <Button
-                  className="mt-3 w-full bg-gold text-ocean-deep hover:bg-gold-deep"
-                  onClick={() => setCheckDatesOpen(true)}
+                  type="button"
+                  size="icon"
+                  variant="outline"
+                  className="h-9 w-9"
+                  disabled={guests <= minParty}
+                  onClick={() => setGuests((g) => Math.max(minParty, g - 1))}
+                  aria-label="Decrease guests"
                 >
-                  Check Dates
+                  <Minus className="h-4 w-4" />
                 </Button>
-              );
-            }
-            return (
-              <>
-                {instantNotReady && (
-                  <p className="mt-3 rounded-md bg-amber-50 px-3 py-2 text-xs text-amber-900">
-                    The calendar isn&apos;t updated for this trip yet — instant booking
-                    isn&apos;t available. You can still send the host a request below.
-                  </p>
+                <span className="min-w-[2ch] text-center text-base font-semibold">
+                  {guests}
+                </span>
+                <Button
+                  type="button"
+                  size="icon"
+                  variant="outline"
+                  className="h-9 w-9"
+                  disabled={guests >= maxParty}
+                  onClick={() => setGuests((g) => Math.min(maxParty, g + 1))}
+                  aria-label="Increase guests"
+                >
+                  <Plus className="h-4 w-4" />
+                </Button>
+                <span className="ml-1 text-sm text-muted-foreground">
+                  of {maxParty}
+                </span>
+                {perExtra > 0 && (
+                  <span className="ml-auto text-xs text-muted-foreground">
+                    +{formatCurrency(extraDisplay, display)} / extra guest
+                  </span>
                 )}
-                <Button
-                  className="mt-3 w-full bg-gold text-ocean-deep hover:bg-gold-deep"
-                  onClick={() => setRequestOpen(true)}
-                >
-                  Request to Book
-                </Button>
-              </>
-            );
-          })()}
-        </aside>
+              </div>
+              {minParty > 1 && (
+                <p className="mt-2 text-xs text-muted-foreground">
+                  Minimum {minParty} guests required.
+                </p>
+              )}
+            </div>
+
+            {/* Payment summary */}
+            <div className="mt-5 overflow-hidden rounded-xl border border-emerald-200 bg-card">
+              <div className="bg-emerald-50 px-5 py-5 text-center">
+                <div className="text-sm font-bold uppercase tracking-wide text-emerald-900">
+                  Due Now to Book
+                </div>
+                <div className="mt-0.5 text-xs text-emerald-900/70">
+                  Charged today to secure your spot
+                </div>
+                <div className="mt-2 whitespace-nowrap text-4xl font-extrabold leading-none text-emerald-700 sm:text-5xl">
+                  {formatCurrency(depositDisplay, display)}
+                </div>
+              </div>
+              <div className="space-y-2 px-5 py-4 text-sm">
+                <div className="flex items-baseline justify-between gap-3">
+                  <span className="text-foreground/80">Total Trip Cost</span>
+                  <span className="whitespace-nowrap font-semibold text-foreground">
+                    {formatCurrency(totalDisplay, display)}
+                  </span>
+                </div>
+                <div className="flex items-baseline justify-between gap-3">
+                  <div className="min-w-0">
+                    <div className="text-foreground/80">Remaining Balance</div>
+                    <div className="text-xs text-muted-foreground">
+                      Paid directly to guide at boat
+                    </div>
+                  </div>
+                  <span className="whitespace-nowrap font-semibold text-foreground">
+                    {formatCurrency(balanceDisplay, display)}
+                  </span>
+                </div>
+              </div>
+            </div>
+
+            <CurrencyDisclaimer
+              baseCurrency={base}
+              displayCurrency={display}
+              className="mt-3"
+            />
+
+            {(() => {
+              const bt = trip.booking_type ?? "request_to_book";
+              const instantReady =
+                bt === "instant_book" && hostHasAvailability && !!hostId;
+              const instantNotReady =
+                bt === "instant_book" && (!hostHasAvailability || !hostId);
+
+              return (
+                <>
+                  {instantNotReady && (
+                    <p className="mt-3 rounded-md bg-amber-50 px-3 py-2 text-xs text-amber-900">
+                      The calendar isn&apos;t updated for this trip yet —
+                      instant booking isn&apos;t available. You can still send
+                      the host a request below.
+                    </p>
+                  )}
+                  <Button
+                    className="mt-3 w-full bg-gold text-ocean-deep hover:bg-gold-deep"
+                    onClick={() =>
+                      instantReady
+                        ? setCheckDatesOpen(true)
+                        : setRequestOpen(true)
+                    }
+                  >
+                    {instantReady ? "Check Dates" : "Request to Book"}
+                  </Button>
+                  <p className="mt-2 text-center text-xs text-muted-foreground">
+                    You are only paying a 10% deposit online today. The
+                    remaining 90% balance is paid directly to your captain at
+                    the dock.
+                  </p>
+                </>
+              );
+            })()}
+          </div>
+        </div>
       </div>
 
       {hostId ? (
@@ -318,7 +352,10 @@ function TripCard({
         tripId={trip.id}
         tripTitle={trip.title}
         defaultStartTime={trip.start_time ?? null}
-        defaultDurationHours={Math.max(1, Math.round((trip.duration_minutes ?? 240) / 60))}
+        defaultDurationHours={Math.max(
+          1,
+          Math.round((trip.duration_minutes ?? 240) / 60),
+        )}
         minParty={minParty}
         maxParty={maxParty}
       />
@@ -360,13 +397,14 @@ export function TripsBlock({ trips, hostId, hostHasAvailability }: Props) {
           </Button>
         </div>
       ) : (
-        <div className="space-y-4">
-          {trips.map((t) => (
+        <div className="space-y-3">
+          {trips.map((t, i) => (
             <TripCard
               key={t.id}
               trip={t}
               hostId={hostId}
               hostHasAvailability={hostHasAvailability}
+              defaultOpen={i === 0}
             />
           ))}
         </div>
