@@ -106,13 +106,10 @@ function TripCard({
   const baseDisplay = convertMinor(trip.price_minor, base, display);
   const extraDisplay = convertMinor(perExtra, base, display);
 
-  const startLabel = formatStartTime(trip.start_time);
   const envs = trip.environments ?? [];
   const techs = trip.techniques ?? [];
   const species = trip.target_species ?? [];
-  const styleLabel = envs[0]
-    ? fishingEnvironmentLabel(envs[0])
-    : techs[0] ?? null;
+
 
   const durationLabel = formatDuration(trip.duration_minutes);
   const titleWithDuration = durationLabel
