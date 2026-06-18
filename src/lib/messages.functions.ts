@@ -445,6 +445,47 @@ export const ensureThreadForJourney = createServerFn({ method: "POST" })
     return { thread_id: thread.id };
   });
 
+export const ensureThreadWithOperator = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((input: unknown) =>
+    z.object({ operator_id: z.string().uuid() }).parse(input)
+  )
+  .handler(async ({ data, context }): Promise<{ thread_id: string }> => {
+    const { supabase, userId } = context;
+
+    const { data: operator, error: oErr } = await supabase
+      .from("operators")
+      .select("id, owner_id")
+      .eq("id", data.operator_id)
+      .maybeSingle();
+    if (oErr || !operator) throw new Error("Listing not found.");
+    if (operator.owner_id === userId)
+      throw new Error("You can't message yourself.");
+
+    const { data: existing } = await supabase
+      .from("message_threads")
+      .select("id")
+      .eq("learner_id", userId)
+      .eq("mentor_id", operator.owner_id)
+      .is("journey_id", null)
+      .maybeSingle();
+
+    if (existing) return { thread_id: existing.id };
+
+    const { data: thread, error: tErr } = await supabase
+      .from("message_threads")
+      .insert({
+        learner_id: userId,
+        mentor_id: operator.owner_id,
+        journey_id: null,
+      })
+      .select("id")
+      .single();
+    if (tErr || !thread)
+      throw new Error(tErr?.message ?? "Could not start conversation.");
+    return { thread_id: thread.id };
+  });
+
 export const ensureThreadForAideWithLearner = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .inputValidator((input: unknown) =>

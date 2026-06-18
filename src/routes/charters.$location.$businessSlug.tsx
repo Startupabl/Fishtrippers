@@ -153,6 +153,7 @@ function OperatorListingPage() {
               name={captainName}
               avatarUrl={owner?.avatar_url}
               verified={approved}
+              operatorId={op.id}
             />
             <SpeciesGrid species={(op?.target_species as string[]) ?? []} />
             {op?.business_type === "charter" && (
