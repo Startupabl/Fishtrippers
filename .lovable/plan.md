@@ -1,106 +1,12 @@
-## Goal
-Replace generic listing URLs with SEO-friendly, semantic URLs of the form:
+## Update home page hero intro video
 
-```
-/charters/[city-slug]/[business-name-slug]
-```
+In `src/routes/index.tsx` (the modal triggered by the "How FishTrippers works" link in the hero):
 
-…and make sure old links keep working forever via 301 redirects when a captain changes their business name or location.
+1. **Replace the iframe video source** (line 418) with the new Bunny Stream video:
+   - From: `https://iframe.mediadelivery.net/embed/683194/aa5f7090-2922-4ba8-a2c8-0d11de0d09f2?autoplay=true&loop=false&muted=true&color=FF5733`
+   - To: `https://iframe.mediadelivery.net/embed/683194/4a27c961-f4c0-4b88-b463-e507b24032fa?autoplay=true&loop=false&muted=true&color=FF5733`
+   (Converted your `player.mediadelivery.net/play/...` link to the matching `iframe.mediadelivery.net/embed/...` embed URL, keeping the same playback options.)
 
----
+2. **Update the dialog title text** (line 400) from `What is FishTrippers?` to `How FishTrippers Works`. Also update the iframe `title` attribute (line 419) to match for accessibility.
 
-## 1. URL structure decision
-
-Going with the cleaner variant from your two options:
-
-```
-fishtrippers.com/charters/tampa/captain-daves-inshore-charters
-```
-
-Reasons over the hyphenated single-segment version (`/tampa-inshore-charter-guide/captain-daves`):
-- Cleaner, easier to read, less keyword-stuffed (Google penalizes the latter pattern).
-- City stays a clean facet we can later use for `/charters/tampa` city landing pages.
-- Avoids ambiguity when a captain offers multiple fishing styles.
-
----
-
-## 2. Database changes (one migration)
-
-Add two columns on `operators` plus a slug-history table:
-
-- `operators.location_slug text` — derived from city (e.g. `"Tampa"` → `tampa`). Unique-per-business not required; many operators share a city.
-- `operators.slug` already exists and is unique — we'll repurpose it as the business slug (e.g. `captain-daves-inshore-charters`). Uniqueness becomes **per (location_slug, slug)** instead of globally unique so two captains in different cities can both be `captain-daves`. Implemented via a unique index on `(location_slug, slug)` and dropping the existing global unique on `slug`.
-- New table `operator_slug_history`:
-  - `operator_id` (FK → operators)
-  - `old_location_slug text`
-  - `old_business_slug text`
-  - `created_at`
-  - Unique on `(old_location_slug, old_business_slug)` for fast redirect lookup.
-  - RLS: public `SELECT` to `anon` (needed for redirect resolution during SSR), admin/service writes only.
-- Trigger on `operators` BEFORE INSERT/UPDATE:
-  - Auto-generate `location_slug` from `city` if null or city changed.
-  - Auto-generate `slug` from `display_name` if null or display_name changed, with a numeric suffix on collision within the same `location_slug`.
-  - On UPDATE, if `(location_slug, slug)` actually changed, insert the OLD pair into `operator_slug_history` (ignore conflicts).
-
-A SQL helper `slugify(text)` will lowercase, strip diacritics, replace non-alphanumerics with `-`, and collapse repeats.
-
----
-
-## 3. New route
-
-Create `src/routes/charters.$location.$businessSlug.tsx`:
-
-- Loader calls a new server function `getOperatorByCharterSlug({ location, businessSlug })` that:
-  1. Looks up the operator by `(location_slug, slug)`.
-  2. If not found, checks `operator_slug_history` for the pair. If found, fetches the current `(location_slug, slug)` from operators and throws `redirect({ to: '/charters/$location/$businessSlug', params, statusCode: 301 })`.
-  3. If still not found, throws `notFound()`.
-- Renders the same listing UI currently used in `c.$categorySlug.$listingSlug.tsx` (extract the rendering body into a shared component `<OperatorListingView />` so both routes can share it during transition).
-- Includes per-listing `head()` with title/description/og:image derived from operator data.
-
----
-
-## 4. Backward-compat for old URLs
-
-Keep `src/routes/c.$categorySlug.$listingSlug.tsx` but convert its loader to:
-- Resolve the operator by old slug (current behavior).
-- Throw `redirect({ to: '/charters/$location/$businessSlug', statusCode: 301 })` to the new URL.
-
-This preserves any existing inbound links and Google rankings.
-
----
-
-## 5. Frontend wiring
-
-Files that build operator URLs today and need to switch to the new pattern:
-- `src/components/listings/OperatorCard.tsx` — used by `/search` and home Featured Charters & Guides.
-- Anywhere `getOperatorCardDTO` projects slug/category — extend it to also return `location_slug`.
-- `src/lib/operators-search.functions.ts` — include `location_slug` in the DTO.
-- `src/routes/sitemap[.]xml.ts` — emit the new `/charters/.../...` URLs (and drop the legacy ones since they 301 anyway).
-- Sharing helpers (`SharePath`) and any captain dashboard "view my listing" buttons.
-
----
-
-## 6. Listing creation / edit flow
-
-In `upsertOperatorDraft` / `submitOperatorForReview` (and the captain-edit flow), the slug is auto-generated by the DB trigger — no UI changes needed. But:
-- On the dashboard "My Listing" page, surface the live URL preview so captains see what their public link will be.
-- When the captain edits business name or city, the trigger handles slug regen + history insert automatically.
-
----
-
-## 7. Out of scope (for this pass)
-
-- Removing the underlying numeric `id`/`listing_number` from the DB — kept internally for admin/joins.
-- Multi-language slugs.
-- Restructuring `/c/...` category browse pages (only the per-listing detail page changes).
-
----
-
-## Technical summary
-
-Files touched:
-- **New migration**: add `slugify()`, `location_slug` column, swap unique index, create `operator_slug_history` + RLS + GRANTs, install BEFORE INSERT/UPDATE trigger.
-- **New route**: `src/routes/charters.$location.$businessSlug.tsx`.
-- **New shared component**: `src/components/listings/OperatorListingView.tsx` extracted from the operator branch of the existing `c.$categorySlug.$listingSlug.tsx`.
-- **New server fn**: `getOperatorByCharterSlug` in `src/lib/operators-public.functions.ts`.
-- **Edited**: `src/routes/c.$categorySlug.$listingSlug.tsx` (301 redirect for operator listings), `OperatorCard.tsx`, `operators-search.functions.ts`, `sitemap[.]xml.ts`, share/preview links.
+No other files need changes — the hero trigger button already reads "How FishTrippers works", and the background hero image stays the same.
