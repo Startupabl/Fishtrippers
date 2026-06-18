@@ -185,12 +185,18 @@ function TripCard({
       >
         <div className="overflow-hidden">
           <div className="border-t bg-card px-5 pb-6 pt-5 lg:px-6 lg:min-w-[380px]">
-            {/* Description */}
+            {/* Trip Description */}
             {trip.description && (
-              <p className="whitespace-pre-line text-sm text-foreground/80">
-                {trip.description}
-              </p>
+              <div className="space-y-1">
+                <p className="text-sm font-semibold text-foreground">
+                  Trip Description:
+                </p>
+                <p className="whitespace-pre-line text-sm text-foreground/80">
+                  {trip.description}
+                </p>
+              </div>
             )}
+
 
 
             {/* Guests stepper */}
