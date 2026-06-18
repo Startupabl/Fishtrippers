@@ -59,8 +59,8 @@ export function OperatorCard({ operator }: { operator: OperatorCardDTO }) {
   return (
     <li className="group overflow-hidden rounded-2xl border border-border bg-card shadow-sm transition-shadow hover:shadow-md">
       <Link
-        to="/c/$categorySlug/$listingSlug"
-        params={{ categorySlug, listingSlug }}
+        to="/charters/$location/$businessSlug"
+        params={{ location, businessSlug }}
         className="block"
       >
         <div className="relative">
