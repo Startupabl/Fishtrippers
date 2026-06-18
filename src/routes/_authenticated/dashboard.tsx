@@ -13,7 +13,7 @@ import { Card } from "@/components/ui/card";
 import {
   AlertTriangle,
   BookOpen,
-  Clock,
+  CalendarDays,
   Calendar,
   Wallet,
   Plus,
@@ -166,11 +166,10 @@ function AideDashboardHome() {
             tint={`${YELLOW}33`}
           />
           <NavCard
-            to="/settings/profile"
-            hash="lab-hours"
-            icon={<Clock className="size-5" />}
-            title="Lab Hours"
-            desc="Set your weekly availability."
+            to="/dashboard/master-calendar"
+            icon={<CalendarDays className="size-5" />}
+            title="Manage Availability"
+            desc="Set your weekly availability and block-out dates."
             tint={`${LEAF}33`}
           />
         </div>
