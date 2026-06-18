@@ -38,7 +38,7 @@ import { toast } from "sonner";
 import { X } from "lucide-react";
 import { upsertTrip, getMyCapabilities } from "@/lib/trips.functions";
 import { saveDefaultDeparture } from "@/lib/operators.functions";
-import { DURATION_OPTIONS, BOOKING_TYPE_OPTIONS } from "@/lib/trips.shared";
+import { DURATION_OPTIONS, BOOKING_TYPE_OPTIONS, CHARTER_TYPE_OPTIONS } from "@/lib/trips.shared";
 import {
   FISHING_ENVIRONMENTS,
   FISHING_TECHNIQUES,
@@ -60,6 +60,9 @@ export interface TripEditorState {
   max_party_size: number | null;
   template_key?: string | null;
   booking_type: "instant_book" | "request_to_book";
+  charter_type: "private_charter" | "shared_tour";
+  seats_available: number | null;
+
   target_species: string[];
   environments: string[];
   techniques: string[];
@@ -87,6 +90,9 @@ const empty: TripEditorState = {
   max_party_size: null,
   template_key: null,
   booking_type: "request_to_book",
+  charter_type: "private_charter",
+  seats_available: null,
+
   target_species: [],
   environments: [],
   techniques: [],
@@ -150,8 +156,11 @@ export function TripFormDialog({ open, onOpenChange, initial }: Props) {
       if (!form.duration_minutes) throw new Error("Pick a duration");
       if (form.price_minor == null || form.price_minor < 0)
         throw new Error("Enter a base price");
-      if (form.max_party_size == null || form.max_party_size < 1)
-        throw new Error("Enter max party size");
+      if (form.charter_type === "private_charter") {
+        if (form.max_party_size == null || form.max_party_size < 1)
+          throw new Error("Enter max party size");
+      }
+
       if (form.description.trim().length < 10)
         throw new Error("Description is too short");
       if (form.target_species.length === 0) throw new Error("Pick at least one target fish");
@@ -159,6 +168,11 @@ export function TripFormDialog({ open, onOpenChange, initial }: Props) {
       if (form.environments.length > 2) throw new Error("Max 2 environments per trip");
       if (form.techniques.length === 0) throw new Error("Pick at least one fishing style");
       if (!form.departure_address.trim()) throw new Error("Pick a departure point");
+      if (form.charter_type === "shared_tour") {
+        if (form.seats_available == null || form.seats_available < 1)
+          throw new Error("Enter total seats available");
+      }
+
 
       const result = await upsertFn({
         data: {
@@ -170,10 +184,18 @@ export function TripFormDialog({ open, onOpenChange, initial }: Props) {
           price_minor: form.price_minor!,
           per_extra_minor: form.per_extra_minor ?? 0,
           min_party_size: form.min_party_size ?? 1,
-          max_party_size: form.max_party_size!,
+          max_party_size:
+            form.charter_type === "shared_tour"
+              ? (form.seats_available ?? 1)
+              : form.max_party_size!,
+
           currency: captainCurrency,
           template_key: form.template_key ?? null,
           booking_type: form.booking_type,
+          charter_type: form.charter_type,
+          seats_available:
+            form.charter_type === "shared_tour" ? form.seats_available : null,
+
           target_species: form.target_species,
           environments: form.environments,
           techniques: form.techniques,
@@ -216,10 +238,15 @@ export function TripFormDialog({ open, onOpenChange, initial }: Props) {
     onError: (e: any) => toast.error(e?.message ?? "Could not save trip"),
   });
 
-  const totalPreview =
-    form.price_minor != null && form.max_party_size && form.max_party_size > 0
+  const isShared = form.charter_type === "shared_tour";
+  const totalPreview = isShared
+    ? form.price_minor != null && form.seats_available && form.seats_available > 0
+      ? form.price_minor * form.seats_available
+      : null
+    : form.price_minor != null && form.max_party_size && form.max_party_size > 0
       ? form.price_minor + Math.max(0, form.max_party_size - 1) * (form.per_extra_minor ?? 0)
       : null;
+
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
@@ -229,7 +256,47 @@ export function TripFormDialog({ open, onOpenChange, initial }: Props) {
         </DialogHeader>
 
         <div className="space-y-6">
+          {/* 0. Booking type (charter vs shared) */}
+          <section className="space-y-3 rounded-xl border-2 border-primary/20 bg-primary/5 p-4">
+            <h3 className="text-sm font-semibold uppercase tracking-wide text-primary">
+              Booking type
+            </h3>
+            <div className="grid gap-3 sm:grid-cols-2">
+              {CHARTER_TYPE_OPTIONS.map((opt) => {
+                const selected = form.charter_type === opt.value;
+                return (
+                  <button
+                    key={opt.value}
+                    type="button"
+                    onClick={() =>
+                      setForm((f) => ({
+                        ...f,
+                        charter_type: opt.value,
+                        ...(opt.value === "shared_tour"
+                          ? {
+                              per_extra_minor: 0,
+                              seats_available:
+                                f.seats_available ?? f.max_party_size ?? null,
+                            }
+                          : {}),
+                      }))
+                    }
+                    className={`rounded-lg border p-4 text-left transition-colors ${
+                      selected
+                        ? "border-primary bg-background ring-2 ring-primary"
+                        : "border-border bg-background hover:border-primary/40"
+                    }`}
+                  >
+                    <div className="text-base font-semibold">{opt.label}</div>
+                    <div className="mt-1 text-xs text-muted-foreground">{opt.hint}</div>
+                  </button>
+                );
+              })}
+            </div>
+          </section>
+
           {/* 1. Title */}
+
           <div className="space-y-2">
             <Label htmlFor="trip-title">Trip title</Label>
             <Input
@@ -430,7 +497,9 @@ export function TripFormDialog({ open, onOpenChange, initial }: Props) {
             </h3>
             <div className="grid grid-cols-2 gap-3">
               <div className="space-y-2">
-                <Label htmlFor="trip-price">Base price (1st angler)</Label>
+                <Label htmlFor="trip-price">
+                  {isShared ? "Price per Seat" : "Base price (1st angler)"}
+                </Label>
                 <div className="relative">
                   <span className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-sm text-muted-foreground">
                     {captainCurrency}
@@ -451,26 +520,53 @@ export function TripFormDialog({ open, onOpenChange, initial }: Props) {
                         price_minor: Number.isFinite(n) ? Math.round(n * 100) : null,
                       });
                     }}
-                    placeholder="e.g. 650"
+                    placeholder={isShared ? "e.g. 220" : "e.g. 650"}
                   />
                 </div>
+                {isShared && (
+                  <p className="text-xs text-muted-foreground">
+                    Enter the cost for an individual seat on this trip.
+                  </p>
+                )}
               </div>
-              <div className="space-y-2">
-                <Label htmlFor="trip-party">Max trip size</Label>
-                <Input
-                  id="trip-party"
-                  type="number"
-                  min={1}
-                  max={50}
-                  step="1"
-                  value={form.max_party_size ?? ""}
-                  onChange={(e) => {
-                    const n = parseInt(e.target.value, 10);
-                    setForm({ ...form, max_party_size: Number.isFinite(n) ? n : null });
-                  }}
-                  placeholder="e.g. 6"
-                />
-              </div>
+              {isShared ? (
+                <div className="space-y-2">
+                  <Label htmlFor="trip-seats">Total Seats Available</Label>
+                  <Input
+                    id="trip-seats"
+                    type="number"
+                    min={1}
+                    max={50}
+                    step="1"
+                    value={form.seats_available ?? ""}
+                    onChange={(e) => {
+                      const n = parseInt(e.target.value, 10);
+                      setForm({ ...form, seats_available: Number.isFinite(n) ? n : null });
+                    }}
+                    placeholder="e.g. 6"
+                  />
+                  <p className="text-xs text-muted-foreground">
+                    Enter the maximum number of individual seats you can sell in total for this shared trip (e.g., 6).
+                  </p>
+                </div>
+              ) : (
+                <div className="space-y-2">
+                  <Label htmlFor="trip-party">Max trip size</Label>
+                  <Input
+                    id="trip-party"
+                    type="number"
+                    min={1}
+                    max={50}
+                    step="1"
+                    value={form.max_party_size ?? ""}
+                    onChange={(e) => {
+                      const n = parseInt(e.target.value, 10);
+                      setForm({ ...form, max_party_size: Number.isFinite(n) ? n : null });
+                    }}
+                    placeholder="e.g. 6"
+                  />
+                </div>
+              )}
             </div>
             <div className="space-y-2 max-w-[50%] pr-1.5">
               <Label htmlFor="trip-min-party">Min trip size</Label>
@@ -491,35 +587,38 @@ export function TripFormDialog({ open, onOpenChange, initial }: Props) {
                 The trip requires at least this many guests to run.
               </p>
             </div>
-            <div className="space-y-2">
-              <Label htmlFor="trip-extra">Price per additional angler</Label>
-              <div className="relative">
-                <span className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-sm text-muted-foreground">
-                  {captainCurrency}
-                </span>
-                <Input
-                  id="trip-extra"
-                  type="number"
-                  inputMode="decimal"
-                  min={0}
-                  step="1"
-                  className="pl-14"
-                  value={extraInput}
-                  onChange={(e) => {
-                    setExtraInput(e.target.value);
-                    const n = Number(e.target.value);
-                    setForm({
-                      ...form,
-                      per_extra_minor: Number.isFinite(n) ? Math.round(n * 100) : 0,
-                    });
-                  }}
-                  placeholder="e.g. 75"
-                />
+            {!isShared && (
+              <div className="space-y-2">
+                <Label htmlFor="trip-extra">Price per additional angler</Label>
+                <div className="relative">
+                  <span className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-sm text-muted-foreground">
+                    {captainCurrency}
+                  </span>
+                  <Input
+                    id="trip-extra"
+                    type="number"
+                    inputMode="decimal"
+                    min={0}
+                    step="1"
+                    className="pl-14"
+                    value={extraInput}
+                    onChange={(e) => {
+                      setExtraInput(e.target.value);
+                      const n = Number(e.target.value);
+                      setForm({
+                        ...form,
+                        per_extra_minor: Number.isFinite(n) ? Math.round(n * 100) : 0,
+                      });
+                    }}
+                    placeholder="e.g. 75"
+                  />
+                </div>
+                <p className="text-xs text-muted-foreground">
+                  Charged for each extra guest beyond the first, up to your max party size.
+                </p>
               </div>
-              <p className="text-xs text-muted-foreground">
-                Charged for each extra guest beyond the first, up to your max party size.
-              </p>
-            </div>
+            )}
+
             {totalPreview != null && (() => {
               const depositMinor = Math.round(totalPreview * 0.1);
               const takeHomeMinor = totalPreview - depositMinor;
@@ -528,10 +627,15 @@ export function TripFormDialog({ open, onOpenChange, initial }: Props) {
                   <div className="rounded-lg border bg-background p-3 text-sm space-y-3">
                     <div className="flex items-start justify-between gap-3">
                       <div>
-                        <div className="font-medium">Total Trip Price (Full Boat)</div>
-                        <div className="text-xs text-muted-foreground">
-                          Assumes the trip is booked to your max party size of {form.max_party_size} guests.
+                        <div className="font-medium">
+                          {isShared ? "Total if fully booked" : "Total Trip Price (Full Boat)"}
                         </div>
+                        <div className="text-xs text-muted-foreground">
+                          {isShared
+                            ? `Assumes all ${form.seats_available ?? 0} seats are sold.`
+                            : `Assumes the trip is booked to your max party size of ${form.max_party_size} guests.`}
+                        </div>
+
                       </div>
                       <span className="font-semibold whitespace-nowrap">
                         {formatMoney(totalPreview, captainCurrency)}

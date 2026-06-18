@@ -575,6 +575,9 @@ function MyListingPage() {
                               max_party_size: (t as any).max_party_size ?? null,
                               template_key: t.template_key ?? null,
                               booking_type: (t as any).booking_type ?? "request_to_book",
+                              charter_type: (t as any).charter_type ?? "private_charter",
+                              seats_available: (t as any).seats_available ?? null,
+
                               target_species: Array.isArray((t as any).target_species) ? (t as any).target_species : [],
                               environments: Array.isArray((t as any).environments) ? (t as any).environments : [],
                               techniques: Array.isArray((t as any).techniques) ? (t as any).techniques : [],

@@ -73,6 +73,9 @@ export function TripCatalogStep({ onBack, onNext }: Props) {
       max_party_size: null,
       template_key: preset?.key ?? null,
       booking_type: "request_to_book",
+      charter_type: "private_charter",
+      seats_available: null,
+
       target_species: [],
       environments: [],
       techniques: [],
@@ -97,6 +100,9 @@ export function TripCatalogStep({ onBack, onNext }: Props) {
       max_party_size: t.max_party_size ?? null,
       template_key: t.template_key ?? null,
       booking_type: t.booking_type ?? "request_to_book",
+      charter_type: t.charter_type ?? "private_charter",
+      seats_available: t.seats_available ?? null,
+
       target_species: Array.isArray(t.target_species) ? t.target_species : [],
       environments: Array.isArray(t.environments) ? t.environments : [],
       techniques: Array.isArray(t.techniques) ? t.techniques : [],
