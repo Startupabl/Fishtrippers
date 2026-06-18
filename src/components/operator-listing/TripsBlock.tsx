@@ -66,13 +66,6 @@ function formatStartTime(t?: string | null) {
   return `${hr}:${mm ?? "00"} ${period}`;
 }
 
-function Chip({ children }: { children: React.ReactNode }) {
-  return (
-    <span className="rounded-full border bg-muted/40 px-2.5 py-0.5 text-xs text-muted-foreground">
-      {children}
-    </span>
-  );
-}
 
 function TripCard({
   trip,
