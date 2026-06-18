@@ -18,7 +18,7 @@ export const Route = createFileRoute("/onboarding/learner/pace")({
       {
         name: "description",
         content:
-          "How do you like to learn? Pick a vibe and we'll match the right Aide.",
+          "How do you like to learn? Pick a vibe and we'll match the right Guide.",
       },
     ],
   }),

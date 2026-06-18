@@ -177,7 +177,7 @@ function SuccessPage() {
 
           <div className="mt-8 flex flex-wrap justify-center gap-3">
             <Button asChild size="lg" variant="info" className="min-h-12 rounded-2xl">
-              <Link to="/dashboard/learner">Go to Learner Dashboard</Link>
+              <Link to="/dashboard/learner">Go to Angler Dashboard</Link>
             </Button>
           </div>
         </main>
@@ -219,7 +219,7 @@ function SuccessPage() {
 
           <div className="mt-8 flex justify-center">
             <Button asChild size="lg" variant="info" className="min-h-12 rounded-2xl">
-              <Link to="/dashboard/learner">Go to Learner Dashboard</Link>
+              <Link to="/dashboard/learner">Go to Angler Dashboard</Link>
             </Button>
           </div>
 
@@ -265,7 +265,7 @@ function SuccessPage() {
                 You are officially enrolled and ready to start learning.
               </p>
               <Button asChild size="lg" variant="info" className="mt-6 min-h-12 rounded-2xl">
-                <Link to="/dashboard/learner">Go to Learner Dashboard</Link>
+                <Link to="/dashboard/learner">Go to Angler Dashboard</Link>
               </Button>
             </>
           ) : null}
@@ -306,7 +306,7 @@ function SuccessPage() {
             You're all set!
           </h1>
           <p className="mt-3 text-lg text-muted-foreground">
-            Your Aide is excited to meet you.
+            Your Guide is excited to meet you.
           </p>
           <p className="mt-2 text-sm text-muted-foreground">
             with {displayMentorName(legacyBooking.mentorName)}

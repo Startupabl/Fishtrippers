@@ -20,7 +20,7 @@ export interface AlertTemplateDefault {
 export const ALERT_TEMPLATE_DEFAULTS: Record<AlertTemplatePurpose, AlertTemplateDefault> = {
   booking_confirmed: {
     display_name: "New Booking (Instructor)",
-    description: "Shown in the instructor's header bell when a learner books their course.",
+    description: "Shown in the instructor's header bell when a angler books their fishing trip.",
     message:
       'New student booking confirmed for "{{course_title}}"! Check your schedule to view your updated roster.',
     variables: ["course_title"],
@@ -45,7 +45,7 @@ export const ALERT_TEMPLATE_DEFAULTS: Record<AlertTemplatePurpose, AlertTemplate
   },
   custom_offer_received: {
     display_name: "Custom Offer Received",
-    description: "Shown to a learner when they receive a custom offer.",
+    description: "Shown to a angler when they receive a custom offer.",
     message: '{{aide_name}} sent you a custom offer for "{{course_title}}".',
     variables: ["aide_name", "course_title"],
   },
@@ -56,8 +56,8 @@ export const ALERT_TEMPLATE_DEFAULTS: Record<AlertTemplatePurpose, AlertTemplate
     variables: ["amount"],
   },
   booking_confirmed_learner: {
-    display_name: "Booking Confirmed (Learner)",
-    description: "Shown to a learner after a successful booking.",
+    display_name: "Booking Confirmed (Angler)",
+    description: "Shown to a angler after a successful booking.",
     message: 'Your booking for "{{course_title}}" is confirmed!',
     variables: ["course_title"],
   },

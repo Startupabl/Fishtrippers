@@ -24,11 +24,11 @@ export const Route = createFileRoute("/journey-welcome")({
   validateSearch: zodValidator(searchSchema),
   head: () => ({
     meta: [
-      { title: "Welcome to your Course — FishTrippers" },
+      { title: "Welcome to your Fishing Trip — FishTrippers" },
       {
         name: "description",
         content:
-          "Your Aide is excited to meet you. Book your first session to get started.",
+          "Your Guide is excited to meet you. Book your first session to get started.",
       },
     ],
   }),
@@ -66,7 +66,7 @@ function JourneyWelcomePage() {
             className="text-4xl text-foreground md:text-5xl"
             style={lora}
           >
-            Great choice! Your Aide is excited to meet you.
+            Great choice! Your Guide is excited to meet you.
           </h1>
           <p className="mt-3 text-lg text-muted-foreground">
             Let's get you on the schedule.
@@ -109,7 +109,7 @@ function JourneyWelcomePage() {
             </a>
           </Button>
           <Button asChild variant="ghost" size="lg" className="min-h-12 rounded-2xl">
-            <Link to="/">Browse more Courses</Link>
+            <Link to="/">Browse more Trips</Link>
           </Button>
         </div>
 

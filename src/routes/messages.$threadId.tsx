@@ -44,7 +44,7 @@ function MessagesPage() {
 
   useEffect(() => {
     ensureThread(threadId, {
-      mentorName: mentor || "Your mentor",
+      mentorName: mentor || "Your guide",
       pathTitle: title || undefined,
     });
   }, [threadId, mentor, title, ensureThread]);
@@ -69,7 +69,7 @@ function MessagesPage() {
     setSelection({
       pathId: `offer-${messageId}`,
       mentorId: threadId,
-      mentorName: meta?.mentorName ?? "Your mentor",
+      mentorName: meta?.mentorName ?? "Your guide",
       mentorAvatarUrl: meta?.mentorAvatarUrl ?? "",
       pathTitle: `Custom Offer · ${offer.sessions} ${offer.sessions === 1 ? "session" : "sessions"}`,
       highlights: [offer.description],
@@ -104,7 +104,7 @@ function MessagesPage() {
                 })
               }
             >
-              View as Learner
+              View as Angler
             </Button>
             <Button
               size="sm"
@@ -117,7 +117,7 @@ function MessagesPage() {
                 })
               }
             >
-              View as Aide
+              View as Guide
             </Button>
           </div>
         </div>

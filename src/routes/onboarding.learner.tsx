@@ -8,11 +8,11 @@ import type { LearnerGoal } from "@/data/lesson-paths";
 export const Route = createFileRoute("/onboarding/learner")({
   head: () => ({
     meta: [
-      { title: "Find your perfect Aide — FishTrippers" },
+      { title: "Find your perfect Guide — FishTrippers" },
       {
         name: "description",
         content:
-          "Answer 3 quick questions to get matched with the right AI Aide for your goals.",
+          "Answer 3 quick questions to get matched with the right AI Guide for your goals.",
       },
     ],
   }),

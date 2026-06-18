@@ -9,8 +9,8 @@
 export type StubCategory =
   | "Legal & Compliance"
   | "Trust & Operations"
-  | "Learner Resources"
-  | "Aide Resources"
+  | "Angler Resources"
+  | "Guide Resources"
   | "Company & Contact";
 
 export type InfoBullet = { label: string; body: string };
@@ -62,11 +62,11 @@ export const INFO_PAGES: Record<string, InfoPage> = {
     sections: [
       {
         heading: "1. Simple Data Promise",
-        body: "In this early version of FishTrippers, we only collect the information necessary to create your account and match you with an Aide. We do not sell your data to third parties.",
+        body: "In this early version of FishTrippers, we only collect the information necessary to create your account and match you with an Guide. We do not sell your data to third parties.",
       },
       {
         heading: "2. Learning Data",
-        body: "Any messages or preferences you share are used solely to help your Aide understand your goals. We use standard industry encryption to keep this information safe.",
+        body: "Any messages or preferences you share are used solely to help your Guide understand your goals. We use standard industry encryption to keep this information safe.",
       },
       {
         heading: "3. Your Rights",
@@ -87,7 +87,7 @@ export const INFO_PAGES: Record<string, InfoPage> = {
         body: "FishTrippers is a place for respectful learning. We expect all Aides and learners to treat each other with patience and kindness.",
       },
       {
-        heading: "2. The Aide-Learner Relationship",
+        heading: "2. The Guide-Angler Relationship",
         body: "Aides are independent guides helping you learn AI tools. They are not employees of FishTrippers. We provide the platform; they provide the wisdom.",
       },
       {
@@ -98,10 +98,10 @@ export const INFO_PAGES: Record<string, InfoPage> = {
   },
   "mentor-agreement": stub(
     "mentor-agreement",
-    "Aide Agreement",
-    "Terms that apply to Aides offering Courses on FishTrippers.",
+    "Guide Agreement",
+    "Terms that apply to Aides offering Fishing Trips on FishTrippers.",
     "Our promise to Aides, and yours to learners.",
-    "The full Aide Agreement is coming soon. In the meantime, Aides agree to offer guidance with patience, kindness, and honesty.",
+    "The full Guide Agreement is coming soon. In the meantime, Aides agree to offer guidance with patience, kindness, and honesty.",
     "Legal & Compliance",
   ),
   "acceptable-use-policy": stub(
@@ -139,16 +139,16 @@ export const INFO_PAGES: Record<string, InfoPage> = {
     "Trust & Operations",
   ),
 
-  // Learner Resources
+  // Angler Resources
   "how-it-works": {
     slug: "how-it-works",
     title: "How It Works: Your Path to AI Mastery",
     footerLabel: "How it Works",
     description:
-      "How FishTrippers connects you with human Aides through structured Courses, live sessions, and Refuel add-ons.",
+      "How FishTrippers connects you with human Aides through structured Fishing Trips, live sessions, and Refuel add-ons.",
     headline:
-      "Stop stumbling through complex tools. Master AI with a human Aide by your side.",
-    category: "Learner Resources",
+      "Stop stumbling through complex tools. Master AI with a human Guide by your side.",
+    category: "Angler Resources",
     sections: [
       {
         variant: "lead",
@@ -156,21 +156,21 @@ export const INFO_PAGES: Record<string, InfoPage> = {
       },
       {
         icon: "🗺️",
-        heading: "The Course",
-        body: "Forget generic video bundles. Our **Aides** design structured, one-on-one experiences called **Courses**. Whether you want to master AI Art, score a film with AI Music, or automate your professional writing, you simply find the **Course** that matches your goals.",
+        heading: "The Fishing Trip",
+        body: "Forget generic video bundles. Our **Aides** design structured, one-on-one experiences called **Fishing Trips**. Whether you want to master AI Art, score a film with AI Music, or automate your professional writing, you simply find the **Fishing Trip** that matches your goals.",
       },
       {
         icon: "🤝",
         heading: "Connect & Create",
-        body: "Once you book a **Course**, the \"squeeze\" is over.",
+        body: "Once you book a **Fishing Trip**, the \"squeeze\" is over.",
         bullets: [
           {
             label: "Direct Access",
-            body: "You work one-on-one with your **Aide** in live, online sessions.",
+            body: "You work one-on-one with your **Guide** in live, online sessions.",
           },
           {
             label: "Tailored Timing",
-            body: "Dates and times are organized directly with your **Aide** to fit your schedule.",
+            body: "Dates and times are organized directly with your **Guide** to fit your schedule.",
           },
           {
             label: "No More Guesswork",
@@ -189,47 +189,47 @@ export const INFO_PAGES: Record<string, InfoPage> = {
         body: "Mastery doesn't have an expiration date. After completing your initial **Course**, you have the option to keep the momentum going. You can book Add-on Sessions with your **Aide** for as long as you need to perfectly \"fine-tune\" your new skills.",
       },
     ],
-    cta: { label: "Start Your Course", to: "/search" },
+    cta: { label: "Start Your Fishing Trip", to: "/search" },
   },
   "first-lesson-guide": stub(
     "first-lesson-guide",
-    "First Lesson Guide",
-    "What to expect from your very first lesson on FishTrippers.",
-    "Your first lesson, made easy.",
-    "A friendly first-lesson guide is coming soon. Show up curious — your Aide will take care of the rest.",
-    "Learner Resources",
+    "First Trip Guide",
+    "What to expect from your very first trip on FishTrippers.",
+    "Your first trip, made easy.",
+    "A friendly first-trip guide is coming soon. Show up curious — your Guide will take care of the rest.",
+    "Angler Resources",
   ),
   "learner-faqs": stub(
     "learner-faqs",
-    "Learner FAQs",
+    "Angler FAQs",
     "Answers to common questions from learners on FishTrippers.",
     "Got a question? Start here.",
-    "Our full Learner FAQ is coming soon. In the meantime, contact support and we'll get right back to you.",
-    "Learner Resources",
+    "Our full Angler FAQ is coming soon. In the meantime, contact support and we'll get right back to you.",
+    "Angler Resources",
   ),
 
   // Aide Resources
   "become-a-mentor": {
     ...stub(
       "become-a-mentor",
-      "Become an Aide",
-      "Share your AI know-how, build a Course, and start earning on FishTrippers.",
+      "Become an Guide",
+      "Share your AI know-how, build a Fishing Trip, and start earning on FishTrippers.",
       "Turn what you know into income.",
-      "Full Aide onboarding details are coming soon. Ready now? List your first Course from the Aide dashboard.",
-      "Aide Resources",
+      "Full Guide onboarding details are coming soon. Ready now? List your first Fishing Trip from the Guide dashboard.",
+      "Guide Resources",
     ),
-    footerLabel: "Become an Aide",
+    footerLabel: "Become an Guide",
   },
   "mentor-faqs": {
     ...stub(
       "mentor-faqs",
-      "Aide FAQs",
+      "Guide FAQs",
       "Answers to common questions from Aides on FishTrippers.",
       "Everything Aides ask, in one place.",
-      "Our full Aide FAQ is coming soon. Reach out anytime — we love hearing from our Aides.",
-      "Aide Resources",
+      "Our full Guide FAQ is coming soon. Reach out anytime — we love hearing from our Aides.",
+      "Guide Resources",
     ),
-    footerLabel: "Aide FAQs",
+    footerLabel: "Guide FAQs",
   },
 
   // Company & Contact
@@ -244,19 +244,19 @@ export const INFO_PAGES: Record<string, InfoPage> = {
     sections: [
       {
         variant: "lead",
-        body: "In an era of AI noise, FishTrippers is the filter. We believe that mastering the world's most powerful creative tools shouldn't be a bitter struggle—it should be a refreshing transformation. The current AI landscape is often 'sour': overwhelming, cluttered with technical 'seeds,' and prone to leaving creators feeling burnt out. We exist to provide the clarity, Aide-ship, and 'juice' you need to actually produce work that matters.",
+        body: "In an era of AI noise, FishTrippers is the filter. We believe that mastering the world's most powerful creative tools shouldn't be a bitter struggle—it should be a refreshing transformation. The current AI landscape is often 'sour': overwhelming, cluttered with technical 'seeds,' and prone to leaving creators feeling burnt out. We exist to provide the clarity, Guide-ship, and 'juice' you need to actually produce work that matters.",
       },
       {
-        body: "Our marketplace connects you with human experts—your Aide—to help you navigate the cutting edge of AI Art, Music, Video, Writing, and Design. Every Aide offers Signature Aide Courses, which are specialized, structured paths designed to take you from curious to capable. These are the secret recipes for mastering specific AI workflows, ensuring you aren't just learning tools, but mastering the craft.",
+        body: "Our marketplace connects you with human experts—your Guide—to help you navigate the cutting edge of AI Art, Music, Video, Writing, and Design. Every Guide offers Signature Guide Fishing Trips, which are specialized, structured paths designed to take you from curious to capable. These are the secret recipes for mastering specific AI workflows, ensuring you aren't just learning tools, but mastering the craft.",
       },
       {
-        body: "While our courses provide the roadmap, our Aides provide the Personal Touch. They guide you through the noise, helping you apply advanced AI techniques to your unique creative voice. And if you ever need a little more momentum, our Refuel Sessions allow you to extend your journey whenever you need extra support, a deeper dive, or a creative tune-up.",
+        body: "While our trips provide the roadmap, our Aides provide the Personal Touch. They guide you through the noise, helping you apply advanced AI techniques to your unique creative voice. And if you ever need a little more momentum, our Refuel Sessions allow you to extend your journey whenever you need extra support, a deeper dive, or a creative tune-up.",
       },
       {
         body: "Whether you are a professional looking to Juice Up your workflow or a creator mastering a new medium, we provide the expertise you need to succeed. At FishTrippers, we give you all the juice and none of the seeds.",
       },
     ],
-    cta: { label: "Find Your Aide", to: "/search" },
+    cta: { label: "Find Your Guide", to: "/search" },
   },
   contact: stub(
     "contact",
@@ -294,11 +294,11 @@ export const FOOTER_GROUPS: FooterGroup[] = [
   {
     category: "Learning & Teaching",
     links: [
-      { kind: "external", to: "/", label: "Find a Course" },
-      { kind: "external", to: "/mentor/create-path?new=true", label: "Become an Aide" },
+      { kind: "external", to: "/", label: "Find a Fishing Trip" },
+      { kind: "external", to: "/mentor/create-path?new=true", label: "Become an Guide" },
       { kind: "info", slug: "how-it-works", label: "How it Works" },
-      { kind: "info", slug: "learner-faqs", label: "Learner FAQs" },
-      { kind: "info", slug: "mentor-faqs", label: "Aide FAQs" },
+      { kind: "info", slug: "learner-faqs", label: "Angler FAQs" },
+      { kind: "info", slug: "mentor-faqs", label: "Guide FAQs" },
     ],
   },
   {
@@ -315,7 +315,7 @@ export const FOOTER_GROUPS: FooterGroup[] = [
     links: [
       { kind: "info", slug: "privacy-policy", label: "Privacy Policy" },
       { kind: "info", slug: "terms-of-service", label: "Terms of Service" },
-      { kind: "info", slug: "mentor-agreement", label: "Aide Agreement" },
+      { kind: "info", slug: "mentor-agreement", label: "Guide Agreement" },
       { kind: "info", slug: "acceptable-use-policy", label: "Acceptable Use Policy" },
     ],
   },

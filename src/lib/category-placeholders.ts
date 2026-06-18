@@ -18,7 +18,7 @@ function svg(inner: string, label: string): string {
         <rect width='1200' height='675' fill='${CREAM}'/>
         ${inner}
         <g font-family='Inter, system-ui, sans-serif' fill='${INK}' fill-opacity='0.7'>
-          <text x='60' y='90' font-size='22' font-weight='700' letter-spacing='6'>AIMENTORING.IO</text>
+          <text x='60' y='90' font-size='22' font-weight='700' letter-spacing='6'>AIGUIDING.IO</text>
           <text x='60' y='122' font-size='16' font-weight='500' letter-spacing='2' fill-opacity='0.55'>${label.toUpperCase()}</text>
         </g>
       </svg>`,

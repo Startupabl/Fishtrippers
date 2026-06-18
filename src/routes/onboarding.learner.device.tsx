@@ -17,7 +17,7 @@ export const Route = createFileRoute("/onboarding/learner/device")({
       {
         name: "description",
         content:
-          "Tell us which device you'll use so we can match you with an Aide who teaches that way.",
+          "Tell us which device you'll use so we can match you with an Guide who teaches that way.",
       },
     ],
   }),
@@ -63,8 +63,8 @@ function DeviceStep() {
   return (
     <OnboardingShell
       step={2}
-      headline="What device will you be using for your lessons?"
-      subhead="A senior on an iPad needs a different Aide than a pro on a PC."
+      headline="What device will you be using for your trips?"
+      subhead="A senior on an iPad needs a different Guide than a pro on a PC."
       backTo="/onboarding/learner"
     >
       <div className="grid grid-cols-1 gap-3 sm:grid-cols-3">
