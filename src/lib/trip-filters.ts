@@ -19,22 +19,21 @@ export const DURATION_BUCKETS: DurationBucket[] = [
   { value: "extended", label: "Extended Day (10–14 hrs)", minMinutes: 9 * 60 + 1, maxMinutes: null },
 ];
 
-export const DEPARTURE_TIME_OPTIONS: { value: string; label: string }[] = [
-  { value: "05:00", label: "5:00 AM" },
-  { value: "05:30", label: "5:30 AM" },
-  { value: "06:00", label: "6:00 AM" },
-  { value: "06:30", label: "6:30 AM" },
-  { value: "07:00", label: "7:00 AM" },
-  { value: "07:30", label: "7:30 AM" },
-  { value: "08:00", label: "8:00 AM" },
-  { value: "09:00", label: "9:00 AM" },
-  { value: "10:00", label: "10:00 AM" },
-  { value: "12:00", label: "12:00 PM" },
-  { value: "13:00", label: "1:00 PM" },
-  { value: "14:00", label: "2:00 PM" },
-  { value: "16:00", label: "4:00 PM" },
-  { value: "18:00", label: "6:00 PM" },
+// Departure time windows based on trip_packages.start_time (HH:MM[:SS]).
+// Compared lexicographically against "HH:MM:SS" stored values.
+export type DepartureBucket = {
+  value: "morning" | "afternoon" | "evening";
+  label: string;
+  startTime: string; // inclusive (HH:MM:SS)
+  endTime: string;   // exclusive (HH:MM:SS)
+};
+
+export const DEPARTURE_BUCKETS: DepartureBucket[] = [
+  { value: "morning",   label: "Morning (5 AM – 11 AM)",      startTime: "05:00:00", endTime: "11:00:00" },
+  { value: "afternoon", label: "Afternoon (11 AM – 4 PM)",    startTime: "11:00:00", endTime: "16:00:00" },
+  { value: "evening",   label: "Evening / Night (4 PM – 10 PM)", startTime: "16:00:00", endTime: "22:00:00" },
 ];
+
 
 export const PRICE_PRESETS: { id: string; label: string; min: number; max: number }[] = [
   { id: "lt500", label: "Under $500", min: 0, max: 500 },

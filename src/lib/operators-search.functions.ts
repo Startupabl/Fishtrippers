@@ -38,7 +38,8 @@ const searchSchema = z.object({
   // Trip-level filters (all optional)
   durationMinMinutes: z.number().int().positive().optional().nullable(),
   durationMaxMinutes: z.number().int().positive().optional().nullable(),
-  departureTime: z.string().regex(/^\d{2}:\d{2}$/).optional().nullable(),
+  departureStart: z.string().regex(/^\d{2}:\d{2}:\d{2}$/).optional().nullable(),
+  departureEnd: z.string().regex(/^\d{2}:\d{2}:\d{2}$/).optional().nullable(),
   priceMinMinor: z.number().int().nonnegative().optional().nullable(),
   priceMaxMinor: z.number().int().nonnegative().optional().nullable(),
   techniques: z.array(z.string()).optional().nullable(),
