@@ -2,10 +2,16 @@ import { useId, useState } from "react";
 import {
   Plus,
   Minus,
-  
+  Info,
   HelpCircle,
   ChevronDown,
 } from "lucide-react";
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover";
+
 
 import { HowBookingsWorkDialog } from "@/components/HowBookingsWorkDialog";
 import { Link } from "@tanstack/react-router";
@@ -129,9 +135,75 @@ function TripCard({
             <h3 className="min-w-0 truncate text-xl font-bold text-foreground">
               {titleWithDuration}
             </h3>
-            <div className="whitespace-nowrap text-xl font-bold text-emerald-600">
-              {formatCurrency(baseDisplay, display)}
+            <div className="flex items-center gap-1.5 whitespace-nowrap">
+              <div className="text-xl font-bold text-emerald-600">
+                {formatCurrency(baseDisplay, display)}
+              </div>
+              <Popover>
+                <PopoverTrigger asChild>
+                  <button
+                    type="button"
+                    aria-label="View price details"
+                    onClick={(e) => e.stopPropagation()}
+                    onPointerDown={(e) => e.stopPropagation()}
+                    className="inline-flex h-7 w-7 items-center justify-center rounded-full text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
+                  >
+                    <Info className="h-4 w-4" />
+                  </button>
+                </PopoverTrigger>
+                <PopoverContent
+                  align="end"
+                  className="w-80 p-4"
+                  onClick={(e) => e.stopPropagation()}
+                  onPointerDown={(e) => e.stopPropagation()}
+                >
+                  <div className="mb-3 text-base font-semibold text-foreground">
+                    Price details
+                  </div>
+                  <div className="space-y-0">
+                    <div className="flex items-center justify-between py-2 text-sm">
+                      <span className="text-foreground/80">1 person</span>
+                      <span className="font-semibold text-foreground">
+                        {formatCurrency(baseDisplay, display)}
+                      </span>
+                    </div>
+                    {perExtra > 0 && (
+                      <div className="flex items-center justify-between border-t border-border py-2 text-sm">
+                        <span className="text-foreground/80">+1 additional person</span>
+                        <span className="font-semibold text-foreground">
+                          {formatCurrency(extraDisplay, display)}
+                        </span>
+                      </div>
+                    )}
+                    <div className="border-t border-border pt-2">
+                      <div className="flex items-center justify-between text-sm">
+                        <span className="font-bold text-foreground">Total trip price</span>
+                        <span className="font-bold text-foreground">
+                          {formatCurrency(baseDisplay, display)}
+                        </span>
+                      </div>
+                      {maxParty > 0 && (
+                        <div className="mt-0.5 text-xs text-muted-foreground">
+                          Shared trip, up to {maxParty} guests
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                  <p className="mt-3 text-xs text-muted-foreground">
+                    The base price is for 1 person.
+                    {perExtra > 0
+                      ? ` After that it's ${formatCurrency(extraDisplay, display)} per additional guest, per trip.`
+                      : ""}
+                  </p>
+                  {minParty > 1 && (
+                    <p className="mt-2 text-xs font-medium text-destructive">
+                      This trip requires minimum of {minParty} people.
+                    </p>
+                  )}
+                </PopoverContent>
+              </Popover>
             </div>
+
           </div>
           {/* Experience + capacity */}
           {(envs.length > 0 || techs.length > 0 || maxParty > 0) && (
