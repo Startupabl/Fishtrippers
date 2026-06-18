@@ -67,7 +67,7 @@ export const tripInputSchema = z
     booking_type: z.enum(["instant_book", "request_to_book"]).default("request_to_book"),
     target_species: z.array(z.string()).min(1, "Pick at least one target fish").max(50),
     environments: z.array(z.string()).min(1, "Pick at least one environment").max(2, "Max 2 environments per trip"),
-    techniques: z.array(z.string()).min(1, "Pick at least one technique").max(10),
+    techniques: z.array(z.string()).min(1, "Pick at least one fishing style").max(10),
     departure_address: z.string().trim().min(2, "Pick a departure point"),
     departure_lat: z.number().nullable().optional(),
     departure_lng: z.number().nullable().optional(),
