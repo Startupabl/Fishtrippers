@@ -191,9 +191,10 @@ function MyListingPage() {
 
   const publicHref = useMemo(() => {
     const op: any = operator;
-    if (!op?.slug || !op?.primary_category) return null;
-    return `/c/${op.primary_category}/${op.slug}`;
+    if (!op?.slug || !op?.location_slug) return null;
+    return `/charters/${op.location_slug}/${op.slug}`;
   }, [operator]);
+
 
   if (operatorQ.isLoading) {
     return (
