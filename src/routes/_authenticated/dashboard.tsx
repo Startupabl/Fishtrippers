@@ -74,7 +74,7 @@ function DashboardHeaderBar() {
 
 function AideDashboardHome() {
   const navigate = useNavigate();
-  const { guard, dialog: profileGuardDialog } = useProfileGuard();
+  const { dialog: profileGuardDialog } = useProfileGuard();
   const user = useAuthStore((s) => s.user);
   const hasListing = useHasActiveListing();
   const { titleCase: roleLabel } = useOperatorRoleLabel();
