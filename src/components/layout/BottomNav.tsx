@@ -150,7 +150,7 @@ export function BottomNav() {
               return;
             }
             if (listingLoaded && !hasListingChecked) {
-              navigate({ to: "/mentor/create-path", search: { empty: true } as never });
+              navigate({ to: "/create-listing/new", search: { empty: true } as never });
               return;
             }
             navigate({ to: "/dashboard/aide" });

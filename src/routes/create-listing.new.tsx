@@ -31,7 +31,7 @@ import { Logo } from "@/components/brand/Logo";
 import { upsertOperatorDraft } from "@/lib/operators.functions";
 import { toast } from "sonner";
 
-export const Route = createFileRoute("/mentor/create-path")({
+export const Route = createFileRoute("/create-listing/new")({
   validateSearch: (search) =>
     z
       .object({
@@ -66,7 +66,7 @@ function CreatePathPage() {
   // Redirect to /login if not authenticated.
   useEffect(() => {
     if (initialized && !authUser) {
-      navigate({ to: "/login", search: { redirect: "/mentor/create-path" } as any });
+      navigate({ to: "/login", search: { redirect: "/create-listing/new" } as any });
     }
   }, [initialized, authUser, navigate]);
 

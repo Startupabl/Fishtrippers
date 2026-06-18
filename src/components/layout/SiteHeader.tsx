@@ -54,7 +54,7 @@ export function SiteHeader() {
               className="hidden h-11 rounded-full bg-gold px-5 text-base font-bold text-ocean-deep shadow-sm hover:bg-gold-deep sm:inline-flex lg:px-6"
             >
               <Link
-                to="/mentor/create-path"
+                to="/create-listing/new"
                 search={{ new: true }}
                 onClick={guard(startNewMentorExpressListing)}
               >

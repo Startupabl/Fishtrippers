@@ -179,7 +179,7 @@ export function UserAvatarMenuItems({
       ) : (
         <DropdownMenuItem asChild>
           <Link
-            to="/mentor/create-path"
+            to="/create-listing/new"
             search={{ new: true }}
             onClick={guard(startNewMentorExpressListing)}
             className="flex w-full cursor-pointer items-center gap-2 px-3 py-2"

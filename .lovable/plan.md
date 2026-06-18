@@ -1,47 +1,47 @@
-## Make "Contact captain" actually send a message
+## Move "Create a Listing" wizard from `/mentor/create-path` → `/create-listing/new`
 
-Currently `CaptainCard.onClick` only fires `toast.info("Contact captain — available after approval")`. The messaging infrastructure exists (`message_threads`, `messages`, `sendMessage`), but it's journey-based — there's no path to start a thread with an operator directly. `message_threads.journey_id` is already nullable, so we can reuse the existing tables.
+The route at `/mentor/create-path` is the listing-creation wizard. We'll move it under the existing `/create-listing` informational landing page so the URL reads clean to public users and the landing page stays intact. Sidebar label also gets updated.
 
-### 1. New server function — `src/lib/messages.functions.ts`
+### 1. Promote `/create-listing` to a layout
 
-Add `ensureThreadWithOperator`:
+Rename `src/routes/create-listing.tsx` → `src/routes/create-listing.index.tsx` (no other change). This makes `/create-listing` an index leaf and frees the parent path for nesting.
 
-- Input: `{ operator_id: uuid }` (zod)
-- `requireSupabaseAuth` middleware
-- Look up `operators.owner_id` for the operator (via `supabase`); 404 if missing
-- Block messaging yourself (`owner_id === userId`)
-- Look for existing thread where `learner_id=userId AND mentor_id=owner_id AND journey_id IS NULL` (use `.is("journey_id", null)`); reuse if found
-- Otherwise insert a new `message_threads` row with `journey_id: null`
-- Return `{ thread_id }`
+> Note: TanStack flat-file routing automatically treats `create-listing.tsx` as a leaf and `create-listing.index.tsx` + `create-listing.new.tsx` as siblings under the path prefix — no explicit layout file is required.
 
-No schema migration needed.
+### 2. Move the wizard
 
-### 2. New component — `src/components/operator-listing/ContactCaptainDialog.tsx`
+Rename `src/routes/mentor.create-path.tsx` → `src/routes/create-listing.new.tsx`.
 
-A small shadcn `Dialog` that:
+Inside the file:
+- `createFileRoute("/mentor/create-path")` → `createFileRoute("/create-listing/new")`
+- The internal redirect `navigate({ to: "/login", search: { redirect: "/mentor/create-path" } })` → use `"/create-listing/new"`
 
-- Props: `open`, `onOpenChange`, `operatorId`, `captainName`
-- Renders a `<Textarea>` (min 10 / max 1000 chars) with placeholder `Hi {captainName}, I'm interested in your trips…`
-- Submit button "Send message":
-  - If no signed-in user → close dialog and `navigate({ to: "/auth", search: { redirect: window.location.pathname + window.location.hash } })`
-  - Otherwise: call `ensureThreadWithOperator({ data: { operator_id } })`, then `sendMessage({ data: { thread_id, body } })`
-  - On success: `toast.success("Message sent")`, close, `navigate({ to: "/dashboard/messages/$threadId", params: { threadId } })`
-  - On error: `toast.error(err.message)`
-- Uses `useServerFn` + `useMutation`; disabled state during pending
+### 3. Update every reference in the codebase
 
-### 3. Wire `CaptainCard` — `src/components/operator-listing/CaptainCard.tsx`
+Replace `"/mentor/create-path"` with `"/create-listing/new"` in:
 
-- Add `operatorId: string` prop
-- Replace the `toast.info` `onClick` with `setOpen(true)`
-- Render `<ContactCaptainDialog open={open} onOpenChange={setOpen} operatorId={operatorId} captainName={name} />`
+- `src/lib/content.ts` (footer/nav link)
+- `src/lib/admin.functions.ts` (2 email edit URLs)
+- `src/routes/sitemap[.]xml.ts`
+- `src/routes/c.$categorySlug.$listingSlug.tsx`
+- `src/routes/onboarding.choice.tsx`
+- `src/routes/_authenticated/dashboard.tsx`
+- `src/routes/_authenticated/dashboard.my-listing.tsx` (4 instances)
+- `src/routes/_authenticated/dashboard.aide.courses.tsx` (5 instances)
+- `src/components/dashboard/WorkspaceSidebar.tsx`
+- `src/components/layout/UserAvatarMenu.tsx`
+- `src/components/layout/SiteHeader.tsx`
+- `src/components/layout/BottomNav.tsx`
+- `src/components/operator-listing/PreviewBanner.tsx`
 
-### 4. Pass `operatorId` to `CaptainCard`
+The auto-generated `src/routeTree.gen.ts` will regenerate on the next build — not touched manually.
 
-- `src/routes/charters.$location.$businessSlug.tsx` line ~152 — add `operatorId={op.id}`
-- `src/routes/_authenticated/operator.preview.tsx` line ~254 — pass the operator id from preview data (preview is owner-only viewing their own listing; the dialog will block self-messaging from the server, which is correct)
+### 4. Sidebar label
+
+In `src/components/dashboard/WorkspaceSidebar.tsx` line 50, change `title: "List Your Trip"` → `title: "Listing Details"` (same line where we update the `to` path).
 
 ### Out of scope
 
-- No email notification for new contact threads (existing system only emails on `is_urgent`)
-- No changes to threads list UI; the new thread will appear there since it matches the `learner_id/mentor_id` query
-- No verification gate — message goes through whether or not the operator is "verified"
+- No redirect from old `/mentor/create-path` URL (any existing email edit links sent before this change won't resolve; admin emails get the new URL going forward).
+- No copy changes on the landing page itself.
+- No changes to other `/mentor/*` routes (`mentor-faqs`, `mentor-agreement`, `become-a-mentor`, `m.$mentorSlug`).

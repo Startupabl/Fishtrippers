@@ -295,7 +295,7 @@ export const FOOTER_GROUPS: FooterGroup[] = [
     category: "Learning & Teaching",
     links: [
       { kind: "external", to: "/", label: "Find a Fishing Trip" },
-      { kind: "external", to: "/mentor/create-path?new=true", label: "Become an Guide" },
+      { kind: "external", to: "/create-listing/new?new=true", label: "Become an Guide" },
       { kind: "info", slug: "how-it-works", label: "How it Works" },
       { kind: "info", slug: "learner-faqs", label: "Angler FAQs" },
       { kind: "info", slug: "mentor-faqs", label: "Guide FAQs" },
