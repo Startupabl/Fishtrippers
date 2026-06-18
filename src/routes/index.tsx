@@ -397,7 +397,7 @@ function Index() {
                 color: "#0A2540",
               }}
             >
-              What is FishTrippers?
+              How FishTrippers Works
             </DialogTitle>
             <DialogDescription className="sr-only">
               Intro video about FishTrippers.
@@ -415,8 +415,8 @@ function Index() {
                 }}
               >
                 <iframe
-                  src="https://iframe.mediadelivery.net/embed/683194/aa5f7090-2922-4ba8-a2c8-0d11de0d09f2?autoplay=true&loop=false&muted=true&color=FF5733"
-                  title="What is FishTrippers?"
+                  src="https://iframe.mediadelivery.net/embed/683194/4a27c961-f4c0-4b88-b463-e507b24032fa?autoplay=true&loop=false&muted=true&color=FF5733"
+                  title="How FishTrippers Works"
                   style={{
                     position: "absolute",
                     top: 0,
