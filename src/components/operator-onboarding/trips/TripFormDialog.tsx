@@ -520,18 +520,52 @@ export function TripFormDialog({ open, onOpenChange, initial }: Props) {
                 Charged for each extra guest beyond the first, up to your max party size.
               </p>
             </div>
-            {totalPreview != null && (
-              <div className="rounded-lg border bg-background p-3 text-sm">
-                <div className="flex items-center justify-between">
-                  <span className="text-muted-foreground">
-                    Total at full trip ({form.max_party_size} guests)
-                  </span>
-                  <span className="font-semibold">
-                    {formatMoney(totalPreview, captainCurrency)}
-                  </span>
-                </div>
-              </div>
-            )}
+            {totalPreview != null && (() => {
+              const depositMinor = Math.round(totalPreview * 0.1);
+              const takeHomeMinor = totalPreview - depositMinor;
+              return (
+                <>
+                  <div className="rounded-lg border bg-background p-3 text-sm space-y-3">
+                    <div className="flex items-start justify-between gap-3">
+                      <div>
+                        <div className="font-medium">Total Trip Price (Full Boat)</div>
+                        <div className="text-xs text-muted-foreground">
+                          Assumes the trip is booked to your max party size of {form.max_party_size} guests.
+                        </div>
+                      </div>
+                      <span className="font-semibold whitespace-nowrap">
+                        {formatMoney(totalPreview, captainCurrency)}
+                      </span>
+                    </div>
+                    <div className="flex items-start justify-between gap-3">
+                      <div>
+                        <div className="font-medium">Deposit to Fishtrippers (10%)</div>
+                        <div className="text-xs text-muted-foreground">
+                          Paid by the customer online at booking.
+                        </div>
+                      </div>
+                      <span className="font-semibold whitespace-nowrap">
+                        {formatMoney(depositMinor, captainCurrency)}
+                      </span>
+                    </div>
+                    <div className="border-t pt-3 flex items-start justify-between gap-3">
+                      <div>
+                        <div className="font-semibold">Your Take-Home Cash (90%)</div>
+                        <div className="text-xs text-muted-foreground">
+                          Paid directly to you by the customer when you meet.
+                        </div>
+                      </div>
+                      <span className="text-base font-bold whitespace-nowrap">
+                        {formatMoney(takeHomeMinor, captainCurrency)}
+                      </span>
+                    </div>
+                  </div>
+                  <p className="text-xs text-muted-foreground">
+                    Fishtrippers collects our 10% matchmaking fee upfront from the customer's deposit. You collect the remaining 90% balance when you meet.
+                  </p>
+                </>
+              );
+            })()}
           </section>
 
           {/* Departure */}
