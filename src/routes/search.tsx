@@ -158,7 +158,7 @@ function SearchPage() {
 
   const activeCategoryLabel =
     FISHING_ENVIRONMENTS.find((e) => e.id === search.category)?.label ??
-    "All categories";
+    "All trip types";
 
   const durationLabel = search.duration
     ? DURATION_OPTIONS.find((o) => o.value === search.duration)?.label ?? "Duration"
