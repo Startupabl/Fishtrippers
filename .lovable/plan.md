@@ -1,12 +1,16 @@
-On the captains dashboard, the Aide workspace home has a card currently labeled "Lab Hours" that links to the profile settings hash. We need to relabel it "Manage Availability" and point it to the existing `/dashboard/master-calendar` page shown in the sidebar.
+## Dashboard cleanup for captains with an existing listing
 
-Changes:
-- Edit `src/routes/_authenticated/dashboard.tsx` inside the `AideDashboardHome` Studio section.
-- Change the card:
-  - title: "Manage Availability"
-  - description: "Set your weekly availability and block-out dates."
-  - link: `to="/dashboard/master-calendar"`, remove `hash`
-  - icon: `CalendarDays` (imported from `lucide-react`)
-- Add the missing `CalendarDays` import alongside the existing `Clock` import (or swap `Clock` for `CalendarDays` if no other usage remains). Verify no other code references the old `hash="lab-hours"` path in this file.
+On the captains dashboard (`AideDashboardHome`), make three small layout changes:
 
-No other dashboard or sidebar changes are needed; the sidebar already links to `/dashboard/master-calendar` as "Manage Availability".
+1. Remove the "Create New Listing" button from the header — it is no longer needed after the first listing is created.
+2. Rename the "My Listing" card to **"My Listing & Trips"**.
+3. Reorder the sections so the **Studio** cards appear first (top) and the **Operations** cards appear second (bottom).
+
+### Implementation details
+
+- File: `src/routes/_authenticated/dashboard.tsx`
+- Delete the `<Button asChild ...>` block that links to `/create-listing/new` with the `Plus` icon and `Create New Listing` label.
+- Update the `NavCard` title from `"My Listing"` to `"My Listing & Trips"`.
+- Swap the order of the two `<section>` blocks: move the existing `Studio` section above the `Operations` section, keeping their internal card layouts unchanged.
+
+No other dashboard or sidebar changes are needed.
