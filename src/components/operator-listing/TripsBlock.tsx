@@ -108,7 +108,7 @@ function TripCard({
 
   return (
     <article className="rounded-2xl border bg-card p-5">
-      <div className="grid gap-5 lg:grid-cols-[minmax(0,1fr)_260px]">
+      <div className="grid gap-5 lg:grid-cols-[minmax(0,1fr)_380px]">
         {/* LEFT: trip content */}
         <div className="min-w-0 space-y-3">
           <div>
@@ -168,95 +168,93 @@ function TripCard({
         </div>
 
         {/* RIGHT: price + guests selector */}
-        <aside className="rounded-xl border bg-muted/20 p-4">
+        <aside className="rounded-xl border bg-muted/20 p-5 lg:min-w-[360px]">
           <div className="text-xs uppercase tracking-wide text-muted-foreground">
             From
           </div>
-          <div className="text-2xl font-bold text-emerald-700">
+          <div className="text-2xl font-bold text-ocean-deep">
             {formatCurrency(baseDisplay, display)}
           </div>
-          <div className="text-xs text-muted-foreground">
+          <div className="text-sm text-muted-foreground">
             base · 1 guest
           </div>
 
           {perExtra > 0 && (
-            <p className="mt-2 text-xs text-muted-foreground">
+            <p className="mt-2 text-sm text-muted-foreground">
               The base price is for 1 person. After that it&apos;s{" "}
               {formatCurrency(extraDisplay, display)} per each additional person per day.
             </p>
           )}
 
           {minParty > 1 && (
-            <p className="mt-2 text-xs font-medium text-foreground">
+            <p className="mt-2 text-sm font-medium text-foreground">
               This trip requires a minimum of {minParty} people.
             </p>
           )}
 
           {/* Guests stepper */}
           <div className="mt-4">
-            <div className="mb-1 text-xs font-medium">Guests</div>
+            <div className="mb-1.5 text-sm font-medium">Guests</div>
             <div className="flex items-center gap-2">
               <Button
                 type="button"
                 size="icon"
                 variant="outline"
-                className="h-8 w-8"
+                className="h-9 w-9"
                 disabled={guests <= minParty}
                 onClick={() => setGuests((g) => Math.max(minParty, g - 1))}
                 aria-label="Decrease guests"
               >
-                <Minus className="h-3.5 w-3.5" />
+                <Minus className="h-4 w-4" />
               </Button>
-              <span className="min-w-[2ch] text-center text-sm font-medium">
+              <span className="min-w-[2ch] text-center text-base font-semibold">
                 {guests}
               </span>
               <Button
                 type="button"
                 size="icon"
                 variant="outline"
-                className="h-8 w-8"
+                className="h-9 w-9"
                 disabled={guests >= maxParty}
                 onClick={() => setGuests((g) => Math.min(maxParty, g + 1))}
                 aria-label="Increase guests"
               >
-                <Plus className="h-3.5 w-3.5" />
+                <Plus className="h-4 w-4" />
               </Button>
-              <span className="ml-1 text-xs text-muted-foreground">
+              <span className="ml-1 text-sm text-muted-foreground">
                 of {maxParty}
               </span>
             </div>
           </div>
 
-          <div className="mt-4 overflow-hidden rounded-lg border">
-            <div className="bg-gold/20 px-3 py-2.5 text-ocean-deep">
-              <div className="flex items-baseline justify-between gap-2">
-                <span className="text-[11px] font-bold uppercase tracking-wide">
-                  Due now to book
-                </span>
-                <span className="text-xl font-extrabold">
-                  {formatCurrency(depositDisplay, display)}
-                </span>
+          <div className="mt-4 overflow-hidden rounded-xl border-2 border-gold/60 bg-card">
+            {/* Due Now callout */}
+            <div className="bg-gold/15 px-5 py-4 text-center text-ocean-deep">
+              <div className="text-sm font-bold uppercase tracking-wide">
+                Due now to book
               </div>
-              <div className="text-[11px] opacity-80">
-                Charged today to secure your spot
+              <div className="mt-1 text-3xl font-extrabold leading-tight">
+                {formatCurrency(depositDisplay, display)}
+              </div>
+              <div className="mt-1 text-sm opacity-80">
+                (Charged today to secure your spot)
               </div>
             </div>
-            <div className="space-y-1.5 px-3 py-2.5 text-sm">
-              <div className="flex items-baseline justify-between">
-                <span className="text-muted-foreground">
-                  Total trip cost ({guests} {guests === 1 ? "guest" : "guests"})
-                </span>
-                <span className="font-semibold">
+            {/* Breakdown rows */}
+            <div className="space-y-2 px-5 py-4 text-sm">
+              <div className="flex items-center justify-between gap-3">
+                <span className="text-foreground/80">Total trip cost:</span>
+                <span className="whitespace-nowrap font-semibold text-foreground">
                   {formatCurrency(totalDisplay, display)}
                 </span>
               </div>
-              <div className="flex items-baseline justify-between">
-                <span className="text-muted-foreground">Remaining balance</span>
-                <span className="font-semibold">
+              <div className="flex items-center justify-between gap-3">
+                <span className="text-foreground/80">Remaining balance:</span>
+                <span className="whitespace-nowrap font-semibold text-foreground">
                   {formatCurrency(balanceDisplay, display)}
                 </span>
               </div>
-              <p className="text-[11px] text-muted-foreground">
+              <p className="pt-1 text-xs text-muted-foreground">
                 Paid directly to your guide when you meet.
               </p>
             </div>
@@ -264,7 +262,7 @@ function TripCard({
           <CurrencyDisclaimer
             baseCurrency={base}
             displayCurrency={display}
-            className="mt-2"
+            className="mt-3"
           />
 
 
