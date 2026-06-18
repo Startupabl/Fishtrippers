@@ -577,6 +577,7 @@ function MyListingPage() {
                               booking_type: (t as any).booking_type ?? "request_to_book",
                               charter_type: (t as any).charter_type ?? "private_charter",
                               seats_available: (t as any).seats_available ?? null,
+                              min_seats_to_sail: (t as any).min_seats_to_sail ?? null,
 
                               target_species: Array.isArray((t as any).target_species) ? (t as any).target_species : [],
                               environments: Array.isArray((t as any).environments) ? (t as any).environments : [],
