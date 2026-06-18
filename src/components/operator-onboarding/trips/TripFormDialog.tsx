@@ -165,6 +165,11 @@ export function TripFormDialog({ open, onOpenChange, initial }: Props) {
       if (form.environments.length > 2) throw new Error("Max 2 environments per trip");
       if (form.techniques.length === 0) throw new Error("Pick at least one fishing style");
       if (!form.departure_address.trim()) throw new Error("Pick a departure point");
+      if (form.charter_type === "shared_tour") {
+        if (form.seats_available == null || form.seats_available < 1)
+          throw new Error("Enter total seats available");
+      }
+
 
       const result = await upsertFn({
         data: {
