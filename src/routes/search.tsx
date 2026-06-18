@@ -310,7 +310,7 @@ function SearchPage() {
                   : "text-foreground hover:bg-accent",
               )}
             >
-              All categories
+              All trip types
             </button>
             {FISHING_ENVIRONMENTS.map((env) => (
               <button
