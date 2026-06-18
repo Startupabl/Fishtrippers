@@ -3,7 +3,7 @@ import {
   Plus,
   MapPin,
   Minus,
-  Fish,
+  
   HelpCircle,
   ChevronDown,
 } from "lucide-react";
@@ -66,13 +66,6 @@ function formatStartTime(t?: string | null) {
   return `${hr}:${mm ?? "00"} ${period}`;
 }
 
-function Chip({ children }: { children: React.ReactNode }) {
-  return (
-    <span className="rounded-full border bg-muted/40 px-2.5 py-0.5 text-xs text-muted-foreground">
-      {children}
-    </span>
-  );
-}
 
 function TripCard({
   trip,
@@ -151,6 +144,17 @@ function TripCard({
               </p>
             )}
           </div>
+          {(envs.length > 0 || techs.length > 0) && (
+            <p className="mt-0.5 truncate text-sm text-muted-foreground">
+              Experience:{" "}
+              {[
+                ...envs.map((e) => fishingEnvironmentLabel(e)),
+                ...techs,
+              ]
+                .filter(Boolean)
+                .join(", ")}
+            </p>
+          )}
         </div>
         <ChevronDown
           className={`h-5 w-5 shrink-0 self-center text-muted-foreground transition-transform duration-300 ${
@@ -169,38 +173,12 @@ function TripCard({
       >
         <div className="overflow-hidden">
           <div className="border-t bg-card px-5 pb-6 pt-5 lg:px-6 lg:min-w-[380px]">
-            {/* Description + chips */}
+            {/* Description + meeting location */}
             <div className="space-y-3">
-              {(envs.length > 0 || techs.length > 0) && (
-                <div className="flex flex-wrap gap-1.5">
-                  {envs.map((e) => (
-                    <Chip key={`e-${e}`}>{fishingEnvironmentLabel(e)}</Chip>
-                  ))}
-                  {techs.map((t) => (
-                    <Chip key={`t-${t}`}>{t}</Chip>
-                  ))}
-                </div>
-              )}
-
               {trip.description && (
                 <p className="whitespace-pre-line text-sm text-foreground/80">
                   {trip.description}
                 </p>
-              )}
-
-              {species.length > 0 && (
-                <div className="flex flex-wrap items-center gap-1.5 text-sm">
-                  <Fish className="h-3.5 w-3.5 text-muted-foreground" />
-                  <span className="text-muted-foreground">Targeting:</span>
-                  {species.slice(0, 8).map((s) => (
-                    <Chip key={`s-${s}`}>{speciesLabel(s)}</Chip>
-                  ))}
-                  {species.length > 8 && (
-                    <span className="text-xs text-muted-foreground">
-                      +{species.length - 8} more
-                    </span>
-                  )}
-                </div>
               )}
 
               {trip.departure_address && (
