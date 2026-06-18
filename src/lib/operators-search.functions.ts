@@ -6,6 +6,7 @@ import { z } from "zod";
 export type OperatorCardDTO = {
   id: string;
   slug: string | null;
+  location_slug: string | null;
   display_name: string;
   city: string | null;
   state: string | null;
@@ -25,6 +26,7 @@ export type OperatorCardDTO = {
   lowest_price_label: string | null; // e.g. "From US $200"
   trip_count: number;
 };
+
 
 const searchSchema = z.object({
   q: z.string().optional().nullable(),
