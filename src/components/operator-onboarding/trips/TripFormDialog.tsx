@@ -93,6 +93,7 @@ const empty: TripEditorState = {
   booking_type: "request_to_book",
   charter_type: "private_charter",
   seats_available: null,
+  min_seats_to_sail: null,
 
   target_species: [],
   environments: [],
