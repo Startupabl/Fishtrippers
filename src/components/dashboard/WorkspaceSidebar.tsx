@@ -47,7 +47,7 @@ const learnerItems: Item[] = [
 ];
 
 const guestItems: Item[] = [
-  { title: "List Your Trip", to: "/create-listing/new", search: { new: true }, icon: Plus },
+  { title: "Listing Details", to: "/create-listing/new", search: { new: true }, icon: Plus },
   { title: "Book a Trip", to: "/search", icon: Search },
 ];
 
