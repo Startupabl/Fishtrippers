@@ -8,7 +8,6 @@ import {
 } from "@tanstack/react-router";
 import { useServerFn } from "@tanstack/react-start";
 import { useQuery } from "@tanstack/react-query";
-import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import {
   AlertTriangle,
@@ -16,10 +15,8 @@ import {
   CalendarDays,
   Calendar,
   Wallet,
-  Plus,
 } from "lucide-react";
 import { DESIGN_SYSTEM } from "@/lib/brand";
-import { startNewMentorExpressListing } from "@/stores/useMentorExpressStore";
 import { ListingLiveCelebrationDialog } from "@/components/dashboard/ListingLiveCelebrationDialog";
 import { useProfileGuard } from "@/components/onboarding/ProfileCompletionGuard";
 import { useAuthStore } from "@/stores/useAuthStore";
