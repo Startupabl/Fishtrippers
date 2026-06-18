@@ -81,6 +81,8 @@ export const upsertTrip = createServerFn({ method: "POST" })
       charter_type: data.charter_type ?? "private_charter",
       seats_available:
         data.charter_type === "shared_tour" ? data.seats_available ?? null : null,
+      min_seats_to_sail:
+        data.charter_type === "shared_tour" ? data.min_seats_to_sail ?? null : null,
 
       target_species: data.target_species,
       environments: data.environments,
