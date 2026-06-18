@@ -62,7 +62,7 @@ export interface TripEditorState {
   booking_type: "instant_book" | "request_to_book";
   charter_type: "private_charter" | "shared_tour";
   seats_available: number | null;
-  min_seats_to_sail: number | null;
+  min_seats_to_sail?: number | null;
 
   target_species: string[];
   environments: string[];
