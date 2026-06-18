@@ -143,6 +143,7 @@ function MyListingPage() {
   const fetchTrips = useServerFn(listMyTrips);
   const fetchStripeIds = useServerFn(getMyStripeIds);
   const removeTrip = useServerFn(deleteTrip);
+  const updateTripStatus = useServerFn(setTripStatus);
 
   const operatorQ = useQuery({
     queryKey: ["my-operator-full"],
