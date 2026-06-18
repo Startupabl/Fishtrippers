@@ -13,21 +13,33 @@ interface Props {
   verified: boolean;
   /** When true, owner-only controls (Upload / Manage photos) are shown. */
   canManage?: boolean;
+  /** Pre-fetched photos (public viewer path). When provided, internal owner-only query is skipped. */
+  photos?: OperatorPhoto[];
+  photosLoading?: boolean;
 }
 
-export function HeaderGallery({ title, location, verified, canManage = true }: Props) {
+export function HeaderGallery({
+  title,
+  location,
+  verified,
+  canManage = true,
+  photos: photosProp,
+  photosLoading: photosLoadingProp,
+}: Props) {
+  const usingProp = photosProp !== undefined;
   const list = useServerFn(listMyOperatorPhotos);
-  const { data: photos = [] } = useQuery({
+  const { data: ownPhotos = [], isLoading: ownLoading } = useQuery({
     queryKey: ["operator-photos-mine"],
     queryFn: () => list(),
-    enabled: canManage,
+    enabled: canManage && !usingProp,
   });
 
   const [managerOpen, setManagerOpen] = useState(false);
   const [lightboxOpen, setLightboxOpen] = useState(false);
   const [lightboxStart, setLightboxStart] = useState(0);
 
-  const photoList = photos as OperatorPhoto[];
+  const photoList = (usingProp ? photosProp! : (ownPhotos as OperatorPhoto[])) as OperatorPhoto[];
+  const isLoading = usingProp ? !!photosLoadingProp : (canManage && ownLoading);
   const hasPhotos = photoList.length > 0;
   const grid = photoList.slice(0, 5);
 
@@ -78,7 +90,14 @@ export function HeaderGallery({ title, location, verified, canManage = true }: P
         </div>
       </div>
 
-      {hasPhotos ? (
+      {isLoading ? (
+        <div className="relative grid h-[260px] grid-cols-4 grid-rows-2 gap-2 overflow-hidden rounded-2xl sm:h-[420px]">
+          <div className="col-span-4 row-span-2 animate-pulse bg-muted sm:col-span-2 sm:row-span-2" />
+          {[1, 2, 3, 4].map((i) => (
+            <div key={i} className="hidden animate-pulse bg-muted sm:block" aria-hidden />
+          ))}
+        </div>
+      ) : hasPhotos ? (
         <div className="relative grid h-[260px] grid-cols-4 grid-rows-2 gap-2 overflow-hidden rounded-2xl sm:h-[420px]">
           {/* Big hero tile (first photo) */}
           <button
@@ -141,7 +160,9 @@ export function HeaderGallery({ title, location, verified, canManage = true }: P
             </div>
             <h3 className="text-lg font-semibold">No photos yet</h3>
             <p className="max-w-sm text-sm text-muted-foreground">
-              Add boat photos and catch shots so guests can see what to expect.
+              {canManage
+                ? "Add boat photos and catch shots so guests can see what to expect."
+                : "This charter hasn't added photos yet."}
             </p>
             {canManage && (
               <Button
