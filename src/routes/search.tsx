@@ -622,18 +622,8 @@ function PricePopover({
   );
 }
 
-function useMemoSync(
-  current: [number, number],
-  upstream: [number, number],
-  setter: (v: [number, number]) => void,
-) {
-  // If upstream values diverge from local (e.g. via preset click from outside),
-  // sync them into local state.
-  if (current[0] !== upstream[0] || current[1] !== upstream[1]) {
-    // Defer to avoid setState during render warning.
-    queueMicrotask(() => setter(upstream));
-  }
-}
+
+
 
 function CheckboxList({
   options,
