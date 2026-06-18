@@ -119,6 +119,11 @@ function OperatorListingPage() {
           <HeaderGallery
             title={op?.display_name ?? ""}
             location={op?.default_departure_address || op?.location || ""}
+            shareLocation={
+              [op?.default_departure_city, op?.default_departure_state, op?.default_departure_country]
+                .filter(Boolean)
+                .join(", ") || op?.location || ""
+            }
             verified={approved}
             canManage={false}
             photos={photos}

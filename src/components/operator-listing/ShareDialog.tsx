@@ -26,7 +26,7 @@ export function ShareDialog({ open, onOpenChange, title, location, url }: ShareD
     return "";
   }, [url, open]);
 
-  const message = `I just found this ${title || "charter"}${
+  const message = `I just found amazing trips organized by ${title || "this charter"}${
     location ? ` in ${location}` : ""
   } on FishTrippers. Check it out!`;
 

@@ -1,39 +1,20 @@
-# Functional Share Button on Listing Page
+## Update ShareDialog message and use city/region instead of full address
 
-Currently the Share icon in `HeaderGallery` is a non-functional button. We'll make it open a share dialog matching the reference design.
+**Changes:**
 
-## What gets built
+1. **`src/components/operator-listing/ShareDialog.tsx`**
+   - Update the prefilled message from:
+     `I just found this {title} in {location} on FishTrippers. Check it out!`
+     to:
+     `I just found amazing trips organized by {title} in {location} on FishTrippers. Check it out!`
+   - No prop shape change; `location` is still a single string — the caller now passes a clean "City, ST, Country" instead of the full street address.
 
-A "Share this experience" modal triggered by the existing Share icon, containing:
+2. **`src/routes/charters.$location.$businessSlug.tsx`**
+   - Build a new `shareLocation` from `op.default_departure_city`, `op.default_departure_state`, and `op.default_departure_country` (joined with `, `, skipping empty parts). Fallback chain: `shareLocation || op.location || ""`.
+   - Pass it via a new optional `shareLocation` prop on `<HeaderGallery>`.
 
-- **Title:** "Share this experience" with a close (X) button.
-- **Prefilled message:** `I just found this {Listing Name} in {City, Region} on FishTrippers. Check it out!`
-- **Share links** (stacked rows with icon + label, divider between each):
-  - Facebook → `https://www.facebook.com/sharer/sharer.php?u={url}&quote={text}`
-  - Messenger → `fb-messenger://share?link={url}` (falls back to `https://www.facebook.com/dialog/send?...`)
-  - X (formerly Twitter) → `https://twitter.com/intent/tweet?url={url}&text={text}`
-  - Email → `mailto:?subject=...&body={text}%20{url}`
-- **"or" divider**
-- **"Share this link"** label + read-only input with the page URL
-- **"Copy link"** primary button (shows "Copied!" state briefly on success)
+3. **`src/components/operator-listing/HeaderGallery.tsx`**
+   - Accept the new `shareLocation?: string` prop.
+   - Pass `location={shareLocation ?? location}` into `<ShareDialog>` so the on-page header keeps showing the full departure address, while the share message uses the cleaner city/region/country string (e.g. `Sunnyvale, CA, USA`).
 
-Each share link opens in a new tab (`target="_blank" rel="noopener"`).
-
-## Files to change
-
-1. **New:** `src/components/operator-listing/ShareDialog.tsx`
-   - Props: `open`, `onOpenChange`, `title` (listing name), `location` (city, region), `url`.
-   - Uses existing `Dialog` from `@/components/ui/dialog` and `Button` / `Input`.
-   - Icons from `lucide-react`: `Facebook`, `MessageCircle`, `Twitter` (or `X`), `Mail`.
-   - Computes share URL client-side: prefer `window.location.href`, fallback to passed-in `url`.
-   - `navigator.clipboard.writeText` for Copy link.
-
-2. **Edit:** `src/components/operator-listing/HeaderGallery.tsx`
-   - Add `const [shareOpen, setShareOpen] = useState(false)`.
-   - Wire existing Share button `onClick={() => setShareOpen(true)}`.
-   - Render `<ShareDialog open={shareOpen} onOpenChange={setShareOpen} title={title} location={location} />` at the bottom of the section.
-
-## Out of scope
-
-- No backend changes, no analytics tracking, no QR code, no SMS/WhatsApp.
-- Styling stays consistent with existing shadcn dialog patterns; not pixel-cloning FishingBooker's modal, just matching its structure (title, message, link rows with dividers, "or", URL input, Copy button).
+No backend, schema, or other UI changes.

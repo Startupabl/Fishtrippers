@@ -17,6 +17,8 @@ interface Props {
   /** Pre-fetched photos (public viewer path). When provided, internal owner-only query is skipped. */
   photos?: OperatorPhoto[];
   photosLoading?: boolean;
+  /** Clean "City, ST, Country" string used in the share message. Falls back to `location`. */
+  shareLocation?: string;
 }
 
 export function HeaderGallery({
@@ -26,6 +28,7 @@ export function HeaderGallery({
   canManage = true,
   photos: photosProp,
   photosLoading: photosLoadingProp,
+  shareLocation,
 }: Props) {
   const usingProp = photosProp !== undefined;
   const list = useServerFn(listMyOperatorPhotos);
@@ -84,7 +87,7 @@ export function HeaderGallery({
             open={shareOpen}
             onOpenChange={setShareOpen}
             title={title}
-            location={location}
+            location={shareLocation ?? location}
           />
           {canManage && hasPhotos && (
             <Button variant="outline" onClick={() => setManagerOpen(true)}>
