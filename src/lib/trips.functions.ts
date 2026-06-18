@@ -123,6 +123,23 @@ export const deleteTrip = createServerFn({ method: "POST" })
     return { ok: true };
   });
 
+export const setTripStatus = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((input: SetTripStatusInput) => setTripStatusSchema.parse(input))
+  .handler(async ({ data, context }) => {
+    const { supabase, userId } = context;
+    const operatorId = await resolveOperatorId(supabase, userId);
+    const { data: row, error } = await supabase
+      .from("trip_packages")
+      .update({ status: data.status })
+      .eq("id", data.id)
+      .eq("operator_id", operatorId)
+      .select("*")
+      .single();
+    if (error) throw new Error(error.message);
+    return { trip: row };
+  });
+
 // Resolve a Google Place via gateway (server holds the connector key).
 export const resolvePlace = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
