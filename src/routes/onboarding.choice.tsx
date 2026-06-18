@@ -92,7 +92,8 @@ function ChoicePage() {
         </Link>
 
         <Link
-          to="/create-listing"
+          to="/mentor/create-path"
+          search={{ new: true }}
           onClick={guard(startNewMentorExpressListing)}
           aria-disabled={!ready}
           className={
