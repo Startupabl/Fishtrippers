@@ -229,7 +229,7 @@ function MyListingPage() {
           className="mt-6 gap-2 rounded-2xl text-white hover:opacity-90"
           style={{ backgroundColor: LEAF }}
         >
-          <Link to="/mentor/create-path" search={{ new: true }}>
+          <Link to="/create-listing/new" search={{ new: true }}>
             <Plus className="size-4" /> List Your Trip
           </Link>
         </Button>
@@ -265,7 +265,7 @@ function MyListingPage() {
             className="gap-2 rounded-2xl text-white hover:opacity-90"
             style={{ backgroundColor: LEAF }}
           >
-            <Link to="/mentor/create-path" search={{ edit: true } as never}>
+            <Link to="/create-listing/new" search={{ edit: true } as never}>
               <Pencil className="size-4" /> Edit listing
             </Link>
           </Button>
@@ -396,7 +396,7 @@ function MyListingPage() {
                       asChild
                       title="Edit listing"
                     >
-                      <Link to="/mentor/create-path" search={{ edit: true } as never}>
+                      <Link to="/create-listing/new" search={{ edit: true } as never}>
                         <Pencil className="size-4" />
                       </Link>
                     </Button>
@@ -441,7 +441,7 @@ function MyListingPage() {
                         </DropdownMenuItem>
                         <DropdownMenuSeparator />
                         <DropdownMenuItem asChild>
-                          <Link to="/mentor/create-path" search={{ edit: true } as never}>
+                          <Link to="/create-listing/new" search={{ edit: true } as never}>
                             <Pencil className="mr-2 size-4" />
                             Edit listing
                           </Link>

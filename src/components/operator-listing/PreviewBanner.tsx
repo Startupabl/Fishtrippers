@@ -36,7 +36,7 @@ export function PreviewBanner({ status, canSubmit, submitting, onSubmit }: Props
             {label}
           </Badge>
           <Button asChild size="sm" variant="outline" className="border-gold text-gold-deep hover:bg-gold/10">
-            <Link to="/mentor/create-path" search={{ edit: true } as never}>
+            <Link to="/create-listing/new" search={{ edit: true } as never}>
               <Pencil className="mr-1.5 h-3.5 w-3.5" />
               Edit Listing
             </Link>

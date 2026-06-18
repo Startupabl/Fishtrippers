@@ -28,7 +28,6 @@ import { Route as GiftRouteImport } from './routes/gift'
 import { Route as ForgotPasswordRouteImport } from './routes/forgot-password'
 import { Route as FirstLessonGuideRouteImport } from './routes/first-lesson-guide'
 import { Route as DataHandlingRouteImport } from './routes/data-handling'
-import { Route as CreateListingRouteImport } from './routes/create-listing'
 import { Route as ContactRouteImport } from './routes/contact'
 import { Route as CheckoutRouteImport } from './routes/checkout'
 import { Route as CancellationPolicyRouteImport } from './routes/cancellation-policy'
@@ -39,14 +38,15 @@ import { Route as AboutRouteImport } from './routes/about'
 import { Route as AuthenticatedRouteImport } from './routes/_authenticated'
 import { Route as AdminRouteImport } from './routes/_admin'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as CreateListingIndexRouteImport } from './routes/create-listing.index'
 import { Route as PagesSlugRouteImport } from './routes/pages.$slug'
 import { Route as PPathSlugRouteImport } from './routes/p.$pathSlug'
 import { Route as OnboardingLearnerRouteImport } from './routes/onboarding.learner'
 import { Route as OnboardingChoiceRouteImport } from './routes/onboarding.choice'
 import { Route as MessagesThreadIdRouteImport } from './routes/messages.$threadId'
-import { Route as MentorCreatePathRouteImport } from './routes/mentor.create-path'
 import { Route as MMentorSlugRouteImport } from './routes/m.$mentorSlug'
 import { Route as GiftSuccessRouteImport } from './routes/gift.success'
+import { Route as CreateListingNewRouteImport } from './routes/create-listing.new'
 import { Route as CheckoutSuccessRouteImport } from './routes/checkout.success'
 import { Route as AuthenticatedSettingsRouteImport } from './routes/_authenticated/settings'
 import { Route as AuthenticatedMyLearningRouteImport } from './routes/_authenticated/my-learning'
@@ -201,11 +201,6 @@ const DataHandlingRoute = DataHandlingRouteImport.update({
   path: '/data-handling',
   getParentRoute: () => rootRouteImport,
 } as any)
-const CreateListingRoute = CreateListingRouteImport.update({
-  id: '/create-listing',
-  path: '/create-listing',
-  getParentRoute: () => rootRouteImport,
-} as any)
 const ContactRoute = ContactRouteImport.update({
   id: '/contact',
   path: '/contact',
@@ -254,6 +249,11 @@ const IndexRoute = IndexRouteImport.update({
   path: '/',
   getParentRoute: () => rootRouteImport,
 } as any)
+const CreateListingIndexRoute = CreateListingIndexRouteImport.update({
+  id: '/create-listing/',
+  path: '/create-listing/',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const PagesSlugRoute = PagesSlugRouteImport.update({
   id: '/pages/$slug',
   path: '/pages/$slug',
@@ -279,11 +279,6 @@ const MessagesThreadIdRoute = MessagesThreadIdRouteImport.update({
   path: '/messages/$threadId',
   getParentRoute: () => rootRouteImport,
 } as any)
-const MentorCreatePathRoute = MentorCreatePathRouteImport.update({
-  id: '/mentor/create-path',
-  path: '/mentor/create-path',
-  getParentRoute: () => rootRouteImport,
-} as any)
 const MMentorSlugRoute = MMentorSlugRouteImport.update({
   id: '/m/$mentorSlug',
   path: '/m/$mentorSlug',
@@ -293,6 +288,11 @@ const GiftSuccessRoute = GiftSuccessRouteImport.update({
   id: '/success',
   path: '/success',
   getParentRoute: () => GiftRoute,
+} as any)
+const CreateListingNewRoute = CreateListingNewRouteImport.update({
+  id: '/create-listing/new',
+  path: '/create-listing/new',
+  getParentRoute: () => rootRouteImport,
 } as any)
 const CheckoutSuccessRoute = CheckoutSuccessRouteImport.update({
   id: '/success',
@@ -633,7 +633,6 @@ export interface FileRoutesByFullPath {
   '/cancellation-policy': typeof CancellationPolicyRoute
   '/checkout': typeof CheckoutRouteWithChildren
   '/contact': typeof ContactRoute
-  '/create-listing': typeof CreateListingRoute
   '/data-handling': typeof DataHandlingRoute
   '/first-lesson-guide': typeof FirstLessonGuideRoute
   '/forgot-password': typeof ForgotPasswordRoute
@@ -659,14 +658,15 @@ export interface FileRoutesByFullPath {
   '/my-learning': typeof AuthenticatedMyLearningRoute
   '/settings': typeof AuthenticatedSettingsRouteWithChildren
   '/checkout/success': typeof CheckoutSuccessRoute
+  '/create-listing/new': typeof CreateListingNewRoute
   '/gift/success': typeof GiftSuccessRoute
   '/m/$mentorSlug': typeof MMentorSlugRoute
-  '/mentor/create-path': typeof MentorCreatePathRoute
   '/messages/$threadId': typeof MessagesThreadIdRoute
   '/onboarding/choice': typeof OnboardingChoiceRoute
   '/onboarding/learner': typeof OnboardingLearnerRouteWithChildren
   '/p/$pathSlug': typeof PPathSlugRoute
   '/pages/$slug': typeof PagesSlugRoute
+  '/create-listing/': typeof CreateListingIndexRoute
   '/admin/listings': typeof AdminAdminListingsRoute
   '/admin/queue': typeof AdminAdminQueueRoute
   '/admin/reviews': typeof AdminAdminReviewsRoute
@@ -729,7 +729,6 @@ export interface FileRoutesByTo {
   '/cancellation-policy': typeof CancellationPolicyRoute
   '/checkout': typeof CheckoutRouteWithChildren
   '/contact': typeof ContactRoute
-  '/create-listing': typeof CreateListingRoute
   '/data-handling': typeof DataHandlingRoute
   '/first-lesson-guide': typeof FirstLessonGuideRoute
   '/forgot-password': typeof ForgotPasswordRoute
@@ -754,14 +753,15 @@ export interface FileRoutesByTo {
   '/my-learning': typeof AuthenticatedMyLearningRoute
   '/settings': typeof AuthenticatedSettingsRouteWithChildren
   '/checkout/success': typeof CheckoutSuccessRoute
+  '/create-listing/new': typeof CreateListingNewRoute
   '/gift/success': typeof GiftSuccessRoute
   '/m/$mentorSlug': typeof MMentorSlugRoute
-  '/mentor/create-path': typeof MentorCreatePathRoute
   '/messages/$threadId': typeof MessagesThreadIdRoute
   '/onboarding/choice': typeof OnboardingChoiceRoute
   '/onboarding/learner': typeof OnboardingLearnerRouteWithChildren
   '/p/$pathSlug': typeof PPathSlugRoute
   '/pages/$slug': typeof PagesSlugRoute
+  '/create-listing': typeof CreateListingIndexRoute
   '/admin/listings': typeof AdminAdminListingsRoute
   '/admin/queue': typeof AdminAdminQueueRoute
   '/admin/reviews': typeof AdminAdminReviewsRoute
@@ -825,7 +825,6 @@ export interface FileRoutesById {
   '/cancellation-policy': typeof CancellationPolicyRoute
   '/checkout': typeof CheckoutRouteWithChildren
   '/contact': typeof ContactRoute
-  '/create-listing': typeof CreateListingRoute
   '/data-handling': typeof DataHandlingRoute
   '/first-lesson-guide': typeof FirstLessonGuideRoute
   '/forgot-password': typeof ForgotPasswordRoute
@@ -851,14 +850,15 @@ export interface FileRoutesById {
   '/_authenticated/my-learning': typeof AuthenticatedMyLearningRoute
   '/_authenticated/settings': typeof AuthenticatedSettingsRouteWithChildren
   '/checkout/success': typeof CheckoutSuccessRoute
+  '/create-listing/new': typeof CreateListingNewRoute
   '/gift/success': typeof GiftSuccessRoute
   '/m/$mentorSlug': typeof MMentorSlugRoute
-  '/mentor/create-path': typeof MentorCreatePathRoute
   '/messages/$threadId': typeof MessagesThreadIdRoute
   '/onboarding/choice': typeof OnboardingChoiceRoute
   '/onboarding/learner': typeof OnboardingLearnerRouteWithChildren
   '/p/$pathSlug': typeof PPathSlugRoute
   '/pages/$slug': typeof PagesSlugRoute
+  '/create-listing/': typeof CreateListingIndexRoute
   '/_admin/admin/listings': typeof AdminAdminListingsRoute
   '/_admin/admin/queue': typeof AdminAdminQueueRoute
   '/_admin/admin/reviews': typeof AdminAdminReviewsRoute
@@ -923,7 +923,6 @@ export interface FileRouteTypes {
     | '/cancellation-policy'
     | '/checkout'
     | '/contact'
-    | '/create-listing'
     | '/data-handling'
     | '/first-lesson-guide'
     | '/forgot-password'
@@ -949,14 +948,15 @@ export interface FileRouteTypes {
     | '/my-learning'
     | '/settings'
     | '/checkout/success'
+    | '/create-listing/new'
     | '/gift/success'
     | '/m/$mentorSlug'
-    | '/mentor/create-path'
     | '/messages/$threadId'
     | '/onboarding/choice'
     | '/onboarding/learner'
     | '/p/$pathSlug'
     | '/pages/$slug'
+    | '/create-listing/'
     | '/admin/listings'
     | '/admin/queue'
     | '/admin/reviews'
@@ -1019,7 +1019,6 @@ export interface FileRouteTypes {
     | '/cancellation-policy'
     | '/checkout'
     | '/contact'
-    | '/create-listing'
     | '/data-handling'
     | '/first-lesson-guide'
     | '/forgot-password'
@@ -1044,14 +1043,15 @@ export interface FileRouteTypes {
     | '/my-learning'
     | '/settings'
     | '/checkout/success'
+    | '/create-listing/new'
     | '/gift/success'
     | '/m/$mentorSlug'
-    | '/mentor/create-path'
     | '/messages/$threadId'
     | '/onboarding/choice'
     | '/onboarding/learner'
     | '/p/$pathSlug'
     | '/pages/$slug'
+    | '/create-listing'
     | '/admin/listings'
     | '/admin/queue'
     | '/admin/reviews'
@@ -1114,7 +1114,6 @@ export interface FileRouteTypes {
     | '/cancellation-policy'
     | '/checkout'
     | '/contact'
-    | '/create-listing'
     | '/data-handling'
     | '/first-lesson-guide'
     | '/forgot-password'
@@ -1140,14 +1139,15 @@ export interface FileRouteTypes {
     | '/_authenticated/my-learning'
     | '/_authenticated/settings'
     | '/checkout/success'
+    | '/create-listing/new'
     | '/gift/success'
     | '/m/$mentorSlug'
-    | '/mentor/create-path'
     | '/messages/$threadId'
     | '/onboarding/choice'
     | '/onboarding/learner'
     | '/p/$pathSlug'
     | '/pages/$slug'
+    | '/create-listing/'
     | '/_admin/admin/listings'
     | '/_admin/admin/queue'
     | '/_admin/admin/reviews'
@@ -1213,7 +1213,6 @@ export interface RootRouteChildren {
   CancellationPolicyRoute: typeof CancellationPolicyRoute
   CheckoutRoute: typeof CheckoutRouteWithChildren
   ContactRoute: typeof ContactRoute
-  CreateListingRoute: typeof CreateListingRoute
   DataHandlingRoute: typeof DataHandlingRoute
   FirstLessonGuideRoute: typeof FirstLessonGuideRoute
   ForgotPasswordRoute: typeof ForgotPasswordRoute
@@ -1233,13 +1232,14 @@ export interface RootRouteChildren {
   SitemapDotxmlRoute: typeof SitemapDotxmlRoute
   TermsRoute: typeof TermsRoute
   TrustAndSafetyRoute: typeof TrustAndSafetyRoute
+  CreateListingNewRoute: typeof CreateListingNewRoute
   MMentorSlugRoute: typeof MMentorSlugRoute
-  MentorCreatePathRoute: typeof MentorCreatePathRoute
   MessagesThreadIdRoute: typeof MessagesThreadIdRoute
   OnboardingChoiceRoute: typeof OnboardingChoiceRoute
   OnboardingLearnerRoute: typeof OnboardingLearnerRouteWithChildren
   PPathSlugRoute: typeof PPathSlugRoute
   PagesSlugRoute: typeof PagesSlugRoute
+  CreateListingIndexRoute: typeof CreateListingIndexRoute
   CCategorySlugListingSlugRoute: typeof CCategorySlugListingSlugRoute
   ChartersLocationBusinessSlugRoute: typeof ChartersLocationBusinessSlugRoute
   ApiPublicHooksCleanupOldMessagesRoute: typeof ApiPublicHooksCleanupOldMessagesRoute
@@ -1381,13 +1381,6 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof DataHandlingRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/create-listing': {
-      id: '/create-listing'
-      path: '/create-listing'
-      fullPath: '/create-listing'
-      preLoaderRoute: typeof CreateListingRouteImport
-      parentRoute: typeof rootRouteImport
-    }
     '/contact': {
       id: '/contact'
       path: '/contact'
@@ -1458,6 +1451,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/create-listing/': {
+      id: '/create-listing/'
+      path: '/create-listing'
+      fullPath: '/create-listing/'
+      preLoaderRoute: typeof CreateListingIndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/pages/$slug': {
       id: '/pages/$slug'
       path: '/pages/$slug'
@@ -1493,13 +1493,6 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof MessagesThreadIdRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/mentor/create-path': {
-      id: '/mentor/create-path'
-      path: '/mentor/create-path'
-      fullPath: '/mentor/create-path'
-      preLoaderRoute: typeof MentorCreatePathRouteImport
-      parentRoute: typeof rootRouteImport
-    }
     '/m/$mentorSlug': {
       id: '/m/$mentorSlug'
       path: '/m/$mentorSlug'
@@ -1513,6 +1506,13 @@ declare module '@tanstack/react-router' {
       fullPath: '/gift/success'
       preLoaderRoute: typeof GiftSuccessRouteImport
       parentRoute: typeof GiftRoute
+    }
+    '/create-listing/new': {
+      id: '/create-listing/new'
+      path: '/create-listing/new'
+      fullPath: '/create-listing/new'
+      preLoaderRoute: typeof CreateListingNewRouteImport
+      parentRoute: typeof rootRouteImport
     }
     '/checkout/success': {
       id: '/checkout/success'
@@ -2190,7 +2190,6 @@ const rootRouteChildren: RootRouteChildren = {
   CancellationPolicyRoute: CancellationPolicyRoute,
   CheckoutRoute: CheckoutRouteWithChildren,
   ContactRoute: ContactRoute,
-  CreateListingRoute: CreateListingRoute,
   DataHandlingRoute: DataHandlingRoute,
   FirstLessonGuideRoute: FirstLessonGuideRoute,
   ForgotPasswordRoute: ForgotPasswordRoute,
@@ -2210,13 +2209,14 @@ const rootRouteChildren: RootRouteChildren = {
   SitemapDotxmlRoute: SitemapDotxmlRoute,
   TermsRoute: TermsRoute,
   TrustAndSafetyRoute: TrustAndSafetyRoute,
+  CreateListingNewRoute: CreateListingNewRoute,
   MMentorSlugRoute: MMentorSlugRoute,
-  MentorCreatePathRoute: MentorCreatePathRoute,
   MessagesThreadIdRoute: MessagesThreadIdRoute,
   OnboardingChoiceRoute: OnboardingChoiceRoute,
   OnboardingLearnerRoute: OnboardingLearnerRouteWithChildren,
   PPathSlugRoute: PPathSlugRoute,
   PagesSlugRoute: PagesSlugRoute,
+  CreateListingIndexRoute: CreateListingIndexRoute,
   CCategorySlugListingSlugRoute: CCategorySlugListingSlugRoute,
   ChartersLocationBusinessSlugRoute: ChartersLocationBusinessSlugRoute,
   ApiPublicHooksCleanupOldMessagesRoute: ApiPublicHooksCleanupOldMessagesRoute,

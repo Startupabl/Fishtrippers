@@ -280,7 +280,7 @@ function MyCoursesPage() {
               style={{ backgroundColor: LEAF }}
             >
               <Link
-                to="/mentor/create-path"
+                to="/create-listing/new"
                 search={{ new: true }}
                 onClick={guard(startNewMentorExpressListing)}
               >
@@ -364,7 +364,7 @@ function MyCoursesPage() {
                             <div className="min-w-0">
                               {j.status === "draft" || !j.slug ? (
                                 <Link
-                                  to="/mentor/create-path"
+                                  to="/create-listing/new"
                                   search={{ draftId: j.id }}
                                   className="block truncate font-medium hover:underline"
                                 >
@@ -398,7 +398,7 @@ function MyCoursesPage() {
                               style={{ backgroundColor: LEAF }}
                             >
                               <Link
-                                to="/mentor/create-path"
+                                to="/create-listing/new"
                                 search={{ draftId: j.id }}
                               >
                                 <FileEdit className="size-3.5" />
@@ -485,7 +485,7 @@ function MyCoursesPage() {
                               title="Edit"
                               onClick={() =>
                                 navigate({
-                                  to: "/mentor/create-path",
+                                  to: "/create-listing/new",
                                   search: { draftId: j.id },
                                 })
                               }
@@ -617,7 +617,7 @@ function EmptyState() {
         style={{ backgroundColor: LEAF }}
       >
         <Link
-          to="/mentor/create-path"
+          to="/create-listing/new"
           search={{ new: true }}
           onClick={guard(startNewMentorExpressListing)}
         >

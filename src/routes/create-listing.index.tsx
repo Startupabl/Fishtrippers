@@ -1,7 +1,7 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { SitePageRenderer } from "@/components/info/SitePageRenderer";
 
-export const Route = createFileRoute("/create-listing")({
+export const Route = createFileRoute("/create-listing/")({
   head: () => ({
     meta: [
       { title: "Create a Listing — Fishtrippers" },

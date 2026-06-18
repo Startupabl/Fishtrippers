@@ -606,7 +606,7 @@ function PathPage() {
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end" className="min-w-56">
               <DropdownMenuItem asChild style={menuItemStyle}>
-                <Link to="/mentor/create-path" search={{ draftId: dbJourney.id }}>
+                <Link to="/create-listing/new" search={{ draftId: dbJourney.id }}>
                   <Pencil className="size-4" />
                   Edit Listing
                 </Link>

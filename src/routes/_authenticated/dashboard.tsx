@@ -120,7 +120,7 @@ function AideDashboardHome() {
           style={{ backgroundColor: LEAF }}
         >
           <Link
-            to="/mentor/create-path"
+            to="/create-listing/new"
             search={{ new: true }}
             onClick={guard(startNewMentorExpressListing)}
           >

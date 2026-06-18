@@ -393,7 +393,7 @@ export const setJourneyModeration = createServerFn({ method: "POST" })
 
         if (mentorProfile?.email) {
           const appUrl = process.env.APP_URL ?? "https://fishtrippers.com";
-          const editUrl = `${appUrl}/mentor/create-path?draftId=${data.journeyId}`;
+          const editUrl = `${appUrl}/create-listing/new?draftId=${data.journeyId}`;
           const rendered = await renderEmailTemplate("listing_rejected_notification", {
             user_name: mentorProfile.first_name ?? "there",
             listing_title: listingTitle,
@@ -1160,7 +1160,7 @@ export const sendReportedListingToDraft = createServerFn({ method: "POST" })
           .maybeSingle();
         if (mentorProfile?.email) {
           const appUrl = process.env.APP_URL ?? "https://fishtrippers.com";
-          const editUrl = `${appUrl}/mentor/create-path?draftId=${data.journeyId}`;
+          const editUrl = `${appUrl}/create-listing/new?draftId=${data.journeyId}`;
           const rendered = await renderEmailTemplate("listing_rejected_notification", {
             user_name: mentorProfile.first_name ?? "there",
             listing_title: listingTitle,
