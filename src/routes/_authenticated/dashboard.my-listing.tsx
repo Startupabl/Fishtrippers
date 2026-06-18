@@ -46,7 +46,7 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { DESIGN_SYSTEM } from "@/lib/brand";
 import { getMyOperator } from "@/lib/operators.functions";
-import { listMyTrips, deleteTrip, setTripStatus } from "@/lib/trips.functions";
+import { listMyTrips, deleteTrip, setTripStatus, listUndersoldSharedTrips } from "@/lib/trips.functions";
 import { getMyStripeIds } from "@/lib/payouts.functions";
 import { listMyHostAvailability } from "@/lib/host-availability.functions";
 import {
@@ -166,6 +166,13 @@ function MyListingPage() {
     queryFn: () => fetchAvail(),
   });
 
+  const fetchUndersold = useServerFn(listUndersoldSharedTrips);
+  const undersoldQ = useQuery({
+    queryKey: ["my-undersold-shared-trips"],
+    queryFn: () => fetchUndersold(),
+    refetchInterval: 5 * 60 * 1000,
+  });
+
   const operator = operatorQ.data?.operator ?? null;
   const trips = tripsQ.data?.trips ?? [];
   const isPayoutReady = !!stripeQ.data?.is_payout_ready;
@@ -174,6 +181,7 @@ function MyListingPage() {
   );
   const hasCalendarEntry = (availQ.data?.length ?? 0) > 0;
   const showCalendarBanner = hasInstantTrip && !hasCalendarEntry;
+  const undersold = undersoldQ.data ?? [];
 
   const [editing, setEditing] = useState<TripEditorState | null>(null);
   const [dialogOpen, setDialogOpen] = useState(false);
@@ -327,6 +335,38 @@ function MyListingPage() {
           </div>
         </Card>
       ) : null}
+
+      {undersold.length > 0 ? (
+        <Card className="mt-4 rounded-2xl border-amber-200 bg-amber-50/60 p-4">
+          <div className="flex items-start gap-3">
+            <div className="mt-0.5 flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-amber-100">
+              <AlertTriangle className="size-4 text-amber-900" />
+            </div>
+            <div className="min-w-0 flex-1">
+              <p className="text-sm font-semibold text-amber-900">
+                Below minimum to sail
+              </p>
+              <p className="text-xs text-amber-900/80">
+                These shared trips haven&apos;t hit your minimum yet. Contact
+                guests to cancel/refund or decide to run them anyway.
+              </p>
+              <ul className="mt-2 space-y-1 text-xs text-amber-900">
+                {undersold.map((u) => (
+                  <li key={`${u.trip_id}-${u.trip_date}`}>
+                    <span className="font-medium">{u.title}</span>
+                    {" — "}
+                    {u.trip_date} · {u.seats_booked}/{u.min_seats_to_sail} seats sold
+                    {" ("}
+                    {u.hours_to_departure}h to departure{")"}
+                  </li>
+                ))}
+              </ul>
+            </div>
+          </div>
+        </Card>
+      ) : null}
+
+
 
       {/* Listing table */}
       <section className="mt-6">
@@ -577,6 +617,7 @@ function MyListingPage() {
                               booking_type: (t as any).booking_type ?? "request_to_book",
                               charter_type: (t as any).charter_type ?? "private_charter",
                               seats_available: (t as any).seats_available ?? null,
+                              min_seats_to_sail: (t as any).min_seats_to_sail ?? null,
 
                               target_species: Array.isArray((t as any).target_species) ? (t as any).target_species : [],
                               environments: Array.isArray((t as any).environments) ? (t as any).environments : [],

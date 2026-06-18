@@ -80,6 +80,7 @@ export const tripInputSchema = z
     booking_type: z.enum(["instant_book", "request_to_book"]).default("request_to_book"),
     charter_type: z.enum(["private_charter", "shared_tour"]).default("private_charter"),
     seats_available: z.number().int().min(1).max(50).nullable().optional(),
+    min_seats_to_sail: z.number().int().min(1).max(50).nullable().optional(),
     target_species: z.array(z.string()).min(1, "Pick at least one target fish").max(50),
     environments: z.array(z.string()).min(1, "Pick at least one environment").max(2, "Max 2 environments per trip"),
     techniques: z.array(z.string()).min(1, "Pick at least one fishing style").max(10),
@@ -95,6 +96,16 @@ export const tripInputSchema = z
   .refine(
     (d) => d.charter_type !== "shared_tour" || (d.seats_available != null && d.seats_available >= 1),
     { message: "Enter total seats available for this shared trip", path: ["seats_available"] },
+  )
+  .refine(
+    (d) =>
+      d.charter_type !== "shared_tour" ||
+      d.min_seats_to_sail == null ||
+      (d.seats_available != null && d.min_seats_to_sail <= d.seats_available),
+    {
+      message: "Minimum seats to sail can't exceed total seats available",
+      path: ["min_seats_to_sail"],
+    },
   );
 
 
