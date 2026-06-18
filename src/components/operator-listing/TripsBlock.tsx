@@ -52,8 +52,9 @@ function formatDuration(mins: number) {
   if (!mins) return "";
   if (mins >= 60 * 12) return "Overnight";
   const h = Math.round(mins / 60);
-  return `${h}h trip`;
+  return `${h} hrs`;
 }
+
 
 function formatStartTime(t?: string | null) {
   if (!t) return null;
@@ -113,14 +114,14 @@ function TripCard({
     ? fishingEnvironmentLabel(envs[0])
     : techs[0] ?? null;
 
-  const metaParts: string[] = [];
-  if (maxParty) metaParts.push(`Up to ${maxParty} guests`);
-  if (startLabel) metaParts.push(`Departs ${startLabel}`);
-  if (trip.departure_address) metaParts.push(trip.departure_address);
-  if (trip.duration_minutes) {
-    const dur = formatDuration(trip.duration_minutes);
-    metaParts.push(styleLabel ? `${dur} (${styleLabel})` : dur);
-  }
+  const durationLabel = formatDuration(trip.duration_minutes);
+  const titleWithDuration = durationLabel
+    ? `${trip.title} (${durationLabel})`
+    : trip.title;
+  const speciesPreview = species
+    .slice(0, 3)
+    .map((s) => speciesLabel(s))
+    .join(", ");
 
   return (
     <article className="overflow-hidden rounded-2xl border bg-card">
@@ -130,36 +131,37 @@ function TripCard({
         onClick={() => setOpen((o) => !o)}
         aria-expanded={open}
         aria-controls={panelId}
-        className="flex w-full items-start justify-between gap-4 px-5 py-4 text-left transition-colors hover:bg-muted/30"
+        className="flex w-full items-center gap-4 px-5 py-4 text-left transition-colors hover:bg-muted/30"
       >
         <div className="min-w-0 flex-1">
-          <div className="flex items-start justify-between gap-3">
-            <h3 className="text-base font-bold text-foreground sm:text-[17px]">
-              {trip.title}
+          {/* Top row: title + price */}
+          <div className="flex items-baseline justify-between gap-3">
+            <h3 className="min-w-0 truncate text-xl font-bold text-foreground">
+              {titleWithDuration}
             </h3>
-            <div className="flex shrink-0 items-center gap-2">
-              <div className="text-right">
-                <div className="text-[11px] uppercase tracking-wide text-muted-foreground">
-                  From
-                </div>
-                <div className="whitespace-nowrap text-base font-bold text-ocean-deep sm:text-lg">
-                  {formatCurrency(baseDisplay, display)}
-                </div>
-              </div>
-              <ChevronDown
-                className={`h-5 w-5 text-muted-foreground transition-transform duration-300 ${
-                  open ? "rotate-180" : ""
-                }`}
-              />
+            <div className="whitespace-nowrap text-xl font-bold text-emerald-600">
+              {formatCurrency(baseDisplay, display)}
             </div>
           </div>
-          {metaParts.length > 0 && (
-            <p className="mt-1 truncate text-xs text-muted-foreground sm:text-sm">
-              {metaParts.join("  •  ")}
+          {/* Bottom row: species + capacity */}
+          <div className="mt-1 flex items-center justify-between gap-3">
+            <p className="min-w-0 truncate text-sm text-muted-foreground">
+              {speciesPreview ? `Fishing for: ${speciesPreview}` : ""}
             </p>
-          )}
+            {maxParty > 0 && (
+              <p className="whitespace-nowrap text-sm text-muted-foreground">
+                Shared trip: Up to {maxParty} guests
+              </p>
+            )}
+          </div>
         </div>
+        <ChevronDown
+          className={`h-5 w-5 shrink-0 self-center text-muted-foreground transition-transform duration-300 ${
+            open ? "rotate-180" : ""
+          }`}
+        />
       </button>
+
 
       {/* Collapsible body */}
       <div
