@@ -1,4 +1,4 @@
-import { useId, useState } from "react";
+import { useCallback, useId, useState } from "react";
 import {
   Plus,
   Minus,
@@ -11,6 +11,8 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from "@/components/ui/popover";
+import { toast } from "sonner";
+
 
 
 import { HowBookingsWorkDialog } from "@/components/HowBookingsWorkDialog";
@@ -88,11 +90,36 @@ function TripCard({
 }) {
   const minParty = Math.max(1, trip.min_party_size ?? 1);
   const maxParty = Math.max(minParty, trip.max_party_size ?? 1);
+  const isShared = trip.charter_type === "shared_tour";
+  const seatsAvailable = trip.seats_available ?? 0;
+  const capacity = isShared ? (seatsAvailable || maxParty) : maxParty;
+  const charterLabel = isShared ? "Shared trip" : "Private trip";
+
+  const [selectedDate, setSelectedDate] = useState<string | null>(null);
+  const [remainingSeats, setRemainingSeats] = useState<number | null>(null);
+
+  const guestUpperBound = isShared
+    ? remainingSeats !== null
+      ? Math.max(0, Math.min(seatsAvailable || maxParty, remainingSeats))
+      : seatsAvailable || maxParty
+    : maxParty;
+
   const [guests, setGuests] = useState(minParty);
   const [open, setOpen] = useState(!!defaultOpen);
   const [checkDatesOpen, setCheckDatesOpen] = useState(false);
   const [requestOpen, setRequestOpen] = useState(false);
   const panelId = useId();
+
+  const handleDateAvailability = useCallback(
+    (info: { date: string | null; remaining: number | null; isShared: boolean }) => {
+      setSelectedDate(info.date);
+      setRemainingSeats(info.isShared ? info.remaining : null);
+      if (info.isShared && info.remaining !== null && info.remaining > 0) {
+        setGuests((g) => Math.min(g, info.remaining as number));
+      }
+    },
+    [],
+  );
 
   const display = useCurrencyStore((s) => s.currency);
   const base = ((trip.currency || "USD").toUpperCase()) as CurrencyCode;
@@ -111,9 +138,7 @@ function TripCard({
   const techs = trip.techniques ?? [];
   const species = trip.target_species ?? [];
 
-  const isShared = trip.charter_type === "shared_tour";
-  const capacity = isShared ? (trip.seats_available ?? maxParty) : maxParty;
-  const charterLabel = isShared ? "Shared trip" : "Private trip";
+
 
 
   const durationLabel = formatDuration(trip.duration_minutes);
@@ -223,10 +248,23 @@ function TripCard({
                   : ""}
               </p>
               {capacity > 0 && (
-                <p className="whitespace-nowrap text-sm text-muted-foreground">
-                  {charterLabel}: Up to {capacity} guests
-                </p>
+                isShared && selectedDate && remainingSeats !== null ? (
+                  remainingSeats <= 0 ? (
+                    <span className="whitespace-nowrap rounded-md bg-destructive/10 px-2 py-0.5 text-sm font-semibold text-destructive">
+                      Sold Out for this date
+                    </span>
+                  ) : (
+                    <p className="whitespace-nowrap text-sm font-bold text-emerald-700">
+                      {charterLabel}: {remainingSeats} spot{remainingSeats === 1 ? "" : "s"} left!
+                    </p>
+                  )
+                ) : (
+                  <p className="whitespace-nowrap text-sm text-muted-foreground">
+                    {charterLabel}: Up to {capacity} guests
+                  </p>
+                )
               )}
+
             </div>
           )}
           {speciesPreview && (
@@ -300,15 +338,24 @@ function TripCard({
                   size="icon"
                   variant="outline"
                   className="h-9 w-9"
-                  disabled={guests >= maxParty}
-                  onClick={() => setGuests((g) => Math.min(maxParty, g + 1))}
+                  disabled={guests >= guestUpperBound}
+                  onClick={() => {
+                    if (guests >= guestUpperBound) {
+                      if (isShared && remainingSeats !== null) {
+                        toast(`Only ${remainingSeats} seat${remainingSeats === 1 ? "" : "s"} left.`);
+                      }
+                      return;
+                    }
+                    setGuests((g) => Math.min(guestUpperBound, g + 1));
+                  }}
                   aria-label="Increase guests"
                 >
                   <Plus className="h-4 w-4" />
                 </Button>
                 <span className="ml-1 text-sm text-muted-foreground">
-                  of {maxParty}
+                  of {guestUpperBound}
                 </span>
+
                 {perExtra > 0 && (
                   <span className="ml-auto text-xs text-muted-foreground">
                     +{formatCurrency(extraDisplay, display)} / extra guest
@@ -405,6 +452,8 @@ function TripCard({
           hostId={hostId}
           tripTitle={trip.title}
           guests={guests}
+          onDateAvailability={handleDateAvailability}
+
         />
       ) : null}
 
