@@ -430,7 +430,7 @@ function ProfileSettingsPage() {
             setDisplayName(e.target.value);
             if (errors.displayName) setErrors((p) => ({ ...p, displayName: undefined }));
           }}
-          placeholder="e.g. Michael C."
+          placeholder="e.g. Christopher C."
           maxLength={60}
           className={cn(errors.displayName && "border-destructive")}
           aria-invalid={!!errors.displayName}
@@ -453,7 +453,7 @@ function ProfileSettingsPage() {
           id="motto"
           value={motto}
           onChange={(e) => setMotto(e.target.value.slice(0, 60))}
-          placeholder="e.g. Stay curious, build often."
+          placeholder="e.g. Tight lines, calm waters."
           maxLength={60}
         />
         <div className="mt-1 flex items-start justify-between gap-2">
