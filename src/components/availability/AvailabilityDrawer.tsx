@@ -14,7 +14,7 @@ export function AvailabilityDrawer({ open, onOpenChange, onSaved }: Props) {
       <SheetContent
         side="right"
         className="w-full overflow-y-auto bg-white sm:max-w-[480px]"
-        style={{ borderLeft: "4px solid #FFD23F" }}
+        style={{ borderLeft: "4px solid #E8B547" }}
       >
         <SheetHeader>
           <SheetTitle className="text-xl">My Lab Hours</SheetTitle>

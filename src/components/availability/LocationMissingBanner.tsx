@@ -45,7 +45,7 @@ export function LocationMissingBanner({ className }: { className?: string }) {
       role="alert"
       className={
         "flex items-start gap-3 rounded-xl border-2 p-4 text-sm " +
-        "border-[#FFD23F] bg-[#FFF8DC] text-foreground " +
+        "border-[#E8B547] bg-[#FFF7E0] text-foreground " +
         (className ?? "")
       }
     >

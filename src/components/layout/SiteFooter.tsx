@@ -112,7 +112,7 @@ export function SiteFooter() {
   }
 
   return (
-    <footer className="mt-16 bg-[#0A0F1A] text-slate-400">
+    <footer className="mt-16 bg-[#0A2540] text-slate-400">
       <div className="mx-auto max-w-[1600px] px-4 md:px-6 lg:px-8 py-14">
         <div className="mb-10">
           <Logo size="md" showTagline />
@@ -152,7 +152,7 @@ export function SiteFooter() {
                       target="_blank"
                       rel="noopener noreferrer"
                       aria-label={s.label}
-                      className="inline-flex size-10 items-center justify-center rounded-lg border border-slate-700/60 text-slate-400 transition-colors hover:border-white hover:bg-white hover:text-[#0A0F1A] focus:outline-none focus-visible:ring-2 focus-visible:ring-white"
+                      className="inline-flex size-10 items-center justify-center rounded-lg border border-slate-700/60 text-slate-400 transition-colors hover:border-white hover:bg-white hover:text-[#0A2540] focus:outline-none focus-visible:ring-2 focus-visible:ring-white"
                     >
                       <Icon className="size-5" />
                     </a>

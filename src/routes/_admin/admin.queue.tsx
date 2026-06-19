@@ -204,8 +204,7 @@ function ListingsToApprove() {
                   size="sm"
                   onClick={() => moderateMutation.mutate({ journeyId: j.id, moderation: "approved" })}
                   disabled={moderateMutation.isPending}
-                  style={{ backgroundColor: "#0A2540" }}
-                  className="text-white hover:opacity-95"
+                  className="bg-primary text-primary-foreground hover:opacity-95"
                 >
                   <Check className="size-4" /> Approve
                 </Button>
@@ -350,8 +349,7 @@ function OpenInquiries() {
                 size="sm"
                 onClick={() => mutation.mutate(t.id)}
                 disabled={mutation.isPending}
-                style={{ backgroundColor: "#0A2540" }}
-                className="text-white hover:opacity-95"
+                className="bg-primary text-primary-foreground hover:opacity-95"
               >
                 {mutation.isPending ? (
                   <Loader2 className="size-4 animate-spin" />
@@ -591,10 +589,10 @@ function UserTypePill({ type }: { type: string }) {
         : type.charAt(0).toUpperCase() + type.slice(1);
   const color =
     type === "aide"
-      ? "bg-[#0A2540]/10 text-[#1f6b3a]"
+      ? "bg-primary/10 text-primary"
       : type === "learner"
-        ? "bg-blue-100 text-blue-800"
-        : "bg-slate-100 text-slate-700";
+        ? "bg-accent/20 text-primary"
+        : "bg-muted text-muted-foreground";
   return (
     <span className={cn("inline-flex items-center rounded-md px-2 py-0.5 text-[11px] font-medium", color)}>
       {label}
@@ -605,7 +603,7 @@ function UserTypePill({ type }: { type: string }) {
 function EmptyState({ title }: { title: string }) {
   return (
     <div className="rounded-lg border border-dashed bg-white p-10 text-center">
-      <CheckCircle2 className="mx-auto size-8 text-[#0A2540]" />
+      <CheckCircle2 className="mx-auto size-8 text-primary" />
       <p className="mt-3 text-sm font-medium text-foreground">{title}</p>
     </div>
   );
