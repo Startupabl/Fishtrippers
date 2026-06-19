@@ -11,7 +11,6 @@ import { convertMinor } from "@/lib/currency";
 import { useCurrencyStore, type CurrencyCode } from "@/stores/useCurrencyStore";
 import type { TripBookingSummary } from "@/lib/trip-bookings.functions";
 
-
 interface TripReceiptDialogProps {
   booking: TripBookingSummary | null;
   captainName: string;
