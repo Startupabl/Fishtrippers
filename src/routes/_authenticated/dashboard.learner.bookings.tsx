@@ -263,6 +263,28 @@ function TripBookingsPage() {
         captainName={receiptTarget?.captain_name ?? "Your captain"}
         onOpenChange={(o) => !o && setReceiptTarget(null)}
       />
+
+      <Dialog
+        open={!!offerTarget}
+        onOpenChange={(o) => !o && setOfferTarget(null)}
+      >
+        <DialogContent className="max-w-lg">
+          <DialogHeader>
+            <DialogTitle>Custom Trip Offer</DialogTitle>
+          </DialogHeader>
+          {offerTarget && (
+            <CustomOfferCard
+              bookingId={offerTarget.id}
+              viewerId={user?.id}
+              onChanged={() => {
+                queryClient.invalidateQueries({
+                  queryKey: ["learner-trip-bookings"],
+                });
+              }}
+            />
+          )}
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
