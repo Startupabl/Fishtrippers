@@ -1,33 +1,15 @@
-# Custom offer cleanup + in-place review for anglers
+## Plan
 
-## 1. Auto-remove cancelled offers from angler's My Bookings
+1. **Stop showing stale offer/payment rows in Angler My Bookings**
+   - Update the angler bookings query so `pending_payment` rows only show if they are real custom offers with an attached `custom_offer` message.
+   - This will hide the current June 25 stale row because it has no custom-offer message and no held availability record.
 
-**Good news:** The captain's "Cancel Offer" action (`cancelPendingTripOffer` in `src/lib/trip-bookings.functions.ts`) already **hard-deletes** the booking row (and clears `host_availability`). The angler's `listMyTripBookingsLearner` queries the `bookings` table directly, so once deleted, the row is automatically gone from their My Bookings view.
+2. **Make captain cancellation cleanup more complete**
+   - When a captain cancels/deletes a pending trip offer, also remove any linked custom-offer messages before deleting the booking, so no orphaned offer UI can rehydrate later.
 
-**What's missing:** the angler's open page won't know until they refetch. Fix by invalidating the learner bookings query when the page re-mounts/focuses (already standard via TanStack Query), and ensure the captain's cancel action's success path is unchanged. No further server work needed beyond confirming behavior — the captain delete is authoritative.
+3. **Keep the review/accept popup behavior**
+   - Leave the existing My Bookings offer popup in place for valid open custom offers.
+   - After decline or accept changes, refresh the bookings list so declined/deleted offers disappear without needing a hard refresh.
 
-No code change required here unless we want stronger live updates; flagging only.
-
-## 2. Replace "Review & Accept Offer" navigation with an in-place offer dialog
-
-Currently in `src/routes/_authenticated/dashboard.learner.bookings.tsx`, the amber "Review & Accept Offer" button on a `pending_offer` row navigates the angler away to `/dashboard/messages/$threadId`. Change it to open a dialog that renders the existing `<CustomOfferCard bookingId={b.id} viewerId={viewerId} />` — the same popup used in the messages thread — which already supports:
-
-- Confirm & Pay (navigates to `/booking-review`)
-- **Decline / Request Changes** (calls `declineBooking`)
-- Trip title, slots with dual-zone time, deposit amount in the viewer's preferred currency
-
-### Changes to `dashboard.learner.bookings.tsx`
-
-1. Import `Dialog`, `DialogContent`, `DialogHeader`, `DialogTitle` from `@/components/ui/dialog`, and `CustomOfferCard` from `@/components/chat/CustomOfferCard`.
-2. Add state `const [offerTarget, setOfferTarget] = useState<TripBookingSummary | null>(null)`.
-3. Get current viewer id (already available via `useProfileStore` or auth context used elsewhere in the file — reuse the existing pattern).
-4. Change the `pending_offer` / `pending_payment` button to call `setOfferTarget(b)` instead of navigating.
-5. Render a `<Dialog open={!!offerTarget} onOpenChange={(o) => !o && setOfferTarget(null)}>` near the bottom (next to the existing receipt/review dialogs) containing the `CustomOfferCard` with an `onChanged` callback that refetches the bookings query and closes the dialog if the offer was declined.
-
-No other files change. The CustomOfferCard already handles all auth/server-fn calls and matches the message-thread experience exactly.
-
-## Out of scope
-
-- No DB migration.
-- No changes to captain's cancel flow (already hard-deletes).
-- No changes to the messages thread offer card.
+4. **Validate with the known June 25 case**
+   - Confirm the visible June 25 `pending_payment` row is no longer returned by the angler bookings function after the query filter change.
