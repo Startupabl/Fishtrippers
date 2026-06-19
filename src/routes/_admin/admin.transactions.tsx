@@ -161,7 +161,7 @@ function TransactionsPage() {
   return (
     <div className="space-y-6">
       <p className="text-sm text-muted-foreground">
-        Every paid order on the platform — gross, platform fee ({feeLabel}), and aide payout.
+        Every paid order on the platform — gross, platform fee ({feeLabel}), and captain/guide payout.
       </p>
 
       <div className="grid gap-4 md:grid-cols-3">
