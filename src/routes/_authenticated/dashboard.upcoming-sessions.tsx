@@ -128,12 +128,43 @@ function UpcomingSessionsPage() {
   const markCompleteFn = useServerFn(markSessionComplete);
   const markOrderCompleteFn = useServerFn(markOrderComplete);
   const fetchTripBookings = useServerFn(listMyTripBookingsAide);
+  const markTripCompleteFn = useServerFn(markTripBookingComplete);
+  const cancelTripOfferFn = useServerFn(cancelPendingTripOffer);
 
   const { data: tripBookings } = useQuery({
     queryKey: ["aide-trip-bookings", user?.id],
     queryFn: () => fetchTripBookings(),
     enabled: !!user,
   });
+
+  const [tripActionBusy, setTripActionBusy] = useState<string | null>(null);
+
+  async function handleMarkTripComplete(bookingId: string) {
+    setTripActionBusy(bookingId);
+    try {
+      await markTripCompleteFn({ data: { booking_id: bookingId } });
+      toast.success("Trip marked complete.");
+      await queryClient.invalidateQueries({ queryKey: ["aide-trip-bookings"] });
+    } catch (e) {
+      toast.error(e instanceof Error ? e.message : "Could not mark complete.");
+    } finally {
+      setTripActionBusy(null);
+    }
+  }
+
+  async function handleCancelOffer(bookingId: string) {
+    setTripActionBusy(bookingId);
+    try {
+      await cancelTripOfferFn({ data: { booking_id: bookingId } });
+      toast.success("Offer cancelled.");
+      await queryClient.invalidateQueries({ queryKey: ["aide-trip-bookings"] });
+    } catch (e) {
+      toast.error(e instanceof Error ? e.message : "Could not cancel offer.");
+    } finally {
+      setTripActionBusy(null);
+    }
+  }
+
 
 
 
