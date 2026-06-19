@@ -88,7 +88,7 @@ export function CheckDatesDialog({
     if (soldOut || overCapacity) return;
     onOpenChange(false);
     navigate({
-      to: "/booking/review",
+      to: "/booking/checkout",
       search: { trip_id: tripId, trip_date: selectedIso, guests } as never,
     });
   };

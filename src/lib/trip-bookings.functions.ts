@@ -1,5 +1,5 @@
 // Server functions for the trip booking flow:
-// Listing page -> CheckDatesDialog -> /booking/review -> Stripe deposit checkout.
+// Listing page -> CheckDatesDialog -> /booking/checkout -> Stripe deposit checkout.
 
 import { createServerFn } from "@tanstack/react-start";
 import { z } from "zod";
@@ -296,7 +296,7 @@ export const createTripDepositCheckout = createServerFn({ method: "POST" })
     const session = await gwCreateCheckoutSession({
       price: price.id,
       success_url: `${origin}/checkout/success?booking_id=${booking.id}&session_id={CHECKOUT_SESSION_ID}`,
-      cancel_url: `${origin}/booking/review?trip_id=${trip.id}&trip_date=${data.trip_date}&guests=${data.guests}`,
+      cancel_url: `${origin}/booking/checkout?trip_id=${trip.id}&trip_date=${data.trip_date}&guests=${data.guests}`,
       client_reference_id: userId,
       metadata: {
         booking_id: booking.id,

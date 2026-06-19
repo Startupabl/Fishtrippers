@@ -37,7 +37,7 @@ const searchSchema = z.object({
   guests: fallback(z.number(), 1).default(1),
 });
 
-export const Route = createFileRoute("/_authenticated/booking/review")({
+export const Route = createFileRoute("/_authenticated/booking/checkout")({
   validateSearch: zodValidator(searchSchema),
   head: () => ({ meta: [{ title: "Review your booking — FishTrippers" }] }),
   component: BookingReviewPage,
