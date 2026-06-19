@@ -583,7 +583,12 @@ function StatusBadge({
 }
 
 function UserTypePill({ type }: { type: string }) {
-  const label = type.charAt(0).toUpperCase() + type.slice(1);
+  const label =
+    type === "aide"
+      ? "Captain/Guide"
+      : type === "learner"
+        ? "Angler"
+        : type.charAt(0).toUpperCase() + type.slice(1);
   const color =
     type === "aide"
       ? "bg-[#0A2540]/10 text-[#1f6b3a]"
