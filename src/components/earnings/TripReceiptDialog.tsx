@@ -7,7 +7,10 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { formatCurrency } from "@/lib/format-currency";
+import { convertMinor } from "@/lib/currency";
+import { useCurrencyStore, type CurrencyCode } from "@/stores/useCurrencyStore";
 import type { TripBookingSummary } from "@/lib/trip-bookings.functions";
+
 
 interface TripReceiptDialogProps {
   booking: TripBookingSummary | null;
@@ -47,10 +50,12 @@ export function TripReceiptDialog({
   const open = !!booking;
   const tripType =
     booking?.source === "custom_offer" ? "Custom Offer" : "Instant Book";
-  const balance = booking?.balance_due_minor ?? 0;
-  const deposit = booking?.deposit_minor ?? 0;
-  const total = booking?.total_price_minor ?? 0;
-  const currency = booking?.currency ?? "USD";
+  const viewerCurrency = useCurrencyStore((s) => s.currency);
+  const sourceCurrency = (booking?.currency as CurrencyCode) ?? "USD";
+  const total = convertMinor(booking?.total_price_minor ?? 0, sourceCurrency, viewerCurrency);
+  const deposit = convertMinor(booking?.deposit_minor ?? 0, sourceCurrency, viewerCurrency);
+  const balance = convertMinor(booking?.balance_due_minor ?? 0, sourceCurrency, viewerCurrency);
+
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
@@ -137,32 +142,33 @@ export function TripReceiptDialog({
                   <h3 className="text-xs uppercase tracking-wide text-muted-foreground mb-2">
                     Financial Summary
                   </h3>
-                  <div className="border border-border rounded-md overflow-hidden">
-                    <div className="flex justify-between px-4 py-2.5 text-sm border-b border-border">
-                      <span className="text-muted-foreground">
-                        Total Trip Price
-                      </span>
-                      <span className="font-medium text-foreground">
-                        {formatCurrency(total / 100, currency)}
-                      </span>
+                    <div className="border border-border rounded-md overflow-hidden">
+                      <div className="flex justify-between px-4 py-2.5 text-sm border-b border-border">
+                        <span className="text-muted-foreground">
+                          Total Trip Price
+                        </span>
+                        <span className="font-medium text-foreground">
+                          {formatCurrency(total, viewerCurrency)}
+                        </span>
+                      </div>
+                      <div className="flex justify-between px-4 py-2.5 text-sm border-b border-border">
+                        <span className="text-muted-foreground">
+                          LESS: Fishtrippers Deposit
+                        </span>
+                        <span className="font-medium text-foreground">
+                          −{formatCurrency(deposit, viewerCurrency)}
+                        </span>
+                      </div>
+                      <div className="flex justify-between px-4 py-3 text-base bg-muted/40">
+                        <span className="font-bold text-foreground">
+                          Balance to Collect at Meeting
+                        </span>
+                        <span className="font-bold text-money" style={display}>
+                          {formatCurrency(balance, viewerCurrency)}
+                        </span>
+                      </div>
                     </div>
-                    <div className="flex justify-between px-4 py-2.5 text-sm border-b border-border">
-                      <span className="text-muted-foreground">
-                        LESS: Fishtrippers Deposit
-                      </span>
-                      <span className="font-medium text-foreground">
-                        −{formatCurrency(deposit / 100, currency)}
-                      </span>
-                    </div>
-                    <div className="flex justify-between px-4 py-3 text-base bg-muted/40">
-                      <span className="font-bold text-foreground">
-                        Balance to Collect at Meeting
-                      </span>
-                      <span className="font-bold text-money" style={display}>
-                        {formatCurrency(balance / 100, currency)}
-                      </span>
-                    </div>
-                  </div>
+
                   <p className="text-xs text-muted-foreground mt-3">
                     Payment is collected directly from the angler in person at
                     the time of the meeting.
