@@ -141,10 +141,10 @@ function TagManagerPage() {
             <div className="grid grid-cols-1 gap-6 pb-2 pt-2 md:grid-cols-3">
               <div className="space-y-2">
                 <h4 className="text-sm font-semibold text-foreground">
-                  1. Aides Create Tags Live
+                  1. Captains/Guides Create Tags Live
                 </h4>
                 <p className="text-sm leading-relaxed text-muted-foreground">
-                  When Aides build or edit a listing, they use a smart autocomplete bar
+                  When captains/guides build or edit a listing, they use a smart autocomplete bar
                   powered by your master dictionary. If they type something brand new, the
                   system lets them add it instantly as a Custom Tag so their creation flow
                   never gets blocked.
