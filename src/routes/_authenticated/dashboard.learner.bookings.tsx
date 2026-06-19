@@ -119,11 +119,15 @@ function mapsUrl(location: string) {
 function TripBookingsPage() {
   const fetchBookings = useServerFn(listMyTripBookingsLearner);
   const fetchReviewed = useServerFn(getMyReviewedBookingIds);
-  const navigate = useNavigate();
+  const queryClient = useQueryClient();
+  const user = useAuthStore((s) => s.user);
   const [reviewTarget, setReviewTarget] = useState<
     { bookingId: string; tripTitle: string } | null
   >(null);
   const [receiptTarget, setReceiptTarget] = useState<TripBookingSummary | null>(
+    null,
+  );
+  const [offerTarget, setOfferTarget] = useState<TripBookingSummary | null>(
     null,
   );
 
