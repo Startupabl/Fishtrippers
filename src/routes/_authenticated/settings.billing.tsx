@@ -1,23 +1,15 @@
-import { createFileRoute, Link, useNavigate, useSearch } from "@tanstack/react-router";
-import { useServerFn } from "@tanstack/react-start";
-import { useQuery, useQueryClient } from "@tanstack/react-query";
+import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
-import { Banknote, CheckCircle2, Lock, AlertTriangle, ExternalLink } from "lucide-react";
+import { Lock, ExternalLink } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuthStore } from "@/stores/useAuthStore";
 import { formatCurrency } from "@/lib/format-currency";
 import { AddressForm, type AddressFormValue } from "@/components/settings/AddressForm";
 import { useProfileStore } from "@/stores/useProfileStore";
-import { useHasActiveListing } from "@/hooks/useHasActiveListing";
-import {
-  getMyStripeIds,
-  startStripeConnectOnboarding,
-  finalizeStripeConnectReturn,
-} from "@/lib/payouts.functions";
-import { DESIGN_SYSTEM } from "@/lib/brand";
+
 
 interface OrderRow {
   id: string;
