@@ -390,7 +390,7 @@ function AlertTemplatesTab() {
                 id="alert-message"
                 value={message}
                 onChange={(e) => setMessage(e.target.value)}
-                placeholder='e.g. New student booking confirmed for "{{course_title}}"!'
+                placeholder='e.g. New angler booking confirmed for "{{course_title}}"!'
                 maxLength={500}
               />
               <p className="text-xs text-muted-foreground">
