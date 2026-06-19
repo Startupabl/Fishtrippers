@@ -1,33 +1,26 @@
 ## Plan
 
-Rebuild the Angler Purchase History page at `/dashboard/learner/purchases` so it lists every trip booking (instant book + accepted custom offers) in a flat, filterable table driven by the captain's completion status.
+### 1. "Write a Review" wiring (Past Trips tab)
+Already complete in `src/routes/_authenticated/dashboard.learner.bookings.tsx` — the Past Trips action button opens the existing `WriteTripReviewDialog`, which calls `submitTripReview` and writes to the same `reviews` table the admin moderation page (`/admin/reviews`) reads from. No code change needed; will verify the path end-to-end and call it out.
 
-### Data source
-- Replace the current `listMyOrdersLearner` driven view with `listMyTripBookingsLearner` so the page reflects real trip transactions (the same source as My Bookings and the receipt modal).
-- Only include rows that have actually been paid online: `confirmed` and `completed`. Pending/declined rows stay out of purchase history.
+### 2. Dynamic review counts on Listing Cards
+Aggregate approved reviews per operator and render them in `OperatorCard`. "Approved" maps to rows present in the `reviews` table (admin moderation works by deleting bad rows; surviving rows are the approved set).
 
-### Columns (in order)
-1. Date Paid — `created_at` formatted as local date.
-2. Order # — short order id derived from `booking.id` (same `#XXXXXX` helper used in the receipt).
-3. Trip Name — `trip_title`.
-4. Total Price — `total_price_minor` in the booking's currency.
-5. Deposit Paid — `deposit_minor` in the booking's currency.
-6. Dock Balance — single column whose label and styling change per row:
-   - `confirmed` → header cell text "Due at Dock", row value rendered bold.
-   - `completed` → header cell text "Paid at Dock", row value rendered normal/muted.
-   - Because the label is per-row, render it inline within the cell as a small caption above the amount so a single table header can read "Dock Balance" while each row clearly states its own state.
-7. Actions — "View Receipt" button that opens the existing `TripReceiptDialog`.
+**`src/lib/operators-search.functions.ts`**
+- Select `owner_id` on the operators query.
+- After the operators query, fetch `reviews(aide_id, rating)` for the returned owner ids in one round-trip (server publishable client).
+- Compute `{ avg, count }` per `aide_id` and populate the existing `rating` / `review_count` fields on each `OperatorCardDTO` (already in the DTO but currently `null`).
 
-All currency uses the booking's own currency code (no forced conversion), matching the receipt modal's fix.
-
-### Filters row (above the table)
-- Timeframe dropdown: All Time (default) / This Month / This Year, filtering by `created_at`.
-- Search input with placeholder "Search by Order # or Trip…", matching against the short order number and `trip_title` (case-insensitive).
+**`src/components/listings/OperatorCard.tsx`**
+- Replace the unconditional "Verified" segment with conditional logic:
+  - `review_count >= 1` → render a segment with a filled amber star, the average to 1 decimal (e.g. `4.9`), and `(N reviews)`.
+  - Otherwise → keep the current static star + "Verified" placeholder.
 
 ### Out of scope
-- No change to the receipt modal, My Bookings page, or schedule panel.
-- No new route file; the existing `dashboard.learner.purchases.tsx` is rewritten in place.
-- Legacy `OrderSchedulePanel` / expand-row UX is removed since trip bookings don't have multi-session schedules.
+- No schema change, no new "approved" column. Admin moderation continues to work via the existing edit/delete flow.
+- `LiveJourneyCard` already renders dynamic review counts when present — no change.
+- Operator listing detail page review feed (`ListingReviews`) already exists and is unchanged.
 
 ### Files touched
-- `src/routes/_authenticated/dashboard.learner.purchases.tsx` — full rewrite.
+- `src/lib/operators-search.functions.ts`
+- `src/components/listings/OperatorCard.tsx`
