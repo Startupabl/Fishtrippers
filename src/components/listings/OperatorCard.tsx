@@ -44,7 +44,21 @@ export function OperatorCard({ operator }: { operator: OperatorCardDTO }) {
     });
   }
 
-  if (operator.verified) {
+  const reviewCount = operator.review_count ?? 0;
+  if (reviewCount >= 1 && operator.rating != null) {
+    segments.push({
+      key: "rating",
+      content: (
+        <>
+          <Star className="size-4 fill-amber-400 text-amber-400" />
+          <span>{operator.rating.toFixed(1)}</span>
+          <span className="font-normal text-muted-foreground">
+            ({reviewCount} review{reviewCount === 1 ? "" : "s"})
+          </span>
+        </>
+      ),
+    });
+  } else if (operator.verified) {
     segments.push({
       key: "verified",
       content: (
@@ -55,6 +69,7 @@ export function OperatorCard({ operator }: { operator: OperatorCardDTO }) {
       ),
     });
   }
+
 
   return (
     <li className="group overflow-hidden rounded-2xl border border-border bg-card shadow-sm transition-shadow hover:shadow-md">

@@ -91,13 +91,14 @@ export const searchOperatorsServer = createServerFn({ method: "POST" })
       .from("operators")
       .select(
         `
-        id, slug, location_slug, display_name, business_type,
+        id, slug, location_slug, display_name, business_type, owner_id,
         default_departure_city, default_departure_state, default_departure_country,
         cover_image_url, booking_type, fishing_environments, featured, priority_order, created_at,
         vessels ( length_ft, max_passenger_capacity, boat_type_id, boat_types ( icon_url, subcategory_name ) ),
         ${tripJoin} ( price_minor, currency, status, duration_minutes, start_time, techniques, target_species )
       `,
       )
+
       .eq("moderation_status", "approved")
       .eq("status", "published");
 
@@ -150,6 +151,27 @@ export const searchOperatorsServer = createServerFn({ method: "POST" })
     const { data: rows, error } = await query;
     if (error) throw error;
 
+    // Aggregate approved reviews per operator (keyed by owner_id == aide_id on reviews).
+    const ownerIds = Array.from(
+      new Set((rows ?? []).map((r: any) => r.owner_id).filter((id: string | null): id is string => !!id)),
+    );
+    const statsByOwner = new Map<string, { sum: number; count: number }>();
+    if (ownerIds.length > 0) {
+      const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+      const { data: reviewRows } = await supabaseAdmin
+        .from("reviews")
+        .select("aide_id, rating")
+        .in("aide_id", ownerIds);
+      for (const r of reviewRows ?? []) {
+        const k = r.aide_id as string | null;
+        if (!k) continue;
+        const cur = statsByOwner.get(k) ?? { sum: 0, count: 0 };
+        cur.sum += (r.rating as number) ?? 0;
+        cur.count += 1;
+        statsByOwner.set(k, cur);
+      }
+    }
+
     const items: OperatorCardDTO[] = (rows ?? []).map((row: any) => {
       const vessel = Array.isArray(row.vessels) ? row.vessels[0] : row.vessels;
       const trips: Array<{ price_minor: number; currency: string; status: string }> =
@@ -168,6 +190,11 @@ export const searchOperatorsServer = createServerFn({ method: "POST" })
           ? vessel.boat_types[0]
           : vessel.boat_types
         : null;
+
+      const ownerStats = row.owner_id ? statsByOwner.get(row.owner_id) : undefined;
+      const reviewCount = ownerStats?.count ?? 0;
+      const reviewAvg = ownerStats && ownerStats.count > 0 ? ownerStats.sum / ownerStats.count : null;
+
       return {
         id: row.id,
         slug: row.slug ?? null,
@@ -187,14 +214,15 @@ export const searchOperatorsServer = createServerFn({ method: "POST" })
         primary_environment:
           (row.fishing_environments && row.fishing_environments[0]) ?? null,
         verified: true,
-        rating: null,
-        review_count: null,
+        rating: reviewAvg,
+        review_count: reviewCount,
         lowest_price_label: cheapest
           ? formatPrice(cheapest.price_minor, cheapest.currency)
           : null,
         trip_count: active.length > 0 ? active.length : trips.length,
       };
     });
+
 
     return { items };
   });
