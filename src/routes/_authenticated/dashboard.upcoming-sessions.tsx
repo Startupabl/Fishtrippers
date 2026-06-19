@@ -321,6 +321,8 @@ function UpcomingSessionsPage() {
     </div>
   );
 
+  const tripBookingRows = tripBookings ?? [];
+
   return (
     <main className="mx-auto max-w-[1600px] px-4 md:px-6 lg:px-8 py-12">
       <h1 className="text-3xl font-bold tracking-tight" style={display}>
@@ -329,6 +331,66 @@ function UpcomingSessionsPage() {
       <p className="mt-2 text-muted-foreground">
         Every booked trip — including pending custom offers.
       </p>
+
+      {tripBookingRows.length > 0 && (
+        <section className="mt-8">
+          <h2 className="text-xl font-bold tracking-tight" style={display}>
+            Trip Bookings ({tripBookingRows.length})
+          </h2>
+          <p className="mt-1 text-sm text-muted-foreground">
+            Charter and guided-trip reservations from your public listings.
+          </p>
+          <div className="mt-3 w-full overflow-x-auto rounded-md border border-border">
+            <Table className="w-full">
+              <TableHeader>
+                <TableRow>
+                  <TableHead className="font-bold">Date</TableHead>
+                  <TableHead className="font-bold">Trip</TableHead>
+                  <TableHead className="font-bold">Angler</TableHead>
+                  <TableHead className="font-bold">Guests</TableHead>
+                  <TableHead className="font-bold">Status</TableHead>
+                  <TableHead className="font-bold text-right">Your earnings</TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                {tripBookingRows.map((b) => (
+                  <TableRow key={b.id}>
+                    <TableCell>
+                      {b.trip_date}
+                      {b.trip_start_time ? ` • ${b.trip_start_time.slice(0, 5)}` : ""}
+                    </TableCell>
+                    <TableCell>{b.trip_title ?? "Trip"}</TableCell>
+                    <TableCell>
+                      <div className="text-sm">
+                        {b.primary_angler_name ?? b.learner_name ?? "—"}
+                      </div>
+                      {b.phone && (
+                        <div className="text-xs text-muted-foreground">{b.phone}</div>
+                      )}
+                    </TableCell>
+                    <TableCell>{b.guests ?? "—"}</TableCell>
+                    <TableCell>
+                      <Badge variant={b.status === "confirmed" ? "default" : "secondary"}>
+                        {b.status === "confirmed" ? "Confirmed" : "Pending"}
+                      </Badge>
+                      {b.is_simulated && (
+                        <Badge variant="outline" className="ml-1 border-amber-500 text-amber-700">
+                          Sim
+                        </Badge>
+                      )}
+                    </TableCell>
+                    <TableCell className="text-right font-semibold">
+                      {formatCurrency(b.aide_earnings_minor / 100, b.currency)}
+                    </TableCell>
+                  </TableRow>
+                ))}
+              </TableBody>
+            </Table>
+          </div>
+        </section>
+      )}
+
+
 
       <Tabs defaultValue="upcoming" className="mt-6">
         <TabsList>
