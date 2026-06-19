@@ -78,10 +78,13 @@ function BookingReviewPage() {
 
   const fetchDetails = useServerFn(getTripReviewDetails);
   const startCheckout = useServerFn(createTripDepositCheckout);
+  const simulatePayment = useServerFn(simulateTripDepositPayment);
 
   const [details, setDetails] = useState<TripReviewDetails | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [paying, setPaying] = useState(false);
+  const [simulating, setSimulating] = useState(false);
+  const simulateEnabled = import.meta.env.VITE_SIMULATE_PAYMENTS === "true";
 
   const [firstName, setFirstName] = useState("");
   const [lastName, setLastName] = useState("");
