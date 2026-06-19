@@ -268,38 +268,6 @@ function MyListingPage() {
         </div>
       </div>
 
-      {showStripeBanner ? (
-        <Card className="mt-6 rounded-2xl border-amber-200 bg-amber-50/60 p-4">
-          <div className="flex flex-wrap items-center justify-between gap-3">
-            <div className="flex items-start gap-3">
-              <div className="mt-0.5 flex h-9 w-9 items-center justify-center rounded-full bg-amber-100">
-                <Banknote className="size-4 text-amber-900" />
-              </div>
-              <div>
-                <p className="text-sm font-semibold text-amber-900">
-                  Connect Stripe to enable payouts
-                </p>
-                <p className="text-xs text-amber-900/80">
-                  Without payouts connected we can&apos;t approve your listing or process bookings.
-                </p>
-              </div>
-            </div>
-            <div className="flex gap-2">
-              <Button
-                size="sm"
-                variant="ghost"
-                className="text-amber-900 hover:bg-amber-100"
-                onClick={() => setPayoutsOpen(true)}
-              >
-                I&apos;ll do this later
-              </Button>
-              <Button size="sm" onClick={() => setPayoutsOpen(true)}>
-                Connect Stripe
-              </Button>
-            </div>
-          </div>
-        </Card>
-      ) : null}
 
       {showCalendarBanner ? (
         <Card className="mt-4 rounded-2xl border-amber-200 bg-amber-50/60 p-4">
