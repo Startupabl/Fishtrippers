@@ -67,6 +67,9 @@ import {
   markSessionComplete,
   markOrderComplete,
 } from "@/lib/orders.functions";
+import { listMyTripBookingsAide } from "@/lib/trip-bookings.functions";
+import { formatCurrency } from "@/lib/format-currency";
+
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { buildGoogleCalendarUrl } from "@/lib/calendar-links";
 import { ensureThreadForAideWithLearner } from "@/lib/messages.functions";
