@@ -27,6 +27,7 @@ import { useAuthStore } from "@/stores/useAuthStore";
 import {
   getTripReviewDetails,
   createTripDepositCheckout,
+  simulateTripDepositPayment,
   type TripReviewDetails,
 } from "@/lib/trip-bookings.functions";
 import { getCancellationPolicy } from "@/lib/cancellation-policies";
