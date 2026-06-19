@@ -259,12 +259,52 @@ function EarningsPage() {
         </Table>
       </div>
 
+      {tripBookings.length > 0 && (
+        <section className="mt-10">
+          <h2 className="text-xl font-bold tracking-tight" style={display}>
+            Trip Bookings ({tripBookings.length})
+          </h2>
+          <p className="mt-1 text-sm text-muted-foreground">
+            Charter and guided-trip earnings.
+          </p>
+          <div className="mt-3 w-full overflow-x-auto rounded-md border border-border">
+            <Table className="w-full">
+              <TableHeader>
+                <TableRow>
+                  <TableHead className="font-bold">Trip date</TableHead>
+                  <TableHead className="font-bold">Trip</TableHead>
+                  <TableHead className="font-bold">Angler</TableHead>
+                  <TableHead className="font-bold">Gross</TableHead>
+                  <TableHead className="font-bold">Fee</TableHead>
+                  <TableHead className="font-bold text-right">Your earnings</TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                {tripBookings.map((b) => (
+                  <TableRow key={b.id}>
+                    <TableCell>{b.trip_date}</TableCell>
+                    <TableCell>{b.trip_title ?? "Trip"}</TableCell>
+                    <TableCell>{b.primary_angler_name ?? b.learner_name ?? "—"}</TableCell>
+                    <TableCell>{formatCurrency(b.total_price_minor / 100, b.currency)}</TableCell>
+                    <TableCell>−{formatCurrency(b.service_fee_minor / 100, b.currency)}</TableCell>
+                    <TableCell className="text-right font-semibold">
+                      {formatCurrency(b.aide_earnings_minor / 100, b.currency)}
+                    </TableCell>
+                  </TableRow>
+                ))}
+              </TableBody>
+            </Table>
+          </div>
+        </section>
+      )}
+
       <ReceiptDialog
         order={selectedOrder}
         aideName={aideName}
         onOpenChange={(open: boolean) => !open && setSelectedOrder(null)}
       />
     </main>
+
   );
 }
 
