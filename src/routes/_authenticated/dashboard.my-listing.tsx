@@ -13,7 +13,7 @@ import {
   Trash2,
   MoreHorizontal,
   CalendarDays,
-  Banknote,
+  
 } from "lucide-react";
 import { toast } from "sonner";
 
