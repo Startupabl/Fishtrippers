@@ -161,6 +161,9 @@ function OperatorListingPage() {
               <BoatInfoBlock vessel={vessel} boatType={boatType} />
             )}
             <AmenitiesGrid features={vessel?.features} />
+            <div className="flex justify-end pt-2">
+              <ReportListingDialog listingId={op?.id ?? null} />
+            </div>
           </aside>
         </div>
       </main>
