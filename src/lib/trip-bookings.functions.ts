@@ -127,7 +127,7 @@ export const getTripReviewDetails = createServerFn({ method: "POST" })
 
     const { data: profile } = await supabase
       .from("profiles")
-      .select("first_name, last_name, email")
+      .select("first_name, last_name, email, phone_number")
       .eq("id", userId)
       .maybeSingle();
 
@@ -164,7 +164,7 @@ export const getTripReviewDetails = createServerFn({ method: "POST" })
       viewer: {
         first_name: profile?.first_name ?? null,
         last_name: profile?.last_name ?? null,
-        phone: (profile as any)?.phone ?? null,
+        phone: profile?.phone_number ?? null,
         email: profile?.email ?? null,
       },
     };
