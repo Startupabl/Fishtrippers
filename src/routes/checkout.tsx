@@ -114,10 +114,6 @@ function CheckoutPage() {
     navigate({ to: "/journey-welcome", search: { bookingId } });
   };
 
-  const journeyPrice = useFormattedPrice(
-    totalPriceMinor,
-    selection.currency as CurrencyCode,
-  );
 
   return (
     <div className="min-h-screen bg-background">
