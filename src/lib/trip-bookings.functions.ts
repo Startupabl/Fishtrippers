@@ -541,13 +541,13 @@ async function hydrateTripBookings(
     tripIds.length
       ? supabaseAdmin
           .from("trip_packages")
-          .select("id, title, start_time, operator_id")
+          .select("id, title, start_time, operator_id, departure_address")
           .in("id", tripIds)
       : Promise.resolve({ data: [] as any[] } as const),
     profileIds.length
       ? supabaseAdmin
           .from("profiles")
-          .select("id, first_name, last_name, display_name, email")
+          .select("id, first_name, last_name, display_name, email, phone_number")
           .in("id", profileIds)
       : Promise.resolve({ data: [] as any[] } as const),
     bookingIds.length
