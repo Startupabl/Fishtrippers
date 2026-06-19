@@ -640,7 +640,14 @@ export const listMyTripBookingsLearner = createServerFn({ method: "GET" })
       .not("trip_date", "is", null)
       .order("trip_date", { ascending: true });
     if (error) throw new Error(error.message);
-    return hydrateTripBookings(data ?? []);
+    const hydrated = await hydrateTripBookings(data ?? []);
+    // Hide instant-book rows stuck in pending_payment from the angler view:
+    // those are abandoned checkout drafts (or captain-cancelled offers with no
+    // remaining custom-offer message). Only surface pending_payment when it's
+    // a real custom offer the angler still needs to pay for.
+    return hydrated.filter(
+      (b) => b.status !== "pending_payment" || b.source === "custom_offer",
+    );
   });
 
 export const listMyTripBookingsAide = createServerFn({ method: "GET" })
@@ -757,6 +764,14 @@ export const cancelPendingTripOffer = createServerFn({ method: "POST" })
       .from("host_availability")
       .delete()
       .eq("booking_id", data.booking_id);
+
+    // Remove any custom-offer messages tied to this booking so the angler's
+    // bookings list and chat thread don't keep showing a stale offer.
+    await supabaseAdmin
+      .from("messages")
+      .delete()
+      .eq("booking_id", data.booking_id)
+      .eq("attachment_type", "custom_offer");
 
     const { error: dErr } = await supabaseAdmin
       .from("bookings")
