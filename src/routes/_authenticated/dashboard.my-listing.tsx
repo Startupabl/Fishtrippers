@@ -392,7 +392,7 @@ function MyListingPage() {
                       asChild
                       title="Edit listing"
                     >
-                      <Link to="/create-listing/new" search={{ edit: true } as never}>
+                      <Link to="/operator/preview" search={{ edit: true } as never}>
                         <Pencil className="size-4" />
                       </Link>
                     </Button>
