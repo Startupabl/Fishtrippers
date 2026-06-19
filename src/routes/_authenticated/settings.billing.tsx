@@ -21,23 +21,14 @@ interface OrderRow {
 }
 
 export const Route = createFileRoute("/_authenticated/settings/billing")({
-  head: () => ({ meta: [{ title: "Billings & Payouts — Settings" }] }),
-  validateSearch: (search: Record<string, unknown>) => ({
-    stripe: (search.stripe === "return" || search.stripe === "refresh"
-      ? (search.stripe as "return" | "refresh")
-      : undefined),
-  }),
+  head: () => ({ meta: [{ title: "Billing — Settings" }] }),
   component: BillingPage,
 });
 
 function BillingPage() {
   const user = useAuthStore((s) => s.user);
   const navigate = useNavigate();
-  const isAide = useHasActiveListing();
-  const search = useSearch({ from: "/_authenticated/settings/billing" });
-  const qc = useQueryClient();
   const [orders, setOrders] = useState<OrderRow[]>([]);
-  const [earnings, setEarnings] = useState<OrderRow[]>([]);
   const [address, setAddress] = useState<AddressFormValue>({
     address_line1: "",
     address_line2: "",
@@ -46,23 +37,7 @@ function BillingPage() {
     postal_code: "",
   });
   const [savingAddress, setSavingAddress] = useState(false);
-  const [connecting, setConnecting] = useState(false);
-  const [returnState, setReturnState] = useState<
-    | { kind: "success" }
-    | { kind: "incomplete" }
-    | { kind: "refresh" }
-    | null
-  >(null);
 
-  const fetchIds = useServerFn(getMyStripeIds);
-  const startOnboarding = useServerFn(startStripeConnectOnboarding);
-  const finalizeReturn = useServerFn(finalizeStripeConnectReturn);
-
-  const { data: stripeIds, refetch: refetchIds } = useQuery({
-    queryKey: ["my-stripe-ids", user?.id],
-    enabled: !!user,
-    queryFn: () => fetchIds(),
-  });
 
   useEffect(() => {
     if (!user && typeof window !== "undefined") navigate({ to: "/login" });
