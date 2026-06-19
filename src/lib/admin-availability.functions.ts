@@ -52,7 +52,7 @@ export const listAvailabilityHolds = createServerFn({ method: "GET" })
 
     const { data: operators } = await supabaseAdmin
       .from("operators")
-      .select("id,owner_id,timezone,display_name")
+      .select("id,owner_id,display_name")
       .in("id", operatorIds);
     const opMap = new Map((operators ?? []).map((o) => [o.id, o]));
 
