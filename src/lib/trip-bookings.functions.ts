@@ -565,7 +565,7 @@ async function hydrateTripBookings(
   const { data: operators } = operatorIds.length
     ? await supabaseAdmin
         .from("operators")
-        .select("id, display_name")
+        .select("id, display_name, default_departure_address")
         .in("id", operatorIds)
     : { data: [] as any[] };
 
