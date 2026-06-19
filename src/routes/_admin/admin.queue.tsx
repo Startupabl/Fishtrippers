@@ -180,7 +180,7 @@ function ListingsToApprove() {
                 <h3 className="mt-2 font-semibold text-foreground">{j.title}</h3>
                 <p className="text-xs text-muted-foreground">
                   {j.category ?? "Uncategorized"} ·{" "}
-                  {j.mentor_name ?? j.mentor_email ?? "Unknown mentor"}
+                  {j.mentor_name ?? j.mentor_email ?? "Unknown captain/guide"}
                 </p>
               </div>
               <div className="flex flex-wrap justify-end gap-2">
