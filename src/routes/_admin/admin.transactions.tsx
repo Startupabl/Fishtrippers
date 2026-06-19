@@ -187,7 +187,7 @@ function TransactionsPage() {
           <Input
             value={qInput}
             onChange={(e) => setQInput(e.target.value)}
-            placeholder="Search by Order #, Learner, or Aide"
+            placeholder="Search by Order #, Angler, or Captain/Guide"
             className="pl-9"
           />
         </div>
