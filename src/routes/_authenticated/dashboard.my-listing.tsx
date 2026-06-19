@@ -636,6 +636,11 @@ function MyListingPage() {
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
+
+      <div className="mt-10 flex justify-start">
+        <ReportListingDialog listingId={operator?.id ?? null} />
+      </div>
     </div>
   );
 }
+
