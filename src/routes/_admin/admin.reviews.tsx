@@ -104,7 +104,7 @@ function ReviewsTable() {
             <tr>
               <th className="w-8 px-2 py-2.5"></th>
               <th className="px-4 py-2.5">Date</th>
-              <th className="px-4 py-2.5">Course Title</th>
+              <th className="px-4 py-2.5">Charter Title</th>
               <th className="px-4 py-2.5">Reviewed By</th>
               <th className="px-4 py-2.5">Review Title</th>
               <th className="px-4 py-2.5">Rating</th>
