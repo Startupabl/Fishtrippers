@@ -77,6 +77,7 @@ import { Route as AuthenticatedDashboardBookingsRouteImport } from './routes/_au
 import { Route as AuthenticatedDashboardAideRouteImport } from './routes/_authenticated/dashboard.aide'
 import { Route as AuthenticatedClassroomOrderIdRouteImport } from './routes/_authenticated/classroom.$orderId'
 import { Route as AuthenticatedCertificateOrderIdRouteImport } from './routes/_authenticated/certificate.$orderId'
+import { Route as AuthenticatedBookingReviewRouteImport } from './routes/_authenticated/booking.review'
 import { Route as AdminAdminTransactionsRouteImport } from './routes/_admin/admin.transactions'
 import { Route as AdminAdminSettingsRouteImport } from './routes/_admin/admin.settings'
 import { Route as AdminAdminSearchSeoRouteImport } from './routes/_admin/admin.search-seo'
@@ -466,6 +467,12 @@ const AuthenticatedCertificateOrderIdRoute =
     path: '/certificate/$orderId',
     getParentRoute: () => AuthenticatedRoute,
   } as any)
+const AuthenticatedBookingReviewRoute =
+  AuthenticatedBookingReviewRouteImport.update({
+    id: '/booking/review',
+    path: '/booking/review',
+    getParentRoute: () => AuthenticatedRoute,
+  } as any)
 const AdminAdminTransactionsRoute = AdminAdminTransactionsRouteImport.update({
   id: '/transactions',
   path: '/transactions',
@@ -673,6 +680,7 @@ export interface FileRoutesByFullPath {
   '/admin/search-seo': typeof AdminAdminSearchSeoRouteWithChildren
   '/admin/settings': typeof AdminAdminSettingsRouteWithChildren
   '/admin/transactions': typeof AdminAdminTransactionsRoute
+  '/booking/review': typeof AuthenticatedBookingReviewRoute
   '/certificate/$orderId': typeof AuthenticatedCertificateOrderIdRoute
   '/classroom/$orderId': typeof AuthenticatedClassroomOrderIdRoute
   '/dashboard/aide': typeof AuthenticatedDashboardAideRouteWithChildren
@@ -767,6 +775,7 @@ export interface FileRoutesByTo {
   '/admin/reviews': typeof AdminAdminReviewsRoute
   '/admin/settings': typeof AdminAdminSettingsRouteWithChildren
   '/admin/transactions': typeof AdminAdminTransactionsRoute
+  '/booking/review': typeof AuthenticatedBookingReviewRoute
   '/certificate/$orderId': typeof AuthenticatedCertificateOrderIdRoute
   '/classroom/$orderId': typeof AuthenticatedClassroomOrderIdRoute
   '/dashboard/aide': typeof AuthenticatedDashboardAideRouteWithChildren
@@ -865,6 +874,7 @@ export interface FileRoutesById {
   '/_admin/admin/search-seo': typeof AdminAdminSearchSeoRouteWithChildren
   '/_admin/admin/settings': typeof AdminAdminSettingsRouteWithChildren
   '/_admin/admin/transactions': typeof AdminAdminTransactionsRoute
+  '/_authenticated/booking/review': typeof AuthenticatedBookingReviewRoute
   '/_authenticated/certificate/$orderId': typeof AuthenticatedCertificateOrderIdRoute
   '/_authenticated/classroom/$orderId': typeof AuthenticatedClassroomOrderIdRoute
   '/_authenticated/dashboard/aide': typeof AuthenticatedDashboardAideRouteWithChildren
@@ -963,6 +973,7 @@ export interface FileRouteTypes {
     | '/admin/search-seo'
     | '/admin/settings'
     | '/admin/transactions'
+    | '/booking/review'
     | '/certificate/$orderId'
     | '/classroom/$orderId'
     | '/dashboard/aide'
@@ -1057,6 +1068,7 @@ export interface FileRouteTypes {
     | '/admin/reviews'
     | '/admin/settings'
     | '/admin/transactions'
+    | '/booking/review'
     | '/certificate/$orderId'
     | '/classroom/$orderId'
     | '/dashboard/aide'
@@ -1154,6 +1166,7 @@ export interface FileRouteTypes {
     | '/_admin/admin/search-seo'
     | '/_admin/admin/settings'
     | '/_admin/admin/transactions'
+    | '/_authenticated/booking/review'
     | '/_authenticated/certificate/$orderId'
     | '/_authenticated/classroom/$orderId'
     | '/_authenticated/dashboard/aide'
@@ -1724,6 +1737,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedCertificateOrderIdRouteImport
       parentRoute: typeof AuthenticatedRoute
     }
+    '/_authenticated/booking/review': {
+      id: '/_authenticated/booking/review'
+      path: '/booking/review'
+      fullPath: '/booking/review'
+      preLoaderRoute: typeof AuthenticatedBookingReviewRouteImport
+      parentRoute: typeof AuthenticatedRoute
+    }
     '/_admin/admin/transactions': {
       id: '/_admin/admin/transactions'
       path: '/transactions'
@@ -2123,6 +2143,7 @@ interface AuthenticatedRouteChildren {
   AuthenticatedDashboardRoute: typeof AuthenticatedDashboardRouteWithChildren
   AuthenticatedMyLearningRoute: typeof AuthenticatedMyLearningRoute
   AuthenticatedSettingsRoute: typeof AuthenticatedSettingsRouteWithChildren
+  AuthenticatedBookingReviewRoute: typeof AuthenticatedBookingReviewRoute
   AuthenticatedCertificateOrderIdRoute: typeof AuthenticatedCertificateOrderIdRoute
   AuthenticatedClassroomOrderIdRoute: typeof AuthenticatedClassroomOrderIdRoute
   AuthenticatedOperatorPreviewRoute: typeof AuthenticatedOperatorPreviewRoute
@@ -2133,6 +2154,7 @@ const AuthenticatedRouteChildren: AuthenticatedRouteChildren = {
   AuthenticatedDashboardRoute: AuthenticatedDashboardRouteWithChildren,
   AuthenticatedMyLearningRoute: AuthenticatedMyLearningRoute,
   AuthenticatedSettingsRoute: AuthenticatedSettingsRouteWithChildren,
+  AuthenticatedBookingReviewRoute: AuthenticatedBookingReviewRoute,
   AuthenticatedCertificateOrderIdRoute: AuthenticatedCertificateOrderIdRoute,
   AuthenticatedClassroomOrderIdRoute: AuthenticatedClassroomOrderIdRoute,
   AuthenticatedOperatorPreviewRoute: AuthenticatedOperatorPreviewRoute,
