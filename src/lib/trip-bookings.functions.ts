@@ -623,6 +623,7 @@ async function hydrateTripBookings(
       stripe_checkout_session_id: sessionId,
       is_simulated: Boolean(sessionId && sessionId.startsWith("sim_")),
       source: isCustomOffer ? "custom_offer" : "instant_book",
+      thread_id: r.thread_id ?? null,
     };
   });
 }
