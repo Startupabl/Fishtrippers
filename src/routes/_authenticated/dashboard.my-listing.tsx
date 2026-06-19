@@ -166,7 +166,7 @@ function MyListingPage() {
 
   const operator = operatorQ.data?.operator ?? null;
   const trips = tripsQ.data?.trips ?? [];
-  const isPayoutReady = !!stripeQ.data?.is_payout_ready;
+  
   const hasInstantTrip = trips.some(
     (t: any) => t.booking_type === "instant_book",
   );
