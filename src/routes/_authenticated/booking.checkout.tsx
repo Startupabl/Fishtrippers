@@ -27,6 +27,7 @@ import { useAuthStore } from "@/stores/useAuthStore";
 import {
   getTripReviewDetails,
   createTripDepositCheckout,
+  simulateTripDepositPayment,
   type TripReviewDetails,
 } from "@/lib/trip-bookings.functions";
 import { getCancellationPolicy } from "@/lib/cancellation-policies";
@@ -77,10 +78,13 @@ function BookingReviewPage() {
 
   const fetchDetails = useServerFn(getTripReviewDetails);
   const startCheckout = useServerFn(createTripDepositCheckout);
+  const simulatePayment = useServerFn(simulateTripDepositPayment);
 
   const [details, setDetails] = useState<TripReviewDetails | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [paying, setPaying] = useState(false);
+  const [simulating, setSimulating] = useState(false);
+  const simulateEnabled = import.meta.env.VITE_SIMULATE_PAYMENTS === "true";
 
   const [firstName, setFirstName] = useState("");
   const [lastName, setLastName] = useState("");
@@ -134,6 +138,37 @@ function BookingReviewPage() {
       setPaying(false);
     }
   }
+
+  async function handleSimulate() {
+    if (!details) return;
+    if (!firstName.trim() || !lastName.trim() || !phoneValid || !phone) {
+      toast.error("Fill in your name and a valid phone first.");
+      return;
+    }
+    setSimulating(true);
+    try {
+      const primaryAnglerName = `${firstName.trim()} ${lastName.trim()}`.trim();
+      const { booking_id } = await simulatePayment({
+        data: {
+          trip_id: details.trip.id,
+          trip_date: details.trip_date,
+          guests: details.guests,
+          primary_angler_name: primaryAnglerName || "Angler",
+          phone: phone.trim(),
+          notes: notes.trim() || null,
+        },
+      });
+      navigate({
+        to: "/checkout/success",
+        search: { booking_id } as never,
+      });
+    } catch (e) {
+      toast.error(e instanceof Error ? e.message : "Could not simulate payment.");
+      setSimulating(false);
+    }
+  }
+
+
 
 
   if (error) {
@@ -418,6 +453,30 @@ function BookingReviewPage() {
                   "Continue to Payment"
                 )}
               </Button>
+
+              {simulateEnabled && (
+                <div className="space-y-2 rounded-xl border border-dashed border-amber-500/60 bg-amber-500/5 p-3">
+                  <Button
+                    type="button"
+                    variant="outline"
+                    className="w-full border-amber-500/60 text-amber-700 hover:bg-amber-500/10 dark:text-amber-300"
+                    onClick={handleSimulate}
+                    disabled={!firstName.trim() || !lastName.trim() || !phoneValid || simulating || paying}
+                  >
+                    {simulating ? (
+                      <>
+                        <Loader2 className="mr-2 size-4 animate-spin" />
+                        Simulating payment…
+                      </>
+                    ) : (
+                      "⚡ Simulate payment success (dev)"
+                    )}
+                  </Button>
+                  <p className="text-center text-[11px] text-amber-700/80 dark:text-amber-300/80">
+                    Dev only — skips Stripe and marks this booking as paid so we can map the post-payment flow.
+                  </p>
+                </div>
+              )}
 
               <p className="text-center text-xs text-muted-foreground">
                 By clicking "Continue to Payment", you agree to our{" "}

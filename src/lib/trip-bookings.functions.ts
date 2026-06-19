@@ -313,3 +313,174 @@ export const createTripDepositCheckout = createServerFn({ method: "POST" })
 
     return { url: session.url, booking_id: booking.id };
   });
+
+// --------------------------------------------------------------------------
+// Simulated payment success (dev only — used until Stripe is wired up live).
+// Creates the booking row and immediately marks it confirmed, firing the
+// same downstream side-effects (host_availability trigger, captain alert,
+// confirmation emails) that the real Stripe webhook produces.
+// --------------------------------------------------------------------------
+
+export const simulateTripDepositPayment = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((i: unknown) => CheckoutInput.parse(i))
+  .handler(async ({ data, context }) => {
+    if (process.env.SIMULATE_PAYMENTS !== "true") {
+      throw new Error("Payment simulation is disabled.");
+    }
+
+    const { supabase, userId } = context;
+    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+
+    const { data: trip, error: tErr } = await supabase
+      .from("trip_packages")
+      .select(
+        "id, title, price_minor, per_extra_minor, charter_type, currency, operator_id, seats_available",
+      )
+      .eq("id", data.trip_id)
+      .maybeSingle();
+    if (tErr || !trip) throw new Error("Trip not found.");
+
+    const { data: operator } = await supabase
+      .from("operators")
+      .select("id, owner_id")
+      .eq("id", trip.operator_id)
+      .maybeSingle();
+    if (!operator) throw new Error("Operator not found.");
+
+    if (trip.charter_type === "shared_tour") {
+      const { data: bookedRows } = await supabase.rpc(
+        "trip_seats_booked_by_date",
+        { _trip_id: trip.id },
+      );
+      const booked =
+        (bookedRows ?? []).find((r: any) => r.trip_date === data.trip_date)
+          ?.seats_booked ?? 0;
+      const remaining = Math.max(0, (trip.seats_available ?? 0) - booked);
+      if (data.guests > remaining) {
+        throw new Error(
+          `Only ${remaining} seat${remaining === 1 ? "" : "s"} left for that date.`,
+        );
+      }
+    }
+
+    const total_minor = computeTripTotal(
+      trip.charter_type,
+      trip.price_minor,
+      trip.per_extra_minor ?? 0,
+      data.guests,
+    );
+    const deposit_minor = Math.round(total_minor * 0.1);
+    const balance_minor = total_minor - deposit_minor;
+
+    const feeRate = await getPlatformFeeRate();
+    const fees = computeFeeBreakdown(deposit_minor, feeRate);
+
+    const simSessionId = `sim_${
+      typeof crypto !== "undefined" && "randomUUID" in crypto
+        ? crypto.randomUUID()
+        : Date.now().toString(36)
+    }`;
+
+    const { data: booking, error: bErr } = await supabaseAdmin
+      .from("bookings")
+      .insert({
+        aide_id: operator.owner_id,
+        learner_id: userId,
+        course_id: trip.id,
+        trip_date: data.trip_date,
+        guests: data.guests,
+        total_price: total_minor,
+        service_fee_amount: fees.feeMinor,
+        aide_earnings: fees.payoutMinor,
+        currency: trip.currency.toUpperCase(),
+        status: "confirmed",
+        primary_angler_name: data.primary_angler_name,
+        phone: data.phone,
+        notes: data.notes ?? null,
+        deposit_minor,
+        balance_due_minor: balance_minor,
+        stripe_checkout_session_id: simSessionId,
+      } as any)
+      .select("id")
+      .single();
+    if (bErr || !booking)
+      throw new Error(bErr?.message ?? "Could not create booking.");
+
+    // Notify the captain — alert + best-effort emails (matches webhook).
+    try {
+      const { renderAlertTemplate } = await import("@/lib/alert-templates.server");
+      const { renderEmailTemplate } = await import("@/lib/email-templates.server");
+      const { sendEmail } = await import("@/lib/email-sender.server");
+
+      const courseTitle = trip.title ?? "your trip";
+
+      const [{ data: aideProfile }, { data: learnerProfile }] = await Promise.all([
+        supabaseAdmin
+          .from("profiles")
+          .select("first_name, email")
+          .eq("id", operator.owner_id)
+          .maybeSingle(),
+        supabaseAdmin
+          .from("profiles")
+          .select("first_name, last_name, email")
+          .eq("id", userId)
+          .maybeSingle(),
+      ]);
+
+      const learnerName =
+        [learnerProfile?.first_name, learnerProfile?.last_name]
+          .filter(Boolean)
+          .join(" ") || "A new angler";
+
+      const alertMessage = await renderAlertTemplate("booking_confirmed", {
+        course_title: courseTitle,
+      });
+      await supabaseAdmin.from("user_alerts").insert({
+        user_id: operator.owner_id,
+        kind: "booking_confirmed",
+        journey_id: null,
+        message: alertMessage,
+      });
+
+      if (aideProfile?.email) {
+        try {
+          const aideEmail = await renderEmailTemplate("booking_confirmed_aide", {
+            aide_first_name: aideProfile.first_name ?? "there",
+            learner_name: learnerName,
+            course_title: courseTitle,
+            schedule_url: "/dashboard/upcoming-sessions",
+          });
+          await sendEmail({
+            to: aideProfile.email,
+            subject: aideEmail.subject,
+            body: aideEmail.body,
+          });
+        } catch (e) {
+          console.error("[simulate-payment] aide email failed", e);
+        }
+      }
+
+      if (learnerProfile?.email) {
+        try {
+          const learnerEmail = await renderEmailTemplate("booking_confirmed_learner", {
+            learner_first_name: learnerProfile.first_name ?? "there",
+            course_title: courseTitle,
+            schedule_url: "/dashboard/learner/schedule",
+          });
+          await sendEmail({
+            to: learnerProfile.email,
+            subject: learnerEmail.subject,
+            body: learnerEmail.body,
+          });
+        } catch (e) {
+          console.error("[simulate-payment] learner email failed", e);
+        }
+      }
+    } catch (e) {
+      console.error("[simulate-payment] post-confirm notifications failed", e);
+    }
+
+    return { booking_id: booking.id };
+  });
+

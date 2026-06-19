@@ -1,58 +1,73 @@
-## Add Admin "Availability Manager" page
+# Simulate Payment Success (Stripe stand-in)
 
-### 1. Sidebar nav (`src/routes/_admin.tsx`)
-- Insert a new entry right below Transactions in the `NAV` array:
-  `{ to: "/admin/availability", label: "Availability Manager", icon: CalendarClock, exact: false }`
-- Add matching branch in `pageTitle()` returning `"Calendar Availability & Hold Logs"`.
-- Import `CalendarClock` from `lucide-react`.
+Goal: until Stripe is wired up at the end of the project, let you click a button that **pretends Stripe just confirmed the payment** and triggers every downstream side-effect (booking → confirmed, captain + angler alerts, transactional emails, success page, dashboards updating). No real charge, no Stripe call.
 
-### 2. New route `src/routes/_admin/admin.availability.tsx`
-- `createFileRoute("/_admin/admin/availability")` — page component titled **"Calendar Availability & Hold Logs"**.
-- Data loaded via TanStack Query calling a new server function `listAvailabilityHolds` (see §3).
-- UI:
-  - Top search input (controlled, client-side filtering) matching captain name or trip type substring (case-insensitive).
-  - Table with columns: Captain Name · Trip Type · Trip Date & Time (guide timezone) · Block Reason · Status badge · Expiration / Countdown · Actions.
-  - Status badge styles: BOOKED (green), BLOCKED (slate), HELD (amber).
-  - For HELD rows, render a live `useEffect` countdown ("Expires in 4h 12m") computed from `offer_expires_at`; otherwise "N/A".
-  - For HELD rows, show a `Release Hold` button → AlertDialog confirmation → calls `releaseAvailabilityHold` server fn → invalidates query + toast.
-  - Empty state and loading skeleton.
+## Where it appears
 
-### 3. Server functions `src/lib/admin-availability.functions.ts`
-Both guarded by `requireSupabaseAuth` + `has_role(_,'admin')` check (throw if not admin).
+1. **`/booking/checkout` (trip deposit flow)** — the main flow. Add a secondary button under the "Continue to Payment" button:
+   - Label: **"Simulate payment success (dev)"**
+   - Style: dashed outline, amber/warning accent so it's obviously not the real CTA.
+   - Visible whenever a `SIMULATE_PAYMENTS` flag is on (see below).
+2. **`/checkout` (legacy mentor/journey checkout)** — already uses an in-memory store with a fake `sleep(1200)`. Leave as-is; it's already a simulation. Just rename its button copy to "Simulate payment success" so the intent is obvious.
 
-- `listAvailabilityHolds()` — runs as admin via `supabaseAdmin` (loaded dynamically inside handler):
-  - Query `host_availability` where `date >= current_date` and status ∈ ('booked','blocked','held').
-  - Join operator → owner profile for captain name + `operators.timezone`.
-  - Join booking → `trip_packages` (for trip title) and `class_sessions` (for date/time) and learner profile (for "sent to <name>").
-  - Build rows in JS:
-    - **Trip Type**: `trip_packages.title` when `course_id` present; otherwise `"Custom Trip"`.
-    - **Trip Date/Time**: use `class_sessions.session_dates_times_array[0]` when present, else `bookings.trip_date`; format in operator timezone (`Intl.DateTimeFormat` with `timeZone`).
-    - **Block Reason**: 
-      - HELD + custom (no course_id) → `"Custom Trip Sent to <Angler Name>"`
-      - HELD + course_id → `"Pending Payment – Booking #<short id>"`
-      - BOOKED → `"Direct Booking #<short id>"`
-      - BLOCKED → `"Manual Block"`
-    - **offerExpiresAt**: for HELD with custom-offer message, look up latest `messages.offer_expires_at` for that `booking_id` where `attachment_type='custom_offer'`. Filter out rows whose `offer_expires_at < now()` (performance/freshness rule).
-  - Return sorted by date asc.
+## Feature flag
 
-- `releaseAvailabilityHold({ id })`:
-  - Verify the row exists with `status='held'`, then `DELETE FROM host_availability WHERE id = $1`.
-  - Return `{ ok: true }`.
+Add a single client-readable env flag so we can turn the simulator off in one place once Stripe goes live:
 
-### 4. Verification
-- Submit a Custom Trip → row appears in /admin/availability as HELD with countdown.
-- Click Release Hold → confirm → row disappears, captain calendar freed.
-- Search filters in real time.
-- Past-dated and expired holds are excluded.
+```
+VITE_SIMULATE_PAYMENTS=true   # in .env (dev/preview)
+```
 
-### Technical Notes
-- Use existing helpers: `Badge`, `AlertDialog`, `Input`, `Table` from shadcn.
-- Countdown updates via single `setInterval(60_000)` re-render in the page component.
-- Timezone formatting:
-  ```ts
-  new Intl.DateTimeFormat('en-US', {
-    timeZone: operator.timezone || 'UTC',
-    dateStyle: 'medium', timeStyle: 'short'
-  }).format(date)
-  ```
-- No schema migration required — `host_availability` already supports the three statuses.
+UI reads `import.meta.env.VITE_SIMULATE_PAYMENTS === "true"`. The server function (below) **also** checks the same flag server-side via `process.env.SIMULATE_PAYMENTS` and refuses to run if it's not set — so even if someone calls the endpoint on a live build, it's a no-op.
+
+## New server function
+
+`src/lib/trip-bookings.functions.ts` → add `simulateTripDepositPayment`:
+
+- Auth-gated (`requireSupabaseAuth`) — only the learner who owns the booking can simulate it.
+- Refuses if `process.env.SIMULATE_PAYMENTS !== "true"`.
+- Input: `{ booking_id: string }`.
+- Loads the booking via `supabaseAdmin`; verifies `learner_id === userId`; verifies `status === "pending_payment"`.
+- Performs the **same writes the Stripe webhook does** for `checkout.session.completed` on the booking path:
+  - `bookings.status = "confirmed"` (stamp a synthetic `stripe_checkout_session_id = "sim_<uuid>"` so we can tell simulated rows apart later).
+  - `class_sessions` seat increment via existing `increment_class_session_seats` RPC if linked.
+  - Insert `user_alerts` row for the captain (`kind: "booking_confirmed"`, rendered via `renderAlertTemplate`).
+  - Send the two transactional emails (`booking_confirmed_aide`, `booking_confirmed_learner`) via the existing `sendEmail` helper, exactly like the webhook.
+- Returns `{ booking_id }`.
+
+To avoid duplicating ~120 lines of webhook code, extract the inner body of the webhook's "Booking-flow checkout" branch into a shared helper `confirmBookingAfterPayment(bookingId, { sessionId })` in `src/lib/booking-confirm.server.ts`, and call it from both the webhook **and** the new simulate function. Pure refactor — no behavior change for real Stripe.
+
+## UI wiring on `/booking/checkout`
+
+After the existing `handleContinue`, add `handleSimulate`:
+
+1. Run the same validation (name, phone, etc.) and create the booking row by calling `createTripDepositCheckout` — but we need its `booking_id` without redirecting to Stripe. Two options; pick **B**:
+   - **A.** Have `createTripDepositCheckout` also return `booking_id` (it already does) and just ignore the `url`. Downside: still spends a Stripe API call creating product/price/session.
+   - **B.** Add a sibling `createTripBookingDraft` server fn that does steps 1–4 of `createTripDepositCheckout` (validation, capacity recheck, fee calc, `bookings` insert with `status: "pending_payment"`) but skips all Stripe calls. The real `createTripDepositCheckout` is refactored to call this helper too, so logic stays in one place.
+2. Call `simulateTripDepositPayment({ booking_id })`.
+3. Navigate to `/checkout/success?booking_id=<id>` — the existing success page already polls for the `confirmed` status and shows confetti + booking details, so no changes needed there.
+
+## Visual treatment
+
+```
+[ Continue to Payment ]            ← primary, unchanged
+[ ⚡ Simulate payment success ]    ← dashed amber, only shown when flag is on
+   Dev only — skips Stripe and marks this booking as paid.
+```
+
+## Out of scope
+
+- Custom-offer chat flow simulation (separate path, can add later if needed).
+- Gift-card / course-order checkout (`/checkout` legacy page is already simulated).
+- Refund / cancel simulation — only payment success for now.
+
+---
+
+## Technical summary
+
+- New file: `src/lib/booking-confirm.server.ts` — `confirmBookingAfterPayment(bookingId, { sessionId })` extracted verbatim from `src/routes/api/public/stripe/webhook.ts` lines ~220–340.
+- Edit: `src/routes/api/public/stripe/webhook.ts` — replace inline branch with `await confirmBookingAfterPayment(meta.booking_id, { sessionId: session.id })`.
+- Edit: `src/lib/trip-bookings.functions.ts` — extract draft-creation helper, add `simulateTripDepositPayment` server fn (auth + flag-gated).
+- Edit: `src/routes/_authenticated/booking.checkout.tsx` — add secondary "Simulate payment success" button visible when `import.meta.env.VITE_SIMULATE_PAYMENTS === "true"`.
+- Edit: `.env` — add `VITE_SIMULATE_PAYMENTS=true` and `SIMULATE_PAYMENTS=true`.
+- No DB migration needed.
