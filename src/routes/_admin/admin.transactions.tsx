@@ -27,6 +27,8 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { listAdminTransactions } from "@/lib/admin.functions";
+import { listAllTripBookingsAdmin } from "@/lib/trip-bookings.functions";
+
 import { formatCurrency } from "@/lib/format-currency";
 import { usePlatformFee } from "@/hooks/usePlatformFee";
 import { cn } from "@/lib/utils";
