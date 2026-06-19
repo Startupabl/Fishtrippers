@@ -192,7 +192,7 @@ function BookingReviewPage() {
   })();
   const startTimeLabel = formatStartTime(details.trip.start_time);
 
-  const canContinue = phone.trim().length >= 7 && !paying;
+  const canContinue = phoneValid && !paying;
 
   return (
     <div className="min-h-screen bg-background">
@@ -229,20 +229,27 @@ function BookingReviewPage() {
                   Mobile phone number{" "}
                   <span className="text-destructive">*</span>
                 </Label>
-                <Input
+                <PhoneInput
                   id="phone"
-                  type="tel"
-                  inputMode="tel"
+                  international
+                  countryCallingCodeEditable={false}
+                  defaultCountry="US"
                   value={phone}
-                  onChange={(e) => setPhone(e.target.value.slice(0, 32))}
-                  placeholder="(555) 123-4567"
-                  className="mt-1.5"
-                  required
+                  onChange={setPhone}
+                  placeholder="Enter your phone number"
+                  className="ft-phone-input mt-1.5"
                 />
                 <p className="mt-1 text-xs text-muted-foreground">
-                  Your captain will text you here with meeting details.
+                  Pick your country and we'll format the rest. Your captain
+                  will text you here with meeting details.
                 </p>
+                {phone && !phoneValid && (
+                  <p className="mt-1 text-xs text-destructive">
+                    Please enter a valid phone number for the selected country.
+                  </p>
+                )}
               </div>
+
               <div>
                 <Label htmlFor="notes">
                   Special notes & group details{" "}
