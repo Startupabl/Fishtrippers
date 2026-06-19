@@ -491,7 +491,7 @@ export const simulateTripDepositPayment = createServerFn({ method: "POST" })
 
 export interface TripBookingSummary {
   id: string;
-  status: "pending_payment" | "confirmed" | "declined" | "pending_offer";
+  status: "pending_payment" | "confirmed" | "declined" | "pending_offer" | "completed";
   trip_date: string | null;
   guests: number | null;
   total_price_minor: number;
@@ -513,6 +513,7 @@ export interface TripBookingSummary {
   notes: string | null;
   stripe_checkout_session_id: string | null;
   is_simulated: boolean;
+  source: "instant_book" | "custom_offer";
 }
 
 const BOOKING_COLS =
