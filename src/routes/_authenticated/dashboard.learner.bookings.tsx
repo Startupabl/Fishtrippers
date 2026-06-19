@@ -1,8 +1,16 @@
 import { useMemo, useState } from "react";
-import { createFileRoute, useNavigate } from "@tanstack/react-router";
+import { createFileRoute } from "@tanstack/react-router";
 import { useServerFn } from "@tanstack/react-start";
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { format, parseISO } from "date-fns";
+import { useAuthStore } from "@/stores/useAuthStore";
+import { CustomOfferCard } from "@/components/chat/CustomOfferCard";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
 import {
   Ship,
   Loader2,
@@ -111,11 +119,15 @@ function mapsUrl(location: string) {
 function TripBookingsPage() {
   const fetchBookings = useServerFn(listMyTripBookingsLearner);
   const fetchReviewed = useServerFn(getMyReviewedBookingIds);
-  const navigate = useNavigate();
+  const queryClient = useQueryClient();
+  const user = useAuthStore((s) => s.user);
   const [reviewTarget, setReviewTarget] = useState<
     { bookingId: string; tripTitle: string } | null
   >(null);
   const [receiptTarget, setReceiptTarget] = useState<TripBookingSummary | null>(
+    null,
+  );
+  const [offerTarget, setOfferTarget] = useState<TripBookingSummary | null>(
     null,
   );
 
@@ -183,14 +195,7 @@ function TripBookingsPage() {
                     <Button
                       size="sm"
                       className="bg-amber-500 text-white hover:bg-amber-600"
-                      onClick={() => {
-                        if (b.thread_id) {
-                          navigate({
-                            to: "/dashboard/messages/$threadId",
-                            params: { threadId: b.thread_id },
-                          });
-                        }
-                      }}
+                      onClick={() => setOfferTarget(b)}
                     >
                       Review & Accept Offer
                     </Button>
@@ -258,6 +263,28 @@ function TripBookingsPage() {
         captainName={receiptTarget?.captain_name ?? "Your captain"}
         onOpenChange={(o) => !o && setReceiptTarget(null)}
       />
+
+      <Dialog
+        open={!!offerTarget}
+        onOpenChange={(o) => !o && setOfferTarget(null)}
+      >
+        <DialogContent className="max-w-lg">
+          <DialogHeader>
+            <DialogTitle>Custom Trip Offer</DialogTitle>
+          </DialogHeader>
+          {offerTarget && (
+            <CustomOfferCard
+              bookingId={offerTarget.id}
+              viewerId={user?.id}
+              onChanged={() => {
+                queryClient.invalidateQueries({
+                  queryKey: ["learner-trip-bookings"],
+                });
+              }}
+            />
+          )}
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
