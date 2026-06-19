@@ -11,8 +11,6 @@ export const Route = createFileRoute("/_admin/admin/users/")({
   component: UsersPage,
 });
 
-type PayoutStatus = "connected" | "pending" | "none";
-
 type AdminUser = {
   id: string;
   email: string | null;
@@ -23,35 +21,14 @@ type AdminUser = {
   last_ip: string | null;
   listings_count: number;
   bookings_count: number;
-  stripe_connect_id: string | null;
-  payout_status: PayoutStatus;
   user_number_id: string | null;
   full_name: string;
   full_name_is_fallback: boolean;
   roles: string[];
 };
 
-const PAYOUT_RANK: Record<PayoutStatus, number> = { connected: 0, pending: 1, none: 2 };
-type SortKey = "user_number_id" | "full_name" | "payout_status";
+type SortKey = "user_number_id" | "full_name";
 type SortDir = "asc" | "desc";
-
-function PayoutBadge({ status }: { status: PayoutStatus }) {
-  if (status === "connected") {
-    return (
-      <span className="inline-block rounded-full bg-emerald-100 px-2 py-0.5 text-[10px] font-medium uppercase tracking-wide text-emerald-800">
-        Connected
-      </span>
-    );
-  }
-  if (status === "pending") {
-    return (
-      <span className="inline-block rounded-full bg-amber-100 px-2 py-0.5 text-[10px] font-medium uppercase tracking-wide text-amber-800">
-        Pending
-      </span>
-    );
-  }
-  return <span className="text-muted-foreground">—</span>;
-}
 
 function SortHeader({
   label,
@@ -168,9 +145,7 @@ function UsersPage() {
     if (sort) {
       list.sort((a, b) => {
         let diff = 0;
-        if (sort.key === "payout_status") {
-          diff = PAYOUT_RANK[a.payout_status] - PAYOUT_RANK[b.payout_status];
-        } else if (sort.key === "user_number_id") {
+        if (sort.key === "user_number_id") {
           diff = (a.user_number_id ?? "").localeCompare(b.user_number_id ?? "");
         } else {
           diff = a.full_name.localeCompare(b.full_name);
@@ -219,28 +194,20 @@ function UsersPage() {
               <th className="px-2 py-2 font-semibold">IP</th>
               <th className="px-2 py-2 font-semibold">Listings</th>
               <th className="px-2 py-2 font-semibold">Bookings</th>
-              <th className="px-2 py-2 font-semibold">
-                <SortHeader
-                  label="Payouts"
-                  active={sort?.key === "payout_status"}
-                  dir={sort?.dir ?? "asc"}
-                  onClick={() => toggleSort("payout_status")}
-                />
-              </th>
               <th className="px-2 py-2 text-right font-semibold">Manage</th>
             </tr>
           </thead>
           <tbody>
             {isLoading && (
               <tr>
-                <td colSpan={8} className="px-2 py-4 text-center text-muted-foreground">
+                <td colSpan={7} className="px-2 py-4 text-center text-muted-foreground">
                   Loading…
                 </td>
               </tr>
             )}
             {!isLoading && rows.length === 0 && (
               <tr>
-                <td colSpan={8} className="px-2 py-4 text-center text-muted-foreground">
+                <td colSpan={7} className="px-2 py-4 text-center text-muted-foreground">
                   No users.
                 </td>
               </tr>
@@ -307,9 +274,6 @@ function UsersPage() {
                   </td>
                   <td className="whitespace-nowrap px-2 py-1.5 tabular-nums">{u.listings_count}</td>
                   <td className="whitespace-nowrap px-2 py-1.5 tabular-nums">{u.bookings_count}</td>
-                  <td className="whitespace-nowrap px-2 py-1.5">
-                    <PayoutBadge status={u.payout_status} />
-                  </td>
                   <td className="whitespace-nowrap px-2 py-1.5 text-right">
                     <span className="inline-flex items-center justify-end gap-1">
                       <Link

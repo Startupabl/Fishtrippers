@@ -13,7 +13,7 @@ import {
   Trash2,
   MoreHorizontal,
   CalendarDays,
-  Banknote,
+  
 } from "lucide-react";
 import { toast } from "sonner";
 
@@ -47,7 +47,7 @@ import {
 import { DESIGN_SYSTEM } from "@/lib/brand";
 import { getMyOperator } from "@/lib/operators.functions";
 import { listMyTrips, deleteTrip, setTripStatus, listUndersoldSharedTrips } from "@/lib/trips.functions";
-import { getMyStripeIds } from "@/lib/payouts.functions";
+
 import { listMyHostAvailability } from "@/lib/host-availability.functions";
 import {
   TripFormDialog,
@@ -124,15 +124,11 @@ function StatusBadge({
   );
 }
 
-function computeStrength(op: any, tripsCount: number, isPayoutReady: boolean) {
+function computeStrength(op: any, tripsCount: number) {
   const hasCover = !!op?.cover_image_url;
   const hasTrips = tripsCount > 0;
-  const score =
-    40 +
-    (hasCover ? 15 : 0) +
-    (hasTrips ? 25 : 0) +
-    (isPayoutReady ? 20 : 0);
-  return { score, hasCover, hasTrips, stripe: isPayoutReady };
+  const score = 50 + (hasCover ? 20 : 0) + (hasTrips ? 30 : 0);
+  return { score, hasCover, hasTrips };
 }
 
 function MyListingPage() {
@@ -141,7 +137,6 @@ function MyListingPage() {
 
   const fetchOperator = useServerFn(getMyOperator);
   const fetchTrips = useServerFn(listMyTrips);
-  const fetchStripeIds = useServerFn(getMyStripeIds);
   const removeTrip = useServerFn(deleteTrip);
   const updateTripStatus = useServerFn(setTripStatus);
 
@@ -155,10 +150,6 @@ function MyListingPage() {
     queryFn: () => fetchTrips(),
   });
 
-  const stripeQ = useQuery({
-    queryKey: ["my-stripe-ids"],
-    queryFn: () => fetchStripeIds(),
-  });
 
   const fetchAvail = useServerFn(listMyHostAvailability);
   const availQ = useQuery({
@@ -175,7 +166,7 @@ function MyListingPage() {
 
   const operator = operatorQ.data?.operator ?? null;
   const trips = tripsQ.data?.trips ?? [];
-  const isPayoutReady = !!stripeQ.data?.is_payout_ready;
+  
   const hasInstantTrip = trips.some(
     (t: any) => t.booking_type === "instant_book",
   );
@@ -246,10 +237,7 @@ function MyListingPage() {
   }
 
   const op: any = operator;
-  const strength = computeStrength(op, trips.length, isPayoutReady);
-  const showStripeBanner =
-    !isPayoutReady &&
-    (op.moderation_status === "pending" || op.moderation_status === "approved");
+  const strength = computeStrength(op, trips.length);
 
   return (
     <div className="mx-auto w-full max-w-[1600px] px-4 md:px-6 lg:px-8 py-8 md:py-10">
@@ -280,38 +268,6 @@ function MyListingPage() {
         </div>
       </div>
 
-      {showStripeBanner ? (
-        <Card className="mt-6 rounded-2xl border-amber-200 bg-amber-50/60 p-4">
-          <div className="flex flex-wrap items-center justify-between gap-3">
-            <div className="flex items-start gap-3">
-              <div className="mt-0.5 flex h-9 w-9 items-center justify-center rounded-full bg-amber-100">
-                <Banknote className="size-4 text-amber-900" />
-              </div>
-              <div>
-                <p className="text-sm font-semibold text-amber-900">
-                  Connect Stripe to enable payouts
-                </p>
-                <p className="text-xs text-amber-900/80">
-                  Without payouts connected we can&apos;t approve your listing or process bookings.
-                </p>
-              </div>
-            </div>
-            <div className="flex gap-2">
-              <Button
-                size="sm"
-                variant="ghost"
-                className="text-amber-900 hover:bg-amber-100"
-                onClick={() => setPayoutsOpen(true)}
-              >
-                I&apos;ll do this later
-              </Button>
-              <Button size="sm" onClick={() => setPayoutsOpen(true)}>
-                Connect Stripe
-              </Button>
-            </div>
-          </div>
-        </Card>
-      ) : null}
 
       {showCalendarBanner ? (
         <Card className="mt-4 rounded-2xl border-amber-200 bg-amber-50/60 p-4">
@@ -475,10 +431,6 @@ function MyListingPage() {
                             </a>
                           </DropdownMenuItem>
                         ) : null}
-                        <DropdownMenuItem onClick={() => setPayoutsOpen(true)}>
-                          <Banknote className="mr-2 size-4" />
-                          {isPayoutReady ? "Manage payouts" : "Connect Stripe"}
-                        </DropdownMenuItem>
                         <DropdownMenuSeparator />
                         <DropdownMenuItem asChild>
                           <Link to="/create-listing/new" search={{ edit: true } as never}>

@@ -457,83 +457,37 @@ function FinancialStripeCard({
   profile,
   listingsCount,
   roles,
-  onGenerateLink,
-  linkPending,
 }: {
   profile: StripeProfileFields;
   listingsCount: number;
   roles: string[];
-  onGenerateLink: () => void;
-  linkPending: boolean;
+  onGenerateLink?: () => void;
+  linkPending?: boolean;
 }) {
   const isAide = listingsCount > 0 || roles.includes("aide");
   const classification = isAide ? "Learner + Active Aide" : "Learner Only";
-  const connected = Boolean(profile.stripe_connect_id);
 
   return (
     <section className="rounded-lg border bg-white p-4">
-      <SectionHeader>Financial &amp; Stripe Status</SectionHeader>
+      <SectionHeader>Account &amp; Billing</SectionHeader>
       <dl className="grid grid-cols-1 gap-x-6 gap-y-3 text-sm sm:grid-cols-2">
         <div>
           <dt className="text-xs text-muted-foreground">Role</dt>
           <dd className="font-medium">{classification}</dd>
         </div>
 
-        {isAide ? (
-          <div>
-            <dt className="text-xs text-muted-foreground">Stripe Payout Status</dt>
-            <dd className="space-y-1">
-              <span
-                className={
-                  "inline-block rounded-full px-2 py-0.5 text-[10px] font-medium uppercase tracking-wide " +
-                  (connected
-                    ? "bg-emerald-100 text-emerald-800"
-                    : "bg-amber-100 text-amber-800")
-                }
-              >
-                {connected ? "Connected" : "Pending Setup"}
-              </span>
-              <div className="font-mono text-xs text-muted-foreground">
-                {profile.stripe_connect_id ?? "No account linked"}
-              </div>
-            </dd>
-          </div>
-        ) : (
-          <div>
-            <dt className="text-xs text-muted-foreground">Stripe Customer Status</dt>
-            <dd>
-              {profile.stripe_customer_id ? (
-                <span className="font-mono text-xs">{profile.stripe_customer_id}</span>
-              ) : (
-                <span className="text-xs text-muted-foreground">No Purchase History</span>
-              )}
-            </dd>
-          </div>
-        )}
-
-        {profile.stripe_customer_id && isAide && (
-          <div>
-            <dt className="text-xs text-muted-foreground">Stripe Customer ID</dt>
-            <dd className="font-mono text-xs">{profile.stripe_customer_id}</dd>
-          </div>
-        )}
-      </dl>
-
-      {connected && (
-        <div className="mt-4 border-t pt-3">
-          <button
-            type="button"
-            onClick={onGenerateLink}
-            disabled={linkPending}
-            className="rounded border border-lime-500 px-3 py-1 text-xs font-medium text-lime-600 hover:bg-lime-50 disabled:opacity-50"
-          >
-            {linkPending ? "Generating…" : "Generate Stripe Dashboard Link"}
-          </button>
-          <p className="mt-1 text-[11px] text-muted-foreground">
-            Opens a one-time login link to the Stripe Express dashboard for this Aide.
-          </p>
+        <div>
+          <dt className="text-xs text-muted-foreground">Stripe Customer Status</dt>
+          <dd>
+            {profile.stripe_customer_id ? (
+              <span className="font-mono text-xs">{profile.stripe_customer_id}</span>
+            ) : (
+              <span className="text-xs text-muted-foreground">No Purchase History</span>
+            )}
+          </dd>
         </div>
-      )}
+      </dl>
     </section>
   );
 }
+

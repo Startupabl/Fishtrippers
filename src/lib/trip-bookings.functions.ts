@@ -232,17 +232,12 @@ export const createTripDepositCheckout = createServerFn({ method: "POST" })
     // Service fee is applied against the deposit amount being charged today.
     const fees = computeFeeBreakdown(deposit_minor, feeRate);
 
-    // Captain Connect preflight
-    const { data: captainProfile } = await supabaseAdmin
-      .from("profiles")
-      .select("stripe_connect_id, is_payout_ready")
-      .eq("id", operator.owner_id)
-      .maybeSingle();
-    if (!captainProfile?.stripe_connect_id || !captainProfile.is_payout_ready) {
-      throw new Error(
-        "This captain is still finishing payout setup. Please try again shortly.",
-      );
-    }
+    // Deposit is charged to the platform Stripe account. The dockside
+    // balance is collected by the captain offline, so no Stripe Connect
+    // transfer is required and we no longer block on the captain having a
+    // connected payout account.
+
+
 
     const bookingAdmin = supabaseAdmin;
     const { data: booking, error: bErr } = await bookingAdmin
@@ -308,8 +303,6 @@ export const createTripDepositCheckout = createServerFn({ method: "POST" })
         balance_due_minor: String(balance_minor),
         total_minor: String(total_minor),
       },
-      application_fee_amount: fees.feeMinor,
-      transfer_destination: captainProfile.stripe_connect_id,
       idempotencyKey: `${idemBase}_session`,
     });
 
