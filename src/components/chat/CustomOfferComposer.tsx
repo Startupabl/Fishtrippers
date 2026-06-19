@@ -1,9 +1,8 @@
 import { useEffect, useMemo, useState } from "react";
 import { useServerFn } from "@tanstack/react-start";
-import { useQuery } from "@tanstack/react-query";
 import { Link } from "@tanstack/react-router";
 import { toast } from "sonner";
-import { AlertTriangle, Loader2, Plus, Trash2 } from "lucide-react";
+import { AlertTriangle, Loader2 } from "lucide-react";
 import {
   Dialog,
   DialogContent,
@@ -22,31 +21,22 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import {
-  createCustomOffer,
-  listAvailableCohorts,
-  type AvailableCohort,
-} from "@/lib/bookings.functions";
-import { listMyJourneys } from "@/lib/journeys.functions";
+import { createCustomOffer } from "@/lib/bookings.functions";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuthStore } from "@/stores/useAuthStore";
 import { friendlyTimezoneLabel } from "@/lib/timezones";
-import { formatUtcInZone, tzAbbrev, zonedWallTimeToUtcISO } from "@/lib/tz";
+import { tzAbbrev, zonedWallTimeToUtcISO } from "@/lib/tz";
+import { SUPPORTED_CURRENCIES } from "@/lib/currency";
+import { DeparturePointPicker } from "@/components/operator-onboarding/trips/DeparturePointPicker";
 
 interface Props {
   open: boolean;
   onOpenChange: (v: boolean) => void;
   threadId: string;
   defaultCurrency?: string;
+  anglerName?: string;
   onSent?: (bookingId: string) => void;
 }
-
-interface SlotDraft {
-  date: string; // yyyy-mm-dd
-  time: string; // HH:mm
-}
-
-type Mode = "new_cohort" | "existing_cohort";
 
 const EXPIRATION_PRESETS: { value: string; label: string }[] = [
   { value: "1", label: "24 hours" },
@@ -55,118 +45,74 @@ const EXPIRATION_PRESETS: { value: string; label: string }[] = [
   { value: "never", label: "Never" },
 ];
 
-function defaultSlot(daysAhead: number): SlotDraft {
-  const d = new Date(Date.now() + daysAhead * 24 * 60 * 60 * 1000);
-  d.setMinutes(0, 0, 0);
-  d.setHours(17);
+const DURATION_HOURS = Array.from({ length: 14 }, (_, i) => i + 1);
+
+interface MeetingPoint {
+  address: string;
+  lat: number | null;
+  lng: number | null;
+  placeId: string | null;
+  city?: string | null;
+  state?: string | null;
+  country?: string | null;
+}
+
+function defaultDate(): string {
+  const d = new Date(Date.now() + 2 * 24 * 60 * 60 * 1000);
   const yyyy = d.getFullYear();
   const mm = String(d.getMonth() + 1).padStart(2, "0");
   const dd = String(d.getDate()).padStart(2, "0");
-  return { date: `${yyyy}-${mm}-${dd}`, time: "17:00" };
+  return `${yyyy}-${mm}-${dd}`;
 }
-
-function deriveTzLabel(tz: string | null | undefined): string {
-  if (!tz) return "";
-  try {
-    const parts = new Intl.DateTimeFormat("en-US", {
-      timeZone: tz,
-      timeZoneName: "short",
-    }).formatToParts(new Date());
-    const name = parts.find((p) => p.type === "timeZoneName")?.value;
-    return (name ?? "").slice(0, 10);
-  } catch {
-    return "";
-  }
-}
-
-function nameOfProfile(p: any): string {
-  if (!p) return "Learner";
-  if (p.display_name?.trim()) return p.display_name.trim();
-  const full = [p.first_name, p.last_name].filter(Boolean).join(" ").trim();
-  return full || (p.email?.split("@")[0] ?? "Learner");
-}
-
-function cohortDropdownLabel(c: AvailableCohort): string {
-  const seatsLeft = c.max_seats - c.filled_seats;
-  const seatSuffix = `${seatsLeft}/${c.max_seats} Seats Left`;
-  // Prefer the admin_label baked at cohort creation — it already includes
-  // the original learner's name (e.g. "Title • Tuesdays @ 2:00 PM • Starts May 26 (Sarah M.)").
-  if (c.admin_label && c.admin_label.trim()) {
-    return `${c.admin_label} — ${seatSuffix}`;
-  }
-  const arr = c.session_dates_times_array ?? [];
-  const first = arr[0]?.starts_at;
-  if (!first) return `[${c.listing_title}] — ${seatSuffix}`;
-  const d = new Date(first);
-  const dow = d.toLocaleDateString("en-US", { weekday: "long" });
-  const time = d.toLocaleTimeString("en-US", {
-    hour: "numeric",
-    minute: "2-digit",
-  });
-  const startDate = d.toLocaleDateString("en-US", {
-    month: "short",
-    day: "numeric",
-  });
-  return `[${c.listing_title}] ${dow}s @ ${time} • Starts ${startDate} — ${seatSuffix}`;
-}
-
 
 export function CustomOfferComposer({
   open,
   onOpenChange,
   threadId,
   defaultCurrency = "USD",
+  anglerName,
   onSent,
 }: Props) {
   const user = useAuthStore((s) => s.user);
-  const [mode, setMode] = useState<Mode>("new_cohort");
 
-  // shared
-  const [price, setPrice] = useState("");
-  const [currency, setCurrency] = useState(defaultCurrency);
-  const [expiration, setExpiration] = useState("7");
+  const [title, setTitle] = useState("");
+  const [durationHours, setDurationHours] = useState<number>(4);
+  const [totalAnglers, setTotalAnglers] = useState<number>(2);
+  const [tripDate, setTripDate] = useState<string>(defaultDate());
+  const [startTime, setStartTime] = useState<string>("07:00");
+  const [meetingPoint, setMeetingPoint] = useState<MeetingPoint>({
+    address: "",
+    lat: null,
+    lng: null,
+    placeId: null,
+  });
+  const [currency, setCurrency] = useState<string>(defaultCurrency);
+  const [totalPrice, setTotalPrice] = useState<string>("");
+  const [depositPrice, setDepositPrice] = useState<string>("");
+  const [depositTouched, setDepositTouched] = useState(false);
+  const [expiration, setExpiration] = useState<string>("3");
+
   const [profileTz, setProfileTz] = useState<string | null>(null);
+  const [operatorCurrency, setOperatorCurrency] = useState<string | null>(null);
   const [tzLoaded, setTzLoaded] = useState(false);
-  const [manualTz, setManualTz] = useState("");
-  const [learnerName, setLearnerName] = useState<string>("");
+  const [resolvedAnglerName, setResolvedAnglerName] = useState<string>(anglerName ?? "");
   const [submitting, setSubmitting] = useState(false);
 
-  // new cohort
-  const [selectedJourneyId, setSelectedJourneyId] = useState<string>("");
-  const [maxSeats, setMaxSeats] = useState(1);
-  const [durationMinutes, setDurationMinutes] = useState<number>(45);
-  const [slots, setSlots] = useState<SlotDraft[]>([defaultSlot(2)]);
-
-  // existing cohort
-  const [selectedCohortId, setSelectedCohortId] = useState<string>("");
-
   const send = useServerFn(createCustomOffer);
-  const fetchCohorts = useServerFn(listAvailableCohorts);
-  const fetchMyJourneys = useServerFn(listMyJourneys);
 
-  const { data: cohorts = [], isLoading: cohortsLoading } = useQuery({
-    queryKey: ["available-cohorts", user?.id],
-    queryFn: () => fetchCohorts(),
-    enabled: open && !!user && mode === "existing_cohort",
-  });
+  // Suggest 10% deposit when total changes (unless guide overrode it)
+  useEffect(() => {
+    if (depositTouched) return;
+    const n = Number(totalPrice);
+    if (!Number.isFinite(n) || n <= 0) {
+      setDepositPrice("");
+      return;
+    }
+    const suggested = Math.max(1, Math.round(n * 0.1 * 100) / 100);
+    setDepositPrice(String(suggested));
+  }, [totalPrice, depositTouched]);
 
-  const { data: myJourneys = [], isLoading: journeysLoading } = useQuery({
-    queryKey: ["my-journeys-for-offer", user?.id],
-    queryFn: () => fetchMyJourneys(),
-    enabled: open && !!user && mode === "new_cohort",
-  });
-
-  const selectedJourney = useMemo(
-    () => myJourneys.find((j) => j.id === selectedJourneyId) ?? null,
-    [myJourneys, selectedJourneyId],
-  );
-
-  const selectedCohort = useMemo(
-    () => cohorts.find((c) => c.id === selectedCohortId) ?? null,
-    [cohorts, selectedCohortId],
-  );
-
-  // Fetch the learner name + aide tz when modal opens.
+  // Fetch guide profile (timezone), operator base currency, angler name
   useEffect(() => {
     if (!open || !user) return;
     let cancelled = false;
@@ -183,48 +129,76 @@ export function CustomOfferComposer({
       });
 
     supabase
-      .from("message_threads")
-      .select("learner_id")
-      .eq("id", threadId)
+      .from("operators")
+      .select("base_currency")
+      .eq("owner_id", user.id)
       .maybeSingle()
-      .then(async ({ data: thread }) => {
-        if (cancelled || !thread?.learner_id) return;
-        const { data: prof } = await supabase
-          .from("profiles")
-          .select("first_name, last_name, display_name, email")
-          .eq("id", thread.learner_id)
-          .maybeSingle();
-        if (!cancelled) setLearnerName(nameOfProfile(prof));
+      .then(({ data }) => {
+        if (cancelled) return;
+        if (data?.base_currency) {
+          setOperatorCurrency(data.base_currency);
+          setCurrency(data.base_currency);
+        }
       });
+
+    if (!anglerName) {
+      supabase
+        .from("message_threads")
+        .select("learner_id")
+        .eq("id", threadId)
+        .maybeSingle()
+        .then(async ({ data: thread }) => {
+          if (cancelled || !thread?.learner_id) return;
+          const { data: prof } = await supabase
+            .from("profiles")
+            .select("first_name, last_name, display_name, email")
+            .eq("id", thread.learner_id)
+            .maybeSingle();
+          if (cancelled) return;
+          const full = [prof?.first_name, prof?.last_name]
+            .filter(Boolean)
+            .join(" ")
+            .trim();
+          setResolvedAnglerName(
+            prof?.display_name?.trim() ||
+              full ||
+              prof?.email?.split("@")[0] ||
+              "Angler",
+          );
+        });
+    }
 
     return () => {
       cancelled = true;
     };
-  }, [open, user, threadId]);
+  }, [open, user, threadId, anglerName]);
+
+  useEffect(() => {
+    if (anglerName) setResolvedAnglerName(anglerName);
+  }, [anglerName]);
 
   const tzMissing = tzLoaded && !profileTz;
-  const autoLabel = deriveTzLabel(profileTz);
-  const tzLabel = (tzMissing ? manualTz : autoLabel).trim();
-
-  function addSlot() {
-    setSlots((s) => [...s, defaultSlot(s.length + 2)]);
-  }
-  function removeSlot(i: number) {
-    setSlots((s) => s.filter((_, idx) => idx !== i));
-  }
-  function updateSlot(i: number, patch: Partial<SlotDraft>) {
-    setSlots((s) => s.map((x, idx) => (idx === i ? { ...x, ...patch } : x)));
-  }
+  const tzFriendly = useMemo(
+    () => (profileTz ? friendlyTimezoneLabel(profileTz) : ""),
+    [profileTz],
+  );
+  const tzAbbr = useMemo(
+    () => (profileTz ? tzAbbrev(profileTz) : ""),
+    [profileTz],
+  );
 
   function resetForm() {
-    setPrice("");
-    setExpiration("7");
-    setSelectedJourneyId("");
-    setMaxSeats(1);
-    setDurationMinutes(45);
-    setSlots([defaultSlot(2)]);
-    setSelectedCohortId("");
-    setManualTz("");
+    setTitle("");
+    setDurationHours(4);
+    setTotalAnglers(2);
+    setTripDate(defaultDate());
+    setStartTime("07:00");
+    setMeetingPoint({ address: "", lat: null, lng: null, placeId: null });
+    setCurrency(operatorCurrency ?? defaultCurrency);
+    setTotalPrice("");
+    setDepositPrice("");
+    setDepositTouched(false);
+    setExpiration("3");
   }
 
   function computeExpiresAt(): string | null {
@@ -236,65 +210,65 @@ export function CustomOfferComposer({
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
-    const priceNum = Number(price);
-    if (!Number.isFinite(priceNum) || priceNum <= 0) {
-      toast.error("Enter a valid price.");
+    if (title.trim().length < 3) {
+      toast.error("Add a trip title (at least 3 characters).");
+      return;
+    }
+    if (!meetingPoint.address || meetingPoint.address.trim().length < 2) {
+      toast.error("Pick a meeting point.");
       return;
     }
     if (!profileTz) {
       toast.error(
-        "Please set your time zone in Profile Settings before sending an offer.",
+        "Please set your time zone in Profile Settings before sending a custom trip.",
       );
       return;
     }
+    const totalNum = Number(totalPrice);
+    const depNum = Number(depositPrice);
+    if (!Number.isFinite(totalNum) || totalNum <= 0) {
+      toast.error("Enter a valid total price.");
+      return;
+    }
+    if (!Number.isFinite(depNum) || depNum <= 0 || depNum > totalNum) {
+      toast.error("Deposit must be greater than 0 and not more than the total.");
+      return;
+    }
 
-    const payload: any = {
-      thread_id: threadId,
-      total_price_minor: Math.round(priceNum * 100),
-      currency,
-      time_zone_label: tzLabel || null,
-      author_timezone: profileTz,
-      expires_at: computeExpiresAt(),
-      mode,
-    };
-
-    if (mode === "new_cohort") {
-      if (!selectedJourney) {
-        toast.error("Pick which listing this offer is for.");
-        return;
-      }
-      if (slots.length === 0) {
-        toast.error("Add at least one session.");
-        return;
-      }
-      const isoSlots = slots.map((s) => ({
-        starts_at: zonedWallTimeToUtcISO(s.date, s.time, profileTz),
-        duration_minutes: durationMinutes,
-      }));
-      if (isoSlots.some((s) => Number.isNaN(new Date(s.starts_at).getTime()))) {
-        toast.error("One of the session dates is invalid.");
-        return;
-      }
-      payload.listing_title = selectedJourney.title;
-      payload.max_seats = maxSeats;
-      payload.slots = isoSlots;
-    } else {
-      if (!selectedCohortId) {
-        toast.error("Pick a cohort to link this offer to.");
-        return;
-      }
-      payload.class_session_id = selectedCohortId;
+    const startsAt = zonedWallTimeToUtcISO(tripDate, startTime, profileTz);
+    if (Number.isNaN(new Date(startsAt).getTime())) {
+      toast.error("That date and time look invalid.");
+      return;
     }
 
     setSubmitting(true);
     try {
-      const res = await send({ data: payload });
-      toast.success("Custom offer sent!");
+      const res = await send({
+        data: {
+          thread_id: threadId,
+          title: title.trim(),
+          duration_minutes: durationHours * 60,
+          total_anglers: totalAnglers,
+          trip_date: tripDate,
+          starts_at: startsAt,
+          meeting_point_address: meetingPoint.address.trim(),
+          meeting_point_lat: meetingPoint.lat,
+          meeting_point_lng: meetingPoint.lng,
+          meeting_point_place_id: meetingPoint.placeId,
+          currency: currency.toUpperCase(),
+          total_price_minor: Math.round(totalNum * 100),
+          deposit_minor: Math.round(depNum * 100),
+          author_timezone: profileTz,
+          time_zone_label: tzAbbr || null,
+          expires_at: computeExpiresAt(),
+        },
+      });
+      toast.success("Custom trip sent!");
       onOpenChange(false);
       onSent?.(res.booking_id);
       resetForm();
     } catch (err) {
-      toast.error(err instanceof Error ? err.message : "Could not send offer.");
+      toast.error(err instanceof Error ? err.message : "Could not send custom trip.");
     } finally {
       setSubmitting(false);
     }
@@ -302,7 +276,7 @@ export function CustomOfferComposer({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-h-[90vh] max-w-lg overflow-y-auto">
+      <DialogContent className="max-h-[92vh] max-w-lg overflow-y-auto">
         <DialogHeader>
           <DialogTitle
             className="text-2xl"
@@ -311,307 +285,178 @@ export function CustomOfferComposer({
               fontWeight: 700,
             }}
           >
-            Create a Custom Offer for {learnerName || "Learner"}
+            Create a Custom Trip for {resolvedAnglerName || "Angler"}
           </DialogTitle>
           <DialogDescription className="text-base">
-            Start a brand-new cohort, or link this offer into one of your
-            existing class sessions.
+            Use this form to send a tailored trip an angler can book immediately.
           </DialogDescription>
         </DialogHeader>
 
         <form onSubmit={handleSubmit} className="space-y-5">
-          {/* Mode toggle */}
-          <div className="grid grid-cols-2 gap-2 rounded-2xl border border-border bg-muted/40 p-1">
-            <button
-              type="button"
-              onClick={() => setMode("new_cohort")}
-              className={`rounded-xl px-3 py-2 text-sm font-medium transition ${
-                mode === "new_cohort"
-                  ? "bg-background text-foreground shadow-sm"
-                  : "text-muted-foreground hover:text-foreground"
-              }`}
-            >
-              Create New Custom Schedule
-            </button>
-            <button
-              type="button"
-              onClick={() => setMode("existing_cohort")}
-              className={`rounded-xl px-3 py-2 text-sm font-medium transition ${
-                mode === "existing_cohort"
-                  ? "bg-background text-foreground shadow-sm"
-                  : "text-muted-foreground hover:text-foreground"
-              }`}
-            >
-              Link to an Existing Cohort
-            </button>
+          <div>
+            <Label htmlFor="ct-title" className="text-base">
+              Trip title
+            </Label>
+            <Input
+              id="ct-title"
+              value={title}
+              onChange={(e) => setTitle(e.target.value)}
+              placeholder="Custom 6-Hour Private Night Fishing"
+              maxLength={140}
+              required
+              className="text-base"
+            />
           </div>
 
-          {/* New cohort fields */}
-          {mode === "new_cohort" && (
-            <div className="space-y-4">
-              <div>
-                <Label htmlFor="listing-select" className="text-base">
-                  Which listing is this offer for?
-                </Label>
-                {journeysLoading ? (
-                  <p className="mt-1 text-sm text-muted-foreground">
-                    Loading your listings…
-                  </p>
-                ) : (
-                  <Select
-                    value={selectedJourneyId}
-                    onValueChange={setSelectedJourneyId}
-                  >
-                    <SelectTrigger id="listing-select" className="text-base">
-                      <SelectValue placeholder="Choose one of your listings" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {myJourneys.map((j) => {
-                        const statusSuffix =
-                          j.status === "published"
-                            ? ""
-                            : j.status === "draft"
-                              ? " · Draft"
-                              : j.moderation_status === "pending"
-                                ? " · Pending"
-                                : ` · ${j.status}`;
-                        return (
-                          <SelectItem key={j.id} value={j.id}>
-                            {j.title}
-                            {statusSuffix}
-                          </SelectItem>
-                        );
-                      })}
-                    </SelectContent>
-                  </Select>
-                )}
-                <p className="mt-1 text-xs text-muted-foreground">
-                  The offer will be tied to this exact listing.
-                </p>
-              </div>
-
-              <div>
-                <Label htmlFor="max-seats" className="text-base">
-                  Seat capacity
-                </Label>
-                <Input
-                  id="max-seats"
-                  type="number"
-                  min={1}
-                  max={50}
-                  value={maxSeats}
-                  onChange={(e) =>
-                    setMaxSeats(
-                      Math.max(
-                        1,
-                        Math.min(50, Number(e.target.value) || 1),
-                      ),
-                    )
-                  }
-                  className="text-base"
-                />
-                <p className="mt-1 text-xs text-muted-foreground">
-                  How many learners can join this cohort total (including this
-                  learner). Set to 1 for a private 1:1.
-                </p>
-              </div>
-
-              <div>
-                <Label htmlFor="duration-select" className="text-base">
-                  Session length
-                </Label>
-                <Select
-                  value={String(durationMinutes)}
-                  onValueChange={(v) => setDurationMinutes(Number(v))}
-                >
-                  <SelectTrigger id="duration-select" className="text-base">
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="30">30 minutes</SelectItem>
-                    <SelectItem value="45">45 minutes</SelectItem>
-                    <SelectItem value="60">60 minutes</SelectItem>
-                    <SelectItem value="90">90 minutes</SelectItem>
-                    <SelectItem value="120">120 minutes</SelectItem>
-                  </SelectContent>
-                </Select>
-                <p className="mt-1 text-xs text-muted-foreground">
-                  Applies to every session in this offer.
-                </p>
-              </div>
-
-
-              <div>
-                <div className="mb-2 flex items-center justify-between">
-                  <Label className="text-base">Session schedule</Label>
-                  <Button
-                    type="button"
-                    size="sm"
-                    variant="ghost"
-                    onClick={addSlot}
-                  >
-                    <Plus className="mr-1 size-4" /> Add session
-                  </Button>
-                </div>
-                <div className="space-y-2">
-                  {slots.map((s, i) => (
-                    <div key={i} className="flex items-center gap-2">
-                      <Input
-                        type="date"
-                        value={s.date}
-                        onChange={(e) =>
-                          updateSlot(i, { date: e.target.value })
-                        }
-                        className="flex-1 text-base"
-                        required
-                      />
-                      <Input
-                        type="time"
-                        value={s.time}
-                        onChange={(e) =>
-                          updateSlot(i, { time: e.target.value })
-                        }
-                        className="w-32 text-base"
-                        required
-                      />
-                      {slots.length > 1 && (
-                        <Button
-                          type="button"
-                          size="icon"
-                          variant="ghost"
-                          onClick={() => removeSlot(i)}
-                          aria-label="Remove session"
-                        >
-                          <Trash2 className="size-4" />
-                        </Button>
-                      )}
-                    </div>
-                  ))}
-                </div>
-                {profileTz ? (
-                  <p className="mt-2 text-xs text-muted-foreground">
-                    Times are scheduled in your listing's time zone:{" "}
-                    <span className="font-semibold">
-                      {friendlyTimezoneLabel(profileTz)}
-                    </span>
-                    .
-                  </p>
-                ) : null}
-              </div>
-            </div>
-          )}
-
-          {/* Existing cohort dropdown */}
-          {mode === "existing_cohort" && (
-            <div className="space-y-3">
-              <Label className="text-base">Pick an existing cohort</Label>
-              {cohortsLoading ? (
-                <p className="text-sm text-muted-foreground">
-                  Loading your cohorts…
-                </p>
-              ) : cohorts.length === 0 ? (
-                <div className="rounded-xl border border-dashed border-border p-4 text-sm text-muted-foreground">
-                  You have no upcoming cohorts with open seats. Switch to{" "}
-                  <button
-                    type="button"
-                    className="font-semibold text-foreground underline"
-                    onClick={() => setMode("new_cohort")}
-                  >
-                    Create New Custom Schedule
-                  </button>
-                  .
-                </div>
-              ) : (
-                <Select
-                  value={selectedCohortId}
-                  onValueChange={setSelectedCohortId}
-                >
-                  <SelectTrigger className="text-base">
-                    <SelectValue placeholder="Choose a cohort" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {cohorts.map((c) => (
-                      <SelectItem key={c.id} value={c.id}>
-                        {cohortDropdownLabel(c)}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              )}
-
-              {selectedCohort && (
-                <div className="rounded-xl border border-border bg-muted/30 p-3">
-                  <p className="mb-2 text-xs font-semibold uppercase tracking-wide text-muted-foreground">
-                    Locked schedule
-                  </p>
-                  <ul className="space-y-1 text-sm">
-                    {(selectedCohort.session_dates_times_array ?? []).map(
-                      (s, i) => (
-                        <li key={i} className="text-foreground">
-                          Session {i + 1}:{" "}
-                          {profileTz
-                            ? `${formatUtcInZone(s.starts_at, profileTz, {
-                                weekday: "short",
-                                month: "short",
-                                day: "numeric",
-                                hour: "numeric",
-                                minute: "2-digit",
-                              })} ${tzAbbrev(profileTz, new Date(s.starts_at))}`
-                            : new Date(s.starts_at).toLocaleString(undefined, {
-                                weekday: "short",
-                                month: "short",
-                                day: "numeric",
-                                hour: "numeric",
-                                minute: "2-digit",
-                              })}
-                        </li>
-                      ),
-                    )}
-                  </ul>
-                </div>
-              )}
-            </div>
-          )}
-
-          {/* Always-visible price / currency / expiration */}
-          <div className="grid grid-cols-[1fr_120px] gap-3 border-t border-border pt-4">
+          <div className="grid grid-cols-2 gap-3">
             <div>
-              <Label htmlFor="price" className="text-base">
-                Total price
+              <Label htmlFor="ct-duration" className="text-base">
+                Duration
+              </Label>
+              <Select
+                value={String(durationHours)}
+                onValueChange={(v) => setDurationHours(Number(v))}
+              >
+                <SelectTrigger id="ct-duration" className="text-base">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  {DURATION_HOURS.map((h) => (
+                    <SelectItem key={h} value={String(h)}>
+                      {h} hour{h === 1 ? "" : "s"}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+            <div>
+              <Label htmlFor="ct-anglers" className="text-base">
+                Total anglers
               </Label>
               <Input
-                id="price"
+                id="ct-anglers"
                 type="number"
-                inputMode="decimal"
-                min="1"
-                step="0.01"
-                value={price}
-                onChange={(e) => setPrice(e.target.value)}
-                placeholder="120.00"
+                min={1}
+                max={50}
+                value={totalAnglers}
+                onChange={(e) =>
+                  setTotalAnglers(
+                    Math.max(1, Math.min(50, Number(e.target.value) || 1)),
+                  )
+                }
                 className="text-base"
+              />
+            </div>
+          </div>
+
+          <div className="grid grid-cols-2 gap-3">
+            <div>
+              <Label htmlFor="ct-date" className="text-base">
+                Trip date
+              </Label>
+              <Input
+                id="ct-date"
+                type="date"
+                value={tripDate}
+                onChange={(e) => setTripDate(e.target.value)}
                 required
+                className="text-base"
               />
             </div>
             <div>
-              <Label htmlFor="currency" className="text-base">
-                Currency
+              <Label htmlFor="ct-time" className="text-base">
+                Start time
               </Label>
               <Input
-                id="currency"
-                value={currency}
-                onChange={(e) => setCurrency(e.target.value.toUpperCase())}
-                maxLength={4}
-                className="uppercase text-base"
+                id="ct-time"
+                type="time"
+                value={startTime}
+                onChange={(e) => setStartTime(e.target.value)}
+                required
+                className="text-base"
               />
             </div>
           </div>
 
           <div>
-            <Label htmlFor="expiration" className="text-base">
+            <Label className="text-base">Meeting point</Label>
+            <div className="mt-1">
+              <DeparturePointPicker
+                value={meetingPoint}
+                onChange={(v) => setMeetingPoint(v)}
+              />
+            </div>
+            <p className="mt-1 text-xs text-muted-foreground">
+              Street address or marina — picked from Google Places.
+            </p>
+          </div>
+
+          <div className="grid grid-cols-[120px_1fr_1fr] gap-3 border-t border-border pt-4">
+            <div>
+              <Label htmlFor="ct-currency" className="text-base">
+                Currency
+              </Label>
+              <Select value={currency} onValueChange={setCurrency}>
+                <SelectTrigger id="ct-currency" className="text-base">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  {SUPPORTED_CURRENCIES.map((c) => (
+                    <SelectItem key={c.code} value={c.code}>
+                      {c.flag} {c.code}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+            <div>
+              <Label htmlFor="ct-total" className="text-base">
+                Total price
+              </Label>
+              <Input
+                id="ct-total"
+                type="number"
+                inputMode="decimal"
+                min="1"
+                step="0.01"
+                value={totalPrice}
+                onChange={(e) => setTotalPrice(e.target.value)}
+                placeholder="600.00"
+                required
+                className="text-base"
+              />
+            </div>
+            <div>
+              <Label htmlFor="ct-deposit" className="text-base">
+                Deposit (due now)
+              </Label>
+              <Input
+                id="ct-deposit"
+                type="number"
+                inputMode="decimal"
+                min="1"
+                step="0.01"
+                value={depositPrice}
+                onChange={(e) => {
+                  setDepositTouched(true);
+                  setDepositPrice(e.target.value);
+                }}
+                placeholder="60.00"
+                required
+                className="text-base"
+              />
+            </div>
+          </div>
+          <p className="-mt-2 text-xs text-muted-foreground">
+            Deposit auto-suggests 10% of the total; adjust as needed.
+          </p>
+
+          <div>
+            <Label htmlFor="ct-expiration" className="text-base">
               Offer expires in
             </Label>
             <Select value={expiration} onValueChange={setExpiration}>
-              <SelectTrigger id="expiration" className="text-base">
+              <SelectTrigger id="ct-expiration" className="text-base">
                 <SelectValue />
               </SelectTrigger>
               <SelectContent>
@@ -632,28 +477,26 @@ export function CustomOfferComposer({
                   aria-hidden
                 />
                 <p className="text-foreground">
-                  ⚠️ Your profile time zone is missing. We need an IANA time
-                  zone (e.g. <span className="font-mono">America/New_York</span>)
-                  to anchor session times correctly. Please set it in{" "}
+                  ⚠️ Your profile time zone is missing. Please set it in{" "}
                   <Link
                     to="/settings/profile"
                     className="font-semibold underline underline-offset-2"
                   >
                     Profile Settings
                   </Link>{" "}
-                  before sending an offer.
+                  before sending a custom trip.
                 </p>
               </div>
             </div>
           ) : profileTz ? (
-            <p className="text-xs text-muted-foreground">
-              Session times you enter are interpreted in your profile time
-              zone (
+            <div className="rounded-xl border border-amber-300 bg-amber-50 p-3 text-sm text-foreground dark:border-amber-700 dark:bg-amber-950/30">
+              ⚠️ Trip times you enter are interpreted in your profile time zone (
               <span className="font-semibold">
-                {friendlyTimezoneLabel(profileTz)}
+                {tzFriendly}
+                {tzAbbr ? ` (${tzAbbr})` : ""}
               </span>
-              ) and shown to the learner in their own time zone.
-            </p>
+              ) and will be shown to the angler in your local time zone.
+            </div>
           ) : null}
 
           <DialogFooter>
@@ -671,7 +514,7 @@ export function CustomOfferComposer({
               disabled={submitting || tzMissing}
             >
               {submitting && <Loader2 className="mr-2 size-4 animate-spin" />}
-              Send Custom Offer
+              Send Custom Trip
             </Button>
           </DialogFooter>
         </form>
