@@ -48,6 +48,11 @@ const TOPIC_LABEL: Record<string, string> = {
   billing_stripe: "Billing & Stripe Connect",
   virtual_classroom_tech: "Virtual Classroom Tech Issue",
   booking_no_show: "Booking / No-Show Issue",
+  specific_trip: "A specific trip",
+  my_listing: "My listing",
+  general_questions: "General questions",
+  technical_issues: "Technical issues",
+  other: "Other",
 };
 
 function relativeTime(iso: string): string {
