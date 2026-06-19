@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { Outlet, Link, createFileRoute, redirect, useRouter, useRouterState } from "@tanstack/react-router";
-import { LayoutDashboard, Users, ListChecks, Receipt, Search, Star, Settings as SettingsIcon, ArrowLeft, Menu, X } from "lucide-react";
+import { LayoutDashboard, Users, ListChecks, Receipt, CalendarClock, Search, Star, Settings as SettingsIcon, ArrowLeft, Menu, X } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { Logo } from "@/components/brand/Logo";
 import { cn } from "@/lib/utils";
