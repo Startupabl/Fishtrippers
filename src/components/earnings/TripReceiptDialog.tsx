@@ -64,7 +64,7 @@ export function TripReceiptDialog({
             <div className="px-6 pb-3 flex justify-end print:hidden">
               <Button size="sm" onClick={() => window.print()}>
                 <Printer className="mr-2 size-4" />
-                Print / Save as PDF
+                Print Receipt
               </Button>
             </div>
 
