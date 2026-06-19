@@ -328,7 +328,7 @@ function OpenInquiries() {
                 </span>
                 {t.booking_id && (
                   <span className="font-medium text-foreground">
-                    Booking / Course:{" "}
+                    Booking / Charter:{" "}
                     <span className="font-normal text-muted-foreground">{t.booking_id}</span>
                   </span>
                 )}
