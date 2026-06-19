@@ -713,7 +713,7 @@ export const markTripBookingComplete = createServerFn({ method: "POST" })
       }
       await supabaseAdmin.from("user_alerts").insert({
         user_id: booking.learner_id,
-        kind: "booking_completed",
+        kind: "booking_confirmed",
         journey_id: null,
         message: `Your trip "${tripTitle}" was marked complete. Leave a review for your captain!`,
       });
