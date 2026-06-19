@@ -84,6 +84,7 @@ import { Route as AdminAdminSearchSeoRouteImport } from './routes/_admin/admin.s
 import { Route as AdminAdminReviewsRouteImport } from './routes/_admin/admin.reviews'
 import { Route as AdminAdminQueueRouteImport } from './routes/_admin/admin.queue'
 import { Route as AdminAdminListingsRouteImport } from './routes/_admin/admin.listings'
+import { Route as AdminAdminAvailabilityRouteImport } from './routes/_admin/admin.availability'
 import { Route as AuthenticatedDashboardMessagesIndexRouteImport } from './routes/_authenticated/dashboard.messages.index'
 import { Route as AdminAdminUsersIndexRouteImport } from './routes/_admin/admin.users.index'
 import { Route as AdminAdminSearchSeoIndexRouteImport } from './routes/_admin/admin.search-seo.index'
@@ -503,6 +504,11 @@ const AdminAdminListingsRoute = AdminAdminListingsRouteImport.update({
   path: '/listings',
   getParentRoute: () => AdminAdminRoute,
 } as any)
+const AdminAdminAvailabilityRoute = AdminAdminAvailabilityRouteImport.update({
+  id: '/availability',
+  path: '/availability',
+  getParentRoute: () => AdminAdminRoute,
+} as any)
 const AuthenticatedDashboardMessagesIndexRoute =
   AuthenticatedDashboardMessagesIndexRouteImport.update({
     id: '/',
@@ -674,6 +680,7 @@ export interface FileRoutesByFullPath {
   '/p/$pathSlug': typeof PPathSlugRoute
   '/pages/$slug': typeof PagesSlugRoute
   '/create-listing/': typeof CreateListingIndexRoute
+  '/admin/availability': typeof AdminAdminAvailabilityRoute
   '/admin/listings': typeof AdminAdminListingsRoute
   '/admin/queue': typeof AdminAdminQueueRoute
   '/admin/reviews': typeof AdminAdminReviewsRoute
@@ -770,6 +777,7 @@ export interface FileRoutesByTo {
   '/p/$pathSlug': typeof PPathSlugRoute
   '/pages/$slug': typeof PagesSlugRoute
   '/create-listing': typeof CreateListingIndexRoute
+  '/admin/availability': typeof AdminAdminAvailabilityRoute
   '/admin/listings': typeof AdminAdminListingsRoute
   '/admin/queue': typeof AdminAdminQueueRoute
   '/admin/reviews': typeof AdminAdminReviewsRoute
@@ -868,6 +876,7 @@ export interface FileRoutesById {
   '/p/$pathSlug': typeof PPathSlugRoute
   '/pages/$slug': typeof PagesSlugRoute
   '/create-listing/': typeof CreateListingIndexRoute
+  '/_admin/admin/availability': typeof AdminAdminAvailabilityRoute
   '/_admin/admin/listings': typeof AdminAdminListingsRoute
   '/_admin/admin/queue': typeof AdminAdminQueueRoute
   '/_admin/admin/reviews': typeof AdminAdminReviewsRoute
@@ -967,6 +976,7 @@ export interface FileRouteTypes {
     | '/p/$pathSlug'
     | '/pages/$slug'
     | '/create-listing/'
+    | '/admin/availability'
     | '/admin/listings'
     | '/admin/queue'
     | '/admin/reviews'
@@ -1063,6 +1073,7 @@ export interface FileRouteTypes {
     | '/p/$pathSlug'
     | '/pages/$slug'
     | '/create-listing'
+    | '/admin/availability'
     | '/admin/listings'
     | '/admin/queue'
     | '/admin/reviews'
@@ -1160,6 +1171,7 @@ export interface FileRouteTypes {
     | '/p/$pathSlug'
     | '/pages/$slug'
     | '/create-listing/'
+    | '/_admin/admin/availability'
     | '/_admin/admin/listings'
     | '/_admin/admin/queue'
     | '/_admin/admin/reviews'
@@ -1786,6 +1798,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AdminAdminListingsRouteImport
       parentRoute: typeof AdminAdminRoute
     }
+    '/_admin/admin/availability': {
+      id: '/_admin/admin/availability'
+      path: '/availability'
+      fullPath: '/admin/availability'
+      preLoaderRoute: typeof AdminAdminAvailabilityRouteImport
+      parentRoute: typeof AdminAdminRoute
+    }
     '/_authenticated/dashboard/messages/': {
       id: '/_authenticated/dashboard/messages/'
       path: '/'
@@ -1982,6 +2001,7 @@ const AdminAdminSettingsRouteWithChildren =
   AdminAdminSettingsRoute._addFileChildren(AdminAdminSettingsRouteChildren)
 
 interface AdminAdminRouteChildren {
+  AdminAdminAvailabilityRoute: typeof AdminAdminAvailabilityRoute
   AdminAdminListingsRoute: typeof AdminAdminListingsRoute
   AdminAdminQueueRoute: typeof AdminAdminQueueRoute
   AdminAdminReviewsRoute: typeof AdminAdminReviewsRoute
@@ -1994,6 +2014,7 @@ interface AdminAdminRouteChildren {
 }
 
 const AdminAdminRouteChildren: AdminAdminRouteChildren = {
+  AdminAdminAvailabilityRoute: AdminAdminAvailabilityRoute,
   AdminAdminListingsRoute: AdminAdminListingsRoute,
   AdminAdminQueueRoute: AdminAdminQueueRoute,
   AdminAdminReviewsRoute: AdminAdminReviewsRoute,
@@ -2247,13 +2268,3 @@ const rootRouteChildren: RootRouteChildren = {
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
-
-import type { getRouter } from './router.tsx'
-import type { startInstance } from './start.ts'
-declare module '@tanstack/react-start' {
-  interface Register {
-    ssr: true
-    router: Awaited<ReturnType<typeof getRouter>>
-    config: Awaited<ReturnType<typeof startInstance.getOptions>>
-  }
-}

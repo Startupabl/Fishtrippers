@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { Outlet, Link, createFileRoute, redirect, useRouter, useRouterState } from "@tanstack/react-router";
-import { LayoutDashboard, Users, ListChecks, Receipt, Search, Star, Settings as SettingsIcon, ArrowLeft, Menu, X } from "lucide-react";
+import { LayoutDashboard, Users, ListChecks, Receipt, CalendarClock, Search, Star, Settings as SettingsIcon, ArrowLeft, Menu, X } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { Logo } from "@/components/brand/Logo";
 import { cn } from "@/lib/utils";
@@ -40,6 +40,7 @@ const NAV = [
   { to: "/admin/users", label: "Users", icon: Users, exact: false },
   { to: "/admin/listings", label: "Listings", icon: ListChecks, exact: false },
   { to: "/admin/transactions", label: "Transactions", icon: Receipt, exact: false },
+  { to: "/admin/availability", label: "Availability Manager", icon: CalendarClock, exact: false },
   { to: "/admin/search-seo", label: "Search & SEO", icon: Search, exact: false },
   { to: "/admin/reviews", label: "Reviews", icon: Star, exact: false },
   { to: "/admin/settings", label: "Settings", icon: SettingsIcon, exact: false },
@@ -50,6 +51,7 @@ function pageTitle(pathname: string): string {
   if (pathname.startsWith("/admin/users")) return "Users";
   if (pathname.startsWith("/admin/listings")) return "Listings";
   if (pathname.startsWith("/admin/transactions")) return "Transactions";
+  if (pathname.startsWith("/admin/availability")) return "Calendar Availability & Hold Logs";
   if (pathname.startsWith("/admin/search-seo")) return "Search & SEO";
   if (pathname.startsWith("/admin/reviews")) return "Reviews";
   if (pathname.startsWith("/admin/settings")) return "Settings";

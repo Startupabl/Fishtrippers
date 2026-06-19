@@ -1,42 +1,58 @@
-# Fix Custom Trip submission + Admin terminology
+## Add Admin "Availability Manager" page
 
-## 1. Bug fix — "host_availability_status_check" violation
+### 1. Sidebar nav (`src/routes/_admin.tsx`)
+- Insert a new entry right below Transactions in the `NAV` array:
+  `{ to: "/admin/availability", label: "Availability Manager", icon: CalendarClock, exact: false }`
+- Add matching branch in `pageTitle()` returning `"Calendar Availability & Hold Logs"`.
+- Import `CalendarClock` from `lucide-react`.
 
-The `sync_host_availability_from_booking` trigger now writes a `'held'` row when a booking is in `pending_offer`, but the `host_availability.status` CHECK constraint still only allows `'booked'` and `'blocked'`. Sending a Custom Trip therefore fails immediately.
+### 2. New route `src/routes/_admin/admin.availability.tsx`
+- `createFileRoute("/_admin/admin/availability")` — page component titled **"Calendar Availability & Hold Logs"**.
+- Data loaded via TanStack Query calling a new server function `listAvailabilityHolds` (see §3).
+- UI:
+  - Top search input (controlled, client-side filtering) matching captain name or trip type substring (case-insensitive).
+  - Table with columns: Captain Name · Trip Type · Trip Date & Time (guide timezone) · Block Reason · Status badge · Expiration / Countdown · Actions.
+  - Status badge styles: BOOKED (green), BLOCKED (slate), HELD (amber).
+  - For HELD rows, render a live `useEffect` countdown ("Expires in 4h 12m") computed from `offer_expires_at`; otherwise "N/A".
+  - For HELD rows, show a `Release Hold` button → AlertDialog confirmation → calls `releaseAvailabilityHold` server fn → invalidates query + toast.
+  - Empty state and loading skeleton.
 
-**Migration:** drop and recreate the check to allow `'booked' | 'blocked' | 'held'`.
+### 3. Server functions `src/lib/admin-availability.functions.ts`
+Both guarded by `requireSupabaseAuth` + `has_role(_,'admin')` check (throw if not admin).
 
-```sql
-ALTER TABLE public.host_availability DROP CONSTRAINT host_availability_status_check;
-ALTER TABLE public.host_availability
-  ADD CONSTRAINT host_availability_status_check
-  CHECK (status IN ('booked','blocked','held'));
-```
+- `listAvailabilityHolds()` — runs as admin via `supabaseAdmin` (loaded dynamically inside handler):
+  - Query `host_availability` where `date >= current_date` and status ∈ ('booked','blocked','held').
+  - Join operator → owner profile for captain name + `operators.timezone`.
+  - Join booking → `trip_packages` (for trip title) and `class_sessions` (for date/time) and learner profile (for "sent to <name>").
+  - Build rows in JS:
+    - **Trip Type**: `trip_packages.title` when `course_id` present; otherwise `"Custom Trip"`.
+    - **Trip Date/Time**: use `class_sessions.session_dates_times_array[0]` when present, else `bookings.trip_date`; format in operator timezone (`Intl.DateTimeFormat` with `timeZone`).
+    - **Block Reason**: 
+      - HELD + custom (no course_id) → `"Custom Trip Sent to <Angler Name>"`
+      - HELD + course_id → `"Pending Payment – Booking #<short id>"`
+      - BOOKED → `"Direct Booking #<short id>"`
+      - BLOCKED → `"Manual Block"`
+    - **offerExpiresAt**: for HELD with custom-offer message, look up latest `messages.offer_expires_at` for that `booking_id` where `attachment_type='custom_offer'`. Filter out rows whose `offer_expires_at < now()` (performance/freshness rule).
+  - Return sorted by date asc.
 
-After this, the Custom Trip form should submit cleanly and reserve the date as a hold on the captain/guide's calendar.
+- `releaseAvailabilityHold({ id })`:
+  - Verify the row exists with `status='held'`, then `DELETE FROM host_availability WHERE id = $1`.
+  - Return `{ ok: true }`.
 
-## 2. Admin terminology pass
+### 4. Verification
+- Submit a Custom Trip → row appears in /admin/availability as HELD with countdown.
+- Click Release Hold → confirm → row disappears, captain calendar freed.
+- Search filters in real time.
+- Past-dated and expired holds are excluded.
 
-Audit the **admin area only** (`src/routes/_admin/**` and admin-specific components) and replace user-facing copy:
-
-| Old wording | New wording |
-|---|---|
-| Host / Hosts | Captain/Guide / Captains & Guides |
-| Mentor / Mentors | Captain/Guide |
-| Aide / Aides | Captain/Guide |
-| Course / Courses | Charter / Charters (or Trip where it refers to a single booking) |
-| Learner / Learners | Angler / Anglers |
-| Student | Angler |
-
-Scope:
-- Column headers, page titles, breadcrumbs, button labels, empty-state copy, tooltips, badge labels, filter labels, modal headings.
-- Includes `admin.users.index.tsx`, `admin.users.$userId.tsx`, admin dashboard, admin bookings/listings/messages pages, and any admin-only components under `src/components/admin/**`.
-
-Out of scope (not changed in this pass):
-- Database column/table names (`aide_id`, `learner_id`, `course_id`, `host_availability`, etc.) — internal only.
-- Non-admin pages (captain/guide dashboard, angler-facing flows) — already use correct terms or handled separately.
-- Variable/function names in code.
-
-## Verification
-- Submit a Custom Trip from the messages thread → expect success, calendar shows a hold on the chosen date.
-- Walk the admin pages → no remaining "host / mentor / aide / course / learner / student" strings in UI copy.
+### Technical Notes
+- Use existing helpers: `Badge`, `AlertDialog`, `Input`, `Table` from shadcn.
+- Countdown updates via single `setInterval(60_000)` re-render in the page component.
+- Timezone formatting:
+  ```ts
+  new Intl.DateTimeFormat('en-US', {
+    timeZone: operator.timezone || 'UTC',
+    dateStyle: 'medium', timeStyle: 'short'
+  }).format(date)
+  ```
+- No schema migration required — `host_availability` already supports the three statuses.
