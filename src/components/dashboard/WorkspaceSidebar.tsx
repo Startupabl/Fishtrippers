@@ -43,7 +43,7 @@ const aideItems: Item[] = [
 
 const learnerItems: Item[] = [
   { title: "Dashboard Home", to: "/dashboard/learner", icon: LayoutDashboard, exact: true },
-  { title: "My Schedule", to: "/dashboard/learner/schedule", icon: Calendar },
+  { title: "My Bookings", to: "/dashboard/learner/bookings", icon: Ship },
   { title: "Purchase History", to: "/dashboard/learner/purchases", icon: Receipt },
 ];
 
