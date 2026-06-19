@@ -137,7 +137,7 @@ function ListingsToApprove() {
       if (v.moderation === "approved") {
         toast.success("Listing approved");
       } else {
-        toast.success("Listing rejected — Aide has been notified");
+        toast.success("Listing rejected — captain/guide has been notified");
         setRejectTarget(null);
       }
       invalidate();
