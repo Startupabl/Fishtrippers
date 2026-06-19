@@ -139,6 +139,37 @@ function BookingReviewPage() {
     }
   }
 
+  async function handleSimulate() {
+    if (!details) return;
+    if (!firstName.trim() || !lastName.trim() || !phoneValid || !phone) {
+      toast.error("Fill in your name and a valid phone first.");
+      return;
+    }
+    setSimulating(true);
+    try {
+      const primaryAnglerName = `${firstName.trim()} ${lastName.trim()}`.trim();
+      const { booking_id } = await simulatePayment({
+        data: {
+          trip_id: details.trip.id,
+          trip_date: details.trip_date,
+          guests: details.guests,
+          primary_angler_name: primaryAnglerName || "Angler",
+          phone: phone.trim(),
+          notes: notes.trim() || null,
+        },
+      });
+      navigate({
+        to: "/checkout/success",
+        search: { booking_id, bookingId: "", session_id: "", order_number: "" },
+      });
+    } catch (e) {
+      toast.error(e instanceof Error ? e.message : "Could not simulate payment.");
+      setSimulating(false);
+    }
+  }
+
+
+
 
   if (error) {
     return (
