@@ -187,7 +187,7 @@ export const listAvailabilityHolds = createServerFn({ method: "GET" })
         status: h.status as AvailabilityRow["status"],
         date: h.date,
         captainName,
-        captainTimezone: (op?.timezone as string | null) ?? null,
+        captainTimezone: ((owner as any)?.timezone as string | null) ?? null,
         tripType,
         tripDateTimeISO,
         blockReason,
