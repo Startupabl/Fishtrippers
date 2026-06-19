@@ -194,14 +194,6 @@ function UsersPage() {
               <th className="px-2 py-2 font-semibold">IP</th>
               <th className="px-2 py-2 font-semibold">Listings</th>
               <th className="px-2 py-2 font-semibold">Bookings</th>
-              <th className="px-2 py-2 font-semibold">
-                <SortHeader
-                  label="Payouts"
-                  active={sort?.key === "payout_status"}
-                  dir={sort?.dir ?? "asc"}
-                  onClick={() => toggleSort("payout_status")}
-                />
-              </th>
               <th className="px-2 py-2 text-right font-semibold">Manage</th>
             </tr>
           </thead>
