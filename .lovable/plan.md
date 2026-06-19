@@ -1,56 +1,59 @@
-# Brand color alignment
+# Rebuild Captain's "My Earnings" — single trip-bookings block
 
-Lock the site to the two brand colors and fix the spots that drifted (footer near-black, leftover green check marks, a second yellow, and admin pages using raw hex instead of tokens).
+Strip the page down to a single data block driven by trip bookings (the pay-at-dock model). Remove the orders-based section entirely.
 
-## Brand colors (single source of truth)
+## Layout
 
-- Blue: **Ocean Deep `#0A2540`** (already `--primary` / `--ocean-deep`)
-- Yellow: **Gold `#E8B547`** (already `--accent` / `--gold`)
+Title + subtitle ("Your financial performance — the deposit covers the platform fee; the remaining balance is collected at the dock.") then exactly three sections: summary cards → filter bar → one earnings table → receipt dialog.
 
-These already exist in `src/styles.css` and `src/lib/brand.ts`. No new tokens needed — we only stop using off-brand hex values and route everything through `primary` / `accent` (or the existing `--ocean-deep` / `--gold` variables for inline styles).
+## 1. Top summary cards (3, brand-aligned)
 
-## Off-brand values to replace
+Driven entirely by `listMyTripBookingsAide()`. Drop orders entirely.
 
-| Current | Used for | Replace with |
-|---|---|---|
-| `#0A0F1A` (near black) | Footer background + hover text | `#0A2540` (Ocean Deep) |
-| `#1F6B36` (green) | Check / success icon color in 5 components | `#0A2540` (Ocean Deep) — checks become brand blue |
-| `#FFD23F` (bright yellow) | Availability editor, banners, custom-offer composer borders/bg | `#E8B547` (Gold) + matching soft tint |
-| Raw `#0A2540` / `#E8B547` inline styles in admin pages | Status pills, dots, buttons | Tailwind `bg-primary`/`bg-accent` tokens (or `var(--ocean-deep)` / `var(--gold)` if inline style is required) |
+- **Completed Earnings** — sum of `balance_due_minor` across bookings with `status === "completed"`. Money-tone value.
+- **Projected Earnings** — sum of `balance_due_minor` across `status === "confirmed"` with `trip_date >= today`.
+- **Trips Run** — count of `status === "completed"`.
 
-## Files to edit
+All currency converted to viewer currency via `convertMinor` (same pattern already in the file). No deposit/platform-fee amounts shown anywhere on the page.
 
-**Footer (highest visibility):**
-- `src/components/layout/SiteFooter.tsx` — swap both `#0A0F1A` → `#0A2540` so the footer is the brand blue on every page.
+## 2. Filter row (above the table)
 
-**Green → brand blue checks/icons:**
-- `src/components/layout/AlertsBellButton.tsx`
-- `src/components/layout/AlertsOnlyBellButton.tsx`
-- `src/components/layout/MessagesIconButton.tsx`
-- `src/components/mentor-express/PreviewStep.tsx` (2 spots)
-- Any remaining `#1F6B36` from the rg list — replace 1:1.
+- **Left — Timeframe `<Select>`** with options: `all` (default), `this_month`, `this_year`, `last_12_months`. Filters by `trip_date` (fallback to `created_at` when null). Replace the current Timeframe options; remove the "Trip" course filter.
+- **Right — Search `<Input>`** with `Search` magnifying-glass icon and placeholder `Search by Order #, Angler, or Trip...`. Debounce-free, real-time `onChange` filter (case-insensitive `includes`) across:
+  - displayed order number (`#` + last 6 chars of `booking.id` uppercased — same identifier used in the row)
+  - `primary_angler_name ?? learner_name`
+  - `trip_title`
 
-**Second yellow → Gold:**
-- `src/components/availability/AvailabilityEditor.tsx` (`SUNNY_YELLOW` constant)
-- `src/components/availability/AvailabilityDrawer.tsx` (left border)
-- `src/components/availability/LocationMissingBanner.tsx` (border/bg/text — text stays brand blue)
-- `src/components/chat/CustomOfferComposer.tsx` (border + bg of warning card)
-- `src/components/chat/FileMessageBubble.tsx` (own-message bubble tint → soft gold)
+Filter row uses `flex flex-wrap justify-between gap-3`.
 
-**Admin pages — switch to tokens:**
-- `src/routes/_admin/admin.queue.tsx` — `style={{ backgroundColor: "#0A2540" }}` buttons → `className="bg-primary text-primary-foreground"`; status pill `bg-[#0A2540]/10 text-[#1f6b3a]` (green text!) → `bg-primary/10 text-primary`; check icon `text-[#0A2540]` → `text-primary`.
-- `src/routes/_admin/admin.index.tsx` — gold status dot inline hex → `bg-accent`.
+## 3. Earnings History table
 
-**Brand alias cleanup (no logic change):**
-- `src/lib/brand.ts` — keep legacy aliases (`leafGreen`, `sunnyYellow`, `accentGreen`) already pointing at ocean/gold; leave as-is.
+One table, rows = completed + confirmed trip bookings (no `pending_*`, no `declined`). Columns:
+
+| Col | Source |
+|---|---|
+| Date | `trip_date` (formatted), fallback `created_at` |
+| Order Number | `#` + last 6 chars of `booking.id` upper-cased |
+| Trip Title | `trip_title` + ` (Instant Book)` or ` (Custom Offer)` from `source` |
+| Angler Name | `primary_angler_name ?? learner_name ?? "—"` |
+| Money Earned | `formatCurrency(balance_due_minor/100, currency)` — money-tone |
+| Status | `<Badge>` — `Completed` (green/money) when `status==="completed"`, `Projected` (accent/gold) when `confirmed` |
+| Actions | `View Receipt` button (Receipt icon) — opens dialog |
+
+Date header keeps the existing asc/desc toggle. Empty state: "No trip earnings yet — once a trip is booked, it will show up here." Filter empty state: "No trips match the current filters."
+
+## 4. Receipt dialog
+
+`ReceiptDialog` currently takes an `OrderSummary`. For trip bookings, create a small adapter dialog `TripReceiptDialog` (new file `src/components/earnings/TripReceiptDialog.tsx`) that takes a `TripBookingSummary` + `captainName` and renders a printable summary: order #, trip title + type, date, angler name + phone, guests, then a financial breakdown — Total trip price, Deposit collected online, Balance due at dock (highlighted as the captain's money earned). Reuses the existing print/close UX from `ReceiptDialog`. The old `ReceiptDialog` stays in the repo (other pages may use it) but is no longer imported here.
+
+## Files to edit / create
+
+- **Edit** `src/routes/_authenticated/dashboard.earnings.tsx` — full rewrite of the component body per above. Remove: `listMyOrdersAide`, `OrderSummary`, `usePlatformFee`, `courseFilter`, the second "Trip Bookings" section, the old `EarningsRow`, the `last_month` timeframe option. Keep: `display` style, currency hooks, sort toggle.
+- **Create** `src/components/earnings/TripReceiptDialog.tsx` — printable receipt for one `TripBookingSummary`.
 
 ## Out of scope
 
-- No changes to typography, spacing, layout, or component structure.
-- No changes to `--money` (green money badges stay green — that's a semantic status color, not branding) or `--destructive` (red).
-- Third-party brand colors stay correct: Google sign-in (`#4285F4` etc.), social share buttons (Facebook/LinkedIn/Instagram brand hexes).
-- Dark mode tokens untouched.
-
-## Verification
-
-After edits: visit `/` (footer), `/dashboard`, `/admin`, `/admin/queue`, an availability editor, and a chat with a custom offer — confirm every accent is either Ocean blue or Gold, and the footer is `#0A2540` on every page.
+- No schema changes (bookings already carry `balance_due_minor`, `status`, `source`).
+- No changes to `listMyTripBookingsAide` or other server functions.
+- No changes to admin or angler dashboards.
+- No changes to the existing `ReceiptDialog` (used elsewhere).
