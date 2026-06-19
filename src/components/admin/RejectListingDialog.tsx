@@ -63,7 +63,7 @@ const REASONS: { key: ReasonKey; label: string; text: string }[] = [
   {
     key: "tos_noncompliance",
     label: "Terms of Service Non-Compliance",
-    text: "This listing does not fully comply with our platform's Terms of Service or focuses on topics outside our approved AI tool categories. Please review your content before resubmitting.",
+    text: "This listing does not fully comply with our platform's Terms of Service or focuses on activities outside our approved charter categories. Please review your content before resubmitting.",
   },
   { key: "custom", label: "Custom Reason", text: "" },
 ];
