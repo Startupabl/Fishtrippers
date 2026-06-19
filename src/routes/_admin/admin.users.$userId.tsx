@@ -388,7 +388,7 @@ function UserDetailPage() {
             <table className="w-full text-xs">
               <thead className="border-b bg-muted/30 text-left text-muted-foreground">
                 <tr>
-                  <th className="px-2 py-1.5 font-medium">Course</th>
+                  <th className="px-2 py-1.5 font-medium">Charter</th>
                   <th className="px-2 py-1.5 font-medium">Status</th>
                   <th className="px-2 py-1.5 font-medium">Total</th>
                   <th className="px-2 py-1.5 font-medium">Created</th>
@@ -465,7 +465,7 @@ function FinancialStripeCard({
   linkPending?: boolean;
 }) {
   const isAide = listingsCount > 0 || roles.includes("aide");
-  const classification = isAide ? "Learner + Active Aide" : "Learner Only";
+  const classification = isAide ? "Angler + Active Captain/Guide" : "Angler Only";
 
   return (
     <section className="rounded-lg border bg-white p-4">

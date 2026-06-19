@@ -20,7 +20,7 @@ const CARDS: CardDef[] = [
   {
     title: "Tag Management",
     description:
-      "Curate, edit, merge, and organize the AI tool keywords and user intent tags used across course listings.",
+      "Curate, edit, merge, and organize the keywords and intent tags used across charter listings.",
     icon: <Tags className="size-5" />,
     to: "/admin/search-seo/tags",
   },
@@ -32,7 +32,7 @@ function SearchSeoDashboard() {
       <div className="mb-6">
         <h2 className="text-2xl font-semibold text-foreground">Search & SEO</h2>
         <p className="mt-1 text-sm text-muted-foreground">
-          Control how learners discover courses across search, tags, and metadata.
+          Control how anglers discover charters across search, tags, and metadata.
         </p>
       </div>
 

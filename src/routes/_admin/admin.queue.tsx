@@ -137,7 +137,7 @@ function ListingsToApprove() {
       if (v.moderation === "approved") {
         toast.success("Listing approved");
       } else {
-        toast.success("Listing rejected — Aide has been notified");
+        toast.success("Listing rejected — captain/guide has been notified");
         setRejectTarget(null);
       }
       invalidate();
@@ -180,7 +180,7 @@ function ListingsToApprove() {
                 <h3 className="mt-2 font-semibold text-foreground">{j.title}</h3>
                 <p className="text-xs text-muted-foreground">
                   {j.category ?? "Uncategorized"} ·{" "}
-                  {j.mentor_name ?? j.mentor_email ?? "Unknown mentor"}
+                  {j.mentor_name ?? j.mentor_email ?? "Unknown captain/guide"}
                 </p>
               </div>
               <div className="flex flex-wrap justify-end gap-2">
@@ -328,7 +328,7 @@ function OpenInquiries() {
                 </span>
                 {t.booking_id && (
                   <span className="font-medium text-foreground">
-                    Booking / Course:{" "}
+                    Booking / Charter:{" "}
                     <span className="font-normal text-muted-foreground">{t.booking_id}</span>
                   </span>
                 )}
@@ -583,7 +583,12 @@ function StatusBadge({
 }
 
 function UserTypePill({ type }: { type: string }) {
-  const label = type.charAt(0).toUpperCase() + type.slice(1);
+  const label =
+    type === "aide"
+      ? "Captain/Guide"
+      : type === "learner"
+        ? "Angler"
+        : type.charAt(0).toUpperCase() + type.slice(1);
   const color =
     type === "aide"
       ? "bg-[#0A2540]/10 text-[#1f6b3a]"

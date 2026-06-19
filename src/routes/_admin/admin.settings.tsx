@@ -12,7 +12,7 @@ const CARDS = [
   {
     to: "/admin/settings/categories",
     title: "Categories",
-    desc: "Manage course flavors and categories used across listings.",
+    desc: "Manage charter flavors and categories used across listings.",
     icon: Tags,
   },
   {

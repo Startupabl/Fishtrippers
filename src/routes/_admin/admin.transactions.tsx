@@ -161,7 +161,7 @@ function TransactionsPage() {
   return (
     <div className="space-y-6">
       <p className="text-sm text-muted-foreground">
-        Every paid order on the platform — gross, platform fee ({feeLabel}), and aide payout.
+        Every paid order on the platform — gross, platform fee ({feeLabel}), and captain/guide payout.
       </p>
 
       <div className="grid gap-4 md:grid-cols-3">
@@ -170,7 +170,7 @@ function TransactionsPage() {
           values={totals.map(([cur, t]) => formatCurrency(t.gross, cur))}
         />
         <SummaryCard
-          label="Aide Payouts"
+          label="Captain/Guide Payouts"
           values={totals.map(([cur, t]) => formatCurrency(t.payout, cur))}
         />
         <SummaryCard
@@ -187,7 +187,7 @@ function TransactionsPage() {
           <Input
             value={qInput}
             onChange={(e) => setQInput(e.target.value)}
-            placeholder="Search by Order #, Learner, or Aide"
+            placeholder="Search by Order #, Angler, or Captain/Guide"
             className="pl-9"
           />
         </div>
@@ -321,8 +321,8 @@ function TransactionsPage() {
               <TableRow>
                 <TableHead className="font-bold">Order Number</TableHead>
                 <TableHead className="font-bold">Date &amp; Time</TableHead>
-                <TableHead className="font-bold">Learner</TableHead>
-                <TableHead className="font-bold">Aide</TableHead>
+                <TableHead className="font-bold">Angler</TableHead>
+                <TableHead className="font-bold">Captain/Guide</TableHead>
                 <TableHead className="font-bold text-right">Gross Total</TableHead>
                 <TableHead className="font-bold text-right">Payout Amount</TableHead>
                 <TableHead className="font-bold text-right">Earnings ({feeLabel})</TableHead>
@@ -345,7 +345,7 @@ function TransactionsPage() {
                 <TableRow>
                   <TableCell colSpan={7} className="text-center text-muted-foreground py-10">
                     {rows.length === 0
-                      ? "No transactions yet — once a learner pays, orders will appear here."
+                      ? "No transactions yet — once an angler pays, orders will appear here."
                       : "No transactions match the current filters."}
                   </TableCell>
                 </TableRow>

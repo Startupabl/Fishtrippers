@@ -141,10 +141,10 @@ function TagManagerPage() {
             <div className="grid grid-cols-1 gap-6 pb-2 pt-2 md:grid-cols-3">
               <div className="space-y-2">
                 <h4 className="text-sm font-semibold text-foreground">
-                  1. Aides Create Tags Live
+                  1. Captains/Guides Create Tags Live
                 </h4>
                 <p className="text-sm leading-relaxed text-muted-foreground">
-                  When Aides build or edit a listing, they use a smart autocomplete bar
+                  When captains/guides build or edit a listing, they use a smart autocomplete bar
                   powered by your master dictionary. If they type something brand new, the
                   system lets them add it instantly as a Custom Tag so their creation flow
                   never gets blocked.
@@ -505,7 +505,7 @@ function MasterDictionaryTab() {
           <DialogHeader>
             <DialogTitle>Delete "{deleting?.name}"?</DialogTitle>
             <DialogDescription>
-              This will permanently remove the tag and strip it from every course listing that
+              This will permanently remove the tag and strip it from every charter listing that
               currently uses it.
             </DialogDescription>
           </DialogHeader>
@@ -530,7 +530,7 @@ function MasterDictionaryTab() {
             <DialogTitle>Merge {selectedTags.length} tags</DialogTitle>
             <DialogDescription>
               Pick the master tag. All other selected tags will be replaced with it on every
-              course listing, then deleted.
+              charter listing, then deleted.
             </DialogDescription>
           </DialogHeader>
           <RadioGroup value={masterId ?? ""} onValueChange={setMasterId} className="space-y-2 py-2">

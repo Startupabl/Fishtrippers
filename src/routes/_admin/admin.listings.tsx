@@ -292,7 +292,7 @@ function ListingsPage() {
           type="text"
           value={aideQ}
           onChange={(e) => setAideQ(e.target.value)}
-          placeholder="Search by aide (name or email)…"
+          placeholder="Search by captain/guide (name or email)…"
           className="w-56 rounded-md border border-border bg-white px-3 py-1.5 text-xs"
         />
         <select
