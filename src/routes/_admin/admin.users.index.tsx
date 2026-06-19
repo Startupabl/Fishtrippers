@@ -11,8 +11,6 @@ export const Route = createFileRoute("/_admin/admin/users/")({
   component: UsersPage,
 });
 
-type PayoutStatus = "connected" | "pending" | "none";
-
 type AdminUser = {
   id: string;
   email: string | null;
@@ -23,35 +21,14 @@ type AdminUser = {
   last_ip: string | null;
   listings_count: number;
   bookings_count: number;
-  stripe_connect_id: string | null;
-  payout_status: PayoutStatus;
   user_number_id: string | null;
   full_name: string;
   full_name_is_fallback: boolean;
   roles: string[];
 };
 
-const PAYOUT_RANK: Record<PayoutStatus, number> = { connected: 0, pending: 1, none: 2 };
-type SortKey = "user_number_id" | "full_name" | "payout_status";
+type SortKey = "user_number_id" | "full_name";
 type SortDir = "asc" | "desc";
-
-function PayoutBadge({ status }: { status: PayoutStatus }) {
-  if (status === "connected") {
-    return (
-      <span className="inline-block rounded-full bg-emerald-100 px-2 py-0.5 text-[10px] font-medium uppercase tracking-wide text-emerald-800">
-        Connected
-      </span>
-    );
-  }
-  if (status === "pending") {
-    return (
-      <span className="inline-block rounded-full bg-amber-100 px-2 py-0.5 text-[10px] font-medium uppercase tracking-wide text-amber-800">
-        Pending
-      </span>
-    );
-  }
-  return <span className="text-muted-foreground">—</span>;
-}
 
 function SortHeader({
   label,
