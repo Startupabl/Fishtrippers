@@ -506,6 +506,8 @@ export interface TripBookingSummary {
   operator_display_name: string | null;
   captain_name: string | null;
   captain_email: string | null;
+  captain_phone: string | null;
+  meeting_location: string | null;
   learner_name: string | null;
   learner_email: string | null;
   primary_angler_name: string | null;
@@ -514,6 +516,7 @@ export interface TripBookingSummary {
   stripe_checkout_session_id: string | null;
   is_simulated: boolean;
   source: "instant_book" | "custom_offer";
+  thread_id: string | null;
 }
 
 const BOOKING_COLS =
@@ -539,13 +542,13 @@ async function hydrateTripBookings(
     tripIds.length
       ? supabaseAdmin
           .from("trip_packages")
-          .select("id, title, start_time, operator_id")
+          .select("id, title, start_time, operator_id, departure_address")
           .in("id", tripIds)
       : Promise.resolve({ data: [] as any[] } as const),
     profileIds.length
       ? supabaseAdmin
           .from("profiles")
-          .select("id, first_name, last_name, display_name, email")
+          .select("id, first_name, last_name, display_name, email, phone_number")
           .in("id", profileIds)
       : Promise.resolve({ data: [] as any[] } as const),
     bookingIds.length
@@ -563,7 +566,7 @@ async function hydrateTripBookings(
   const { data: operators } = operatorIds.length
     ? await supabaseAdmin
         .from("operators")
-        .select("id, display_name")
+        .select("id, display_name, default_departure_address")
         .in("id", operatorIds)
     : { data: [] as any[] };
 
@@ -610,6 +613,8 @@ async function hydrateTripBookings(
       operator_display_name: operator?.display_name ?? null,
       captain_name: nameOf(aide),
       captain_email: aide?.email ?? null,
+      captain_phone: aide?.phone_number ?? null,
+      meeting_location: trip?.departure_address ?? operator?.default_departure_address ?? null,
       learner_name: nameOf(learner),
       learner_email: learner?.email ?? null,
       primary_angler_name: r.primary_angler_name ?? null,
@@ -618,6 +623,7 @@ async function hydrateTripBookings(
       stripe_checkout_session_id: sessionId,
       is_simulated: Boolean(sessionId && sessionId.startsWith("sim_")),
       source: isCustomOffer ? "custom_offer" : "instant_book",
+      thread_id: r.thread_id ?? null,
     };
   });
 }

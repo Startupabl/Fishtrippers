@@ -4,7 +4,7 @@ import {
   Outlet,
   useLocation,
 } from "@tanstack/react-router";
-import { Calendar, Receipt, Ship } from "lucide-react";
+import { Receipt, Ship } from "lucide-react";
 import { Card } from "@/components/ui/card";
 import { DESIGN_SYSTEM } from "@/lib/brand";
 
@@ -37,27 +37,20 @@ function LearnerHome() {
       </div>
 
       <section className="mt-10">
-        <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3">
+        <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
           <NavCard
             to="/dashboard/learner/bookings"
             icon={<Ship className="size-5" />}
-            title="My Trip Bookings"
-            desc="Charters and guided trips you've booked with captains."
+            title="My Bookings"
+            desc="Upcoming and past trips you've booked with captains."
             tint={`${LEAF}33`}
-          />
-          <NavCard
-            to="/dashboard/learner/schedule"
-            icon={<Calendar className="size-5" />}
-            title="My Schedule"
-            desc="Your enrolled and completed sessions — chronological."
-            tint={`${YELLOW}33`}
           />
           <NavCard
             to="/dashboard/learner/purchases"
             icon={<Receipt className="size-5" />}
             title="Purchase History"
             desc="Every booking, receipt, and amount paid."
-            tint={`${LEAF}33`}
+            tint={`${YELLOW}33`}
           />
         </div>
       </section>
