@@ -1985,6 +1985,7 @@ export type Database = {
         | "declined"
         | "pending_payment"
         | "confirmed"
+        | "completed"
       class_session_status_t: "active" | "completed" | "cancelled"
       journey_moderation_status: "pending" | "approved" | "declined"
       journey_status: "draft" | "published" | "archived"
@@ -2142,6 +2143,7 @@ export const Constants = {
         "declined",
         "pending_payment",
         "confirmed",
+        "completed",
       ],
       class_session_status_t: ["active", "completed", "cancelled"],
       journey_moderation_status: ["pending", "approved", "declined"],

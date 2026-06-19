@@ -1,0 +1,1 @@
+ALTER TYPE public.booking_status_t ADD VALUE IF NOT EXISTS 'completed';
