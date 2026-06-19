@@ -62,7 +62,7 @@ export const listAvailabilityHolds = createServerFn({ method: "GET" })
     const { data: ownerProfiles } = ownerIds.length
       ? await supabaseAdmin
           .from("profiles")
-          .select("id,first_name,last_name,display_name")
+          .select("id,first_name,last_name,display_name,timezone")
           .in("id", ownerIds)
       : { data: [] as any[] };
     const ownerMap = new Map((ownerProfiles ?? []).map((p) => [p.id, p]));
