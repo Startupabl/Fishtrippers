@@ -357,6 +357,7 @@ function UpcomingSessionsPage() {
   );
 
   const todayStr = new Date().toISOString().slice(0, 10);
+  const tripBookingRows = tripBookings ?? [];
   const upcomingTripBookings = tripBookingRows.filter((b) => b.status !== "completed");
   const completedTripBookings = tripBookingRows.filter((b) => b.status === "completed");
 
