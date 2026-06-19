@@ -263,8 +263,12 @@ function OperatorPreviewPage() {
               <BoatInfoBlock vessel={vessel} boatType={boatType} />
             )}
             <AmenitiesGrid features={vessel?.features} />
+            <div className="flex justify-end pt-2">
+              <ReportListingDialog listingId={op?.id ?? null} />
+            </div>
           </aside>
         </div>
+
 
         {isEditMode ? (
           <div className="mt-12 rounded-2xl border bg-card p-6 text-center">
