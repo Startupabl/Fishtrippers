@@ -140,18 +140,23 @@ export type Database = {
         Row: {
           aide_earnings: number
           aide_id: string
+          balance_due_minor: number | null
           class_session_id: string | null
           course_id: string | null
           created_at: string
           currency: string
+          deposit_minor: number | null
           guests: number
           id: string
           learner_id: string
+          notes: string | null
+          phone: string | null
+          primary_angler_name: string | null
           promo_code_id: string | null
           service_fee_amount: number
           status: Database["public"]["Enums"]["booking_status_t"]
           stripe_checkout_session_id: string | null
-          thread_id: string
+          thread_id: string | null
           total_price: number
           trip_date: string | null
           updated_at: string
@@ -159,18 +164,23 @@ export type Database = {
         Insert: {
           aide_earnings: number
           aide_id: string
+          balance_due_minor?: number | null
           class_session_id?: string | null
           course_id?: string | null
           created_at?: string
           currency?: string
+          deposit_minor?: number | null
           guests?: number
           id?: string
           learner_id: string
+          notes?: string | null
+          phone?: string | null
+          primary_angler_name?: string | null
           promo_code_id?: string | null
           service_fee_amount: number
           status?: Database["public"]["Enums"]["booking_status_t"]
           stripe_checkout_session_id?: string | null
-          thread_id: string
+          thread_id?: string | null
           total_price: number
           trip_date?: string | null
           updated_at?: string
@@ -178,18 +188,23 @@ export type Database = {
         Update: {
           aide_earnings?: number
           aide_id?: string
+          balance_due_minor?: number | null
           class_session_id?: string | null
           course_id?: string | null
           created_at?: string
           currency?: string
+          deposit_minor?: number | null
           guests?: number
           id?: string
           learner_id?: string
+          notes?: string | null
+          phone?: string | null
+          primary_angler_name?: string | null
           promo_code_id?: string | null
           service_fee_amount?: number
           status?: Database["public"]["Enums"]["booking_status_t"]
           stripe_checkout_session_id?: string | null
-          thread_id?: string
+          thread_id?: string | null
           total_price?: number
           trip_date?: string | null
           updated_at?: string
