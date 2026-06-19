@@ -345,7 +345,7 @@ function TransactionsPage() {
                 <TableRow>
                   <TableCell colSpan={7} className="text-center text-muted-foreground py-10">
                     {rows.length === 0
-                      ? "No transactions yet — once a learner pays, orders will appear here."
+                      ? "No transactions yet — once an angler pays, orders will appear here."
                       : "No transactions match the current filters."}
                   </TableCell>
                 </TableRow>
