@@ -27,6 +27,7 @@ import {
 } from "@/stores/useOperatorOnboardingStore";
 import { submitOperatorSchema } from "@/lib/operators.shared";
 import { ConnectPayoutsDialog } from "@/components/operator-onboarding/ConnectPayoutsDialog";
+import { ReportListingDialog } from "@/components/listings/ReportListingDialog";
 
 export const Route = createFileRoute("/_authenticated/operator/preview")({
   validateSearch: (search) =>
