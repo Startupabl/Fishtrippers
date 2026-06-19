@@ -144,8 +144,8 @@ export function RejectListingDialog({
             <div className="space-y-1.5">
               <Label htmlFor="reject-note">
                 {selected.key === "custom"
-                  ? "Custom message to the Aide"
-                  : "Message to the Aide (editable)"}
+                  ? "Custom message to the captain/guide"
+                  : "Message to the captain/guide (editable)"}
               </Label>
               <Textarea
                 id="reject-note"
@@ -153,7 +153,7 @@ export function RejectListingDialog({
                 onChange={(e) => setNoteText(e.target.value)}
                 placeholder={
                   selected.key === "custom"
-                    ? "Type your custom feedback for the Aide…"
+                    ? "Type your custom feedback for the captain/guide…"
                     : ""
                 }
                 rows={6}
