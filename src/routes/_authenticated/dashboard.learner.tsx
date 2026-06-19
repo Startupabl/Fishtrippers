@@ -4,7 +4,7 @@ import {
   Outlet,
   useLocation,
 } from "@tanstack/react-router";
-import { Calendar, Receipt } from "lucide-react";
+import { Calendar, Receipt, Ship } from "lucide-react";
 import { Card } from "@/components/ui/card";
 import { DESIGN_SYSTEM } from "@/lib/brand";
 
