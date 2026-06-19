@@ -88,10 +88,15 @@ function computeRange(
 
 function TransactionsPage() {
   const fetchTx = useServerFn(listAdminTransactions);
+  const fetchTrips = useServerFn(listAllTripBookingsAdmin);
   const { label: feeLabel } = usePlatformFee();
   const { data, isLoading, error } = useQuery({
     queryKey: ["admin", "transactions"],
     queryFn: () => fetchTx(),
+  });
+  const { data: tripRows } = useQuery({
+    queryKey: ["admin", "trip-bookings"],
+    queryFn: () => fetchTrips(),
   });
 
   const { q, dateRange, from, to, sort } = Route.useSearch();
@@ -110,7 +115,23 @@ function TransactionsPage() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [qInput]);
 
-  const rows = data ?? [];
+  const rows = useMemo(() => {
+    const orderRows = data ?? [];
+    const trips = (tripRows ?? []).filter((b) => b.status === "confirmed");
+    const tripsMapped = trips.map((b) => ({
+      id: b.id,
+      order_number: `TRIP-${b.id.slice(0, 6).toUpperCase()}${b.is_simulated ? " (sim)" : ""}`,
+      created_at: b.created_at,
+      total_paid_minor: b.deposit_minor ?? b.total_price_minor,
+      platform_fee_minor: b.service_fee_minor,
+      aide_payout_minor: b.aide_earnings_minor,
+      currency: b.currency,
+      learner_name: b.primary_angler_name ?? b.learner_name ?? "—",
+      aide_name: b.captain_name ?? b.operator_display_name ?? "—",
+    }));
+    return [...orderRows, ...tripsMapped];
+  }, [data, tripRows]);
+
 
   const filteredRows = useMemo(() => {
     const needle = q.trim().toLowerCase();
