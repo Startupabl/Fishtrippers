@@ -200,14 +200,14 @@ function UsersPage() {
           <tbody>
             {isLoading && (
               <tr>
-                <td colSpan={8} className="px-2 py-4 text-center text-muted-foreground">
+                <td colSpan={7} className="px-2 py-4 text-center text-muted-foreground">
                   Loading…
                 </td>
               </tr>
             )}
             {!isLoading && rows.length === 0 && (
               <tr>
-                <td colSpan={8} className="px-2 py-4 text-center text-muted-foreground">
+                <td colSpan={7} className="px-2 py-4 text-center text-muted-foreground">
                   No users.
                 </td>
               </tr>
