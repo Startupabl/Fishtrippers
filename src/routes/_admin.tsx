@@ -51,6 +51,7 @@ function pageTitle(pathname: string): string {
   if (pathname.startsWith("/admin/users")) return "Users";
   if (pathname.startsWith("/admin/listings")) return "Listings";
   if (pathname.startsWith("/admin/transactions")) return "Transactions";
+  if (pathname.startsWith("/admin/availability")) return "Calendar Availability & Hold Logs";
   if (pathname.startsWith("/admin/search-seo")) return "Search & SEO";
   if (pathname.startsWith("/admin/reviews")) return "Reviews";
   if (pathname.startsWith("/admin/settings")) return "Settings";
