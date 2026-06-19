@@ -38,17 +38,17 @@ const REASONS: { key: ReasonKey; label: string; text: string }[] = [
   {
     key: "unreasonable_pricing",
     label: "Unreasonable Pricing",
-    text: "The pricing for this course appears unusually high for our current marketplace benchmarks. To ensure your class gets booked and maintains platform accessibility, we recommend aligning your rates with standard market values or starting lower to build up your student reviews first.",
+    text: "The pricing for this charter appears unusually high for our current marketplace benchmarks. To ensure your trip gets booked and maintains platform accessibility, we recommend aligning your rates with standard market values or starting lower to build up your angler reviews first.",
   },
   {
     key: "missing_showcase",
     label: "Missing Showcase / Portfolio",
-    text: "Your course looks incredible! To give you the absolute best chance at scoring bookings and making your listing truly pop, we highly recommend adding 1-2 examples of your work to your Showcase Gallery. Showing students a quick visual sneak peek of what they'll create helps build trust instantly!",
+    text: "Your charter looks incredible! To give you the absolute best chance at scoring bookings and making your listing truly pop, we highly recommend adding 1-2 examples of your work to your Showcase Gallery. Showing anglers a quick visual sneak peek of what to expect helps build trust instantly!",
   },
   {
     key: "incomplete_session_details",
-    label: "Incomplete Session Details",
-    text: "Your course description or individual session titles need a bit more detail. Please expand on your curriculum so students know exactly what value and milestones they are getting in each session.",
+    label: "Incomplete Trip Details",
+    text: "Your charter description or individual trip titles need a bit more detail. Please expand on your offerings so anglers know exactly what value and experience they are getting on each trip.",
   },
   {
     key: "poor_imagery",
