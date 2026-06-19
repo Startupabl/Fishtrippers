@@ -98,7 +98,7 @@ export function CustomOfferCard({ bookingId, viewerId, onChanged }: Props) {
     <div className="min-w-0 w-full max-w-full overflow-hidden rounded-2xl border border-info/30 bg-info/5 p-4 shadow-sm">
       <div className="flex min-w-0 items-center gap-2 text-sm font-semibold text-info">
         <Sparkles className="size-4 shrink-0" />
-        <span className="min-w-0 break-words [overflow-wrap:anywhere]">Custom Offer</span>
+        <span className="min-w-0 break-words [overflow-wrap:anywhere]">Custom Trip</span>
       </div>
 
       {booking.course_title && (
