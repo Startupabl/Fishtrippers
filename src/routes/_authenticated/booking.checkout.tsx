@@ -30,6 +30,9 @@ import {
   type TripReviewDetails,
 } from "@/lib/trip-bookings.functions";
 import { getCancellationPolicy } from "@/lib/cancellation-policies";
+import PhoneInput, { isValidPhoneNumber } from "react-phone-number-input";
+import "react-phone-number-input/style.css";
+
 
 const searchSchema = z.object({
   trip_id: fallback(z.string(), "").default(""),
@@ -80,7 +83,7 @@ function BookingReviewPage() {
   const [paying, setPaying] = useState(false);
 
   const [anglerName, setAnglerName] = useState("");
-  const [phone, setPhone] = useState("");
+  const [phone, setPhone] = useState<string | undefined>(undefined);
   const [notes, setNotes] = useState("");
 
   useEffect(() => {
@@ -97,16 +100,22 @@ function BookingReviewPage() {
           .join(" ")
           .trim();
         setAnglerName(fullName);
-        if (d.viewer.phone) setPhone(d.viewer.phone);
+        if (d.viewer.phone) {
+          // E.164 starts with '+'; if missing assume US and prefix.
+          const raw = d.viewer.phone.trim();
+          setPhone(raw.startsWith("+") ? raw : `+1${raw.replace(/[^0-9]/g, "")}`);
+        }
       })
       .catch((e) =>
         setError(e instanceof Error ? e.message : "Could not load trip."),
       );
   }, [trip_id, trip_date, guests, initialized, user, fetchDetails]);
 
+  const phoneValid = !!phone && isValidPhoneNumber(phone);
+
   async function handleContinue() {
     if (!details) return;
-    if (phone.trim().length < 7) return;
+    if (!phoneValid || !phone) return;
     setPaying(true);
     try {
       const { url } = await startCheckout({
@@ -126,6 +135,7 @@ function BookingReviewPage() {
       setPaying(false);
     }
   }
+
 
   if (error) {
     return (
@@ -182,7 +192,7 @@ function BookingReviewPage() {
   })();
   const startTimeLabel = formatStartTime(details.trip.start_time);
 
-  const canContinue = phone.trim().length >= 7 && !paying;
+  const canContinue = phoneValid && !paying;
 
   return (
     <div className="min-h-screen bg-background">
@@ -219,20 +229,27 @@ function BookingReviewPage() {
                   Mobile phone number{" "}
                   <span className="text-destructive">*</span>
                 </Label>
-                <Input
+                <PhoneInput
                   id="phone"
-                  type="tel"
-                  inputMode="tel"
+                  international
+                  countryCallingCodeEditable={false}
+                  defaultCountry="US"
                   value={phone}
-                  onChange={(e) => setPhone(e.target.value.slice(0, 32))}
-                  placeholder="(555) 123-4567"
-                  className="mt-1.5"
-                  required
+                  onChange={setPhone}
+                  placeholder="Enter your phone number"
+                  className="ft-phone-input mt-1.5"
                 />
                 <p className="mt-1 text-xs text-muted-foreground">
-                  Your captain will text you here with meeting details.
+                  Pick your country and we'll format the rest. Your captain
+                  will text you here with meeting details.
                 </p>
+                {phone && !phoneValid && (
+                  <p className="mt-1 text-xs text-destructive">
+                    Please enter a valid phone number for the selected country.
+                  </p>
+                )}
               </div>
+
               <div>
                 <Label htmlFor="notes">
                   Special notes & group details{" "}
