@@ -30,6 +30,9 @@ import {
   type TripReviewDetails,
 } from "@/lib/trip-bookings.functions";
 import { getCancellationPolicy } from "@/lib/cancellation-policies";
+import PhoneInput, { isValidPhoneNumber } from "react-phone-number-input";
+import "react-phone-number-input/style.css";
+
 
 const searchSchema = z.object({
   trip_id: fallback(z.string(), "").default(""),
@@ -80,7 +83,7 @@ function BookingReviewPage() {
   const [paying, setPaying] = useState(false);
 
   const [anglerName, setAnglerName] = useState("");
-  const [phone, setPhone] = useState("");
+  const [phone, setPhone] = useState<string | undefined>(undefined);
   const [notes, setNotes] = useState("");
 
   useEffect(() => {
@@ -97,16 +100,22 @@ function BookingReviewPage() {
           .join(" ")
           .trim();
         setAnglerName(fullName);
-        if (d.viewer.phone) setPhone(d.viewer.phone);
+        if (d.viewer.phone) {
+          // E.164 starts with '+'; if missing assume US and prefix.
+          const raw = d.viewer.phone.trim();
+          setPhone(raw.startsWith("+") ? raw : `+1${raw.replace(/[^0-9]/g, "")}`);
+        }
       })
       .catch((e) =>
         setError(e instanceof Error ? e.message : "Could not load trip."),
       );
   }, [trip_id, trip_date, guests, initialized, user, fetchDetails]);
 
+  const phoneValid = !!phone && isValidPhoneNumber(phone);
+
   async function handleContinue() {
     if (!details) return;
-    if (phone.trim().length < 7) return;
+    if (!phoneValid || !phone) return;
     setPaying(true);
     try {
       const { url } = await startCheckout({
@@ -126,6 +135,7 @@ function BookingReviewPage() {
       setPaying(false);
     }
   }
+
 
   if (error) {
     return (
