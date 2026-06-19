@@ -3,7 +3,17 @@ import { z } from "zod";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 import { supabaseAdmin } from "@/integrations/supabase/client.server";
 
-const TOPICS = ["general_question", "billing_stripe", "virtual_classroom_tech", "booking_no_show"] as const;
+const TOPICS = [
+  "general_question",
+  "billing_stripe",
+  "virtual_classroom_tech",
+  "booking_no_show",
+  "specific_trip",
+  "my_listing",
+  "general_questions",
+  "technical_issues",
+  "other",
+] as const;
 const USER_TYPES = ["learner", "aide", "visitor"] as const;
 
 const submitSchema = z.object({

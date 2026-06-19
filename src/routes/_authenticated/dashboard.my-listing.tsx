@@ -54,6 +54,7 @@ import {
   type TripEditorState,
 } from "@/components/operator-onboarding/trips/TripFormDialog";
 import { ConnectPayoutsDialog } from "@/components/operator-onboarding/ConnectPayoutsDialog";
+import { ReportListingDialog } from "@/components/listings/ReportListingDialog";
 import { useOperatorRoleLabel } from "@/hooks/useHasActiveListing";
 import { formatCurrency } from "@/lib/format-currency";
 
@@ -636,6 +637,11 @@ function MyListingPage() {
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
+
+      <div className="mt-10 flex justify-start">
+        <ReportListingDialog listingId={operator?.id ?? null} />
+      </div>
     </div>
   );
 }
+

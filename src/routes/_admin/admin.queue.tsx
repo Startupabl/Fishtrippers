@@ -48,6 +48,11 @@ const TOPIC_LABEL: Record<string, string> = {
   billing_stripe: "Billing & Stripe Connect",
   virtual_classroom_tech: "Virtual Classroom Tech Issue",
   booking_no_show: "Booking / No-Show Issue",
+  specific_trip: "A specific trip",
+  my_listing: "My listing",
+  general_questions: "General questions",
+  technical_issues: "Technical issues",
+  other: "Other",
 };
 
 function relativeTime(iso: string): string {
@@ -164,7 +169,6 @@ function ListingsToApprove() {
   return (
     <div className="space-y-3">
       {rows.map((j) => {
-        const payoutReady = !!j.mentor_is_payout_ready;
         const slug = j.slug;
         return (
           <div key={j.id} className="rounded-lg border bg-white p-4 shadow-sm">
@@ -172,9 +176,6 @@ function ListingsToApprove() {
               <div className="min-w-0">
                 <div className="flex flex-wrap items-center gap-2">
                   <StatusBadge tone="amber">Pending Review</StatusBadge>
-                  <StatusBadge tone={payoutReady ? "green" : "red"}>
-                    {payoutReady ? "✅ Stripe Connected" : "⛔ Stripe Missing"}
-                  </StatusBadge>
                   <span className="text-xs text-muted-foreground">{relativeTime(j.created_at)}</span>
                 </div>
                 <h3 className="mt-2 font-semibold text-foreground">{j.title}</h3>

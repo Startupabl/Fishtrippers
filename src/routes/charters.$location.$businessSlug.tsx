@@ -13,6 +13,7 @@ import { BoatInfoBlock } from "@/components/operator-listing/BoatInfoBlock";
 import { AmenitiesGrid } from "@/components/operator-listing/AmenitiesGrid";
 import { PoliciesBlock } from "@/components/operator-listing/PoliciesBlock";
 import { MeetingPointMap } from "@/components/operator-listing/MeetingPointMap";
+import { ReportListingDialog } from "@/components/listings/ReportListingDialog";
 
 export const Route = createFileRoute("/charters/$location/$businessSlug")({
   loader: async ({ params }) => {
@@ -160,6 +161,9 @@ function OperatorListingPage() {
               <BoatInfoBlock vessel={vessel} boatType={boatType} />
             )}
             <AmenitiesGrid features={vessel?.features} />
+            <div className="flex justify-end pt-2">
+              <ReportListingDialog listingId={op?.id ?? null} />
+            </div>
           </aside>
         </div>
       </main>
