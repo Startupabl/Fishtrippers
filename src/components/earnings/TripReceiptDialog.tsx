@@ -140,32 +140,32 @@ export function TripReceiptDialog({
                   <h3 className="text-xs uppercase tracking-wide text-muted-foreground mb-2">
                     Financial Summary
                   </h3>
-                    <div className="border border-border rounded-md overflow-hidden">
-                      <div className="flex justify-between px-4 py-2.5 text-sm border-b border-border">
-                        <span className="text-muted-foreground">
-                          Total Trip Price
-                        </span>
-                        <span className="font-medium text-foreground">
-                          {formatCurrency(total, viewerCurrency)}
-                        </span>
-                      </div>
-                      <div className="flex justify-between px-4 py-2.5 text-sm border-b border-border">
-                        <span className="text-muted-foreground">
-                          LESS: Fishtrippers Deposit
-                        </span>
-                        <span className="font-medium text-foreground">
-                          −{formatCurrency(deposit, viewerCurrency)}
-                        </span>
-                      </div>
-                      <div className="flex justify-between px-4 py-3 text-base bg-muted/40">
-                        <span className="font-bold text-foreground">
-                          Balance to Collect at Meeting
-                        </span>
-                        <span className="font-bold text-money" style={display}>
-                          {formatCurrency(balance, viewerCurrency)}
-                        </span>
-                      </div>
+                  <div className="border border-border rounded-md overflow-hidden">
+                    <div className="flex justify-between px-4 py-2.5 text-sm border-b border-border">
+                      <span className="text-muted-foreground">
+                        Total Trip Price
+                      </span>
+                      <span className="font-medium text-foreground">
+                        {formatCurrency(total, viewerCurrency)}
+                      </span>
                     </div>
+                    <div className="flex justify-between px-4 py-2.5 text-sm border-b border-border">
+                      <span className="text-muted-foreground">
+                        LESS: Fishtrippers Deposit
+                      </span>
+                      <span className="font-medium text-foreground">
+                        −{formatCurrency(deposit, viewerCurrency)}
+                      </span>
+                    </div>
+                    <div className="flex justify-between px-4 py-3 text-base bg-muted/40">
+                      <span className="font-bold text-foreground">
+                        Balance to Collect at Meeting
+                      </span>
+                      <span className="font-bold text-money" style={display}>
+                        {formatCurrency(balance, viewerCurrency)}
+                      </span>
+                    </div>
+                  </div>
 
                   <p className="text-xs text-muted-foreground mt-3">
                     Payment is collected directly from the angler in person at
