@@ -123,6 +123,16 @@ function UpcomingSessionsPage() {
   const listCompletionsFn = useServerFn(listSessionCompletions);
   const markCompleteFn = useServerFn(markSessionComplete);
   const markOrderCompleteFn = useServerFn(markOrderComplete);
+  const fetchTripBookings = useServerFn(listMyTripBookingsAide);
+
+  const { data: tripBookings } = useQuery({
+    queryKey: ["aide-trip-bookings", user?.id],
+    queryFn: () => fetchTripBookings(),
+    enabled: !!user,
+  });
+
+
+
 
 
   const [editTarget, setEditTarget] = useState<ScheduleRow | null>(null);
