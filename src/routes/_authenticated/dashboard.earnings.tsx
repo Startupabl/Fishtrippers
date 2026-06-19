@@ -86,7 +86,17 @@ function EarningsPage() {
     enabled: !!user,
   });
 
+  const fetchTripBookings = useServerFn(listMyTripBookingsAide);
+  const { data: tripBookingsData } = useQuery({
+    queryKey: ["my-trip-bookings-aide", user?.id],
+    queryFn: () => fetchTripBookings(),
+    enabled: !!user,
+  });
+
   const orders = data ?? [];
+  const tripBookings = (tripBookingsData ?? []).filter(
+    (b) => b.status === "confirmed",
+  );
 
   const totals = useMemo(() => {
     let payout = 0;
@@ -98,8 +108,15 @@ function EarningsPage() {
       fees += convertMinor(o.platform_fee_minor, cur, currency);
       gross += convertMinor(o.total_paid_minor, cur, currency);
     }
+    for (const b of tripBookings) {
+      const cur = (b.currency as CurrencyCode) ?? currency;
+      payout += convertMinor(b.aide_earnings_minor, cur, currency);
+      fees += convertMinor(b.service_fee_minor, cur, currency);
+      gross += convertMinor(b.total_price_minor, cur, currency);
+    }
     return { payout, fees, gross };
-  }, [orders, currency]);
+  }, [orders, tripBookings, currency]);
+
 
   const courseOptions = useMemo(() => {
     const titles = new Set<string>();
