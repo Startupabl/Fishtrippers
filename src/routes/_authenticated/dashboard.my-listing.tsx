@@ -137,7 +137,6 @@ function MyListingPage() {
 
   const fetchOperator = useServerFn(getMyOperator);
   const fetchTrips = useServerFn(listMyTrips);
-  const fetchStripeIds = useServerFn(getMyStripeIds);
   const removeTrip = useServerFn(deleteTrip);
   const updateTripStatus = useServerFn(setTripStatus);
 
