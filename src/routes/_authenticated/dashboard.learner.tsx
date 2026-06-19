@@ -37,7 +37,14 @@ function LearnerHome() {
       </div>
 
       <section className="mt-10">
-        <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
+        <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3">
+          <NavCard
+            to="/dashboard/learner/bookings"
+            icon={<Ship className="size-5" />}
+            title="My Trip Bookings"
+            desc="Charters and guided trips you've booked with captains."
+            tint={`${LEAF}33`}
+          />
           <NavCard
             to="/dashboard/learner/schedule"
             icon={<Calendar className="size-5" />}
@@ -54,6 +61,7 @@ function LearnerHome() {
           />
         </div>
       </section>
+
     </div>
   );
 }
