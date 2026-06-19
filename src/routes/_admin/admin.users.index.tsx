@@ -274,9 +274,6 @@ function UsersPage() {
                   </td>
                   <td className="whitespace-nowrap px-2 py-1.5 tabular-nums">{u.listings_count}</td>
                   <td className="whitespace-nowrap px-2 py-1.5 tabular-nums">{u.bookings_count}</td>
-                  <td className="whitespace-nowrap px-2 py-1.5">
-                    <PayoutBadge status={u.payout_status} />
-                  </td>
                   <td className="whitespace-nowrap px-2 py-1.5 text-right">
                     <span className="inline-flex items-center justify-end gap-1">
                       <Link
