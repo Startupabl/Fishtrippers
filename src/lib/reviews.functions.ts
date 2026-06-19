@@ -54,7 +54,7 @@ export const getMyReviewedOrderIds = createServerFn({ method: "GET" })
       .select("order_id")
       .eq("learner_id", context.userId);
     if (error) return [];
-    return (data ?? []).map((r) => r.order_id);
+    return (data ?? []).map((r) => r.order_id).filter((id): id is string => !!id);
   });
 
 export type ListingReviewStats = { avg: number; count: number };
