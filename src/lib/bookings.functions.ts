@@ -690,12 +690,14 @@ export const declineBooking = createServerFn({ method: "POST" })
       .eq("id", b.id);
     if (uErr) throw new Error(uErr.message);
 
-    await supabase.from("messages").insert({
-      thread_id: b.thread_id,
-      sender_id: userId,
-      body: "Declined the custom offer. Let's chat about adjustments.",
-      attachment_type: "none",
-    });
+    if (b.thread_id) {
+      await supabase.from("messages").insert({
+        thread_id: b.thread_id,
+        sender_id: userId,
+        body: "Declined the custom offer. Let's chat about adjustments.",
+        attachment_type: "none",
+      });
+    }
 
     return { ok: true };
   });
