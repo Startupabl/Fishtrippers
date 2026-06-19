@@ -252,7 +252,7 @@ function ReviewsPage() {
   return (
     <div className="space-y-4">
       <p className="text-sm text-muted-foreground">
-        Manage learner-submitted reviews across all listings.
+        Manage angler-submitted reviews across all listings.
       </p>
       <ReviewsTable />
     </div>
