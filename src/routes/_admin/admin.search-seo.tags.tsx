@@ -505,7 +505,7 @@ function MasterDictionaryTab() {
           <DialogHeader>
             <DialogTitle>Delete "{deleting?.name}"?</DialogTitle>
             <DialogDescription>
-              This will permanently remove the tag and strip it from every course listing that
+              This will permanently remove the tag and strip it from every charter listing that
               currently uses it.
             </DialogDescription>
           </DialogHeader>
