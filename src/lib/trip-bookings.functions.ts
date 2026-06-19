@@ -303,8 +303,6 @@ export const createTripDepositCheckout = createServerFn({ method: "POST" })
         balance_due_minor: String(balance_minor),
         total_minor: String(total_minor),
       },
-      application_fee_amount: fees.feeMinor,
-      transfer_destination: captainProfile.stripe_connect_id,
       idempotencyKey: `${idemBase}_session`,
     });
 
