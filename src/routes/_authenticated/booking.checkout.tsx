@@ -82,7 +82,8 @@ function BookingReviewPage() {
   const [error, setError] = useState<string | null>(null);
   const [paying, setPaying] = useState(false);
 
-  const [anglerName, setAnglerName] = useState("");
+  const [firstName, setFirstName] = useState("");
+  const [lastName, setLastName] = useState("");
   const [phone, setPhone] = useState<string | undefined>(undefined);
   const [notes, setNotes] = useState("");
 
@@ -95,11 +96,8 @@ function BookingReviewPage() {
     fetchDetails({ data: { trip_id, trip_date, guests } })
       .then((d) => {
         setDetails(d);
-        const fullName = [d.viewer.first_name, d.viewer.last_name]
-          .filter(Boolean)
-          .join(" ")
-          .trim();
-        setAnglerName(fullName);
+        setFirstName(d.viewer.first_name?.trim() ?? "");
+        setLastName(d.viewer.last_name?.trim() ?? "");
         if (d.viewer.phone) {
           // E.164 starts with '+'; if missing assume US and prefix.
           const raw = d.viewer.phone.trim();
@@ -115,15 +113,16 @@ function BookingReviewPage() {
 
   async function handleContinue() {
     if (!details) return;
-    if (!phoneValid || !phone) return;
+    if (!firstName.trim() || !lastName.trim() || !phoneValid || !phone) return;
     setPaying(true);
     try {
+      const primaryAnglerName = `${firstName.trim()} ${lastName.trim()}`.trim();
       const { url } = await startCheckout({
         data: {
           trip_id: details.trip.id,
           trip_date: details.trip_date,
           guests: details.guests,
-          primary_angler_name: anglerName.trim() || "Angler",
+          primary_angler_name: primaryAnglerName || "Angler",
           phone: phone.trim(),
           notes: notes.trim() || null,
         },
@@ -192,7 +191,7 @@ function BookingReviewPage() {
   })();
   const startTimeLabel = formatStartTime(details.trip.start_time);
 
-  const canContinue = phoneValid && !paying;
+  const canContinue = firstName.trim() && lastName.trim() && phoneValid && !paying;
 
   return (
     <div className="min-h-screen bg-background">
@@ -214,15 +213,33 @@ function BookingReviewPage() {
               Angler details
             </h2>
             <div className="space-y-4">
-              <div>
-                <Label htmlFor="angler-name">Primary angler name</Label>
-                <Input
-                  id="angler-name"
-                  value={anglerName}
-                  onChange={(e) => setAnglerName(e.target.value.slice(0, 120))}
-                  placeholder="Your full name"
-                  className="mt-1.5"
-                />
+              <div className="grid gap-4 sm:grid-cols-2">
+                <div>
+                  <Label htmlFor="first-name">
+                    First name <span className="text-destructive">*</span>
+                  </Label>
+                  <Input
+                    id="first-name"
+                    value={firstName}
+                    onChange={(e) => setFirstName(e.target.value.slice(0, 80))}
+                    placeholder="First name"
+                    required
+                    className="mt-1.5"
+                  />
+                </div>
+                <div>
+                  <Label htmlFor="last-name">
+                    Last name <span className="text-destructive">*</span>
+                  </Label>
+                  <Input
+                    id="last-name"
+                    value={lastName}
+                    onChange={(e) => setLastName(e.target.value.slice(0, 80))}
+                    placeholder="Last name"
+                    required
+                    className="mt-1.5"
+                  />
+                </div>
               </div>
               <div>
                 <Label htmlFor="phone">
