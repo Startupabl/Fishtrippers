@@ -38,25 +38,23 @@ export interface BookingDetail {
   author_timezone: string | null;
 }
 
-const SlotInput = z.object({
-  starts_at: z.string().min(10),
-  duration_minutes: z.number().int().min(15).max(480).default(45),
-});
-
 const CreateOfferInput = z.object({
   thread_id: z.string().uuid(),
-  total_price_minor: z.number().int().min(100).max(10_000_00),
+  title: z.string().trim().min(3).max(140),
+  duration_minutes: z.number().int().min(30).max(14 * 60),
+  total_anglers: z.number().int().min(1).max(50),
+  trip_date: z.string().regex(/^\d{4}-\d{2}-\d{2}$/),
+  starts_at: z.string().min(10),
+  meeting_point_address: z.string().trim().min(2).max(500),
+  meeting_point_lat: z.number().nullable().optional(),
+  meeting_point_lng: z.number().nullable().optional(),
+  meeting_point_place_id: z.string().nullable().optional(),
   currency: z.string().min(3).max(8),
+  total_price_minor: z.number().int().min(100).max(10_000_00),
+  deposit_minor: z.number().int().min(100).max(10_000_00),
   time_zone_label: z.string().trim().max(10).nullable().optional(),
   author_timezone: z.string().trim().min(1).max(64).nullable().optional(),
   expires_at: z.string().datetime().nullable().optional(),
-  mode: z.enum(["new_cohort", "existing_cohort"]),
-  // new_cohort
-  listing_title: z.string().trim().min(2).max(140).optional(),
-  max_seats: z.number().int().min(1).max(50).optional(),
-  slots: z.array(SlotInput).min(1).max(20).optional(),
-  // existing_cohort
-  class_session_id: z.string().uuid().optional(),
 });
 
 function buildAdminLabel(opts: {
@@ -74,7 +72,7 @@ function buildAdminLabel(opts: {
     month: "short",
     day: "numeric",
   });
-  return `[${opts.title}] ${dow}s @ ${time} • Starts ${startDate} (with Learner: ${opts.learnerName})`;
+  return `[${opts.title}] ${dow}s @ ${time} • Starts ${startDate} (with Angler: ${opts.learnerName})`;
 }
 
 
@@ -84,6 +82,10 @@ export const createCustomOffer = createServerFn({ method: "POST" })
   .handler(async ({ data, context }) => {
     const { supabase, userId } = context;
 
+    if (data.deposit_minor > data.total_price_minor) {
+      throw new Error("Deposit cannot exceed the total price.");
+    }
+
     const { data: thread, error: tErr } = await supabase
       .from("message_threads")
       .select("id, learner_id, mentor_id, journey_id")
@@ -91,74 +93,69 @@ export const createCustomOffer = createServerFn({ method: "POST" })
       .maybeSingle();
     if (tErr || !thread) throw new Error("Conversation not found.");
     if (thread.mentor_id !== userId)
-      throw new Error("Only the Aide can send a custom offer.");
+      throw new Error("Only the guide can send a custom trip.");
 
-    let classSessionId: string;
+    const { data: angler } = await supabase
+      .from("profiles")
+      .select("first_name, last_name, display_name, email")
+      .eq("id", thread.learner_id)
+      .maybeSingle();
+    const anglerName =
+      angler?.display_name?.trim() ||
+      [angler?.first_name, angler?.last_name].filter(Boolean).join(" ").trim() ||
+      angler?.email?.split("@")[0] ||
+      "Angler";
 
-    if (data.mode === "new_cohort") {
-      if (!data.listing_title || !data.slots || data.slots.length === 0) {
-        throw new Error("Title and at least one session date are required.");
-      }
-      const slots = [...data.slots].sort(
-        (a, b) =>
-          new Date(a.starts_at).getTime() - new Date(b.starts_at).getTime(),
-      );
+    const { data: guide } = await supabase
+      .from("profiles")
+      .select("first_name, last_name, display_name, email")
+      .eq("id", userId)
+      .maybeSingle();
+    const guideName =
+      guide?.display_name?.trim() ||
+      [guide?.first_name, guide?.last_name].filter(Boolean).join(" ").trim() ||
+      guide?.email?.split("@")[0] ||
+      "Your guide";
 
-      // learner name for the admin label
-      const { data: learner } = await supabase
-        .from("profiles")
-        .select("first_name, last_name, display_name, email")
-        .eq("id", thread.learner_id)
-        .maybeSingle();
-      const learnerName =
-        learner?.display_name?.trim() ||
-        [learner?.first_name, learner?.last_name].filter(Boolean).join(" ").trim() ||
-        learner?.email?.split("@")[0] ||
-        "Learner";
+    const adminLabel = buildAdminLabel({
+      title: data.title,
+      firstSlotIso: data.starts_at,
+      learnerName: anglerName,
+    });
 
-      const adminLabel = buildAdminLabel({
-        title: data.listing_title,
-        firstSlotIso: slots[0].starts_at,
-        learnerName,
-      });
+    const { data: cs, error: csErr } = await supabase
+      .from("class_sessions")
+      .insert({
+        aide_id: userId,
+        course_id: thread.journey_id,
+        listing_title: data.title,
+        session_dates_times_array: [
+          {
+            starts_at: data.starts_at,
+            duration_minutes: data.duration_minutes,
+          },
+        ],
+        max_seats: data.total_anglers,
+        filled_seats: 0,
+        admin_label: adminLabel,
+        status: "active",
+        meeting_point_address: data.meeting_point_address,
+        meeting_point_lat: data.meeting_point_lat ?? null,
+        meeting_point_lng: data.meeting_point_lng ?? null,
+        meeting_point_place_id: data.meeting_point_place_id ?? null,
+      } as any)
+      .select("id")
+      .single();
+    if (csErr || !cs)
+      throw new Error(csErr?.message ?? "Could not create custom trip.");
+    const classSessionId = cs.id;
 
-      const { data: cs, error: csErr } = await supabase
-        .from("class_sessions")
-        .insert({
-          aide_id: userId,
-          course_id: thread.journey_id,
-          listing_title: data.listing_title,
-          session_dates_times_array: slots,
-          
-          max_seats: data.max_seats ?? 1,
-          filled_seats: 0,
-          admin_label: adminLabel,
-          status: "active",
-        })
-        .select("id")
-        .single();
-      if (csErr || !cs)
-        throw new Error(csErr?.message ?? "Could not create class session.");
-      classSessionId = cs.id;
-    } else {
-      if (!data.class_session_id)
-        throw new Error("Pick an existing cohort to link.");
-      const { data: cs, error: csErr } = await supabase
-        .from("class_sessions")
-        .select("id, aide_id, max_seats, filled_seats")
-        .eq("id", data.class_session_id)
-        .maybeSingle();
-      if (csErr || !cs) throw new Error("Cohort not found.");
-      if (cs.aide_id !== userId)
-        throw new Error("That cohort doesn't belong to you.");
-      if (cs.filled_seats >= cs.max_seats)
-        throw new Error("That cohort has no seats left.");
-      classSessionId = cs.id;
-    }
-
+    // The deposit is what the angler actually pays at checkout — fees are
+    // computed off the deposit so the existing checkout flow charges the
+    // right amount.
     const feeRate = await getPlatformFeeRate();
-    const fees = computeFeeBreakdown(data.total_price_minor, feeRate);
-
+    const fees = computeFeeBreakdown(data.deposit_minor, feeRate);
+    const balanceDueMinor = data.total_price_minor - data.deposit_minor;
 
     const { data: booking, error: bErr } = await supabase
       .from("bookings")
@@ -168,23 +165,27 @@ export const createCustomOffer = createServerFn({ method: "POST" })
         course_id: thread.journey_id,
         thread_id: thread.id,
         class_session_id: classSessionId,
-        total_price: data.total_price_minor,
+        total_price: data.deposit_minor,
+        deposit_minor: data.deposit_minor,
+        balance_due_minor: balanceDueMinor,
         service_fee_amount: fees.feeMinor,
         aide_earnings: fees.payoutMinor,
         currency: data.currency.toUpperCase(),
         status: "pending_offer",
-      })
+        trip_date: data.trip_date,
+        guests: data.total_anglers,
+      } as any)
       .select("id")
       .single();
     if (bErr || !booking)
-      throw new Error(bErr?.message ?? "Could not create offer.");
+      throw new Error(bErr?.message ?? "Could not create custom trip.");
 
     const { data: msg, error: mErr } = await supabase
       .from("messages")
       .insert({
         thread_id: thread.id,
         sender_id: userId,
-        body: "Sent a custom offer",
+        body: "Sent a custom trip",
         attachment_type: "custom_offer",
         booking_id: booking.id,
         time_zone_label: data.time_zone_label || null,
@@ -194,7 +195,18 @@ export const createCustomOffer = createServerFn({ method: "POST" })
       .select("id")
       .single();
     if (mErr || !msg)
-      throw new Error(mErr?.message ?? "Could not post offer message.");
+      throw new Error(mErr?.message ?? "Could not post custom trip message.");
+
+    // In-app alert for the angler (real-time alert; email infra not wired yet)
+    try {
+      await supabaseAdmin.from("user_alerts").insert({
+        user_id: thread.learner_id,
+        kind: "custom_offer_received",
+        message: `🎣 ${guideName} sent you a custom trip: ${data.title}`,
+      } as any);
+    } catch (e) {
+      console.error("[createCustomOffer] alert insert failed", e);
+    }
 
     return {
       booking_id: booking.id,
