@@ -195,14 +195,7 @@ function TripBookingsPage() {
                     <Button
                       size="sm"
                       className="bg-amber-500 text-white hover:bg-amber-600"
-                      onClick={() => {
-                        if (b.thread_id) {
-                          navigate({
-                            to: "/dashboard/messages/$threadId",
-                            params: { threadId: b.thread_id },
-                          });
-                        }
-                      }}
+                      onClick={() => setOfferTarget(b)}
                     >
                       Review & Accept Offer
                     </Button>
