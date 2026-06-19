@@ -40,6 +40,7 @@ const NAV = [
   { to: "/admin/users", label: "Users", icon: Users, exact: false },
   { to: "/admin/listings", label: "Listings", icon: ListChecks, exact: false },
   { to: "/admin/transactions", label: "Transactions", icon: Receipt, exact: false },
+  { to: "/admin/availability", label: "Availability Manager", icon: CalendarClock, exact: false },
   { to: "/admin/search-seo", label: "Search & SEO", icon: Search, exact: false },
   { to: "/admin/reviews", label: "Reviews", icon: Star, exact: false },
   { to: "/admin/settings", label: "Settings", icon: SettingsIcon, exact: false },
