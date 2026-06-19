@@ -2,8 +2,10 @@ import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useEffect, useMemo, useState } from "react";
 import { useServerFn } from "@tanstack/react-start";
 import { useQuery } from "@tanstack/react-query";
-import { ArrowDown, ArrowUp, Receipt } from "lucide-react";
+import { ArrowDown, ArrowUp, Receipt, Search } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Badge } from "@/components/ui/badge";
 import {
   Table,
   TableBody,
@@ -23,19 +25,15 @@ import { useAuthStore } from "@/stores/useAuthStore";
 import { useCurrencyStore, type CurrencyCode } from "@/stores/useCurrencyStore";
 import { convertMinor } from "@/lib/currency";
 import { formatCurrency } from "@/lib/format-currency";
-import { usePlatformFee } from "@/hooks/usePlatformFee";
 import {
- listMyOrdersAide,
-
-  type OrderSummary,
-} from "@/lib/orders.functions";
-import { listMyTripBookingsAide } from "@/lib/trip-bookings.functions";
-import { ReceiptDialog } from "@/components/earnings/ReceiptDialog";
-
+  listMyTripBookingsAide,
+  type TripBookingSummary,
+} from "@/lib/trip-bookings.functions";
+import { TripReceiptDialog } from "@/components/earnings/TripReceiptDialog";
 
 const display = { fontFamily: "Montserrat, system-ui, sans-serif" };
 
-type Timeframe = "all" | "this_month" | "last_month" | "this_year";
+type Timeframe = "all" | "this_month" | "this_year" | "last_12_months";
 type SortDir = "asc" | "desc";
 
 export const Route = createFileRoute("/_authenticated/dashboard/earnings")({
@@ -52,103 +50,116 @@ function timeframeBounds(tf: Timeframe): { start: Date; end: Date } | null {
       end: new Date(now.getFullYear(), now.getMonth() + 1, 1),
     };
   }
-  if (tf === "last_month") {
+  if (tf === "this_year") {
     return {
-      start: new Date(now.getFullYear(), now.getMonth() - 1, 1),
-      end: new Date(now.getFullYear(), now.getMonth(), 1),
+      start: new Date(now.getFullYear(), 0, 1),
+      end: new Date(now.getFullYear() + 1, 0, 1),
     };
   }
-  // this_year
-  return {
-    start: new Date(now.getFullYear(), 0, 1),
-    end: new Date(now.getFullYear() + 1, 0, 1),
-  };
+  // last_12_months
+  const start = new Date(now);
+  start.setMonth(start.getMonth() - 12);
+  return { start, end: new Date(now.getFullYear(), now.getMonth(), now.getDate() + 1) };
+}
+
+function shortOrderNumber(id: string): string {
+  return "#" + id.replace(/-/g, "").slice(-6).toUpperCase();
+}
+
+function formatDate(iso: string | null): string {
+  if (!iso) return "—";
+  try {
+    return new Date(iso).toLocaleDateString(undefined, {
+      year: "numeric",
+      month: "short",
+      day: "numeric",
+    });
+  } catch {
+    return "—";
+  }
 }
 
 function EarningsPage() {
   const user = useAuthStore((s) => s.user);
   const navigate = useNavigate();
-  const fetchOrders = useServerFn(listMyOrdersAide);
   const currency = useCurrencyStore((s) => s.currency);
-  const { label: feeLabel } = usePlatformFee();
-  const [selectedOrder, setSelectedOrder] = useState<OrderSummary | null>(null);
+  const fetchTripBookings = useServerFn(listMyTripBookingsAide);
+
+  const [selectedBooking, setSelectedBooking] =
+    useState<TripBookingSummary | null>(null);
   const [sortDir, setSortDir] = useState<SortDir>("desc");
   const [timeframe, setTimeframe] = useState<Timeframe>("all");
-  const [courseFilter, setCourseFilter] = useState<string>("all");
+  const [search, setSearch] = useState("");
 
   useEffect(() => {
     if (!user && typeof window !== "undefined") navigate({ to: "/login" });
   }, [user, navigate]);
 
   const { data, isLoading } = useQuery({
-    queryKey: ["my-orders-aide", user?.id],
-    queryFn: () => fetchOrders(),
-    enabled: !!user,
-  });
-
-  const fetchTripBookings = useServerFn(listMyTripBookingsAide);
-  const { data: tripBookingsData } = useQuery({
     queryKey: ["my-trip-bookings-aide", user?.id],
     queryFn: () => fetchTripBookings(),
     enabled: !!user,
   });
 
-  const orders = data ?? [];
-  const tripBookings = (tripBookingsData ?? []).filter(
-    (b) => b.status === "confirmed" || b.status === "completed",
+  const bookings = useMemo(
+    () =>
+      (data ?? []).filter(
+        (b) => b.status === "completed" || b.status === "confirmed",
+      ),
+    [data],
   );
 
   const totals = useMemo(() => {
-    let payout = 0;
-    let fees = 0;
-    let gross = 0;
-    for (const o of orders) {
-      const cur = (o.currency as CurrencyCode) ?? currency;
-      payout += convertMinor(o.aide_payout_minor, cur, currency);
-      fees += convertMinor(o.platform_fee_minor, cur, currency);
-      gross += convertMinor(o.total_paid_minor, cur, currency);
-    }
-    for (const b of tripBookings) {
+    let completedEarnings = 0;
+    let projectedEarnings = 0;
+    let tripsRun = 0;
+    const todayIso = new Date().toISOString().slice(0, 10);
+    for (const b of bookings) {
       const cur = (b.currency as CurrencyCode) ?? currency;
-      payout += convertMinor(b.aide_earnings_minor, cur, currency);
-      fees += convertMinor(b.service_fee_minor, cur, currency);
-      gross += convertMinor(b.total_price_minor, cur, currency);
+      const balance = convertMinor(b.balance_due_minor ?? 0, cur, currency);
+      if (b.status === "completed") {
+        completedEarnings += balance;
+        tripsRun += 1;
+      } else if (b.status === "confirmed") {
+        if (!b.trip_date || b.trip_date >= todayIso) {
+          projectedEarnings += balance;
+        }
+      }
     }
-    return { payout, fees, gross };
-  }, [orders, tripBookings, currency]);
+    return { completedEarnings, projectedEarnings, tripsRun };
+  }, [bookings, currency]);
 
-
-  const courseOptions = useMemo(() => {
-    const titles = new Set<string>();
-    for (const o of orders) {
-      if (o.snapshot_course_title) titles.add(o.snapshot_course_title);
-    }
-    return Array.from(titles).sort((a, b) => a.localeCompare(b));
-  }, [orders]);
-
-  const visibleOrders = useMemo(() => {
+  const visibleRows = useMemo(() => {
     const bounds = timeframeBounds(timeframe);
-    let rows = orders;
+    const q = search.trim().toLowerCase();
+    let rows = bookings;
     if (bounds) {
-      rows = rows.filter((o) => {
-        const t = new Date(o.created_at).getTime();
+      rows = rows.filter((b) => {
+        const iso = b.trip_date ?? b.created_at;
+        const t = new Date(iso).getTime();
         return t >= bounds.start.getTime() && t < bounds.end.getTime();
       });
     }
-    if (courseFilter !== "all") {
-      rows = rows.filter((o) => o.snapshot_course_title === courseFilter);
+    if (q) {
+      rows = rows.filter((b) => {
+        const orderNum = shortOrderNumber(b.id).toLowerCase();
+        const angler = (b.primary_angler_name ?? b.learner_name ?? "").toLowerCase();
+        const title = (b.trip_title ?? "").toLowerCase();
+        return (
+          orderNum.includes(q) || angler.includes(q) || title.includes(q)
+        );
+      });
     }
-    const sorted = [...rows].sort((a, b) => {
-      const ta = new Date(a.created_at).getTime();
-      const tb = new Date(b.created_at).getTime();
+    return [...rows].sort((a, b) => {
+      const ta = new Date(a.trip_date ?? a.created_at).getTime();
+      const tb = new Date(b.trip_date ?? b.created_at).getTime();
       return sortDir === "desc" ? tb - ta : ta - tb;
     });
-    return sorted;
-  }, [orders, timeframe, courseFilter, sortDir]);
+  }, [bookings, timeframe, search, sortDir]);
 
   if (!user) return null;
 
-  const aideName = user.displayName || user.firstName || user.email;
+  const captainName = user.displayName || user.firstName || user.email;
 
   return (
     <main className="mx-auto max-w-[1600px] px-4 md:px-6 lg:px-8 py-12 print:hidden">
@@ -156,52 +167,52 @@ function EarningsPage() {
         My Earnings
       </h1>
       <p className="mt-2 text-muted-foreground">
-        Your financial performance — payouts settle to your account at the time of booking.
+        Your financial performance — the deposit covers the platform fee; the
+        remaining balance is collected at the dock.
       </p>
 
       <div className="mt-6 grid grid-cols-1 gap-4 md:grid-cols-3">
-        <SummaryCard label="Total Revenue Earned" value={formatCurrency(totals.payout, currency)} accent />
-        <SummaryCard label="Gross" value={formatCurrency(totals.gross, currency)} />
         <SummaryCard
-          label={`Platform fee (${feeLabel})`}
-          value={`−${formatCurrency(totals.fees, currency)}`}
+          label="Completed Earnings"
+          value={formatCurrency(totals.completedEarnings, currency)}
+          accent="money"
         />
+        <SummaryCard
+          label="Projected Earnings"
+          value={formatCurrency(totals.projectedEarnings, currency)}
+          accent="gold"
+        />
+        <SummaryCard label="Trips Run" value={String(totals.tripsRun)} />
       </div>
 
-      <div className="mt-8 flex flex-wrap items-center gap-3">
+      <div className="mt-8 flex flex-wrap items-center justify-between gap-3">
         <div className="flex items-center gap-2">
           <span className="text-xs uppercase tracking-wide text-muted-foreground">
             Timeframe
           </span>
-          <Select value={timeframe} onValueChange={(v) => setTimeframe(v as Timeframe)}>
-            <SelectTrigger className="w-[160px]">
+          <Select
+            value={timeframe}
+            onValueChange={(v) => setTimeframe(v as Timeframe)}
+          >
+            <SelectTrigger className="w-[180px]">
               <SelectValue />
             </SelectTrigger>
             <SelectContent>
               <SelectItem value="all">All Time</SelectItem>
               <SelectItem value="this_month">This Month</SelectItem>
-              <SelectItem value="last_month">Last Month</SelectItem>
               <SelectItem value="this_year">This Year</SelectItem>
+              <SelectItem value="last_12_months">Past 12 Months</SelectItem>
             </SelectContent>
           </Select>
         </div>
-        <div className="flex items-center gap-2">
-          <span className="text-xs uppercase tracking-wide text-muted-foreground">
-            Trip
-          </span>
-          <Select value={courseFilter} onValueChange={setCourseFilter}>
-            <SelectTrigger className="w-[220px]">
-              <SelectValue />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="all">All Trips</SelectItem>
-              {courseOptions.map((t) => (
-                <SelectItem key={t} value={t}>
-                  {t}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
+        <div className="relative w-full max-w-sm">
+          <Search className="pointer-events-none absolute left-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" />
+          <Input
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
+            placeholder="Search by Order #, Angler, or Trip..."
+            className="pl-9"
+          />
         </div>
       </div>
 
@@ -213,7 +224,9 @@ function EarningsPage() {
                 <button
                   type="button"
                   className="inline-flex items-center gap-1 hover:text-foreground"
-                  onClick={() => setSortDir((d) => (d === "desc" ? "asc" : "desc"))}
+                  onClick={() =>
+                    setSortDir((d) => (d === "desc" ? "asc" : "desc"))
+                  }
                 >
                   Date
                   {sortDir === "desc" ? (
@@ -227,31 +240,38 @@ function EarningsPage() {
               <TableHead className="font-bold">Trip Title</TableHead>
               <TableHead className="font-bold">Angler</TableHead>
               <TableHead className="font-bold">Money Earned</TableHead>
+              <TableHead className="font-bold">Status</TableHead>
               <TableHead className="font-bold">Actions</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
             {isLoading ? (
               <TableRow>
-                <TableCell colSpan={6} className="text-center text-muted-foreground py-10">
+                <TableCell
+                  colSpan={7}
+                  className="text-center text-muted-foreground py-10"
+                >
                   Loading…
                 </TableCell>
               </TableRow>
-            ) : visibleOrders.length === 0 ? (
+            ) : visibleRows.length === 0 ? (
               <TableRow>
-                <TableCell colSpan={6} className="text-center text-muted-foreground py-10">
-                  {orders.length === 0
-                    ? "No earnings yet — once an angler books a trip, the ledger will populate here."
-                    : "No orders match the current filters."}
+                <TableCell
+                  colSpan={7}
+                  className="text-center text-muted-foreground py-10"
+                >
+                  {bookings.length === 0
+                    ? "No trip earnings yet — once a trip is booked, it will show up here."
+                    : "No trips match the current filters."}
                 </TableCell>
               </TableRow>
             ) : (
-              visibleOrders.map((o) => (
+              visibleRows.map((b) => (
                 <EarningsRow
-                  key={o.id}
-                  order={o}
+                  key={b.id}
+                  booking={b}
                   viewerCurrency={currency}
-                  onViewReceipt={() => setSelectedOrder(o)}
+                  onViewReceipt={() => setSelectedBooking(b)}
                 />
               ))
             )}
@@ -259,52 +279,12 @@ function EarningsPage() {
         </Table>
       </div>
 
-      {tripBookings.length > 0 && (
-        <section className="mt-10">
-          <h2 className="text-xl font-bold tracking-tight" style={display}>
-            Trip Bookings ({tripBookings.length})
-          </h2>
-          <p className="mt-1 text-sm text-muted-foreground">
-            Charter and guided-trip earnings.
-          </p>
-          <div className="mt-3 w-full overflow-x-auto rounded-md border border-border">
-            <Table className="w-full">
-              <TableHeader>
-                <TableRow>
-                  <TableHead className="font-bold">Trip date</TableHead>
-                  <TableHead className="font-bold">Trip</TableHead>
-                  <TableHead className="font-bold">Angler</TableHead>
-                  <TableHead className="font-bold">Gross</TableHead>
-                  <TableHead className="font-bold">Fee</TableHead>
-                  <TableHead className="font-bold text-right">Your earnings</TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {tripBookings.map((b) => (
-                  <TableRow key={b.id}>
-                    <TableCell>{b.trip_date}</TableCell>
-                    <TableCell>{b.trip_title ?? "Trip"}</TableCell>
-                    <TableCell>{b.primary_angler_name ?? b.learner_name ?? "—"}</TableCell>
-                    <TableCell>{formatCurrency(b.total_price_minor / 100, b.currency)}</TableCell>
-                    <TableCell>−{formatCurrency(b.service_fee_minor / 100, b.currency)}</TableCell>
-                    <TableCell className="text-right font-semibold">
-                      {formatCurrency(b.aide_earnings_minor / 100, b.currency)}
-                    </TableCell>
-                  </TableRow>
-                ))}
-              </TableBody>
-            </Table>
-          </div>
-        </section>
-      )}
-
-      <ReceiptDialog
-        order={selectedOrder}
-        aideName={aideName}
-        onOpenChange={(open: boolean) => !open && setSelectedOrder(null)}
+      <TripReceiptDialog
+        booking={selectedBooking}
+        captainName={captainName}
+        onOpenChange={(open) => !open && setSelectedBooking(null)}
       />
     </main>
-
   );
 }
 
@@ -315,69 +295,78 @@ function SummaryCard({
 }: {
   label: string;
   value: string;
-  accent?: boolean;
+  accent?: "money" | "gold";
 }) {
+  const tone =
+    accent === "money"
+      ? "text-money"
+      : accent === "gold"
+        ? "text-accent-foreground"
+        : "text-foreground";
   return (
     <div className="rounded-lg border border-border bg-card p-4">
       <div className="text-xs uppercase tracking-wide text-muted-foreground">
         {label}
       </div>
-      <div
-        className={`mt-1 text-2xl font-bold ${accent ? "text-money" : "text-foreground"}`}
-        style={display}
-      >
+      <div className={`mt-1 text-2xl font-bold ${tone}`} style={display}>
         {value}
       </div>
     </div>
   );
 }
 
-function formatDate(iso: string): string {
-  try {
-    return new Date(iso).toLocaleDateString(undefined, {
-      year: "numeric",
-      month: "short",
-      day: "numeric",
-    });
-  } catch {
-    return "—";
-  }
-}
-
 function EarningsRow({
-  order,
+  booking,
   viewerCurrency,
   onViewReceipt,
 }: {
-  order: OrderSummary;
+  booking: TripBookingSummary;
   viewerCurrency: CurrencyCode;
   onViewReceipt: () => void;
 }) {
-  const payout = formatCurrency(
+  const earned = formatCurrency(
     convertMinor(
-      order.aide_payout_minor,
-      order.currency as CurrencyCode,
+      booking.balance_due_minor ?? 0,
+      booking.currency as CurrencyCode,
       viewerCurrency,
     ),
     viewerCurrency,
   );
+  const tripType =
+    booking.source === "custom_offer" ? "Custom Offer" : "Instant Book";
+  const isCompleted = booking.status === "completed";
+  const angler = booking.primary_angler_name ?? booking.learner_name ?? "—";
 
   return (
     <TableRow>
       <TableCell className="text-sm text-foreground whitespace-nowrap">
-        {formatDate(order.created_at)}
-      </TableCell>
-      <TableCell className="text-sm text-foreground">{order.order_number}</TableCell>
-      <TableCell className="text-sm font-medium text-foreground">
-        {order.snapshot_course_title ?? "Custom session"}
+        {formatDate(booking.trip_date ?? booking.created_at)}
       </TableCell>
       <TableCell className="text-sm text-foreground">
-        <span className="truncate">{order.counterparty_name}</span>
+        {shortOrderNumber(booking.id)}
       </TableCell>
-      <TableCell className="text-sm font-bold text-money">{payout}</TableCell>
+      <TableCell className="text-sm font-medium text-foreground">
+        {booking.trip_title ?? "Trip"}{" "}
+        <span className="text-muted-foreground">({tripType})</span>
+      </TableCell>
+      <TableCell className="text-sm text-foreground">
+        <span className="truncate">{angler}</span>
+      </TableCell>
+      <TableCell className="text-sm font-bold text-money">{earned}</TableCell>
+      <TableCell className="text-sm">
+        {isCompleted ? (
+          <Badge className="bg-money text-money-foreground hover:bg-money">
+            Completed
+          </Badge>
+        ) : (
+          <Badge className="bg-accent text-accent-foreground hover:bg-accent">
+            Projected
+          </Badge>
+        )}
+      </TableCell>
       <TableCell className="text-sm text-foreground">
         <Button size="sm" variant="outline" onClick={onViewReceipt}>
-          <Receipt className="mr-1 size-4" /> Receipt
+          <Receipt className="mr-1 size-4" /> View Receipt
         </Button>
       </TableCell>
     </TableRow>
