@@ -321,8 +321,8 @@ function TransactionsPage() {
               <TableRow>
                 <TableHead className="font-bold">Order Number</TableHead>
                 <TableHead className="font-bold">Date &amp; Time</TableHead>
-                <TableHead className="font-bold">Learner</TableHead>
-                <TableHead className="font-bold">Aide</TableHead>
+                <TableHead className="font-bold">Angler</TableHead>
+                <TableHead className="font-bold">Captain/Guide</TableHead>
                 <TableHead className="font-bold text-right">Gross Total</TableHead>
                 <TableHead className="font-bold text-right">Payout Amount</TableHead>
                 <TableHead className="font-bold text-right">Earnings ({feeLabel})</TableHead>
