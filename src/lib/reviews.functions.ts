@@ -57,6 +57,60 @@ export const getMyReviewedOrderIds = createServerFn({ method: "GET" })
     return (data ?? []).map((r) => r.order_id).filter((id): id is string => !!id);
   });
 
+export const getMyReviewedBookingIds = createServerFn({ method: "GET" })
+  .middleware([requireSupabaseAuth])
+  .handler(async ({ context }): Promise<string[]> => {
+    const { data, error } = await supabaseAdmin
+      .from("reviews")
+      .select("booking_id")
+      .eq("learner_id", context.userId);
+    if (error) return [];
+    return (data ?? []).map((r) => r.booking_id).filter((id): id is string => !!id);
+  });
+
+const SubmitTripReviewInput = z.object({
+  bookingId: z.string().uuid(),
+  rating: z.number().int().min(1).max(5),
+  title: z.string().trim().min(1).max(50),
+  description: z.string().trim().min(1).max(500),
+});
+
+export const submitTripReview = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((input: unknown) => SubmitTripReviewInput.parse(input))
+  .handler(async ({ data, context }) => {
+    const { userId } = context;
+
+    const { data: booking, error: bErr } = await supabaseAdmin
+      .from("bookings")
+      .select("id, learner_id, aide_id, course_id, status")
+      .eq("id", data.bookingId)
+      .single();
+    if (bErr || !booking) throw new Error("Booking not found");
+    if (booking.learner_id !== userId) throw new Error("Not your booking");
+    if (booking.status !== "completed")
+      throw new Error("Trip is not completed yet");
+    if (!booking.course_id) throw new Error("Trip is missing a listing reference");
+
+    const { error: insertErr } = await supabaseAdmin.from("reviews").insert({
+      booking_id: booking.id,
+      listing_id: booking.course_id,
+      aide_id: booking.aide_id,
+      learner_id: userId,
+      rating: data.rating,
+      title: data.title,
+      description: data.description,
+    });
+
+    if (insertErr) {
+      if (insertErr.code === "23505")
+        throw new Error("You already reviewed this trip");
+      throw new Error(insertErr.message);
+    }
+
+    return { ok: true };
+  });
+
 export type ListingReviewStats = { avg: number; count: number };
 
 export const getListingReviewStats = createServerFn({ method: "POST" })
