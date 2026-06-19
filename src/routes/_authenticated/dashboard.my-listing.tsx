@@ -431,10 +431,6 @@ function MyListingPage() {
                             </a>
                           </DropdownMenuItem>
                         ) : null}
-                        <DropdownMenuItem onClick={() => setPayoutsOpen(true)}>
-                          <Banknote className="mr-2 size-4" />
-                          {isPayoutReady ? "Manage payouts" : "Connect Stripe"}
-                        </DropdownMenuItem>
                         <DropdownMenuSeparator />
                         <DropdownMenuItem asChild>
                           <Link to="/create-listing/new" search={{ edit: true } as never}>
