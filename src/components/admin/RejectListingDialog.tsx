@@ -58,7 +58,7 @@ const REASONS: { key: ReasonKey; label: string; text: string }[] = [
   {
     key: "inappropriate_content",
     label: "Inappropriate Language / Content",
-    text: "Your listing contains language, phrasing, or content that violates our community guidelines. Please review your text to ensure a professional and respectful learning environment.",
+    text: "Your listing contains language, phrasing, or content that violates our community guidelines. Please review your text to ensure a professional and respectful experience.",
   },
   {
     key: "tos_noncompliance",
