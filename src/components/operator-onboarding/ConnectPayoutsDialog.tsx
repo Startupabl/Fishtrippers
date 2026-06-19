@@ -1,7 +1,5 @@
-import { useState } from "react";
-import { useServerFn } from "@tanstack/react-start";
-import { Loader2, Banknote } from "lucide-react";
-import { toast } from "sonner";
+import { useNavigate } from "@tanstack/react-router";
+import { ClipboardList } from "lucide-react";
 
 import {
   Dialog,
@@ -12,7 +10,6 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
-import { startStripeConnectOnboarding } from "@/lib/payouts.functions";
 
 interface Props {
   open: boolean;
@@ -20,26 +17,15 @@ interface Props {
   onLater?: () => void;
 }
 
-export function ConnectPayoutsDialog({ open, onOpenChange, onLater }: Props) {
-  const start = useServerFn(startStripeConnectOnboarding);
-  const [loading, setLoading] = useState(false);
+export function ListingSubmittedDialog({ open, onOpenChange, onLater }: Props) {
+  const navigate = useNavigate();
 
-  const handleConnect = async () => {
-    setLoading(true);
-    try {
-      const { url } = await start();
-      if (url) {
-        window.location.href = url;
-        return;
-      }
-      throw new Error("Could not start Stripe onboarding");
-    } catch (e: any) {
-      toast.error(e?.message ?? "Failed to start Stripe onboarding");
-      setLoading(false);
-    }
+  const handleGoToListings = () => {
+    onOpenChange(false);
+    navigate({ to: "/dashboard/my-listing" });
   };
 
-  const handleLater = () => {
+  const handleClose = () => {
     onOpenChange(false);
     onLater?.();
   };
@@ -49,35 +35,27 @@ export function ConnectPayoutsDialog({ open, onOpenChange, onLater }: Props) {
       <DialogContent className="sm:max-w-[480px]">
         <DialogHeader>
           <div className="mx-auto mb-2 flex h-12 w-12 items-center justify-center rounded-full bg-primary/10">
-            <Banknote className="h-6 w-6 text-primary" />
+            <ClipboardList className="h-6 w-6 text-primary" />
           </div>
-          <DialogTitle className="text-center">One more thing — connect payouts</DialogTitle>
+          <DialogTitle className="text-center">Listing submitted for review</DialogTitle>
           <DialogDescription className="text-center">
-            Your listing is in review. To accept bookings the moment we approve it,
-            connect your Stripe account now. Without payouts connected we can&apos;t
-            approve your listing.
+            Thanks! Our team will review your listing within 24 hours. In the
+            meantime, head to <strong>My Listings</strong> to manage your trips,
+            availability, and photos.
           </DialogDescription>
         </DialogHeader>
         <DialogFooter className="flex-col gap-2 sm:flex-col sm:space-x-0">
-          <Button
-            onClick={handleConnect}
-            disabled={loading}
-            className="w-full gap-2"
-            size="lg"
-          >
-            {loading ? <Loader2 className="size-4 animate-spin" /> : null}
-            Connect Stripe
+          <Button onClick={handleGoToListings} className="w-full" size="lg">
+            Go to My Listings
           </Button>
-          <Button
-            variant="ghost"
-            onClick={handleLater}
-            disabled={loading}
-            className="w-full"
-          >
-            I&apos;ll do this later
+          <Button variant="ghost" onClick={handleClose} className="w-full">
+            Close
           </Button>
         </DialogFooter>
       </DialogContent>
     </Dialog>
   );
 }
+
+// Back-compat alias so existing call sites keep working.
+export const ConnectPayoutsDialog = ListingSubmittedDialog;
