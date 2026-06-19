@@ -94,6 +94,7 @@ import { Route as AuthenticatedDashboardMessagesThreadIdRouteImport } from './ro
 import { Route as AuthenticatedDashboardLearnerUpcomingSessionsRouteImport } from './routes/_authenticated/dashboard.learner.upcoming-sessions'
 import { Route as AuthenticatedDashboardLearnerScheduleRouteImport } from './routes/_authenticated/dashboard.learner.schedule'
 import { Route as AuthenticatedDashboardLearnerPurchasesRouteImport } from './routes/_authenticated/dashboard.learner.purchases'
+import { Route as AuthenticatedDashboardLearnerBookingsRouteImport } from './routes/_authenticated/dashboard.learner.bookings'
 import { Route as AuthenticatedDashboardAideCoursesRouteImport } from './routes/_authenticated/dashboard.aide.courses'
 import { Route as AdminAdminUsersUserIdRouteImport } from './routes/_admin/admin.users.$userId'
 import { Route as AdminAdminSettingsStripeRouteImport } from './routes/_admin/admin.settings.stripe'
@@ -561,6 +562,12 @@ const AuthenticatedDashboardLearnerPurchasesRoute =
     path: '/purchases',
     getParentRoute: () => AuthenticatedDashboardLearnerRoute,
   } as any)
+const AuthenticatedDashboardLearnerBookingsRoute =
+  AuthenticatedDashboardLearnerBookingsRouteImport.update({
+    id: '/bookings',
+    path: '/bookings',
+    getParentRoute: () => AuthenticatedDashboardLearnerRoute,
+  } as any)
 const AuthenticatedDashboardAideCoursesRoute =
   AuthenticatedDashboardAideCoursesRouteImport.update({
     id: '/courses',
@@ -721,6 +728,7 @@ export interface FileRoutesByFullPath {
   '/admin/settings/stripe': typeof AdminAdminSettingsStripeRoute
   '/admin/users/$userId': typeof AdminAdminUsersUserIdRoute
   '/dashboard/aide/courses': typeof AuthenticatedDashboardAideCoursesRoute
+  '/dashboard/learner/bookings': typeof AuthenticatedDashboardLearnerBookingsRoute
   '/dashboard/learner/purchases': typeof AuthenticatedDashboardLearnerPurchasesRoute
   '/dashboard/learner/schedule': typeof AuthenticatedDashboardLearnerScheduleRoute
   '/dashboard/learner/upcoming-sessions': typeof AuthenticatedDashboardLearnerUpcomingSessionsRoute
@@ -816,6 +824,7 @@ export interface FileRoutesByTo {
   '/admin/settings/stripe': typeof AdminAdminSettingsStripeRoute
   '/admin/users/$userId': typeof AdminAdminUsersUserIdRoute
   '/dashboard/aide/courses': typeof AuthenticatedDashboardAideCoursesRoute
+  '/dashboard/learner/bookings': typeof AuthenticatedDashboardLearnerBookingsRoute
   '/dashboard/learner/purchases': typeof AuthenticatedDashboardLearnerPurchasesRoute
   '/dashboard/learner/schedule': typeof AuthenticatedDashboardLearnerScheduleRoute
   '/dashboard/learner/upcoming-sessions': typeof AuthenticatedDashboardLearnerUpcomingSessionsRoute
@@ -917,6 +926,7 @@ export interface FileRoutesById {
   '/_admin/admin/settings/stripe': typeof AdminAdminSettingsStripeRoute
   '/_admin/admin/users/$userId': typeof AdminAdminUsersUserIdRoute
   '/_authenticated/dashboard/aide/courses': typeof AuthenticatedDashboardAideCoursesRoute
+  '/_authenticated/dashboard/learner/bookings': typeof AuthenticatedDashboardLearnerBookingsRoute
   '/_authenticated/dashboard/learner/purchases': typeof AuthenticatedDashboardLearnerPurchasesRoute
   '/_authenticated/dashboard/learner/schedule': typeof AuthenticatedDashboardLearnerScheduleRoute
   '/_authenticated/dashboard/learner/upcoming-sessions': typeof AuthenticatedDashboardLearnerUpcomingSessionsRoute
@@ -1017,6 +1027,7 @@ export interface FileRouteTypes {
     | '/admin/settings/stripe'
     | '/admin/users/$userId'
     | '/dashboard/aide/courses'
+    | '/dashboard/learner/bookings'
     | '/dashboard/learner/purchases'
     | '/dashboard/learner/schedule'
     | '/dashboard/learner/upcoming-sessions'
@@ -1112,6 +1123,7 @@ export interface FileRouteTypes {
     | '/admin/settings/stripe'
     | '/admin/users/$userId'
     | '/dashboard/aide/courses'
+    | '/dashboard/learner/bookings'
     | '/dashboard/learner/purchases'
     | '/dashboard/learner/schedule'
     | '/dashboard/learner/upcoming-sessions'
@@ -1212,6 +1224,7 @@ export interface FileRouteTypes {
     | '/_admin/admin/settings/stripe'
     | '/_admin/admin/users/$userId'
     | '/_authenticated/dashboard/aide/courses'
+    | '/_authenticated/dashboard/learner/bookings'
     | '/_authenticated/dashboard/learner/purchases'
     | '/_authenticated/dashboard/learner/schedule'
     | '/_authenticated/dashboard/learner/upcoming-sessions'
@@ -1868,6 +1881,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedDashboardLearnerPurchasesRouteImport
       parentRoute: typeof AuthenticatedDashboardLearnerRoute
     }
+    '/_authenticated/dashboard/learner/bookings': {
+      id: '/_authenticated/dashboard/learner/bookings'
+      path: '/bookings'
+      fullPath: '/dashboard/learner/bookings'
+      preLoaderRoute: typeof AuthenticatedDashboardLearnerBookingsRouteImport
+      parentRoute: typeof AuthenticatedDashboardLearnerRoute
+    }
     '/_authenticated/dashboard/aide/courses': {
       id: '/_authenticated/dashboard/aide/courses'
       path: '/courses'
@@ -2056,6 +2076,7 @@ const AuthenticatedDashboardAideRouteWithChildren =
   )
 
 interface AuthenticatedDashboardLearnerRouteChildren {
+  AuthenticatedDashboardLearnerBookingsRoute: typeof AuthenticatedDashboardLearnerBookingsRoute
   AuthenticatedDashboardLearnerPurchasesRoute: typeof AuthenticatedDashboardLearnerPurchasesRoute
   AuthenticatedDashboardLearnerScheduleRoute: typeof AuthenticatedDashboardLearnerScheduleRoute
   AuthenticatedDashboardLearnerUpcomingSessionsRoute: typeof AuthenticatedDashboardLearnerUpcomingSessionsRoute
@@ -2063,6 +2084,8 @@ interface AuthenticatedDashboardLearnerRouteChildren {
 
 const AuthenticatedDashboardLearnerRouteChildren: AuthenticatedDashboardLearnerRouteChildren =
   {
+    AuthenticatedDashboardLearnerBookingsRoute:
+      AuthenticatedDashboardLearnerBookingsRoute,
     AuthenticatedDashboardLearnerPurchasesRoute:
       AuthenticatedDashboardLearnerPurchasesRoute,
     AuthenticatedDashboardLearnerScheduleRoute:

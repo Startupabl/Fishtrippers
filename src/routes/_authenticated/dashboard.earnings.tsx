@@ -25,10 +25,13 @@ import { convertMinor } from "@/lib/currency";
 import { formatCurrency } from "@/lib/format-currency";
 import { usePlatformFee } from "@/hooks/usePlatformFee";
 import {
-  listMyOrdersAide,
+ listMyOrdersAide,
+
   type OrderSummary,
 } from "@/lib/orders.functions";
+import { listMyTripBookingsAide } from "@/lib/trip-bookings.functions";
 import { ReceiptDialog } from "@/components/earnings/ReceiptDialog";
+
 
 const display = { fontFamily: "Montserrat, system-ui, sans-serif" };
 
@@ -83,7 +86,17 @@ function EarningsPage() {
     enabled: !!user,
   });
 
+  const fetchTripBookings = useServerFn(listMyTripBookingsAide);
+  const { data: tripBookingsData } = useQuery({
+    queryKey: ["my-trip-bookings-aide", user?.id],
+    queryFn: () => fetchTripBookings(),
+    enabled: !!user,
+  });
+
   const orders = data ?? [];
+  const tripBookings = (tripBookingsData ?? []).filter(
+    (b) => b.status === "confirmed",
+  );
 
   const totals = useMemo(() => {
     let payout = 0;
@@ -95,8 +108,15 @@ function EarningsPage() {
       fees += convertMinor(o.platform_fee_minor, cur, currency);
       gross += convertMinor(o.total_paid_minor, cur, currency);
     }
+    for (const b of tripBookings) {
+      const cur = (b.currency as CurrencyCode) ?? currency;
+      payout += convertMinor(b.aide_earnings_minor, cur, currency);
+      fees += convertMinor(b.service_fee_minor, cur, currency);
+      gross += convertMinor(b.total_price_minor, cur, currency);
+    }
     return { payout, fees, gross };
-  }, [orders, currency]);
+  }, [orders, tripBookings, currency]);
+
 
   const courseOptions = useMemo(() => {
     const titles = new Set<string>();
@@ -239,12 +259,52 @@ function EarningsPage() {
         </Table>
       </div>
 
+      {tripBookings.length > 0 && (
+        <section className="mt-10">
+          <h2 className="text-xl font-bold tracking-tight" style={display}>
+            Trip Bookings ({tripBookings.length})
+          </h2>
+          <p className="mt-1 text-sm text-muted-foreground">
+            Charter and guided-trip earnings.
+          </p>
+          <div className="mt-3 w-full overflow-x-auto rounded-md border border-border">
+            <Table className="w-full">
+              <TableHeader>
+                <TableRow>
+                  <TableHead className="font-bold">Trip date</TableHead>
+                  <TableHead className="font-bold">Trip</TableHead>
+                  <TableHead className="font-bold">Angler</TableHead>
+                  <TableHead className="font-bold">Gross</TableHead>
+                  <TableHead className="font-bold">Fee</TableHead>
+                  <TableHead className="font-bold text-right">Your earnings</TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                {tripBookings.map((b) => (
+                  <TableRow key={b.id}>
+                    <TableCell>{b.trip_date}</TableCell>
+                    <TableCell>{b.trip_title ?? "Trip"}</TableCell>
+                    <TableCell>{b.primary_angler_name ?? b.learner_name ?? "—"}</TableCell>
+                    <TableCell>{formatCurrency(b.total_price_minor / 100, b.currency)}</TableCell>
+                    <TableCell>−{formatCurrency(b.service_fee_minor / 100, b.currency)}</TableCell>
+                    <TableCell className="text-right font-semibold">
+                      {formatCurrency(b.aide_earnings_minor / 100, b.currency)}
+                    </TableCell>
+                  </TableRow>
+                ))}
+              </TableBody>
+            </Table>
+          </div>
+        </section>
+      )}
+
       <ReceiptDialog
         order={selectedOrder}
         aideName={aideName}
         onOpenChange={(open: boolean) => !open && setSelectedOrder(null)}
       />
     </main>
+
   );
 }
 

@@ -484,3 +484,178 @@ export const simulateTripDepositPayment = createServerFn({ method: "POST" })
     return { booking_id: booking.id };
   });
 
+// --------------------------------------------------------------------------
+// List trip bookings (surfaces for learner hub, captain dashboards, admin).
+// All return a uniform TripBookingSummary so consumers can render the same row.
+// --------------------------------------------------------------------------
+
+export interface TripBookingSummary {
+  id: string;
+  status: "pending_payment" | "confirmed" | "declined" | "pending_offer";
+  trip_date: string | null;
+  guests: number | null;
+  total_price_minor: number;
+  deposit_minor: number | null;
+  balance_due_minor: number | null;
+  aide_earnings_minor: number;
+  service_fee_minor: number;
+  currency: string;
+  created_at: string;
+  trip_title: string | null;
+  trip_start_time: string | null;
+  operator_display_name: string | null;
+  captain_name: string | null;
+  captain_email: string | null;
+  learner_name: string | null;
+  learner_email: string | null;
+  primary_angler_name: string | null;
+  phone: string | null;
+  notes: string | null;
+  stripe_checkout_session_id: string | null;
+  is_simulated: boolean;
+}
+
+const BOOKING_COLS =
+  "id, status, trip_date, guests, total_price, deposit_minor, balance_due_minor, aide_earnings, service_fee_amount, currency, created_at, course_id, aide_id, learner_id, primary_angler_name, phone, notes, stripe_checkout_session_id";
+
+async function hydrateTripBookings(
+  rows: any[],
+): Promise<TripBookingSummary[]> {
+  if (rows.length === 0) return [];
+  const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+
+  const tripIds = Array.from(
+    new Set(rows.map((r) => r.course_id).filter(Boolean) as string[]),
+  );
+  const profileIds = Array.from(
+    new Set(
+      rows.flatMap((r) => [r.aide_id, r.learner_id]).filter(Boolean) as string[],
+    ),
+  );
+
+  const [tripsRes, profilesRes] = await Promise.all([
+    tripIds.length
+      ? supabaseAdmin
+          .from("trip_packages")
+          .select("id, title, start_time, operator_id")
+          .in("id", tripIds)
+      : Promise.resolve({ data: [] as any[] } as const),
+    profileIds.length
+      ? supabaseAdmin
+          .from("profiles")
+          .select("id, first_name, last_name, display_name, email")
+          .in("id", profileIds)
+      : Promise.resolve({ data: [] as any[] } as const),
+  ]);
+
+  const operatorIds = Array.from(
+    new Set(((tripsRes.data ?? []) as any[]).map((t) => t.operator_id).filter(Boolean)),
+  );
+  const { data: operators } = operatorIds.length
+    ? await supabaseAdmin
+        .from("operators")
+        .select("id, display_name")
+        .in("id", operatorIds)
+    : { data: [] as any[] };
+
+  const tripsById = new Map<string, any>(
+    ((tripsRes.data ?? []) as any[]).map((t) => [t.id, t]),
+  );
+  const profilesById = new Map<string, any>(
+    ((profilesRes.data ?? []) as any[]).map((p) => [p.id, p]),
+  );
+  const operatorsById = new Map<string, any>(
+    ((operators ?? []) as any[]).map((o) => [o.id, o]),
+  );
+
+  const nameOf = (p: any) =>
+    p?.display_name?.trim() ||
+    [p?.first_name, p?.last_name].filter(Boolean).join(" ").trim() ||
+    p?.email?.split("@")[0] ||
+    null;
+
+  return rows.map((r) => {
+    const trip = r.course_id ? tripsById.get(r.course_id) : null;
+    const operator = trip?.operator_id ? operatorsById.get(trip.operator_id) : null;
+    const aide = profilesById.get(r.aide_id);
+    const learner = profilesById.get(r.learner_id);
+    const sessionId: string | null = r.stripe_checkout_session_id ?? null;
+    return {
+      id: r.id,
+      status: r.status,
+      trip_date: r.trip_date,
+      guests: r.guests,
+      total_price_minor: r.total_price ?? 0,
+      deposit_minor: r.deposit_minor ?? null,
+      balance_due_minor: r.balance_due_minor ?? null,
+      aide_earnings_minor: r.aide_earnings ?? 0,
+      service_fee_minor: r.service_fee_amount ?? 0,
+      currency: r.currency ?? "USD",
+      created_at: r.created_at,
+      trip_title: trip?.title ?? null,
+      trip_start_time: trip?.start_time ?? null,
+      operator_display_name: operator?.display_name ?? null,
+      captain_name: nameOf(aide),
+      captain_email: aide?.email ?? null,
+      learner_name: nameOf(learner),
+      learner_email: learner?.email ?? null,
+      primary_angler_name: r.primary_angler_name ?? null,
+      phone: r.phone ?? null,
+      notes: r.notes ?? null,
+      stripe_checkout_session_id: sessionId,
+      is_simulated: Boolean(sessionId && sessionId.startsWith("sim_")),
+    };
+  });
+}
+
+export const listMyTripBookingsLearner = createServerFn({ method: "GET" })
+  .middleware([requireSupabaseAuth])
+  .handler(async ({ context }): Promise<TripBookingSummary[]> => {
+    const { supabase, userId } = context;
+    const { data, error } = await supabase
+      .from("bookings")
+      .select(BOOKING_COLS)
+      .eq("learner_id", userId)
+      .in("status", ["confirmed", "pending_payment"])
+      .not("trip_date", "is", null)
+      .order("trip_date", { ascending: true });
+    if (error) throw new Error(error.message);
+    return hydrateTripBookings(data ?? []);
+  });
+
+export const listMyTripBookingsAide = createServerFn({ method: "GET" })
+  .middleware([requireSupabaseAuth])
+  .handler(async ({ context }): Promise<TripBookingSummary[]> => {
+    const { supabase, userId } = context;
+    const { data, error } = await supabase
+      .from("bookings")
+      .select(BOOKING_COLS)
+      .eq("aide_id", userId)
+      .in("status", ["confirmed", "pending_payment"])
+      .not("trip_date", "is", null)
+      .order("trip_date", { ascending: true });
+    if (error) throw new Error(error.message);
+    return hydrateTripBookings(data ?? []);
+  });
+
+export const listAllTripBookingsAdmin = createServerFn({ method: "GET" })
+  .middleware([requireSupabaseAuth])
+  .handler(async ({ context }): Promise<TripBookingSummary[]> => {
+    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+    // Authorize admin
+    const { data: isAdmin } = await context.supabase.rpc("has_role", {
+      _user_id: context.userId,
+      _role: "admin",
+    });
+    if (!isAdmin) throw new Error("Forbidden");
+    const { data, error } = await supabaseAdmin
+      .from("bookings")
+      .select(BOOKING_COLS)
+      .not("trip_date", "is", null)
+      .order("created_at", { ascending: false })
+      .limit(500);
+    if (error) throw new Error(error.message);
+    return hydrateTripBookings(data ?? []);
+  });
+
+

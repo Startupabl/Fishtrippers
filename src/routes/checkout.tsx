@@ -54,9 +54,14 @@ function CheckoutPage() {
     if (!selection) setSelection(DEMO_SELECTION);
   }, [selection, setSelection]);
 
+  const totalPriceMinor = selection?.priceMinor ?? 0;
+  const journeyPrice = useFormattedPrice(
+    totalPriceMinor,
+    (selection?.currency ?? "USD") as CurrencyCode,
+  );
+
   if (!selection) return null;
 
-  const totalPriceMinor = selection.priceMinor;
 
   const handlePay = async (ctx: { promoCode?: string | null; giftCardCode?: string | null }) => {
     await sleep(1200);
@@ -109,10 +114,6 @@ function CheckoutPage() {
     navigate({ to: "/journey-welcome", search: { bookingId } });
   };
 
-  const journeyPrice = useFormattedPrice(
-    totalPriceMinor,
-    selection.currency as CurrencyCode,
-  );
 
   return (
     <div className="min-h-screen bg-background">
