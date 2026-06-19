@@ -124,7 +124,7 @@ export function CustomOfferCard({ bookingId, viewerId, onChanged }: Props) {
       </div>
 
       <div className="mt-3 grid min-w-0 grid-cols-[minmax(0,1fr)_auto] items-center gap-3 rounded-xl bg-background/70 px-3 py-2">
-        <span className="min-w-0 break-words text-sm text-muted-foreground [overflow-wrap:anywhere]">Total</span>
+        <span className="min-w-0 break-words text-sm text-muted-foreground [overflow-wrap:anywhere]">Deposit due now</span>
         <span className="min-w-0 break-words text-right text-lg font-semibold text-foreground [overflow-wrap:anywhere]">{fmt}</span>
       </div>
 
