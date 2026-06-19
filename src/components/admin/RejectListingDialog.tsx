@@ -117,7 +117,7 @@ export function RejectListingDialog({
           <DialogTitle>Decline Listing: {listingTitle}</DialogTitle>
           <DialogDescription>
             Pick a reason. The mapped feedback is editable before sending — the
-            Aide will receive it by email and as an onsite alert, and the
+            captain/guide will receive it by email and as an onsite alert, and the
             listing will be sent back to draft.
           </DialogDescription>
         </DialogHeader>
