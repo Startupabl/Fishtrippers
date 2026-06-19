@@ -506,6 +506,8 @@ export interface TripBookingSummary {
   operator_display_name: string | null;
   captain_name: string | null;
   captain_email: string | null;
+  captain_phone: string | null;
+  meeting_location: string | null;
   learner_name: string | null;
   learner_email: string | null;
   primary_angler_name: string | null;
