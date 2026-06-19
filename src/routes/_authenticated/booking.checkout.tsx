@@ -454,6 +454,30 @@ function BookingReviewPage() {
                 )}
               </Button>
 
+              {simulateEnabled && (
+                <div className="space-y-2 rounded-xl border border-dashed border-amber-500/60 bg-amber-500/5 p-3">
+                  <Button
+                    type="button"
+                    variant="outline"
+                    className="w-full border-amber-500/60 text-amber-700 hover:bg-amber-500/10 dark:text-amber-300"
+                    onClick={handleSimulate}
+                    disabled={!firstName.trim() || !lastName.trim() || !phoneValid || simulating || paying}
+                  >
+                    {simulating ? (
+                      <>
+                        <Loader2 className="mr-2 size-4 animate-spin" />
+                        Simulating payment…
+                      </>
+                    ) : (
+                      "⚡ Simulate payment success (dev)"
+                    )}
+                  </Button>
+                  <p className="text-center text-[11px] text-amber-700/80 dark:text-amber-300/80">
+                    Dev only — skips Stripe and marks this booking as paid so we can map the post-payment flow.
+                  </p>
+                </div>
+              )}
+
               <p className="text-center text-xs text-muted-foreground">
                 By clicking "Continue to Payment", you agree to our{" "}
                 <Link to="/terms" className="text-primary hover:underline">
