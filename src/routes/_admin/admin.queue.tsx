@@ -169,7 +169,6 @@ function ListingsToApprove() {
   return (
     <div className="space-y-3">
       {rows.map((j) => {
-        const payoutReady = !!j.mentor_is_payout_ready;
         const slug = j.slug;
         return (
           <div key={j.id} className="rounded-lg border bg-white p-4 shadow-sm">
@@ -177,9 +176,6 @@ function ListingsToApprove() {
               <div className="min-w-0">
                 <div className="flex flex-wrap items-center gap-2">
                   <StatusBadge tone="amber">Pending Review</StatusBadge>
-                  <StatusBadge tone={payoutReady ? "green" : "red"}>
-                    {payoutReady ? "✅ Stripe Connected" : "⛔ Stripe Missing"}
-                  </StatusBadge>
                   <span className="text-xs text-muted-foreground">{relativeTime(j.created_at)}</span>
                 </div>
                 <h3 className="mt-2 font-semibold text-foreground">{j.title}</h3>
