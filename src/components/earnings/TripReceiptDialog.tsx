@@ -148,7 +148,7 @@ export function TripReceiptDialog({
                     </div>
                     <div className="flex justify-between px-4 py-2.5 text-sm border-b border-border">
                       <span className="text-muted-foreground">
-                        Deposit Collected Online
+                        LESS: Fishtrippers Deposit
                       </span>
                       <span className="font-medium text-foreground">
                         −{formatCurrency(deposit / 100, currency)}
@@ -156,7 +156,7 @@ export function TripReceiptDialog({
                     </div>
                     <div className="flex justify-between px-4 py-3 text-base bg-muted/40">
                       <span className="font-bold text-foreground">
-                        Balance Due at Dock
+                        Balance to Collect at Meeting
                       </span>
                       <span className="font-bold text-money" style={display}>
                         {formatCurrency(balance / 100, currency)}
@@ -164,9 +164,8 @@ export function TripReceiptDialog({
                     </div>
                   </div>
                   <p className="text-xs text-muted-foreground mt-3">
-                    Amounts shown in {currency}. The deposit covers the
-                    platform fee; the balance is collected directly by the
-                    captain at the dock.
+                    Payment is collected directly from the angler in person at
+                    the time of the meeting.
                   </p>
                 </section>
               </div>
