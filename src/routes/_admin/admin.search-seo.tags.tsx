@@ -530,7 +530,7 @@ function MasterDictionaryTab() {
             <DialogTitle>Merge {selectedTags.length} tags</DialogTitle>
             <DialogDescription>
               Pick the master tag. All other selected tags will be replaced with it on every
-              course listing, then deleted.
+              charter listing, then deleted.
             </DialogDescription>
           </DialogHeader>
           <RadioGroup value={masterId ?? ""} onValueChange={setMasterId} className="space-y-2 py-2">
