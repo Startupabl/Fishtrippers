@@ -119,6 +119,19 @@ export function SiteFooter() {
           <Logo size="md" showTagline />
         </div>
 
+        <div className="mb-12 grid gap-10 lg:grid-cols-[1.4fr_1fr]">
+          <div>
+            <h2 className="text-lg font-semibold text-white">Get in touch</h2>
+            <p className="mt-1 text-sm text-slate-400">
+              Questions about a trip, your listing, or the platform? Drop us a line.
+            </p>
+            <div className="mt-5 max-w-xl">
+              <FooterContactForm />
+            </div>
+          </div>
+        </div>
+
+
         <nav
           aria-label="Footer"
           className="grid grid-cols-1 gap-10 sm:grid-cols-2 lg:grid-cols-4"
