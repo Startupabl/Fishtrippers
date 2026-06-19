@@ -8,6 +8,7 @@ import {
   Receipt,
   Plus,
   Search,
+  Ship,
 } from "lucide-react";
 import {
   Sidebar,
