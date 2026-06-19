@@ -170,7 +170,7 @@ function TransactionsPage() {
           values={totals.map(([cur, t]) => formatCurrency(t.gross, cur))}
         />
         <SummaryCard
-          label="Aide Payouts"
+          label="Captain/Guide Payouts"
           values={totals.map(([cur, t]) => formatCurrency(t.payout, cur))}
         />
         <SummaryCard
