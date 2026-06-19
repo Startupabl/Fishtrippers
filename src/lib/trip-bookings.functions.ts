@@ -517,7 +517,7 @@ export interface TripBookingSummary {
 }
 
 const BOOKING_COLS =
-  "id, status, trip_date, guests, total_price, deposit_minor, balance_due_minor, aide_earnings, service_fee_amount, currency, created_at, course_id, aide_id, learner_id, primary_angler_name, phone, notes, stripe_checkout_session_id";
+  "id, status, trip_date, guests, total_price, deposit_minor, balance_due_minor, aide_earnings, service_fee_amount, currency, created_at, course_id, aide_id, learner_id, primary_angler_name, phone, notes, stripe_checkout_session_id, thread_id";
 
 async function hydrateTripBookings(
   rows: any[],
@@ -533,8 +533,9 @@ async function hydrateTripBookings(
       rows.flatMap((r) => [r.aide_id, r.learner_id]).filter(Boolean) as string[],
     ),
   );
+  const bookingIds = rows.map((r) => r.id);
 
-  const [tripsRes, profilesRes] = await Promise.all([
+  const [tripsRes, profilesRes, offerMsgsRes] = await Promise.all([
     tripIds.length
       ? supabaseAdmin
           .from("trip_packages")
@@ -546,6 +547,13 @@ async function hydrateTripBookings(
           .from("profiles")
           .select("id, first_name, last_name, display_name, email")
           .in("id", profileIds)
+      : Promise.resolve({ data: [] as any[] } as const),
+    bookingIds.length
+      ? supabaseAdmin
+          .from("messages")
+          .select("booking_id")
+          .in("booking_id", bookingIds)
+          .eq("attachment_type", "custom_offer")
       : Promise.resolve({ data: [] as any[] } as const),
   ]);
 
@@ -568,6 +576,9 @@ async function hydrateTripBookings(
   const operatorsById = new Map<string, any>(
     ((operators ?? []) as any[]).map((o) => [o.id, o]),
   );
+  const customOfferBookingIds = new Set<string>(
+    ((offerMsgsRes.data ?? []) as any[]).map((m) => m.booking_id),
+  );
 
   const nameOf = (p: any) =>
     p?.display_name?.trim() ||
@@ -581,6 +592,7 @@ async function hydrateTripBookings(
     const aide = profilesById.get(r.aide_id);
     const learner = profilesById.get(r.learner_id);
     const sessionId: string | null = r.stripe_checkout_session_id ?? null;
+    const isCustomOffer = customOfferBookingIds.has(r.id) || r.status === "pending_offer";
     return {
       id: r.id,
       status: r.status,
@@ -605,6 +617,7 @@ async function hydrateTripBookings(
       notes: r.notes ?? null,
       stripe_checkout_session_id: sessionId,
       is_simulated: Boolean(sessionId && sessionId.startsWith("sim_")),
+      source: isCustomOffer ? "custom_offer" : "instant_book",
     };
   });
 }
