@@ -1,15 +1,33 @@
 ## Plan
 
-1. **Stop showing stale offer/payment rows in Angler My Bookings**
-   - Update the angler bookings query so `pending_payment` rows only show if they are real custom offers with an attached `custom_offer` message.
-   - This will hide the current June 25 stale row because it has no custom-offer message and no held availability record.
+Rebuild the Angler Purchase History page at `/dashboard/learner/purchases` so it lists every trip booking (instant book + accepted custom offers) in a flat, filterable table driven by the captain's completion status.
 
-2. **Make captain cancellation cleanup more complete**
-   - When a captain cancels/deletes a pending trip offer, also remove any linked custom-offer messages before deleting the booking, so no orphaned offer UI can rehydrate later.
+### Data source
+- Replace the current `listMyOrdersLearner` driven view with `listMyTripBookingsLearner` so the page reflects real trip transactions (the same source as My Bookings and the receipt modal).
+- Only include rows that have actually been paid online: `confirmed` and `completed`. Pending/declined rows stay out of purchase history.
 
-3. **Keep the review/accept popup behavior**
-   - Leave the existing My Bookings offer popup in place for valid open custom offers.
-   - After decline or accept changes, refresh the bookings list so declined/deleted offers disappear without needing a hard refresh.
+### Columns (in order)
+1. Date Paid — `created_at` formatted as local date.
+2. Order # — short order id derived from `booking.id` (same `#XXXXXX` helper used in the receipt).
+3. Trip Name — `trip_title`.
+4. Total Price — `total_price_minor` in the booking's currency.
+5. Deposit Paid — `deposit_minor` in the booking's currency.
+6. Dock Balance — single column whose label and styling change per row:
+   - `confirmed` → header cell text "Due at Dock", row value rendered bold.
+   - `completed` → header cell text "Paid at Dock", row value rendered normal/muted.
+   - Because the label is per-row, render it inline within the cell as a small caption above the amount so a single table header can read "Dock Balance" while each row clearly states its own state.
+7. Actions — "View Receipt" button that opens the existing `TripReceiptDialog`.
 
-4. **Validate with the known June 25 case**
-   - Confirm the visible June 25 `pending_payment` row is no longer returned by the angler bookings function after the query filter change.
+All currency uses the booking's own currency code (no forced conversion), matching the receipt modal's fix.
+
+### Filters row (above the table)
+- Timeframe dropdown: All Time (default) / This Month / This Year, filtering by `created_at`.
+- Search input with placeholder "Search by Order # or Trip…", matching against the short order number and `trip_title` (case-insensitive).
+
+### Out of scope
+- No change to the receipt modal, My Bookings page, or schedule panel.
+- No new route file; the existing `dashboard.learner.purchases.tsx` is rewritten in place.
+- Legacy `OrderSchedulePanel` / expand-row UX is removed since trip bookings don't have multi-session schedules.
+
+### Files touched
+- `src/routes/_authenticated/dashboard.learner.purchases.tsx` — full rewrite.
