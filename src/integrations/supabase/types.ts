@@ -287,6 +287,10 @@ export type Database = {
           live_ended_at: string | null
           live_started_at: string | null
           max_seats: number
+          meeting_point_address: string | null
+          meeting_point_lat: number | null
+          meeting_point_lng: number | null
+          meeting_point_place_id: string | null
           price_minor: number | null
           session_dates_times_array: Json
           status: Database["public"]["Enums"]["class_session_status_t"]
@@ -308,6 +312,10 @@ export type Database = {
           live_ended_at?: string | null
           live_started_at?: string | null
           max_seats?: number
+          meeting_point_address?: string | null
+          meeting_point_lat?: number | null
+          meeting_point_lng?: number | null
+          meeting_point_place_id?: string | null
           price_minor?: number | null
           session_dates_times_array?: Json
           status?: Database["public"]["Enums"]["class_session_status_t"]
@@ -329,6 +337,10 @@ export type Database = {
           live_ended_at?: string | null
           live_started_at?: string | null
           max_seats?: number
+          meeting_point_address?: string | null
+          meeting_point_lat?: number | null
+          meeting_point_lng?: number | null
+          meeting_point_place_id?: string | null
           price_minor?: number | null
           session_dates_times_array?: Json
           status?: Database["public"]["Enums"]["class_session_status_t"]
@@ -1926,6 +1938,7 @@ export type Database = {
     }
     Functions: {
       contains_forbidden_keyword: { Args: { _input: string }; Returns: boolean }
+      expire_pending_custom_offers: { Args: never; Returns: number }
       generate_unique_cert_number: { Args: never; Returns: string }
       generate_unique_listing_number: { Args: never; Returns: string }
       generate_unique_order_number: { Args: never; Returns: string }
