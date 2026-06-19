@@ -32,7 +32,7 @@ function SearchSeoDashboard() {
       <div className="mb-6">
         <h2 className="text-2xl font-semibold text-foreground">Search & SEO</h2>
         <p className="mt-1 text-sm text-muted-foreground">
-          Control how learners discover courses across search, tags, and metadata.
+          Control how anglers discover charters across search, tags, and metadata.
         </p>
       </div>
 
