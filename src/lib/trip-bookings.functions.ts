@@ -516,6 +516,7 @@ export interface TripBookingSummary {
   stripe_checkout_session_id: string | null;
   is_simulated: boolean;
   source: "instant_book" | "custom_offer";
+  thread_id: string | null;
 }
 
 const BOOKING_COLS =
