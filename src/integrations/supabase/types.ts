@@ -1500,34 +1500,37 @@ export type Database = {
       reviews: {
         Row: {
           aide_id: string
+          booking_id: string | null
           created_at: string
           description: string
           id: string
           learner_id: string
           listing_id: string
-          order_id: string
+          order_id: string | null
           rating: number
           title: string
         }
         Insert: {
           aide_id: string
+          booking_id?: string | null
           created_at?: string
           description: string
           id?: string
           learner_id: string
           listing_id: string
-          order_id: string
+          order_id?: string | null
           rating: number
           title: string
         }
         Update: {
           aide_id?: string
+          booking_id?: string | null
           created_at?: string
           description?: string
           id?: string
           learner_id?: string
           listing_id?: string
-          order_id?: string
+          order_id?: string | null
           rating?: number
           title?: string
         }
