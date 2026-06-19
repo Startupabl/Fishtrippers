@@ -232,26 +232,39 @@
 }
 
 /* International phone input — match shadcn Input styling */
+.ft-phone-input {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
 .ft-phone-input .PhoneInputInput {
   display: flex;
   height: 2.5rem;
   width: 100%;
+  min-width: 0;
+  flex: 1 1 auto;
   border-radius: var(--radius);
-  border: 1px solid hsl(var(--input));
-  background: hsl(var(--background));
+  border: 1px solid var(--input);
+  background: var(--background);
   padding: 0 0.75rem;
   font-size: 0.875rem;
-  color: hsl(var(--foreground));
+  color: var(--foreground);
   outline: none;
 }
 .ft-phone-input .PhoneInputInput:focus {
-  border-color: hsl(var(--ring));
-  box-shadow: 0 0 0 2px hsl(var(--ring) / 0.25);
+  border-color: var(--ring);
+  box-shadow: 0 0 0 2px color-mix(in oklch, var(--ring) 25%, transparent);
 }
 .ft-phone-input .PhoneInputCountry {
-  margin-right: 0.5rem;
+  display: flex;
+  align-items: center;
   padding: 0 0.5rem;
+  height: 2.5rem;
   border-radius: var(--radius);
-  border: 1px solid hsl(var(--input));
-  background: hsl(var(--background));
+  border: 1px solid var(--input);
+  background: var(--background);
+}
+.ft-phone-input .PhoneInputCountryIcon {
+  width: 1.5rem;
+  height: 1rem;
 }
