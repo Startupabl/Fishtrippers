@@ -630,7 +630,7 @@ export const listMyTripBookingsLearner = createServerFn({ method: "GET" })
       .from("bookings")
       .select(BOOKING_COLS)
       .eq("learner_id", userId)
-      .in("status", ["confirmed", "pending_payment"])
+      .in("status", ["confirmed", "pending_payment", "pending_offer", "completed"])
       .not("trip_date", "is", null)
       .order("trip_date", { ascending: true });
     if (error) throw new Error(error.message);
@@ -645,7 +645,7 @@ export const listMyTripBookingsAide = createServerFn({ method: "GET" })
       .from("bookings")
       .select(BOOKING_COLS)
       .eq("aide_id", userId)
-      .in("status", ["confirmed", "pending_payment"])
+      .in("status", ["confirmed", "pending_payment", "pending_offer", "completed"])
       .not("trip_date", "is", null)
       .order("trip_date", { ascending: true });
     if (error) throw new Error(error.message);
@@ -656,7 +656,6 @@ export const listAllTripBookingsAdmin = createServerFn({ method: "GET" })
   .middleware([requireSupabaseAuth])
   .handler(async ({ context }): Promise<TripBookingSummary[]> => {
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
-    // Authorize admin
     const { data: isAdmin } = await context.supabase.rpc("has_role", {
       _user_id: context.userId,
       _role: "admin",
@@ -670,6 +669,96 @@ export const listAllTripBookingsAdmin = createServerFn({ method: "GET" })
       .limit(500);
     if (error) throw new Error(error.message);
     return hydrateTripBookings(data ?? []);
+  });
+
+// --------------------------------------------------------------------------
+// Mark a confirmed trip booking as completed (captain action).
+// --------------------------------------------------------------------------
+
+const MarkCompleteInput = z.object({ booking_id: z.string().uuid() });
+
+export const markTripBookingComplete = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((i: unknown) => MarkCompleteInput.parse(i))
+  .handler(async ({ data, context }) => {
+    const { supabase, userId } = context;
+    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+
+    const { data: booking, error: bErr } = await supabase
+      .from("bookings")
+      .select("id, aide_id, learner_id, status, course_id")
+      .eq("id", data.booking_id)
+      .maybeSingle();
+    if (bErr || !booking) throw new Error("Booking not found.");
+    if (booking.aide_id !== userId) throw new Error("Not your booking.");
+    if (booking.status !== "confirmed")
+      throw new Error("Only confirmed bookings can be marked complete.");
+
+    const { error: uErr } = await supabaseAdmin
+      .from("bookings")
+      .update({ status: "completed" })
+      .eq("id", data.booking_id);
+    if (uErr) throw new Error(uErr.message);
+
+    // Best-effort learner alert prompting them to leave a review.
+    try {
+      let tripTitle = "your trip";
+      if (booking.course_id) {
+        const { data: trip } = await supabaseAdmin
+          .from("trip_packages")
+          .select("title")
+          .eq("id", booking.course_id)
+          .maybeSingle();
+        if (trip?.title) tripTitle = trip.title;
+      }
+      await supabaseAdmin.from("user_alerts").insert({
+        user_id: booking.learner_id,
+        kind: "booking_completed",
+        journey_id: null,
+        message: `Your trip "${tripTitle}" was marked complete. Leave a review for your captain!`,
+      });
+    } catch (e) {
+      console.error("[markTripBookingComplete] alert failed", e);
+    }
+
+    return { ok: true };
+  });
+
+// --------------------------------------------------------------------------
+// Cancel a pending custom offer (captain action).
+// --------------------------------------------------------------------------
+
+export const cancelPendingTripOffer = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((i: unknown) => MarkCompleteInput.parse(i))
+  .handler(async ({ data, context }) => {
+    const { supabase, userId } = context;
+    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+
+    const { data: booking, error: bErr } = await supabase
+      .from("bookings")
+      .select("id, aide_id, status")
+      .eq("id", data.booking_id)
+      .maybeSingle();
+    if (bErr || !booking) throw new Error("Booking not found.");
+    if (booking.aide_id !== userId) throw new Error("Not your booking.");
+    if (booking.status !== "pending_offer" && booking.status !== "pending_payment")
+      throw new Error("Only pending offers can be cancelled.");
+
+    // Release any held calendar dates first (FK is ON DELETE SET NULL,
+    // not CASCADE, so the trigger-driven cleanup may not fire on delete).
+    await supabaseAdmin
+      .from("host_availability")
+      .delete()
+      .eq("booking_id", data.booking_id);
+
+    const { error: dErr } = await supabaseAdmin
+      .from("bookings")
+      .delete()
+      .eq("id", data.booking_id);
+    if (dErr) throw new Error(dErr.message);
+
+    return { ok: true };
   });
 
 
