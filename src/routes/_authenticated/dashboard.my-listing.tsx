@@ -150,10 +150,6 @@ function MyListingPage() {
     queryFn: () => fetchTrips(),
   });
 
-  const stripeQ = useQuery({
-    queryKey: ["my-stripe-ids"],
-    queryFn: () => fetchStripeIds(),
-  });
 
   const fetchAvail = useServerFn(listMyHostAvailability);
   const availQ = useQuery({
