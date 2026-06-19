@@ -176,7 +176,7 @@ export function ScheduleLiveDateDialog({ row, onOpenChange }: Props) {
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="max-h-[90vh] max-w-lg overflow-y-auto">
         {row?.moderation_status !== "approved" && (
-          <div className="mb-3 flex items-start gap-2 rounded-xl border-2 border-[#FFD23F] bg-[#FFF8DC] px-3 py-2.5 text-sm">
+          <div className="mb-3 flex items-start gap-2 rounded-xl border-2 border-[#E8B547] bg-[#FFF7E0] px-3 py-2.5 text-sm">
             <AlertTriangle
               className="mt-0.5 size-4 shrink-0 text-[#B45309]"
               aria-hidden
@@ -385,7 +385,7 @@ export function ScheduleLiveDateDialog({ row, onOpenChange }: Props) {
           </div>
 
           {tzMissing ? (
-            <div className="rounded-xl border-2 border-[#FFD23F] bg-[#FFF8DC] p-3 text-sm">
+            <div className="rounded-xl border-2 border-[#E8B547] bg-[#FFF7E0] p-3 text-sm">
               <div className="flex items-start gap-2">
                 <AlertTriangle
                   className="mt-0.5 size-4 shrink-0 text-[#B45309]"

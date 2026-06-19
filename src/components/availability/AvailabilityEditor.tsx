@@ -35,7 +35,7 @@ const SLOT_LABELS: Record<Slot, string> = {
 };
 
 const LEAF_GREEN = "#0A2540";
-const SUNNY_YELLOW = "#FFD23F";
+const SUNNY_YELLOW = "#E8B547";
 
 interface Props {
   onSaved?: (row: AvailabilityRow) => void;

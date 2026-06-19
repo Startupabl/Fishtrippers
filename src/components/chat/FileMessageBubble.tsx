@@ -41,7 +41,7 @@ export function FileMessageBubble({ name, url, mime, size, mine }: Props) {
         "flex min-w-0 w-full max-w-full items-center gap-3 overflow-hidden rounded-2xl border px-3 py-2.5 shadow-sm",
         mine ? "border-transparent" : "border-border bg-white",
       )}
-      style={mine ? { backgroundColor: "#FFF4C2" } : undefined}
+      style={mine ? { backgroundColor: "#FFF7E0" } : undefined}
     >
       <div
         className={cn(

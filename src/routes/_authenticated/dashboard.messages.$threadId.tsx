@@ -338,7 +338,7 @@ function ThreadPage() {
                   )}
                   style={{
                     fontFamily: "Inter, system-ui, sans-serif",
-                    ...(mine ? { backgroundColor: "#FFF4C2" } : {}),
+                    ...(mine ? { backgroundColor: "#FFF7E0" } : {}),
                   }}
                 >
                   {m.body}

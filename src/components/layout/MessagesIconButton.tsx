@@ -111,7 +111,7 @@ export function MessagesIconButton() {
               style={{
                 height: 18,
                 backgroundColor: DESIGN_SYSTEM.colors.sunnyYellow,
-                color: "#1F6B36",
+                color: "#0A2540",
               }}
             >
               {label}

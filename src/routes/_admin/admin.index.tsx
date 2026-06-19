@@ -42,7 +42,7 @@ function StatCard({
         <div className="flex items-center gap-3">
           <span className="text-5xl font-bold tracking-tight">{total}</span>
           {warn && (
-            <span className="inline-block size-2.5 rounded-full" style={{ backgroundColor: "#E8B547" }} />
+            <span className="inline-block size-2.5 rounded-full bg-accent" />
           )}
         </div>
         <dl className="mt-5 space-y-2 text-sm">

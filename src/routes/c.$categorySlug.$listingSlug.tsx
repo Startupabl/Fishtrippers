@@ -1094,8 +1094,8 @@ function PathBookingSidebar({
         >
           Price
         </h2>
-        <p className="mt-3 text-2xl md:text-3xl font-bold" style={{ color: "#1F6B36" }}>{fmt(totalMinor)}</p>
-        <p className="text-sm" style={{ color: "#1F6B36" }}>Per Person</p>
+        <p className="mt-3 text-2xl md:text-3xl font-bold" style={{ color: "#0A2540" }}>{fmt(totalMinor)}</p>
+        <p className="text-sm" style={{ color: "#0A2540" }}>Per Person</p>
 
         <Separator className="my-4" />
 
@@ -1157,8 +1157,8 @@ function PathBookingSidebar({
               title={isOwner ? "This is what learners see" : undefined}
               className="w-full rounded-2xl border-2 bg-white font-bold hover:bg-white/90"
               style={{
-                borderColor: "#1F6B36",
-                color: "#1F6B36",
+                borderColor: "#0A2540",
+                color: "#0A2540",
                 fontFamily: DESIGN_SYSTEM.fonts.serif,
               }}
             >
