@@ -124,15 +124,11 @@ function StatusBadge({
   );
 }
 
-function computeStrength(op: any, tripsCount: number, isPayoutReady: boolean) {
+function computeStrength(op: any, tripsCount: number) {
   const hasCover = !!op?.cover_image_url;
   const hasTrips = tripsCount > 0;
-  const score =
-    40 +
-    (hasCover ? 15 : 0) +
-    (hasTrips ? 25 : 0) +
-    (isPayoutReady ? 20 : 0);
-  return { score, hasCover, hasTrips, stripe: isPayoutReady };
+  const score = 50 + (hasCover ? 20 : 0) + (hasTrips ? 30 : 0);
+  return { score, hasCover, hasTrips };
 }
 
 function MyListingPage() {
