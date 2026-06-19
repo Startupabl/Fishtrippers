@@ -160,7 +160,7 @@ function BookingReviewPage() {
       });
       navigate({
         to: "/checkout/success",
-        search: { booking_id, bookingId: "", session_id: "", order_number: "" },
+        search: { booking_id } as never,
       });
     } catch (e) {
       toast.error(e instanceof Error ? e.message : "Could not simulate payment.");
