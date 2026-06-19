@@ -433,7 +433,7 @@ function MyListingPage() {
                         ) : null}
                         <DropdownMenuSeparator />
                         <DropdownMenuItem asChild>
-                          <Link to="/create-listing/new" search={{ edit: true } as never}>
+                          <Link to="/operator/preview" search={{ edit: true } as never}>
                             <Pencil className="mr-2 size-4" />
                             Edit listing
                           </Link>
