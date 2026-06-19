@@ -55,7 +55,6 @@ export function TripReceiptDialog({
   const deposit = convertMinor(booking?.deposit_minor ?? 0, sourceCurrency, viewerCurrency);
   const balance = convertMinor(booking?.balance_due_minor ?? 0, sourceCurrency, viewerCurrency);
 
-
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="max-w-2xl p-0">
