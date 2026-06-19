@@ -465,7 +465,7 @@ function FinancialStripeCard({
   linkPending?: boolean;
 }) {
   const isAide = listingsCount > 0 || roles.includes("aide");
-  const classification = isAide ? "Learner + Active Aide" : "Learner Only";
+  const classification = isAide ? "Angler + Active Captain/Guide" : "Angler Only";
 
   return (
     <section className="rounded-lg border bg-white p-4">
