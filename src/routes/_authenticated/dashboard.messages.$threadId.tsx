@@ -229,8 +229,8 @@ function ThreadPage() {
             className="min-w-0 shrink-0 gap-1 font-semibold"
           >
             <Sparkles className="size-4 shrink-0" />
-            <span className="hidden sm:inline">Send Custom Offer</span>
-            <span className="sm:hidden">Offer</span>
+            <span className="hidden sm:inline">Create Custom Trip</span>
+            <span className="sm:hidden">Trip</span>
           </Button>
         )}
       </header>
@@ -241,6 +241,7 @@ function ThreadPage() {
           onOpenChange={setOfferOpen}
           threadId={threadId}
           defaultCurrency={meta.journey_currency ?? "USD"}
+          anglerName={meta.counterpart_name}
           onSent={() => {
             fetchMessages({ data: { thread_id: threadId } })
               .then((msgs) => setMessages(msgs))
