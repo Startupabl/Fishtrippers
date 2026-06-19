@@ -3,6 +3,7 @@ import { useQuery } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
 import { Facebook, Instagram, Youtube, Music2 } from "lucide-react";
 import { Logo } from "@/components/brand/Logo";
+import { FooterContactForm } from "@/components/contact/FooterContactForm";
 import { listLivePages } from "@/lib/site-pages.functions";
 import { useHasActiveListingStatus } from "@/hooks/useHasActiveListing";
 import { useAuthStore } from "@/stores/useAuthStore";
