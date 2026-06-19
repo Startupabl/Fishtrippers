@@ -612,6 +612,8 @@ async function hydrateTripBookings(
       operator_display_name: operator?.display_name ?? null,
       captain_name: nameOf(aide),
       captain_email: aide?.email ?? null,
+      captain_phone: aide?.phone_number ?? null,
+      meeting_location: trip?.departure_address ?? operator?.default_departure_address ?? null,
       learner_name: nameOf(learner),
       learner_email: learner?.email ?? null,
       primary_angler_name: r.primary_angler_name ?? null,
