@@ -145,9 +145,7 @@ function UsersPage() {
     if (sort) {
       list.sort((a, b) => {
         let diff = 0;
-        if (sort.key === "payout_status") {
-          diff = PAYOUT_RANK[a.payout_status] - PAYOUT_RANK[b.payout_status];
-        } else if (sort.key === "user_number_id") {
+        if (sort.key === "user_number_id") {
           diff = (a.user_number_id ?? "").localeCompare(b.user_number_id ?? "");
         } else {
           diff = a.full_name.localeCompare(b.full_name);
