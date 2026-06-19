@@ -95,7 +95,7 @@ function EarningsPage() {
 
   const orders = data ?? [];
   const tripBookings = (tripBookingsData ?? []).filter(
-    (b) => b.status === "confirmed",
+    (b) => b.status === "confirmed" || b.status === "completed",
   );
 
   const totals = useMemo(() => {

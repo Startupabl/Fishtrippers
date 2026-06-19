@@ -1,73 +1,79 @@
-# Simulate Payment Success (Stripe stand-in)
+## Goal
 
-Goal: until Stripe is wired up at the end of the project, let you click a button that **pretends Stripe just confirmed the payment** and triggers every downstream side-effect (booking → confirmed, captain + angler alerts, transactional emails, success page, dashboards updating). No real charge, no Stripe call.
+On `/dashboard/upcoming-sessions` (captain schedule), split everything into **Upcoming** vs **Completed** tabs, give the captain a "Mark as Complete" action on past confirmed trips and a "Cancel Offer" action on pending custom offers, propagate completion status to the angler's `/dashboard/learner/bookings` page, and let the angler open the review dialog from there.
 
-## Where it appears
+## 1. Database migration
 
-1. **`/booking/checkout` (trip deposit flow)** — the main flow. Add a secondary button under the "Continue to Payment" button:
-   - Label: **"Simulate payment success (dev)"**
-   - Style: dashed outline, amber/warning accent so it's obviously not the real CTA.
-   - Visible whenever a `SIMULATE_PAYMENTS` flag is on (see below).
-2. **`/checkout` (legacy mentor/journey checkout)** — already uses an in-memory store with a fake `sleep(1200)`. Leave as-is; it's already a simulation. Just rename its button copy to "Simulate payment success" so the intent is obvious.
+`booking_status_t` is currently `{pending_offer, declined, pending_payment, confirmed}` — no `completed` value — and `reviews` is hard-wired to `orders` (FK-less `order_id NOT NULL` + RLS EXISTS check on `orders`), so trip-booking completions and reviews can't be recorded.
 
-## Feature flag
+- `ALTER TYPE booking_status_t ADD VALUE 'completed'`.
+- Update `prevent_booking_field_tampering` and `sync_host_availability_from_booking` so `confirmed → completed` is permitted and `host_availability` for the date stays as `booked` (historical record).
+- `reviews`:
+  - Add nullable `booking_id uuid`.
+  - Make `order_id` nullable.
+  - Replace unique constraint with two partial unique indexes: `(order_id, learner_id) WHERE order_id IS NOT NULL` and `(booking_id, learner_id) WHERE booking_id IS NOT NULL`.
+  - Add CHECK: exactly one of `order_id` / `booking_id` is set.
+  - Add second insert RLS policy: learner may insert when their `booking_id` row has `status = 'completed'`.
 
-Add a single client-readable env flag so we can turn the simulator off in one place once Stripe goes live:
+## 2. Server functions
 
+`src/lib/trip-bookings.functions.ts`:
+
+- **`markTripBookingComplete({ booking_id })`** — `requireSupabaseAuth`. Verify `aide_id = userId` and current status is `confirmed`; update to `completed` via `supabaseAdmin`. Insert a learner `user_alerts` row ("Your trip is complete — leave a review").
+- **`cancelPendingTripOffer({ booking_id })`** — `requireSupabaseAuth`. Verify `aide_id = userId` AND status in (`pending_offer`, `pending_payment`); delete the booking row via `supabaseAdmin`. The existing `sync_host_availability_from_booking` trigger releases the held date on delete-cascade fallback; if not, also `DELETE FROM host_availability WHERE booking_id = …`. Mark any related `messages.custom_offer` attachment as withdrawn (best-effort).
+- Update `listMyTripBookingsLearner`, `listMyTripBookingsAide`, `listAllTripBookingsAdmin` to include `completed` (and keep `pending_offer` for the captain so custom offers show up).
+- Add **`listMyReviewedBookingIds()`** (mirrors `getMyReviewedOrderIds`).
+- Extend `TripBookingSummary` with a `source: "instant_book" | "custom_offer"` flag derived from whether a `messages` row with `attachment_type='custom_offer'` exists for the booking (or whether status ever was `pending_offer`).
+
+`src/lib/reviews.functions.ts`:
+
+- **`submitTripReview({ booking_id, rating, title, description })`** — verify booking belongs to learner and is `completed`; insert `reviews` row with `booking_id` and `listing_id = trip_packages.id`, `aide_id` from booking.
+
+## 3. Review dialog
+
+- New `WriteTripReviewDialog` (clone of `WriteReviewDialog`) taking `bookingId` + `tripTitle`; calls `submitTripReview`; invalidates `["my-reviewed-bookings"]` and `["learner-trip-bookings"]`.
+
+## 4. Captain schedule UI (`dashboard.upcoming-sessions.tsx`)
+
+Refactor to a single top-level Upcoming/Completed tab set; remove the duplicate trip-bookings section above the tabs.
+
+```text
+My Schedule
+ ├── Tab: Upcoming
+ │     ├── Trip Bookings table (status ≠ completed)
+ │     └── Course Schedule (existing upcomingRows)
+ └── Tab: Completed
+       ├── Trip Bookings table (status = completed)
+       └── Course Schedule (existing completedRows)
 ```
-VITE_SIMULATE_PAYMENTS=true   # in .env (dev/preview)
-```
 
-UI reads `import.meta.env.VITE_SIMULATE_PAYMENTS === "true"`. The server function (below) **also** checks the same flag server-side via `process.env.SIMULATE_PAYMENTS` and refuses to run if it's not set — so even if someone calls the endpoint on a live build, it's a no-op.
+Trip Bookings table columns (both tabs):
 
-## New server function
+| Date | Trip Type | Angler | Guests | Status | Earnings | Action |
 
-`src/lib/trip-bookings.functions.ts` → add `simulateTripDepositPayment`:
+- **Trip Type** renders as `"{trip_title} (Instant Book)"` or `"{trip_title} (Custom Offer)"` based on the new `source` flag.
+- **Status** badge: Pending Offer / Pending Payment / Confirmed / Completed.
+- **Action** column:
+  - `pending_offer` → **Cancel Offer** button → `cancelPendingTripOffer`, optimistic remove + toast.
+  - `confirmed` AND `trip_date < today` → **Mark as Complete** button → `markTripBookingComplete`, moves row to Completed tab.
+  - Otherwise → no action.
+- All mutations invalidate `["aide-trip-bookings", user?.id]`.
 
-- Auth-gated (`requireSupabaseAuth`) — only the learner who owns the booking can simulate it.
-- Refuses if `process.env.SIMULATE_PAYMENTS !== "true"`.
-- Input: `{ booking_id: string }`.
-- Loads the booking via `supabaseAdmin`; verifies `learner_id === userId`; verifies `status === "pending_payment"`.
-- Performs the **same writes the Stripe webhook does** for `checkout.session.completed` on the booking path:
-  - `bookings.status = "confirmed"` (stamp a synthetic `stripe_checkout_session_id = "sim_<uuid>"` so we can tell simulated rows apart later).
-  - `class_sessions` seat increment via existing `increment_class_session_seats` RPC if linked.
-  - Insert `user_alerts` row for the captain (`kind: "booking_confirmed"`, rendered via `renderAlertTemplate`).
-  - Send the two transactional emails (`booking_confirmed_aide`, `booking_confirmed_learner`) via the existing `sendEmail` helper, exactly like the webhook.
-- Returns `{ booking_id }`.
+The existing course-schedule "Mark complete" flow stays inside the Upcoming tab's course table only.
 
-To avoid duplicating ~120 lines of webhook code, extract the inner body of the webhook's "Booking-flow checkout" branch into a shared helper `confirmBookingAfterPayment(bookingId, { sessionId })` in `src/lib/booking-confirm.server.ts`, and call it from both the webhook **and** the new simulate function. Pure refactor — no behavior change for real Stripe.
+## 5. Angler bookings UI (`dashboard.learner.bookings.tsx`)
 
-## UI wiring on `/booking/checkout`
+- Add a `Completed` badge when `b.status === 'completed'`.
+- Fetch `listMyReviewedBookingIds` in parallel.
+- For each completed booking, render a prominent **Write a Review** button (Star icon, primary variant) unless its id is in the reviewed set.
+- Button opens `WriteTripReviewDialog` for that booking; on submit the queries invalidate and the button disappears.
 
-After the existing `handleContinue`, add `handleSimulate`:
+## 6. Earnings / admin consistency
 
-1. Run the same validation (name, phone, etc.) and create the booking row by calling `createTripDepositCheckout` — but we need its `booking_id` without redirecting to Stripe. Two options; pick **B**:
-   - **A.** Have `createTripDepositCheckout` also return `booking_id` (it already does) and just ignore the `url`. Downside: still spends a Stripe API call creating product/price/session.
-   - **B.** Add a sibling `createTripBookingDraft` server fn that does steps 1–4 of `createTripDepositCheckout` (validation, capacity recheck, fee calc, `bookings` insert with `status: "pending_payment"`) but skips all Stripe calls. The real `createTripDepositCheckout` is refactored to call this helper too, so logic stays in one place.
-2. Call `simulateTripDepositPayment({ booking_id })`.
-3. Navigate to `/checkout/success?booking_id=<id>` — the existing success page already polls for the `confirmed` status and shows confetti + booking details, so no changes needed there.
-
-## Visual treatment
-
-```
-[ Continue to Payment ]            ← primary, unchanged
-[ ⚡ Simulate payment success ]    ← dashed amber, only shown when flag is on
-   Dev only — skips Stripe and marks this booking as paid.
-```
+- `dashboard.earnings.tsx`: include `completed` in the trip revenue filter (currently only `confirmed`).
+- `admin.transactions.tsx`: already renders from the list function, so it picks up `completed` automatically once the list-function filter is widened.
 
 ## Out of scope
 
-- Custom-offer chat flow simulation (separate path, can add later if needed).
-- Gift-card / course-order checkout (`/checkout` legacy page is already simulated).
-- Refund / cancel simulation — only payment success for now.
-
----
-
-## Technical summary
-
-- New file: `src/lib/booking-confirm.server.ts` — `confirmBookingAfterPayment(bookingId, { sessionId })` extracted verbatim from `src/routes/api/public/stripe/webhook.ts` lines ~220–340.
-- Edit: `src/routes/api/public/stripe/webhook.ts` — replace inline branch with `await confirmBookingAfterPayment(meta.booking_id, { sessionId: session.id })`.
-- Edit: `src/lib/trip-bookings.functions.ts` — extract draft-creation helper, add `simulateTripDepositPayment` server fn (auth + flag-gated).
-- Edit: `src/routes/_authenticated/booking.checkout.tsx` — add secondary "Simulate payment success" button visible when `import.meta.env.VITE_SIMULATE_PAYMENTS === "true"`.
-- Edit: `.env` — add `VITE_SIMULATE_PAYMENTS=true` and `SIMULATE_PAYMENTS=true`.
-- No DB migration needed.
+- No Stripe/refund work — cancelling a `pending_offer` only deletes the row (no charge exists yet).
+- Course/order flow untouched; order reviews still use the existing `submitReview`.

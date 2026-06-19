@@ -67,7 +67,11 @@ import {
   markSessionComplete,
   markOrderComplete,
 } from "@/lib/orders.functions";
-import { listMyTripBookingsAide } from "@/lib/trip-bookings.functions";
+import {
+  listMyTripBookingsAide,
+  markTripBookingComplete,
+  cancelPendingTripOffer,
+} from "@/lib/trip-bookings.functions";
 import { formatCurrency } from "@/lib/format-currency";
 
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
@@ -124,12 +128,43 @@ function UpcomingSessionsPage() {
   const markCompleteFn = useServerFn(markSessionComplete);
   const markOrderCompleteFn = useServerFn(markOrderComplete);
   const fetchTripBookings = useServerFn(listMyTripBookingsAide);
+  const markTripCompleteFn = useServerFn(markTripBookingComplete);
+  const cancelTripOfferFn = useServerFn(cancelPendingTripOffer);
 
   const { data: tripBookings } = useQuery({
     queryKey: ["aide-trip-bookings", user?.id],
     queryFn: () => fetchTripBookings(),
     enabled: !!user,
   });
+
+  const [tripActionBusy, setTripActionBusy] = useState<string | null>(null);
+
+  async function handleMarkTripComplete(bookingId: string) {
+    setTripActionBusy(bookingId);
+    try {
+      await markTripCompleteFn({ data: { booking_id: bookingId } });
+      toast.success("Trip marked complete.");
+      await queryClient.invalidateQueries({ queryKey: ["aide-trip-bookings"] });
+    } catch (e) {
+      toast.error(e instanceof Error ? e.message : "Could not mark complete.");
+    } finally {
+      setTripActionBusy(null);
+    }
+  }
+
+  async function handleCancelOffer(bookingId: string) {
+    setTripActionBusy(bookingId);
+    try {
+      await cancelTripOfferFn({ data: { booking_id: bookingId } });
+      toast.success("Offer cancelled.");
+      await queryClient.invalidateQueries({ queryKey: ["aide-trip-bookings"] });
+    } catch (e) {
+      toast.error(e instanceof Error ? e.message : "Could not cancel offer.");
+    } finally {
+      setTripActionBusy(null);
+    }
+  }
+
 
 
 
@@ -321,7 +356,123 @@ function UpcomingSessionsPage() {
     </div>
   );
 
+  const todayStr = new Date().toISOString().slice(0, 10);
   const tripBookingRows = tripBookings ?? [];
+  const upcomingTripBookings = tripBookingRows.filter((b) => b.status !== "completed");
+  const completedTripBookings = tripBookingRows.filter((b) => b.status === "completed");
+
+  const renderTripBookingsTable = (
+    rows: typeof tripBookingRows,
+    mode: "upcoming" | "completed",
+  ) => (
+    <div className="mt-3 w-full overflow-x-auto rounded-md border border-border">
+      <Table className="w-full">
+        <TableHeader>
+          <TableRow>
+            <TableHead className="font-bold">Date</TableHead>
+            <TableHead className="font-bold">Trip Type</TableHead>
+            <TableHead className="font-bold">Angler</TableHead>
+            <TableHead className="font-bold">Guests</TableHead>
+            <TableHead className="font-bold">Status</TableHead>
+            <TableHead className="font-bold text-right">Your earnings</TableHead>
+            <TableHead className="font-bold">Action</TableHead>
+          </TableRow>
+        </TableHeader>
+        <TableBody>
+          {rows.length === 0 ? (
+            <TableRow>
+              <TableCell colSpan={7} className="text-center text-muted-foreground py-6">
+                {mode === "upcoming"
+                  ? "No trip bookings yet. Share your listing to attract anglers."
+                  : "No completed trips yet."}
+              </TableCell>
+            </TableRow>
+          ) : (
+            rows.map((b) => {
+              const sourceLabel =
+                b.source === "custom_offer" ? "Custom Offer" : "Instant Book";
+              const isPastConfirmed =
+                b.status === "confirmed" &&
+                !!b.trip_date &&
+                b.trip_date <= todayStr;
+              const statusLabel =
+                b.status === "pending_offer"
+                  ? "Pending Offer"
+                  : b.status === "pending_payment"
+                    ? "Pending Payment"
+                    : b.status === "confirmed"
+                      ? "Confirmed"
+                      : b.status === "completed"
+                        ? "Completed"
+                        : b.status;
+              return (
+                <TableRow key={b.id}>
+                  <TableCell>
+                    {b.trip_date}
+                    {b.trip_start_time ? ` • ${b.trip_start_time.slice(0, 5)}` : ""}
+                  </TableCell>
+                  <TableCell>
+                    <div className="font-medium">{b.trip_title ?? "Trip"}</div>
+                    <div className="text-xs text-muted-foreground">({sourceLabel})</div>
+                  </TableCell>
+                  <TableCell>
+                    <div className="text-sm">
+                      {b.primary_angler_name ?? b.learner_name ?? "—"}
+                    </div>
+                    {b.phone && (
+                      <div className="text-xs text-muted-foreground">{b.phone}</div>
+                    )}
+                  </TableCell>
+                  <TableCell>{b.guests ?? "—"}</TableCell>
+                  <TableCell>
+                    <Badge
+                      variant={
+                        b.status === "confirmed" || b.status === "completed"
+                          ? "default"
+                          : "secondary"
+                      }
+                    >
+                      {statusLabel}
+                    </Badge>
+                    {b.is_simulated && (
+                      <Badge variant="outline" className="ml-1 border-amber-500 text-amber-700">
+                        Sim
+                      </Badge>
+                    )}
+                  </TableCell>
+                  <TableCell className="text-right font-semibold">
+                    {formatCurrency(b.aide_earnings_minor / 100, b.currency)}
+                  </TableCell>
+                  <TableCell>
+                    {mode === "upcoming" && b.status === "pending_offer" && (
+                      <Button
+                        size="sm"
+                        variant="outline"
+                        className="text-red-600"
+                        disabled={tripActionBusy === b.id}
+                        onClick={() => handleCancelOffer(b.id)}
+                      >
+                        {tripActionBusy === b.id ? "…" : "Cancel Offer"}
+                      </Button>
+                    )}
+                    {mode === "upcoming" && isPastConfirmed && (
+                      <Button
+                        size="sm"
+                        disabled={tripActionBusy === b.id}
+                        onClick={() => handleMarkTripComplete(b.id)}
+                      >
+                        {tripActionBusy === b.id ? "…" : "Mark as Complete"}
+                      </Button>
+                    )}
+                  </TableCell>
+                </TableRow>
+              );
+            })
+          )}
+        </TableBody>
+      </Table>
+    </div>
+  );
 
   return (
     <main className="mx-auto max-w-[1600px] px-4 md:px-6 lg:px-8 py-12">
@@ -332,86 +483,58 @@ function UpcomingSessionsPage() {
         Every booked trip — including pending custom offers.
       </p>
 
-      {tripBookingRows.length > 0 && (
-        <section className="mt-8">
-          <h2 className="text-xl font-bold tracking-tight" style={display}>
-            Trip Bookings ({tripBookingRows.length})
-          </h2>
-          <p className="mt-1 text-sm text-muted-foreground">
-            Charter and guided-trip reservations from your public listings.
-          </p>
-          <div className="mt-3 w-full overflow-x-auto rounded-md border border-border">
-            <Table className="w-full">
-              <TableHeader>
-                <TableRow>
-                  <TableHead className="font-bold">Date</TableHead>
-                  <TableHead className="font-bold">Trip</TableHead>
-                  <TableHead className="font-bold">Angler</TableHead>
-                  <TableHead className="font-bold">Guests</TableHead>
-                  <TableHead className="font-bold">Status</TableHead>
-                  <TableHead className="font-bold text-right">Your earnings</TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {tripBookingRows.map((b) => (
-                  <TableRow key={b.id}>
-                    <TableCell>
-                      {b.trip_date}
-                      {b.trip_start_time ? ` • ${b.trip_start_time.slice(0, 5)}` : ""}
-                    </TableCell>
-                    <TableCell>{b.trip_title ?? "Trip"}</TableCell>
-                    <TableCell>
-                      <div className="text-sm">
-                        {b.primary_angler_name ?? b.learner_name ?? "—"}
-                      </div>
-                      {b.phone && (
-                        <div className="text-xs text-muted-foreground">{b.phone}</div>
-                      )}
-                    </TableCell>
-                    <TableCell>{b.guests ?? "—"}</TableCell>
-                    <TableCell>
-                      <Badge variant={b.status === "confirmed" ? "default" : "secondary"}>
-                        {b.status === "confirmed" ? "Confirmed" : "Pending"}
-                      </Badge>
-                      {b.is_simulated && (
-                        <Badge variant="outline" className="ml-1 border-amber-500 text-amber-700">
-                          Sim
-                        </Badge>
-                      )}
-                    </TableCell>
-                    <TableCell className="text-right font-semibold">
-                      {formatCurrency(b.aide_earnings_minor / 100, b.currency)}
-                    </TableCell>
-                  </TableRow>
-                ))}
-              </TableBody>
-            </Table>
-          </div>
-        </section>
-      )}
-
-
-
       <Tabs defaultValue="upcoming" className="mt-6">
         <TabsList>
           <TabsTrigger value="upcoming">
-            Upcoming {upcomingRows.length > 0 && `(${upcomingRows.length})`}
+            Upcoming{" "}
+            {upcomingRows.length + upcomingTripBookings.length > 0 &&
+              `(${upcomingRows.length + upcomingTripBookings.length})`}
           </TabsTrigger>
           <TabsTrigger value="completed">
-            Completed {completedRows.length > 0 && `(${completedRows.length})`}
+            Completed{" "}
+            {completedRows.length + completedTripBookings.length > 0 &&
+              `(${completedRows.length + completedTripBookings.length})`}
           </TabsTrigger>
         </TabsList>
+
         <TabsContent value="upcoming">
-          {renderTable(
-            upcomingRows,
-            "No booked trips yet. Share your listing on social media to increase traffic and bookings.",
-            "upcoming",
-          )}
+          <section className="mt-4">
+            <h2 className="text-lg font-bold tracking-tight" style={display}>
+              Trip Bookings
+            </h2>
+            <p className="mt-1 text-sm text-muted-foreground">
+              Charter and guided-trip reservations and pending custom offers.
+            </p>
+            {renderTripBookingsTable(upcomingTripBookings, "upcoming")}
+          </section>
+          <section className="mt-8">
+            <h2 className="text-lg font-bold tracking-tight" style={display}>
+              Course Schedule
+            </h2>
+            {renderTable(
+              upcomingRows,
+              "No upcoming course sessions.",
+              "upcoming",
+            )}
+          </section>
         </TabsContent>
+
         <TabsContent value="completed">
-          {renderTable(completedRows, "No completed trips yet.", "completed")}
+          <section className="mt-4">
+            <h2 className="text-lg font-bold tracking-tight" style={display}>
+              Completed Trips
+            </h2>
+            {renderTripBookingsTable(completedTripBookings, "completed")}
+          </section>
+          <section className="mt-8">
+            <h2 className="text-lg font-bold tracking-tight" style={display}>
+              Completed Course Sessions
+            </h2>
+            {renderTable(completedRows, "No completed course sessions yet.", "completed")}
+          </section>
         </TabsContent>
       </Tabs>
+
 
       {editTarget && (
 

@@ -1500,34 +1500,37 @@ export type Database = {
       reviews: {
         Row: {
           aide_id: string
+          booking_id: string | null
           created_at: string
           description: string
           id: string
           learner_id: string
           listing_id: string
-          order_id: string
+          order_id: string | null
           rating: number
           title: string
         }
         Insert: {
           aide_id: string
+          booking_id?: string | null
           created_at?: string
           description: string
           id?: string
           learner_id: string
           listing_id: string
-          order_id: string
+          order_id?: string | null
           rating: number
           title: string
         }
         Update: {
           aide_id?: string
+          booking_id?: string | null
           created_at?: string
           description?: string
           id?: string
           learner_id?: string
           listing_id?: string
-          order_id?: string
+          order_id?: string | null
           rating?: number
           title?: string
         }
@@ -1985,6 +1988,7 @@ export type Database = {
         | "declined"
         | "pending_payment"
         | "confirmed"
+        | "completed"
       class_session_status_t: "active" | "completed" | "cancelled"
       journey_moderation_status: "pending" | "approved" | "declined"
       journey_status: "draft" | "published" | "archived"
@@ -2142,6 +2146,7 @@ export const Constants = {
         "declined",
         "pending_payment",
         "confirmed",
+        "completed",
       ],
       class_session_status_t: ["active", "completed", "cancelled"],
       journey_moderation_status: ["pending", "approved", "declined"],

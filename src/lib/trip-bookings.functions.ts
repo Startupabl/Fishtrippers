@@ -491,7 +491,7 @@ export const simulateTripDepositPayment = createServerFn({ method: "POST" })
 
 export interface TripBookingSummary {
   id: string;
-  status: "pending_payment" | "confirmed" | "declined" | "pending_offer";
+  status: "pending_payment" | "confirmed" | "declined" | "pending_offer" | "completed";
   trip_date: string | null;
   guests: number | null;
   total_price_minor: number;
@@ -513,10 +513,11 @@ export interface TripBookingSummary {
   notes: string | null;
   stripe_checkout_session_id: string | null;
   is_simulated: boolean;
+  source: "instant_book" | "custom_offer";
 }
 
 const BOOKING_COLS =
-  "id, status, trip_date, guests, total_price, deposit_minor, balance_due_minor, aide_earnings, service_fee_amount, currency, created_at, course_id, aide_id, learner_id, primary_angler_name, phone, notes, stripe_checkout_session_id";
+  "id, status, trip_date, guests, total_price, deposit_minor, balance_due_minor, aide_earnings, service_fee_amount, currency, created_at, course_id, aide_id, learner_id, primary_angler_name, phone, notes, stripe_checkout_session_id, thread_id";
 
 async function hydrateTripBookings(
   rows: any[],
@@ -532,8 +533,9 @@ async function hydrateTripBookings(
       rows.flatMap((r) => [r.aide_id, r.learner_id]).filter(Boolean) as string[],
     ),
   );
+  const bookingIds = rows.map((r) => r.id);
 
-  const [tripsRes, profilesRes] = await Promise.all([
+  const [tripsRes, profilesRes, offerMsgsRes] = await Promise.all([
     tripIds.length
       ? supabaseAdmin
           .from("trip_packages")
@@ -545,6 +547,13 @@ async function hydrateTripBookings(
           .from("profiles")
           .select("id, first_name, last_name, display_name, email")
           .in("id", profileIds)
+      : Promise.resolve({ data: [] as any[] } as const),
+    bookingIds.length
+      ? supabaseAdmin
+          .from("messages")
+          .select("booking_id")
+          .in("booking_id", bookingIds)
+          .eq("attachment_type", "custom_offer")
       : Promise.resolve({ data: [] as any[] } as const),
   ]);
 
@@ -567,6 +576,9 @@ async function hydrateTripBookings(
   const operatorsById = new Map<string, any>(
     ((operators ?? []) as any[]).map((o) => [o.id, o]),
   );
+  const customOfferBookingIds = new Set<string>(
+    ((offerMsgsRes.data ?? []) as any[]).map((m) => m.booking_id),
+  );
 
   const nameOf = (p: any) =>
     p?.display_name?.trim() ||
@@ -580,6 +592,7 @@ async function hydrateTripBookings(
     const aide = profilesById.get(r.aide_id);
     const learner = profilesById.get(r.learner_id);
     const sessionId: string | null = r.stripe_checkout_session_id ?? null;
+    const isCustomOffer = customOfferBookingIds.has(r.id) || r.status === "pending_offer";
     return {
       id: r.id,
       status: r.status,
@@ -604,6 +617,7 @@ async function hydrateTripBookings(
       notes: r.notes ?? null,
       stripe_checkout_session_id: sessionId,
       is_simulated: Boolean(sessionId && sessionId.startsWith("sim_")),
+      source: isCustomOffer ? "custom_offer" : "instant_book",
     };
   });
 }
@@ -616,7 +630,7 @@ export const listMyTripBookingsLearner = createServerFn({ method: "GET" })
       .from("bookings")
       .select(BOOKING_COLS)
       .eq("learner_id", userId)
-      .in("status", ["confirmed", "pending_payment"])
+      .in("status", ["confirmed", "pending_payment", "pending_offer", "completed"])
       .not("trip_date", "is", null)
       .order("trip_date", { ascending: true });
     if (error) throw new Error(error.message);
@@ -631,7 +645,7 @@ export const listMyTripBookingsAide = createServerFn({ method: "GET" })
       .from("bookings")
       .select(BOOKING_COLS)
       .eq("aide_id", userId)
-      .in("status", ["confirmed", "pending_payment"])
+      .in("status", ["confirmed", "pending_payment", "pending_offer", "completed"])
       .not("trip_date", "is", null)
       .order("trip_date", { ascending: true });
     if (error) throw new Error(error.message);
@@ -642,7 +656,6 @@ export const listAllTripBookingsAdmin = createServerFn({ method: "GET" })
   .middleware([requireSupabaseAuth])
   .handler(async ({ context }): Promise<TripBookingSummary[]> => {
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
-    // Authorize admin
     const { data: isAdmin } = await context.supabase.rpc("has_role", {
       _user_id: context.userId,
       _role: "admin",
@@ -656,6 +669,96 @@ export const listAllTripBookingsAdmin = createServerFn({ method: "GET" })
       .limit(500);
     if (error) throw new Error(error.message);
     return hydrateTripBookings(data ?? []);
+  });
+
+// --------------------------------------------------------------------------
+// Mark a confirmed trip booking as completed (captain action).
+// --------------------------------------------------------------------------
+
+const MarkCompleteInput = z.object({ booking_id: z.string().uuid() });
+
+export const markTripBookingComplete = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((i: unknown) => MarkCompleteInput.parse(i))
+  .handler(async ({ data, context }) => {
+    const { supabase, userId } = context;
+    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+
+    const { data: booking, error: bErr } = await supabase
+      .from("bookings")
+      .select("id, aide_id, learner_id, status, course_id")
+      .eq("id", data.booking_id)
+      .maybeSingle();
+    if (bErr || !booking) throw new Error("Booking not found.");
+    if (booking.aide_id !== userId) throw new Error("Not your booking.");
+    if (booking.status !== "confirmed")
+      throw new Error("Only confirmed bookings can be marked complete.");
+
+    const { error: uErr } = await supabaseAdmin
+      .from("bookings")
+      .update({ status: "completed" })
+      .eq("id", data.booking_id);
+    if (uErr) throw new Error(uErr.message);
+
+    // Best-effort learner alert prompting them to leave a review.
+    try {
+      let tripTitle = "your trip";
+      if (booking.course_id) {
+        const { data: trip } = await supabaseAdmin
+          .from("trip_packages")
+          .select("title")
+          .eq("id", booking.course_id)
+          .maybeSingle();
+        if (trip?.title) tripTitle = trip.title;
+      }
+      await supabaseAdmin.from("user_alerts").insert({
+        user_id: booking.learner_id,
+        kind: "booking_confirmed",
+        journey_id: null,
+        message: `Your trip "${tripTitle}" was marked complete. Leave a review for your captain!`,
+      });
+    } catch (e) {
+      console.error("[markTripBookingComplete] alert failed", e);
+    }
+
+    return { ok: true };
+  });
+
+// --------------------------------------------------------------------------
+// Cancel a pending custom offer (captain action).
+// --------------------------------------------------------------------------
+
+export const cancelPendingTripOffer = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((i: unknown) => MarkCompleteInput.parse(i))
+  .handler(async ({ data, context }) => {
+    const { supabase, userId } = context;
+    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+
+    const { data: booking, error: bErr } = await supabase
+      .from("bookings")
+      .select("id, aide_id, status")
+      .eq("id", data.booking_id)
+      .maybeSingle();
+    if (bErr || !booking) throw new Error("Booking not found.");
+    if (booking.aide_id !== userId) throw new Error("Not your booking.");
+    if (booking.status !== "pending_offer" && booking.status !== "pending_payment")
+      throw new Error("Only pending offers can be cancelled.");
+
+    // Release any held calendar dates first (FK is ON DELETE SET NULL,
+    // not CASCADE, so the trigger-driven cleanup may not fire on delete).
+    await supabaseAdmin
+      .from("host_availability")
+      .delete()
+      .eq("booking_id", data.booking_id);
+
+    const { error: dErr } = await supabaseAdmin
+      .from("bookings")
+      .delete()
+      .eq("id", data.booking_id);
+    if (dErr) throw new Error(dErr.message);
+
+    return { ok: true };
   });
 
 

@@ -1,11 +1,15 @@
+import { useState } from "react";
 import { createFileRoute } from "@tanstack/react-router";
 import { useServerFn } from "@tanstack/react-start";
 import { useQuery } from "@tanstack/react-query";
 import { format, parseISO } from "date-fns";
-import { Ship, CalendarDays, Users, Loader2 } from "lucide-react";
+import { Ship, CalendarDays, Users, Loader2, Star } from "lucide-react";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
 import { listMyTripBookingsLearner } from "@/lib/trip-bookings.functions";
+import { getMyReviewedBookingIds } from "@/lib/reviews.functions";
+import { WriteTripReviewDialog } from "@/components/reviews/WriteTripReviewDialog";
 import { formatCurrency } from "@/lib/format-currency";
 import { convertMinor } from "@/lib/currency";
 import { useCurrencyStore, type CurrencyCode } from "@/stores/useCurrencyStore";
@@ -18,13 +22,38 @@ export const Route = createFileRoute("/_authenticated/dashboard/learner/bookings
   component: TripBookingsPage,
 });
 
+function statusBadge(status: string) {
+  switch (status) {
+    case "confirmed":
+      return { label: "Confirmed", variant: "default" as const };
+    case "completed":
+      return { label: "Completed", variant: "default" as const };
+    case "pending_offer":
+      return { label: "Pending offer", variant: "secondary" as const };
+    case "pending_payment":
+      return { label: "Awaiting payment", variant: "secondary" as const };
+    default:
+      return { label: status, variant: "secondary" as const };
+  }
+}
+
 function TripBookingsPage() {
   const fetchBookings = useServerFn(listMyTripBookingsLearner);
+  const fetchReviewed = useServerFn(getMyReviewedBookingIds);
   const currency = useCurrencyStore((s) => s.currency);
+  const [reviewTarget, setReviewTarget] = useState<
+    { bookingId: string; tripTitle: string } | null
+  >(null);
+
   const { data, isLoading, error } = useQuery({
     queryKey: ["learner-trip-bookings"],
     queryFn: () => fetchBookings(),
   });
+  const { data: reviewedIds } = useQuery({
+    queryKey: ["my-reviewed-bookings"],
+    queryFn: () => fetchReviewed(),
+  });
+  const reviewedSet = new Set(reviewedIds ?? []);
 
   const fmt = (m: number, c: string) =>
     formatCurrency(convertMinor(m, c as CurrencyCode, currency), currency);
@@ -73,6 +102,9 @@ function TripBookingsPage() {
                 }
               })()
             : "Date TBD";
+          const sb = statusBadge(b.status);
+          const isCompleted = b.status === "completed";
+          const alreadyReviewed = reviewedSet.has(b.id);
           return (
             <Card key={b.id} className="rounded-2xl border-border/60 p-5">
               <div className="flex flex-wrap items-start justify-between gap-4">
@@ -81,11 +113,7 @@ function TripBookingsPage() {
                     <p className="text-lg font-bold text-foreground" style={lora}>
                       {b.trip_title ?? "Trip"}
                     </p>
-                    <Badge
-                      variant={b.status === "confirmed" ? "default" : "secondary"}
-                    >
-                      {b.status === "confirmed" ? "Confirmed" : "Awaiting payment"}
-                    </Badge>
+                    <Badge variant={sb.variant}>{sb.label}</Badge>
                     {b.is_simulated && (
                       <Badge variant="outline" className="border-amber-500 text-amber-700">
                         Simulated
@@ -110,6 +138,27 @@ function TripBookingsPage() {
                       </span>
                     )}
                   </div>
+
+                  {isCompleted && !alreadyReviewed && (
+                    <Button
+                      className="mt-4"
+                      onClick={() =>
+                        setReviewTarget({
+                          bookingId: b.id,
+                          tripTitle: b.trip_title ?? "Your trip",
+                        })
+                      }
+                    >
+                      <Star className="mr-2 size-4" />
+                      Write a Review
+                    </Button>
+                  )}
+                  {isCompleted && alreadyReviewed && (
+                    <p className="mt-4 inline-flex items-center gap-1.5 text-sm text-muted-foreground">
+                      <Star className="size-4 fill-yellow-400 text-yellow-400" />
+                      Review submitted
+                    </p>
+                  )}
                 </div>
                 <div className="text-right">
                   <p className="text-xs uppercase tracking-wide text-muted-foreground">
@@ -132,6 +181,15 @@ function TripBookingsPage() {
           );
         })}
       </div>
+
+      {reviewTarget && (
+        <WriteTripReviewDialog
+          open={!!reviewTarget}
+          onOpenChange={(o) => !o && setReviewTarget(null)}
+          bookingId={reviewTarget.bookingId}
+          tripTitle={reviewTarget.tripTitle}
+        />
+      )}
     </div>
   );
 }

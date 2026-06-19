@@ -28,6 +28,7 @@ const STATUS_LABEL: Record<BookingDetail["status"], string> = {
   pending_payment: "Awaiting payment",
   declined: "Declined",
   confirmed: "Confirmed",
+  completed: "Completed",
 };
 
 export function CustomOfferCard({ bookingId, viewerId, onChanged }: Props) {
