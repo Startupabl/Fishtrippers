@@ -1,7 +1,8 @@
 import { useState } from "react";
 import { createFileRoute } from "@tanstack/react-router";
 import { useServerFn } from "@tanstack/react-start";
-import { Anchor, Facebook, Instagram, Mail, Music2, Youtube } from "lucide-react";
+import { useMutation } from "@tanstack/react-query";
+import { Anchor, Facebook, Instagram, Mail, Music2, Youtube, CheckCircle2 } from "lucide-react";
 import { toast } from "sonner";
 import { z } from "zod";
 
@@ -16,7 +17,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { ContactTopics, submitContactMessage } from "@/lib/contact.functions";
+import { submitSupportTicket } from "@/lib/support-tickets.functions";
 
 export const Route = createFileRoute("/contact")({
   head: () => ({
@@ -38,11 +39,22 @@ export const Route = createFileRoute("/contact")({
   component: ContactPage,
 });
 
+const TOPIC_OPTIONS = [
+  { value: "specific_trip", label: "A specific trip" },
+  { value: "my_listing", label: "My listing" },
+  { value: "general_questions", label: "General questions" },
+  { value: "technical_issues", label: "Technical issues" },
+  { value: "other", label: "Other" },
+] as const;
+
+type TopicValue = (typeof TOPIC_OPTIONS)[number]["value"];
+
 const ClientSchema = z.object({
   name: z.string().trim().min(1, "Please enter your name").max(100),
   email: z.string().trim().email("Enter a valid email").max(255),
-  topic: z.enum(ContactTopics),
-  message: z.string().trim().min(10, "Message must be at least 10 characters").max(2000),
+  topic: z.enum(["specific_trip", "my_listing", "general_questions", "technical_issues", "other"]),
+  message: z.string().trim().min(10, "Message must be at least 10 characters").max(5000),
+  website: z.string().max(0).optional().or(z.literal("")), // honeypot
 });
 
 const SOCIALS = [
@@ -53,19 +65,45 @@ const SOCIALS = [
 ];
 
 function ContactPage() {
-  const submit = useServerFn(submitContactMessage);
-  const [submitting, setSubmitting] = useState(false);
-  const [submitted, setSubmitted] = useState(false);
-  const [errors, setErrors] = useState<Record<string, string>>({});
+  const submit = useServerFn(submitSupportTicket);
   const [form, setForm] = useState({
     name: "",
     email: "",
-    topic: ContactTopics[0] as (typeof ContactTopics)[number],
+    topic: "" as TopicValue | "",
     message: "",
     website: "", // honeypot
   });
+  const [errors, setErrors] = useState<Record<string, string>>({});
+  const [submitted, setSubmitted] = useState(false);
 
-  const onSubmit = async (e: React.FormEvent) => {
+  const mutation = useMutation({
+    mutationFn: async (payload: z.infer<typeof ClientSchema>) => {
+      // Honeypot tripped — silently succeed
+      if (payload.website && payload.website.length > 0) {
+        return { ok: true };
+      }
+      return submit({
+        data: {
+          full_name: payload.name,
+          email: payload.email,
+          user_type: "visitor",
+          topic: payload.topic,
+          booking_id: null,
+          message: payload.message,
+        },
+      });
+    },
+    onSuccess: () => {
+      setSubmitted(true);
+      toast.success("Message sent — we'll be in touch.");
+      setForm({ name: "", email: "", topic: "", message: "", website: "" });
+    },
+    onError: (err: Error) => {
+      toast.error(err.message ?? "Something went wrong");
+    },
+  });
+
+  const onSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     setErrors({});
     const parsed = ClientSchema.safeParse(form);
@@ -78,17 +116,7 @@ function ContactPage() {
       setErrors(fieldErrors);
       return;
     }
-    setSubmitting(true);
-    try {
-      await submit({ data: { ...parsed.data, website: form.website } });
-      setSubmitted(true);
-      toast.success("Message sent — we'll be in touch.");
-      setForm({ name: "", email: "", topic: ContactTopics[0], message: "", website: "" });
-    } catch (err) {
-      toast.error(err instanceof Error ? err.message : "Something went wrong");
-    } finally {
-      setSubmitting(false);
-    }
+    mutation.mutate(parsed.data);
   };
 
   return (
@@ -117,7 +145,7 @@ function ContactPage() {
               {submitted ? (
                 <div className="py-10 text-center">
                   <div className="mx-auto mb-4 inline-flex size-12 items-center justify-center rounded-full bg-emerald-500/10 text-emerald-600">
-                    <Mail className="size-6" />
+                    <CheckCircle2 className="size-6" />
                   </div>
                   <h2 className="text-2xl font-semibold">Thanks — message received</h2>
                   <p className="mt-2 text-muted-foreground">
@@ -178,22 +206,25 @@ function ContactPage() {
                   <div>
                     <Label htmlFor="topic">Topic</Label>
                     <Select
-                      value={form.topic}
+                      value={form.topic || undefined}
                       onValueChange={(v) =>
-                        setForm({ ...form, topic: v as (typeof ContactTopics)[number] })
+                        setForm({ ...form, topic: v as TopicValue })
                       }
                     >
                       <SelectTrigger id="topic" className="mt-1">
-                        <SelectValue />
+                        <SelectValue placeholder="Select a topic" />
                       </SelectTrigger>
                       <SelectContent>
-                        {ContactTopics.map((t) => (
-                          <SelectItem key={t} value={t}>
-                            {t}
+                        {TOPIC_OPTIONS.map((t) => (
+                          <SelectItem key={t.value} value={t.value}>
+                            {t.label}
                           </SelectItem>
                         ))}
                       </SelectContent>
                     </Select>
+                    {errors.topic && (
+                      <p className="mt-1 text-sm text-destructive">{errors.topic}</p>
+                    )}
                   </div>
 
                   <div>
@@ -203,7 +234,7 @@ function ContactPage() {
                       rows={6}
                       value={form.message}
                       onChange={(e) => setForm({ ...form, message: e.target.value })}
-                      maxLength={2000}
+                      maxLength={5000}
                       required
                       className="mt-1"
                     />
@@ -213,12 +244,12 @@ function ContactPage() {
                           <span className="text-destructive">{errors.message}</span>
                         )}
                       </span>
-                      <span>{form.message.length}/2000</span>
+                      <span>{form.message.length}/5000</span>
                     </div>
                   </div>
 
-                  <Button type="submit" size="lg" disabled={submitting} className="w-full sm:w-auto">
-                    {submitting ? "Sending…" : "Send message"}
+                  <Button type="submit" size="lg" disabled={mutation.isPending} className="w-full sm:w-auto">
+                    {mutation.isPending ? "Sending…" : "Send message"}
                   </Button>
                 </form>
               )}

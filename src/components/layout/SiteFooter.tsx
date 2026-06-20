@@ -3,7 +3,6 @@ import { useQuery } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
 import { Facebook, Instagram, Youtube, Music2 } from "lucide-react";
 import { Logo } from "@/components/brand/Logo";
-import { FooterContactForm } from "@/components/contact/FooterContactForm";
 import { listLivePages } from "@/lib/site-pages.functions";
 import { useHasActiveListingStatus } from "@/hooks/useHasActiveListing";
 import { useAuthStore } from "@/stores/useAuthStore";
@@ -118,19 +117,6 @@ export function SiteFooter() {
         <div className="mb-10">
           <Logo size="md" showTagline />
         </div>
-
-        <div className="mb-12 grid gap-10 lg:grid-cols-[1.4fr_1fr]">
-          <div>
-            <h2 className="text-lg font-semibold text-white">Get in touch</h2>
-            <p className="mt-1 text-sm text-slate-400">
-              Questions about a trip, your listing, or the platform? Drop us a line.
-            </p>
-            <div className="mt-5 max-w-xl">
-              <FooterContactForm />
-            </div>
-          </div>
-        </div>
-
 
         <nav
           aria-label="Footer"
