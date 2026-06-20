@@ -262,7 +262,7 @@ function MyListingPage() {
             className="gap-2 rounded-2xl text-white hover:opacity-90"
             style={{ backgroundColor: LEAF }}
           >
-            <Link to="/operator/preview" search={{ edit: true } as never}>
+            <Link to="/create-listing/new" search={{ edit: true } as never}>
               <Pencil className="size-4" /> Edit listing
             </Link>
           </Button>
@@ -393,7 +393,7 @@ function MyListingPage() {
                       asChild
                       title="Edit listing"
                     >
-                      <Link to="/operator/preview" search={{ edit: true } as never}>
+                      <Link to="/create-listing/new" search={{ edit: true } as never}>
                         <Pencil className="size-4" />
                       </Link>
                     </Button>
@@ -434,7 +434,7 @@ function MyListingPage() {
                         ) : null}
                         <DropdownMenuSeparator />
                         <DropdownMenuItem asChild>
-                          <Link to="/operator/preview" search={{ edit: true } as never}>
+                          <Link to="/create-listing/new" search={{ edit: true } as never}>
                             <Pencil className="mr-2 size-4" />
                             Edit listing
                           </Link>
