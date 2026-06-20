@@ -168,9 +168,6 @@ function MyListingPage() {
   const operator = operatorQ.data?.operator ?? null;
   const trips = tripsQ.data?.trips ?? [];
   
-  const hasInstantTrip = trips.some(
-    (t: any) => t.booking_type === "instant_book",
-  );
   const hasCalendarEntry = (availQ.data?.length ?? 0) > 0;
   const showCalendarBanner = trips.length > 0 && !hasCalendarEntry;
   const undersold = undersoldQ.data ?? [];
