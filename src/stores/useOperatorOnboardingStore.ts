@@ -295,8 +295,9 @@ export function isFishingFocusValid(s: OperatorOnboardingState): boolean {
 
 
 export function isBookingRulesValid(s: OperatorOnboardingState): boolean {
-  return !!s.booking_type && !!s.advance_notice_hours && !!s.cancellation_policy;
+  return !!s.advance_notice_hours && !!s.cancellation_policy;
 }
+
 
 export function isReadyToSubmit(s: OperatorOnboardingState): boolean {
   return (
