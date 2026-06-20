@@ -13,8 +13,9 @@ import {
   Trash2,
   MoreHorizontal,
   CalendarDays,
-  
+  ShieldCheck,
 } from "lucide-react";
+
 import { toast } from "sonner";
 
 import { Button } from "@/components/ui/button";
@@ -408,12 +409,23 @@ function MyListingPage() {
                       size="icon"
                       variant="ghost"
                       asChild
+                      title="Manage Policies"
+                    >
+                      <Link to="/dashboard/manage-policies">
+                        <ShieldCheck className="size-4" />
+                      </Link>
+                    </Button>
+                    <Button
+                      size="icon"
+                      variant="ghost"
+                      asChild
                       title="Preview"
                     >
                       <Link to="/operator/preview">
                         <Eye className="size-4" />
                       </Link>
                     </Button>
+
                     <DropdownMenu>
                       <DropdownMenuTrigger asChild>
                         <Button size="icon" variant="ghost" title="More">
@@ -436,6 +448,13 @@ function MyListingPage() {
                             Edit listing
                           </Link>
                         </DropdownMenuItem>
+                        <DropdownMenuItem asChild>
+                          <Link to="/dashboard/manage-policies">
+                            <ShieldCheck className="mr-2 size-4" />
+                            Manage Policies
+                          </Link>
+                        </DropdownMenuItem>
+
                       </DropdownMenuContent>
                     </DropdownMenu>
                   </div>
