@@ -468,36 +468,8 @@ export function TripFormDialog({ open, onOpenChange, initial }: Props) {
             </div>
           </section>
 
-          {/* Booking method */}
-          <section className="space-y-3 rounded-xl border bg-muted/30 p-4">
-            <h3 className="text-sm font-semibold uppercase tracking-wide text-muted-foreground">
-              Booking method
-            </h3>
-            <p className="text-xs text-muted-foreground">
-              Override how this individual trip is booked. Inshore or simple trips work
-              great as Instant Book; custom or offshore trips often do better as Request to Book.
-            </p>
-            <div className="grid gap-2 sm:grid-cols-2">
-              {BOOKING_TYPE_OPTIONS.map((opt) => {
-                const selected = form.booking_type === opt.value;
-                return (
-                  <button
-                    key={opt.value}
-                    type="button"
-                    onClick={() => setForm({ ...form, booking_type: opt.value })}
-                    className={`rounded-lg border p-3 text-left transition-colors ${
-                      selected
-                        ? "border-primary bg-primary/5 ring-1 ring-primary"
-                        : "border-border bg-background hover:border-primary/40"
-                    }`}
-                  >
-                    <div className="text-sm font-medium">{opt.label}</div>
-                    <div className="mt-1 text-xs text-muted-foreground">{opt.hint}</div>
-                  </button>
-                );
-              })}
-            </div>
-          </section>
+          {/* Booking method is fixed to Request to Book — captain can switch
+              to Instant Book later on the Manage Availability page. */}
 
           {/* 5. Pricing */}
           <section className="space-y-3 rounded-xl border bg-muted/30 p-4">
