@@ -69,6 +69,7 @@ import { Route as AuthenticatedDashboardMyOrdersRouteImport } from './routes/_au
 import { Route as AuthenticatedDashboardMyListingRouteImport } from './routes/_authenticated/dashboard.my-listing'
 import { Route as AuthenticatedDashboardMessagesRouteImport } from './routes/_authenticated/dashboard.messages'
 import { Route as AuthenticatedDashboardMasterCalendarRouteImport } from './routes/_authenticated/dashboard.master-calendar'
+import { Route as AuthenticatedDashboardManagePoliciesRouteImport } from './routes/_authenticated/dashboard.manage-policies'
 import { Route as AuthenticatedDashboardLearnerRouteImport } from './routes/_authenticated/dashboard.learner'
 import { Route as AuthenticatedDashboardFavoritesRouteImport } from './routes/_authenticated/dashboard.favorites'
 import { Route as AuthenticatedDashboardEarningsBookingsRouteImport } from './routes/_authenticated/dashboard.earnings-bookings'
@@ -421,6 +422,12 @@ const AuthenticatedDashboardMasterCalendarRoute =
     path: '/master-calendar',
     getParentRoute: () => AuthenticatedDashboardRoute,
   } as any)
+const AuthenticatedDashboardManagePoliciesRoute =
+  AuthenticatedDashboardManagePoliciesRouteImport.update({
+    id: '/manage-policies',
+    path: '/manage-policies',
+    getParentRoute: () => AuthenticatedDashboardRoute,
+  } as any)
 const AuthenticatedDashboardLearnerRoute =
   AuthenticatedDashboardLearnerRouteImport.update({
     id: '/learner',
@@ -703,6 +710,7 @@ export interface FileRoutesByFullPath {
   '/dashboard/earnings-bookings': typeof AuthenticatedDashboardEarningsBookingsRoute
   '/dashboard/favorites': typeof AuthenticatedDashboardFavoritesRoute
   '/dashboard/learner': typeof AuthenticatedDashboardLearnerRouteWithChildren
+  '/dashboard/manage-policies': typeof AuthenticatedDashboardManagePoliciesRoute
   '/dashboard/master-calendar': typeof AuthenticatedDashboardMasterCalendarRoute
   '/dashboard/messages': typeof AuthenticatedDashboardMessagesRouteWithChildren
   '/dashboard/my-listing': typeof AuthenticatedDashboardMyListingRoute
@@ -800,6 +808,7 @@ export interface FileRoutesByTo {
   '/dashboard/earnings-bookings': typeof AuthenticatedDashboardEarningsBookingsRoute
   '/dashboard/favorites': typeof AuthenticatedDashboardFavoritesRoute
   '/dashboard/learner': typeof AuthenticatedDashboardLearnerRouteWithChildren
+  '/dashboard/manage-policies': typeof AuthenticatedDashboardManagePoliciesRoute
   '/dashboard/master-calendar': typeof AuthenticatedDashboardMasterCalendarRoute
   '/dashboard/my-listing': typeof AuthenticatedDashboardMyListingRoute
   '/dashboard/my-orders': typeof AuthenticatedDashboardMyOrdersRoute
@@ -901,6 +910,7 @@ export interface FileRoutesById {
   '/_authenticated/dashboard/earnings-bookings': typeof AuthenticatedDashboardEarningsBookingsRoute
   '/_authenticated/dashboard/favorites': typeof AuthenticatedDashboardFavoritesRoute
   '/_authenticated/dashboard/learner': typeof AuthenticatedDashboardLearnerRouteWithChildren
+  '/_authenticated/dashboard/manage-policies': typeof AuthenticatedDashboardManagePoliciesRoute
   '/_authenticated/dashboard/master-calendar': typeof AuthenticatedDashboardMasterCalendarRoute
   '/_authenticated/dashboard/messages': typeof AuthenticatedDashboardMessagesRouteWithChildren
   '/_authenticated/dashboard/my-listing': typeof AuthenticatedDashboardMyListingRoute
@@ -1002,6 +1012,7 @@ export interface FileRouteTypes {
     | '/dashboard/earnings-bookings'
     | '/dashboard/favorites'
     | '/dashboard/learner'
+    | '/dashboard/manage-policies'
     | '/dashboard/master-calendar'
     | '/dashboard/messages'
     | '/dashboard/my-listing'
@@ -1099,6 +1110,7 @@ export interface FileRouteTypes {
     | '/dashboard/earnings-bookings'
     | '/dashboard/favorites'
     | '/dashboard/learner'
+    | '/dashboard/manage-policies'
     | '/dashboard/master-calendar'
     | '/dashboard/my-listing'
     | '/dashboard/my-orders'
@@ -1199,6 +1211,7 @@ export interface FileRouteTypes {
     | '/_authenticated/dashboard/earnings-bookings'
     | '/_authenticated/dashboard/favorites'
     | '/_authenticated/dashboard/learner'
+    | '/_authenticated/dashboard/manage-policies'
     | '/_authenticated/dashboard/master-calendar'
     | '/_authenticated/dashboard/messages'
     | '/_authenticated/dashboard/my-listing'
@@ -1706,6 +1719,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedDashboardMasterCalendarRouteImport
       parentRoute: typeof AuthenticatedDashboardRoute
     }
+    '/_authenticated/dashboard/manage-policies': {
+      id: '/_authenticated/dashboard/manage-policies'
+      path: '/manage-policies'
+      fullPath: '/dashboard/manage-policies'
+      preLoaderRoute: typeof AuthenticatedDashboardManagePoliciesRouteImport
+      parentRoute: typeof AuthenticatedDashboardRoute
+    }
     '/_authenticated/dashboard/learner': {
       id: '/_authenticated/dashboard/learner'
       path: '/learner'
@@ -2124,6 +2144,7 @@ interface AuthenticatedDashboardRouteChildren {
   AuthenticatedDashboardEarningsBookingsRoute: typeof AuthenticatedDashboardEarningsBookingsRoute
   AuthenticatedDashboardFavoritesRoute: typeof AuthenticatedDashboardFavoritesRoute
   AuthenticatedDashboardLearnerRoute: typeof AuthenticatedDashboardLearnerRouteWithChildren
+  AuthenticatedDashboardManagePoliciesRoute: typeof AuthenticatedDashboardManagePoliciesRoute
   AuthenticatedDashboardMasterCalendarRoute: typeof AuthenticatedDashboardMasterCalendarRoute
   AuthenticatedDashboardMessagesRoute: typeof AuthenticatedDashboardMessagesRouteWithChildren
   AuthenticatedDashboardMyListingRoute: typeof AuthenticatedDashboardMyListingRoute
@@ -2144,6 +2165,8 @@ const AuthenticatedDashboardRouteChildren: AuthenticatedDashboardRouteChildren =
     AuthenticatedDashboardFavoritesRoute: AuthenticatedDashboardFavoritesRoute,
     AuthenticatedDashboardLearnerRoute:
       AuthenticatedDashboardLearnerRouteWithChildren,
+    AuthenticatedDashboardManagePoliciesRoute:
+      AuthenticatedDashboardManagePoliciesRoute,
     AuthenticatedDashboardMasterCalendarRoute:
       AuthenticatedDashboardMasterCalendarRoute,
     AuthenticatedDashboardMessagesRoute:

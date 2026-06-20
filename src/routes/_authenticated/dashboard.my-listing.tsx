@@ -13,8 +13,9 @@ import {
   Trash2,
   MoreHorizontal,
   CalendarDays,
-  
+  ShieldCheck,
 } from "lucide-react";
+
 import { toast } from "sonner";
 
 import { Button } from "@/components/ui/button";
