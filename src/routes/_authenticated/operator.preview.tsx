@@ -100,6 +100,8 @@ function OperatorPreviewPage() {
             cancellation_policy: state.cancellation_policy ?? null,
             primary_category: state.primary_category ?? null,
             target_species: state.target_species ?? [],
+            fishing_environments: state.fishing_environments ?? [],
+            base_currency: state.base_currency ?? "USD",
           },
           vessel:
             state.business_type === "charter"

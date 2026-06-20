@@ -47,20 +47,24 @@ export const upsertOperatorDraft = createServerFn({ method: "POST" })
       // Still allow editing while pending. Block once approved/rejected lifecycle changes.
     }
 
-    const operatorPayload = {
-      owner_id: userId,
-      business_type: data.operator.business_type ?? null,
-      display_name: data.operator.display_name ?? null,
-      location: data.operator.location ?? null,
-      about: data.operator.about ?? null,
-      booking_type: data.operator.booking_type ?? null,
-      advance_notice_hours: data.operator.advance_notice_hours ?? null,
-      cancellation_policy: data.operator.cancellation_policy ?? null,
-      primary_category: (data.operator.primary_category ?? null) as any,
-      target_species: data.operator.target_species ?? [],
-      fishing_environments: data.operator.fishing_environments ?? [],
-      base_currency: data.operator.base_currency ?? "USD",
+    // Build a partial operator payload: only include keys the client explicitly
+    // sent. `undefined` means "don't touch"; `null` is an explicit clear.
+    const op = data.operator;
+    const operatorPayload: Record<string, any> = { owner_id: userId };
+    const setIf = (key: string, value: any) => {
+      if (value !== undefined) operatorPayload[key] = value;
     };
+    setIf("business_type", op.business_type);
+    setIf("display_name", op.display_name);
+    setIf("location", op.location);
+    setIf("about", op.about);
+    setIf("booking_type", op.booking_type);
+    setIf("advance_notice_hours", op.advance_notice_hours);
+    setIf("cancellation_policy", op.cancellation_policy);
+    setIf("primary_category", op.primary_category);
+    setIf("target_species", op.target_species);
+    setIf("fishing_environments", op.fishing_environments);
+    setIf("base_currency", op.base_currency);
 
     const { data: upserted, error } = await supabase
       .from("operators")
@@ -72,32 +76,30 @@ export const upsertOperatorDraft = createServerFn({ method: "POST" })
     let vesselRow = null;
     if (data.operator.business_type === "charter" && data.vessel) {
       const vp = data.vessel;
-      const featuresObj = (vp.features ?? {}) as Record<string, string>;
-      const vesselPayload: any = {
-        operator_id: upserted.id,
-        boat_type_id: vp.boat_type_id ?? null,
-        manufacturer: vp.manufacturer ?? null,
-        model: vp.model ?? null,
-        year: vp.year ?? null,
-        length_ft: vp.length_ft ?? null,
-        engine_type: vp.engine_type ?? null,
-        engine_size: vp.engine_size ?? null,
-        restored: vp.restored ?? false,
-        num_engines: vp.num_engines ?? null,
-        horsepower_per_engine: vp.horsepower_per_engine ?? null,
-        max_cruising_speed_knots: vp.max_cruising_speed_knots ?? null,
-        max_passenger_capacity: vp.max_passenger_capacity ?? 1,
-        features: featuresObj,
+      const vesselPayload: Record<string, any> = { operator_id: upserted.id };
+      const setV = (key: string, value: any) => {
+        if (value !== undefined) vesselPayload[key] = value;
       };
-      const hasAny =
-        vp.max_passenger_capacity != null ||
-        vp.boat_type_id ||
-        vp.manufacturer ||
-        vp.model ||
-        vp.year != null ||
-        vp.length_ft != null ||
-        Object.keys(featuresObj).length > 0;
-      if (hasAny) {
+      setV("boat_type_id", vp.boat_type_id);
+      setV("manufacturer", vp.manufacturer);
+      setV("model", vp.model);
+      setV("year", vp.year);
+      setV("length_ft", vp.length_ft);
+      setV("engine_type", vp.engine_type);
+      setV("engine_size", vp.engine_size);
+      setV("restored", vp.restored);
+      setV("num_engines", vp.num_engines);
+      setV("horsepower_per_engine", vp.horsepower_per_engine);
+      setV("max_cruising_speed_knots", vp.max_cruising_speed_knots);
+      setV("max_passenger_capacity", vp.max_passenger_capacity);
+      setV("features", vp.features);
+
+      // Only upsert if there's at least one field beyond operator_id.
+      if (Object.keys(vesselPayload).length > 1) {
+        // Ensure required column on insert.
+        if (vesselPayload.max_passenger_capacity == null) {
+          vesselPayload.max_passenger_capacity = 1;
+        }
         const { data: v, error: vErr } = await supabase
           .from("vessels")
           .upsert(vesselPayload, { onConflict: "operator_id" })
