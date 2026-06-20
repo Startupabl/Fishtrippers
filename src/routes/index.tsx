@@ -291,7 +291,7 @@ function Index() {
           height={1080}
           loading="eager"
           fetchPriority="high"
-          className="absolute inset-0 h-full w-full object-cover object-top"
+          className="absolute inset-0 h-full w-full object-cover object-[50%_25%] md:object-top"
         />
         {/* Navy gradient overlay for legibility */}
         <div
