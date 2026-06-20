@@ -172,7 +172,7 @@ function MyListingPage() {
     (t: any) => t.booking_type === "instant_book",
   );
   const hasCalendarEntry = (availQ.data?.length ?? 0) > 0;
-  const showCalendarBanner = hasInstantTrip && !hasCalendarEntry;
+  const showCalendarBanner = trips.length > 0 && !hasCalendarEntry;
   const undersold = undersoldQ.data ?? [];
 
   const [editing, setEditing] = useState<TripEditorState | null>(null);
