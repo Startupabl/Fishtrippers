@@ -3,17 +3,18 @@ export type CancellationPolicyKey = "flexible" | "moderate" | "strict";
 export const CANCELLATION_POLICY_COPY: Record<CancellationPolicyKey, { label: string; text: string }> = {
   flexible: {
     label: "Flexible",
-    text: "Full refund of your deposit if you cancel at least 24 hours before the trip. Cancellations within 24 hours forfeit the deposit.",
+    text: "Free cancellation up to 24 hours before departure (deposit refunded). Inside 24 hours, a 50% cancellation fee of the total trip price is charged to the card on file.",
   },
   moderate: {
     label: "Moderate",
-    text: "Full refund of your deposit if you cancel at least 7 days before the trip. Cancellations within 7 days forfeit the deposit.",
+    text: "Free cancellation 7+ days before departure. Between 7 days and 24 hours: 50% cancellation fee. Inside 24 hours: 90% cancellation fee (the full remaining balance).",
   },
   strict: {
     label: "Strict",
-    text: "Deposit is non-refundable. The remaining balance is only due if the trip sails as scheduled.",
+    text: "Free cancellation 14+ days before departure. Inside 14 days: 90% cancellation fee (the full remaining balance).",
   },
 };
+
 
 export function getCancellationPolicy(
   key: CancellationPolicyKey | string | null | undefined,
