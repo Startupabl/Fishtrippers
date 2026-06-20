@@ -375,30 +375,31 @@ export const CANCELLATION_POLICY_DETAILS: Record<
 > = {
   flexible: {
     title: "Flexible",
-    summary: "Best for trying new customers",
+    summary: "Best for attracting new customers",
     terms: [
-      "Free cancellation up to 24 hours before departure.",
-      "Inside 24 hours: captain keeps 50% of the trip price.",
+      "Up to 24 hours before departure: free cancellation (deposit refunded).",
+      "Inside 24 hours: card on file is charged a 50% cancellation fee of the total trip price.",
     ],
   },
   moderate: {
     title: "Moderate",
-    summary: "Balanced protection",
+    summary: "Balanced protection for captain and guest",
     terms: [
-      "Free cancellation up to 7 days before departure.",
-      "Between 7 days and 24 hours: 50% refund.",
-      "Inside 24 hours: non-refundable.",
+      "7+ days before departure: free cancellation.",
+      "Between 7 days and 24 hours before: card on file is charged a 50% cancellation fee of the total trip price.",
+      "Inside 24 hours: card on file is charged a 90% cancellation fee (the full remaining balance).",
     ],
   },
   strict: {
     title: "Strict",
     summary: "Best for high-demand seasons",
     terms: [
-      "Free cancellation up to 14 days before departure.",
-      "Within 14 days: non-refundable.",
+      "14+ days before departure: free cancellation.",
+      "Inside 14 days: card on file is charged a 90% cancellation fee (the full remaining balance).",
     ],
   },
 };
 
 export const WEATHER_POLICY_DISCLAIMER =
-  "Regardless of the chosen cancellation policy, if the Captain cancels the trip due to unsafe weather or sea conditions, the customer always receives a 100% refund.";
+  "Weather policy (standard for all trips): If the Captain cancels due to unsafe weather or sea conditions, the guest always receives a 100% refund.";
+
