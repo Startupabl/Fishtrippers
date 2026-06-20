@@ -1,26 +1,77 @@
+
+## Goals
+
+1. Clicking **Edit listing** anywhere in the dashboard should open the multi-step form at **Step 1**, not the read-only preview page.
+2. Saving any step (especially Step 2 — Profile) must persist that step's data without silently wiping data from other steps.
+
+## Diagnosis
+
+### Bug 1 — "Edit listing" lands on preview page
+In `src/routes/_authenticated/dashboard.my-listing.tsx` every "Edit listing" link points to `/operator/preview?edit=true` (lines 265, 396, 437). The preview route is a read-only listing view with a single "Save updates" button — there is no Step 1/2/3 navigation there. The wizard lives at `/create-listing/new`.
+
+### Bug 2 — Profile data appears not to save
+Two persist call sites build a partial operator payload:
+
+- `persistCurrentStep` in `src/routes/create-listing.new.tsx` (≈ line 138)
+- `handleSaveUpdates` in `src/routes/_authenticated/operator.preview.tsx` (≈ line 88)
+
+Both payloads omit `fishing_environments` and `base_currency`. The server handler `upsertOperatorDraft` in `src/lib/operators.functions.ts` (line 61) then does:
+
+```
+fishing_environments: data.operator.fishing_environments ?? [],
+```
+
+Because the field is `undefined` in the payload, it is **overwritten with `[]` on every save**. The wizard advances Step 2 → 3 by calling `persistCurrentStep`, which silently clears the fishing-focus selections the user made earlier when they revisit. From the user's perspective, when they come back to the form, fields look blank / out of sync, and the Continue button on Step 2 can appear to "do nothing" because the operator row is saved with values that don't match the local store after the next hydrate.
+
+A secondary risk: the avatar upload in Step 2 writes to `profiles.avatar_url` but the listing's `cover_image_url` is sourced from `operator_photos` (gallery), so there is no avatar-save bug — only the operator-row wipe is the real issue.
+
 ## Plan
 
-### 1. "Write a Review" wiring (Past Trips tab)
-Already complete in `src/routes/_authenticated/dashboard.learner.bookings.tsx` — the Past Trips action button opens the existing `WriteTripReviewDialog`, which calls `submitTripReview` and writes to the same `reviews` table the admin moderation page (`/admin/reviews`) reads from. No code change needed; will verify the path end-to-end and call it out.
+### 1. Route the "Edit listing" buttons to Step 1 of the wizard
 
-### 2. Dynamic review counts on Listing Cards
-Aggregate approved reviews per operator and render them in `OperatorCard`. "Approved" maps to rows present in the `reviews` table (admin moderation works by deleting bad rows; surviving rows are the approved set).
+File: `src/routes/_authenticated/dashboard.my-listing.tsx`
 
-**`src/lib/operators-search.functions.ts`**
-- Select `owner_id` on the operators query.
-- After the operators query, fetch `reviews(aide_id, rating)` for the returned owner ids in one round-trip (server publishable client).
-- Compute `{ avg, count }` per `aide_id` and populate the existing `rating` / `review_count` fields on each `OperatorCardDTO` (already in the DTO but currently `null`).
+Change all three `<Link to="/operator/preview" search={{ edit: true }}>` "Edit listing" buttons to:
 
-**`src/components/listings/OperatorCard.tsx`**
-- Replace the unconditional "Verified" segment with conditional logic:
-  - `review_count >= 1` → render a segment with a filled amber star, the average to 1 decimal (e.g. `4.9`), and `(N reviews)`.
-  - Otherwise → keep the current static star + "Verified" placeholder.
+```
+<Link to="/create-listing/new" search={{ edit: true }}>
+```
 
-### Out of scope
-- No schema change, no new "approved" column. Admin moderation continues to work via the existing edit/delete flow.
-- `LiveJourneyCard` already renders dynamic review counts when present — no change.
-- Operator listing detail page review feed (`ListingReviews`) already exists and is unchanged.
+Leave the plain "View preview" / "Preview" links pointing at `/operator/preview` (they have no `edit` search param) unchanged.
 
-### Files touched
-- `src/lib/operators-search.functions.ts`
-- `src/components/listings/OperatorCard.tsx`
+Also, when the wizard finishes Step 6 in edit mode, it currently sends the user to `/operator/preview?edit=true`. Keep that — once they finish all steps, landing on the preview to confirm and save is the right ending.
+
+### 2. Stop the server from wiping fields the client didn't send
+
+File: `src/lib/operators.functions.ts`
+
+Change `upsertOperatorDraft` to build the operator payload by **only including keys the client explicitly sent** (treat `undefined` as "don't touch", but allow `null` as an explicit clear). Concretely, replace the flat object literal with a builder that adds each key only when `data.operator.<key> !== undefined`. This makes step-by-step partial saves safe and matches how the UI already thinks about saving.
+
+Apply the same partial-update rule to the vessel payload for charters (don't overwrite `features` with `{}` when the client didn't send `vessel`).
+
+### 3. Make the two client save sites send every field the store knows about
+
+So that no field silently flips to `null`/`[]` on save, update both:
+
+- `persistCurrentStep` in `src/routes/create-listing.new.tsx`
+- `handleSaveUpdates` in `src/routes/_authenticated/operator.preview.tsx`
+
+…to also include `fishing_environments: state.fishing_environments ?? []` and `base_currency: state.base_currency ?? "USD"` in the operator payload. With change #2 above this is belt-and-braces, but it removes a class of regressions if the server handler is ever simplified.
+
+### 4. Verify
+
+Manually walk through, in this order, on a charter account that already has a listing:
+
+1. Dashboard → click **Edit listing** → expect URL `/create-listing/new?edit=true` and Step 1 (Business type) selected.
+2. Step 2 (Profile): edit Display Name, Meeting Point, About → click **Continue** → return to Step 2 → fields persist.
+3. Step 4 (Fishing focus): pick environments + species → Continue → Step 5 → go back to Step 4 → selections persist.
+4. Step 6 (Booking rules): set all 3 fields → Continue → lands on `/operator/preview?edit=true`.
+5. On preview, click **Save updates** → toast success; refresh; data persists.
+
+If any step regresses, capture the failing payload from the network panel and adjust the partial-update guard in step 2.
+
+## Out of scope
+
+- No schema changes.
+- No changes to the avatar upload, the gallery uploader, or the trip catalog modal.
+- No changes to the preview page's layout — only the Edit-button targets and the save helper's payload shape.
