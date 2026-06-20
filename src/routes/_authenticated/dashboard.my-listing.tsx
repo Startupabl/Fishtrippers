@@ -448,6 +448,13 @@ function MyListingPage() {
                             Edit listing
                           </Link>
                         </DropdownMenuItem>
+                        <DropdownMenuItem asChild>
+                          <Link to="/dashboard/manage-policies">
+                            <ShieldCheck className="mr-2 size-4" />
+                            Manage Policies
+                          </Link>
+                        </DropdownMenuItem>
+
                       </DropdownMenuContent>
                     </DropdownMenu>
                   </div>
