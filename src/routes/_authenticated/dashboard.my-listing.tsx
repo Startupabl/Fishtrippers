@@ -409,12 +409,23 @@ function MyListingPage() {
                       size="icon"
                       variant="ghost"
                       asChild
+                      title="Manage Policies"
+                    >
+                      <Link to="/dashboard/manage-policies">
+                        <ShieldCheck className="size-4" />
+                      </Link>
+                    </Button>
+                    <Button
+                      size="icon"
+                      variant="ghost"
+                      asChild
                       title="Preview"
                     >
                       <Link to="/operator/preview">
                         <Eye className="size-4" />
                       </Link>
                     </Button>
+
                     <DropdownMenu>
                       <DropdownMenuTrigger asChild>
                         <Button size="icon" variant="ghost" title="More">
