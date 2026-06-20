@@ -1,11 +1,32 @@
 import { createServerFn } from "@tanstack/react-start";
+import { z } from "zod";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 import {
   upsertDraftInputSchema,
   submitOperatorSchema,
+  CANCELLATION_POLICIES,
   type UpsertDraftInput,
   type SubmitOperatorInput,
 } from "./operators.shared";
+
+export const updateOperatorCancellationPolicy = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((input: { cancellation_policy: string }) =>
+    z.object({ cancellation_policy: z.enum(CANCELLATION_POLICIES) }).parse(input),
+  )
+  .handler(async ({ data, context }) => {
+    const { supabase, userId } = context;
+    const { data: row, error } = await supabase
+      .from("operators")
+      .update({ cancellation_policy: data.cancellation_policy })
+      .eq("owner_id", userId)
+      .select("id, cancellation_policy")
+      .maybeSingle();
+    if (error) throw new Error(error.message);
+    if (!row) throw new Error("Listing not found");
+    return { operator: row };
+  });
+
 
 export const getMyOperator = createServerFn({ method: "GET" })
   .middleware([requireSupabaseAuth])
