@@ -38,7 +38,7 @@ import { toast } from "sonner";
 import { X } from "lucide-react";
 import { upsertTrip, getMyCapabilities } from "@/lib/trips.functions";
 import { saveDefaultDeparture } from "@/lib/operators.functions";
-import { DURATION_OPTIONS, BOOKING_TYPE_OPTIONS, CHARTER_TYPE_OPTIONS } from "@/lib/trips.shared";
+import { DURATION_OPTIONS, CHARTER_TYPE_OPTIONS } from "@/lib/trips.shared";
 import {
   FISHING_ENVIRONMENTS,
   FISHING_TECHNIQUES,
