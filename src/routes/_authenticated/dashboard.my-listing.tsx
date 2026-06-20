@@ -279,10 +279,10 @@ function MyListingPage() {
               </div>
               <div>
                 <p className="text-sm font-semibold text-amber-900">
-                  Action Required: Configure your Master Calendar
+                  Action Required: Set up How Bookings Work
                 </p>
                 <p className="text-xs text-amber-900/80">
-                  You have instant-book trips. Set up your availability so guests can book automatically.
+                  Choose Instant Book or Request to Book and configure your calendar.
                 </p>
               </div>
             </div>
