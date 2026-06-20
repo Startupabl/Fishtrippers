@@ -108,7 +108,7 @@ export const useOperatorOnboardingStore = create<OperatorOnboardingState>()(
       display_name: "",
       location: "",
       about: "",
-      booking_type: null,
+      booking_type: "inquiry",
       advance_notice_hours: null,
       cancellation_policy: null,
       primary_category: null,
@@ -182,7 +182,7 @@ export const useOperatorOnboardingStore = create<OperatorOnboardingState>()(
           display_name: "",
           location: "",
           about: "",
-          booking_type: null,
+          booking_type: "inquiry",
           advance_notice_hours: null,
           cancellation_policy: null,
           primary_category: null,
@@ -212,7 +212,7 @@ export const useOperatorOnboardingStore = create<OperatorOnboardingState>()(
           display_name: operator.display_name ?? "",
           location: operator.location ?? "",
           about: operator.about ?? "",
-          booking_type: operator.booking_type ?? null,
+          booking_type: operator.booking_type ?? "inquiry",
           advance_notice_hours: operator.advance_notice_hours ?? null,
           cancellation_policy: operator.cancellation_policy ?? null,
           primary_category: operator.primary_category ?? null,
@@ -295,8 +295,9 @@ export function isFishingFocusValid(s: OperatorOnboardingState): boolean {
 
 
 export function isBookingRulesValid(s: OperatorOnboardingState): boolean {
-  return !!s.booking_type && !!s.advance_notice_hours && !!s.cancellation_policy;
+  return !!s.advance_notice_hours && !!s.cancellation_policy;
 }
+
 
 export function isReadyToSubmit(s: OperatorOnboardingState): boolean {
   return (

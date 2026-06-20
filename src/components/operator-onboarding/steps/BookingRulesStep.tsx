@@ -1,4 +1,4 @@
-import { Zap, MessageSquare, CheckCircle2, AlertTriangle } from "lucide-react";
+import { CheckCircle2, AlertTriangle } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import {
@@ -28,7 +28,6 @@ interface Props {
 }
 
 export function BookingRulesStep({ onBack, onNext }: Props) {
-  const booking_type = useOperatorOnboardingStore((s) => s.booking_type);
   const advance_notice_hours = useOperatorOnboardingStore((s) => s.advance_notice_hours);
   const cancellation_policy = useOperatorOnboardingStore((s) => s.cancellation_policy);
   const setBookingRules = useOperatorOnboardingStore((s) => s.setBookingRules);
@@ -39,62 +38,11 @@ export function BookingRulesStep({ onBack, onNext }: Props) {
       <header>
         <h1 className="text-3xl font-bold tracking-tight">Booking rules & policy</h1>
         <p className="mt-2 text-muted-foreground">
-          Last stop before submitting — set how customers can book and your cancellation terms.
+          Last stop before submitting — set your booking notice and cancellation terms.
+          You'll choose Instant Book or Request to Book from your Manage Availability page after submitting.
         </p>
       </header>
 
-      {/* Booking type */}
-      <section className="space-y-4 rounded-2xl border bg-card p-6">
-        <div>
-          <h2 className="text-lg font-semibold">How should bookings work?</h2>
-          <p className="text-sm text-muted-foreground">
-            You can set this per-trip later; this is your default.
-          </p>
-        </div>
-        <div className="grid gap-3 sm:grid-cols-2">
-          {[
-            {
-              id: "instant" as const,
-              icon: Zap,
-              title: "Instant Book",
-              desc: "Automatically confirms the booking if the slot is open on your calendar. Keep your availability current.",
-            },
-            {
-              id: "inquiry" as const,
-              icon: MessageSquare,
-              title: "Inquiry Only",
-              desc: "Customers send a request first. You manually approve or decline before dates lock.",
-            },
-          ].map((opt) => {
-            const Icon = opt.icon;
-            const selected = booking_type === opt.id;
-            return (
-              <button
-                key={opt.id}
-                type="button"
-                onClick={() => setBookingRules({ booking_type: opt.id })}
-                className={cn(
-                  "flex items-start gap-3 rounded-xl border-2 p-4 text-left transition-all",
-                  selected
-                    ? "border-primary bg-primary/5"
-                    : "border-border hover:border-primary/40",
-                )}
-              >
-                <Icon
-                  className={cn(
-                    "mt-1 h-5 w-5 shrink-0",
-                    selected ? "text-primary" : "text-muted-foreground",
-                  )}
-                />
-                <div className="min-w-0">
-                  <div className="font-semibold">{opt.title}</div>
-                  <p className="mt-1 text-sm text-muted-foreground">{opt.desc}</p>
-                </div>
-              </button>
-            );
-          })}
-        </div>
-      </section>
 
       {/* Advance notice */}
       <section className="space-y-3 rounded-2xl border bg-card p-6">
