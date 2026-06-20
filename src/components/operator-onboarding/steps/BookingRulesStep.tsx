@@ -1,4 +1,4 @@
-import { Zap, MessageSquare, CheckCircle2, AlertTriangle } from "lucide-react";
+import { CheckCircle2, AlertTriangle } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import {
