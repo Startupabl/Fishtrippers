@@ -1,7 +1,7 @@
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { useServerFn } from "@tanstack/react-start";
-import { useQuery, useQueryClient } from "@tanstack/react-query";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import {
@@ -19,13 +19,25 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
-import { Info, AlertTriangle } from "lucide-react";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
+import { Label } from "@/components/ui/label";
+import { Textarea } from "@/components/ui/textarea";
+import { Info, AlertTriangle, Loader2 } from "lucide-react";
 import { useAuthStore } from "@/stores/useAuthStore";
 import {
   listMyTripBookingsAide,
   markTripBookingComplete,
   cancelPendingTripOffer,
+  type TripBookingSummary,
 } from "@/lib/trip-bookings.functions";
+import { submitCancellationDispute } from "@/lib/cancellation-disputes.functions";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 
 const display = { fontFamily: "Montserrat, system-ui, sans-serif" };
@@ -44,6 +56,27 @@ function UpcomingSessionsPage() {
   const fetchTripBookings = useServerFn(listMyTripBookingsAide);
   const markTripCompleteFn = useServerFn(markTripBookingComplete);
   const cancelTripOfferFn = useServerFn(cancelPendingTripOffer);
+  const submitDispute = useServerFn(submitCancellationDispute);
+
+  const [reportTarget, setReportTarget] = useState<TripBookingSummary | null>(null);
+  const [reportClaimType, setReportClaimType] =
+    useState<"policy_payout" | "other">("policy_payout");
+  const [reportDetails, setReportDetails] = useState("");
+
+  const reportMutation = useMutation({
+    mutationFn: (input: {
+      bookingId: string;
+      claimType: "policy_payout" | "other";
+      details: string;
+    }) => submitDispute({ data: input }),
+    onSuccess: () => {
+      toast.success("Claim submitted to admin team");
+      setReportTarget(null);
+      setReportDetails("");
+      setReportClaimType("policy_payout");
+    },
+    onError: (e: Error) => toast.error(e.message || "Failed to submit claim"),
+  });
 
   useEffect(() => {
     if (!user && typeof window !== "undefined") navigate({ to: "/login" });
@@ -229,11 +262,11 @@ function UpcomingSessionsPage() {
                           size="sm"
                           variant="outline"
                           className="border-red-300 text-red-700 hover:bg-red-50 hover:text-red-800"
-                          onClick={() =>
-                            toast.message(
-                              "Report submitted to our support team. We'll review and reach out shortly.",
-                            )
-                          }
+                          onClick={() => {
+                            setReportClaimType("policy_payout");
+                            setReportDetails("");
+                            setReportTarget(b);
+                          }}
                         >
                           <AlertTriangle className="mr-1.5 size-4" />
                           Report Issue
@@ -302,6 +335,112 @@ function UpcomingSessionsPage() {
           {renderTripBookingsTable(completedTripBookings, "completed")}
         </TabsContent>
       </Tabs>
+
+      <Dialog
+        open={!!reportTarget}
+        onOpenChange={(o) => {
+          if (!o && !reportMutation.isPending) {
+            setReportTarget(null);
+            setReportDetails("");
+          }
+        }}
+      >
+        <DialogContent className="max-w-lg">
+          <DialogHeader>
+            <DialogTitle>Initiate Payout Claim for Cancellation</DialogTitle>
+            <DialogDescription>
+              Submit this claim to the admin team for review.
+              {reportTarget?.trip_title ? ` Trip: "${reportTarget.trip_title}"` : ""}
+            </DialogDescription>
+          </DialogHeader>
+
+          <div className="space-y-4">
+            <div className="space-y-2">
+              <Label className="text-sm font-medium">
+                Are you requesting a payout enforcement based on your cancellation
+                policy?
+              </Label>
+              <div className="space-y-2">
+                <label className="flex cursor-pointer items-start gap-2 rounded-md border p-3 hover:bg-muted/40">
+                  <input
+                    type="radio"
+                    name="claim-type"
+                    value="policy_payout"
+                    checked={reportClaimType === "policy_payout"}
+                    onChange={() => setReportClaimType("policy_payout")}
+                    className="mt-1"
+                  />
+                  <span className="text-sm">
+                    <strong>Yes</strong> — Request Policy Payout
+                  </span>
+                </label>
+                <label className="flex cursor-pointer items-start gap-2 rounded-md border p-3 hover:bg-muted/40">
+                  <input
+                    type="radio"
+                    name="claim-type"
+                    value="other"
+                    checked={reportClaimType === "other"}
+                    onChange={() => setReportClaimType("other")}
+                    className="mt-1"
+                  />
+                  <span className="text-sm">
+                    <strong>No</strong> — Reporting another issue
+                  </span>
+                </label>
+              </div>
+            </div>
+
+            <div className="space-y-2">
+              <Label htmlFor="report-details">
+                Provide details for the Admin team regarding this claim:
+              </Label>
+              <Textarea
+                id="report-details"
+                value={reportDetails}
+                onChange={(e) => setReportDetails(e.target.value.slice(0, 250))}
+                maxLength={250}
+                rows={5}
+                placeholder="Describe what happened…"
+                disabled={reportMutation.isPending}
+              />
+              <div className="text-right text-xs text-muted-foreground">
+                {reportDetails.length}/250
+              </div>
+            </div>
+          </div>
+
+          <DialogFooter>
+            <Button
+              variant="outline"
+              disabled={reportMutation.isPending}
+              onClick={() => {
+                setReportTarget(null);
+                setReportDetails("");
+              }}
+            >
+              Cancel
+            </Button>
+            <Button
+              disabled={
+                reportDetails.trim().length === 0 || reportMutation.isPending
+              }
+              onClick={() => {
+                if (!reportTarget) return;
+                reportMutation.mutate({
+                  bookingId: reportTarget.id,
+                  claimType: reportClaimType,
+                  details: reportDetails.trim(),
+                });
+              }}
+            >
+              {reportMutation.isPending && (
+                <Loader2 className="mr-1.5 size-4 animate-spin" />
+              )}
+              Submit Claim
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </main>
   );
 }

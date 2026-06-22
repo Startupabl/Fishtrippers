@@ -232,6 +232,56 @@ export type Database = {
           },
         ]
       }
+      cancellation_disputes: {
+        Row: {
+          admin_notes: string | null
+          booking_id: string
+          captain_details: string
+          captain_id: string
+          claim_type: Database["public"]["Enums"]["cancellation_dispute_type_t"]
+          created_at: string
+          id: string
+          resolved_at: string | null
+          resolved_by: string | null
+          status: Database["public"]["Enums"]["cancellation_dispute_status_t"]
+          updated_at: string
+        }
+        Insert: {
+          admin_notes?: string | null
+          booking_id: string
+          captain_details: string
+          captain_id: string
+          claim_type: Database["public"]["Enums"]["cancellation_dispute_type_t"]
+          created_at?: string
+          id?: string
+          resolved_at?: string | null
+          resolved_by?: string | null
+          status?: Database["public"]["Enums"]["cancellation_dispute_status_t"]
+          updated_at?: string
+        }
+        Update: {
+          admin_notes?: string | null
+          booking_id?: string
+          captain_details?: string
+          captain_id?: string
+          claim_type?: Database["public"]["Enums"]["cancellation_dispute_type_t"]
+          created_at?: string
+          id?: string
+          resolved_at?: string | null
+          resolved_by?: string | null
+          status?: Database["public"]["Enums"]["cancellation_dispute_status_t"]
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "cancellation_disputes_booking_id_fkey"
+            columns: ["booking_id"]
+            isOneToOne: false
+            referencedRelation: "bookings"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       categories: {
         Row: {
           created_at: string
@@ -1996,6 +2046,8 @@ export type Database = {
         | "confirmed"
         | "completed"
         | "cancelled"
+      cancellation_dispute_status_t: "pending" | "approved" | "denied"
+      cancellation_dispute_type_t: "policy_payout" | "other"
       class_session_status_t: "active" | "completed" | "cancelled"
       journey_moderation_status: "pending" | "approved" | "declined"
       journey_status: "draft" | "published" | "archived"
@@ -2156,6 +2208,8 @@ export const Constants = {
         "completed",
         "cancelled",
       ],
+      cancellation_dispute_status_t: ["pending", "approved", "denied"],
+      cancellation_dispute_type_t: ["policy_payout", "other"],
       class_session_status_t: ["active", "completed", "cancelled"],
       journey_moderation_status: ["pending", "approved", "declined"],
       journey_status: ["draft", "published", "archived"],

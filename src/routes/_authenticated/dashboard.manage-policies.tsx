@@ -2,7 +2,7 @@ import { useState } from "react";
 import { createFileRoute, Link, useRouter } from "@tanstack/react-router";
 import { useServerFn } from "@tanstack/react-start";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { CheckCircle2, AlertTriangle, ArrowLeft } from "lucide-react";
+import { CheckCircle2, AlertTriangle, ArrowLeft, Info } from "lucide-react";
 import { toast } from "sonner";
 
 import { Button } from "@/components/ui/button";
@@ -149,6 +149,25 @@ function ManagePoliciesPage() {
               </button>
             );
           })}
+        </div>
+      </section>
+
+      <section className="flex gap-3 rounded-2xl border border-sky-200 bg-sky-50 p-5 dark:bg-sky-950/30 dark:border-sky-900">
+        <Info className="mt-0.5 h-5 w-5 shrink-0 text-sky-600" />
+        <div className="text-sm text-sky-950 dark:text-sky-100">
+          <div className="font-bold">💡 How to Enforce Your Cancellation Policy</div>
+          <p className="mt-1.5 leading-relaxed">
+            If a guest cancels late or fails to show up, you cannot charge them from this page.
+            Please navigate to your{" "}
+            <Link
+              to="/dashboard/upcoming-sessions"
+              className="font-semibold underline underline-offset-2 hover:text-sky-700"
+            >
+              My Schedule
+            </Link>{" "}
+            page, find the specific reservation card, and click 'Report Issue' within 48 hours of
+            the scheduled departure to initiate a claim.
+          </p>
         </div>
       </section>
 
