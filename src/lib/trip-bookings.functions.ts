@@ -517,10 +517,12 @@ export interface TripBookingSummary {
   is_simulated: boolean;
   source: "instant_book" | "custom_offer";
   thread_id: string | null;
+  angler_written_reason: string | null;
+  cancellation_timestamp: string | null;
 }
 
 const BOOKING_COLS =
-  "id, status, trip_date, guests, total_price, deposit_minor, balance_due_minor, aide_earnings, service_fee_amount, currency, created_at, course_id, aide_id, learner_id, primary_angler_name, phone, notes, stripe_checkout_session_id, thread_id";
+  "id, status, trip_date, guests, total_price, deposit_minor, balance_due_minor, aide_earnings, service_fee_amount, currency, created_at, course_id, aide_id, learner_id, primary_angler_name, phone, notes, stripe_checkout_session_id, thread_id, angler_written_reason, cancellation_timestamp";
 
 async function hydrateTripBookings(
   rows: any[],
