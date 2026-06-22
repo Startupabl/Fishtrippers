@@ -27,7 +27,7 @@ export interface BookingDetail {
   service_fee_amount: number;
   aide_earnings: number;
   currency: string;
-  status: "pending_offer" | "declined" | "pending_payment" | "confirmed" | "completed";
+  status: "pending_offer" | "declined" | "pending_payment" | "confirmed" | "completed" | "cancelled";
   created_at: string;
   slots: BookingSlot[];
   course_title: string | null;
