@@ -90,8 +90,12 @@ function UpcomingSessionsPage() {
   const visibleBookings = allTripBookings.filter(
     (b) => !(b.status === "pending_payment" && b.source === "instant_book"),
   );
-  const upcomingTripBookings = visibleBookings.filter((b) => b.status !== "completed");
-  const completedTripBookings = visibleBookings.filter((b) => b.status === "completed");
+  const upcomingTripBookings = visibleBookings.filter(
+    (b) => b.status !== "completed" && b.status !== "cancelled",
+  );
+  const completedTripBookings = visibleBookings.filter(
+    (b) => b.status === "completed" || b.status === "cancelled",
+  );
 
   const renderTripBookingsTable = (
     rows: typeof allTripBookings,
