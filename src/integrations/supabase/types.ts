@@ -241,6 +241,8 @@ export type Database = {
           claim_type: Database["public"]["Enums"]["cancellation_dispute_type_t"]
           created_at: string
           id: string
+          paid_out_at: string | null
+          paid_out_by: string | null
           resolved_at: string | null
           resolved_by: string | null
           status: Database["public"]["Enums"]["cancellation_dispute_status_t"]
@@ -254,6 +256,8 @@ export type Database = {
           claim_type: Database["public"]["Enums"]["cancellation_dispute_type_t"]
           created_at?: string
           id?: string
+          paid_out_at?: string | null
+          paid_out_by?: string | null
           resolved_at?: string | null
           resolved_by?: string | null
           status?: Database["public"]["Enums"]["cancellation_dispute_status_t"]
@@ -267,6 +271,8 @@ export type Database = {
           claim_type?: Database["public"]["Enums"]["cancellation_dispute_type_t"]
           created_at?: string
           id?: string
+          paid_out_at?: string | null
+          paid_out_by?: string | null
           resolved_at?: string | null
           resolved_by?: string | null
           status?: Database["public"]["Enums"]["cancellation_dispute_status_t"]
@@ -1401,6 +1407,8 @@ export type Database = {
           last_name: string | null
           login_count: number
           motto: string | null
+          payout_details: Json | null
+          payout_method: string | null
           phone_number: string | null
           postal_code: string | null
           state_province: string | null
@@ -1431,6 +1439,8 @@ export type Database = {
           last_name?: string | null
           login_count?: number
           motto?: string | null
+          payout_details?: Json | null
+          payout_method?: string | null
           phone_number?: string | null
           postal_code?: string | null
           state_province?: string | null
@@ -1461,6 +1471,8 @@ export type Database = {
           last_name?: string | null
           login_count?: number
           motto?: string | null
+          payout_details?: Json | null
+          payout_method?: string | null
           phone_number?: string | null
           postal_code?: string | null
           state_province?: string | null
@@ -2046,7 +2058,11 @@ export type Database = {
         | "confirmed"
         | "completed"
         | "cancelled"
-      cancellation_dispute_status_t: "pending" | "approved" | "denied"
+      cancellation_dispute_status_t:
+        | "pending"
+        | "approved"
+        | "denied"
+        | "paid_out"
       cancellation_dispute_type_t: "policy_payout" | "other"
       class_session_status_t: "active" | "completed" | "cancelled"
       journey_moderation_status: "pending" | "approved" | "declined"
@@ -2209,7 +2225,12 @@ export const Constants = {
         "completed",
         "cancelled",
       ],
-      cancellation_dispute_status_t: ["pending", "approved", "denied"],
+      cancellation_dispute_status_t: [
+        "pending",
+        "approved",
+        "denied",
+        "paid_out",
+      ],
       cancellation_dispute_type_t: ["policy_payout", "other"],
       class_session_status_t: ["active", "completed", "cancelled"],
       journey_moderation_status: ["pending", "approved", "declined"],
