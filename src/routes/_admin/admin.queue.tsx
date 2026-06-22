@@ -95,10 +95,11 @@ function QueuePage() {
       </div>
 
       <Tabs value={tab} onValueChange={setTab} className="w-full">
-        <TabsList className="grid w-full grid-cols-3 sm:max-w-2xl">
+        <TabsList className="grid w-full grid-cols-4 sm:max-w-3xl">
           <TabsTrigger value="listings">Listing Applications</TabsTrigger>
           <TabsTrigger value="inquiries">Support tickets</TabsTrigger>
           <TabsTrigger value="flags">Flagged Content</TabsTrigger>
+          <TabsTrigger value="cancellations">Cancellation Disputes</TabsTrigger>
         </TabsList>
 
         <TabsContent value="listings" className="mt-6">
@@ -109,6 +110,9 @@ function QueuePage() {
         </TabsContent>
         <TabsContent value="flags" className="mt-6">
           <FlaggedContent />
+        </TabsContent>
+        <TabsContent value="cancellations" className="mt-6">
+          <CancellationDisputes />
         </TabsContent>
       </Tabs>
     </div>
