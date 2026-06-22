@@ -9,6 +9,7 @@ import {
   Plus,
   Search,
   Ship,
+  ShieldCheck,
 } from "lucide-react";
 import {
   Sidebar,
@@ -39,6 +40,7 @@ const aideItems: Item[] = [
   { title: "My Earnings", to: "/dashboard/earnings", icon: Wallet },
   { title: "My Listing", to: "/dashboard/my-listing", icon: BookOpen },
   { title: "Manage Availability", to: "/dashboard/master-calendar", icon: CalendarDays },
+  { title: "Manage Policies", to: "/dashboard/manage-policies", icon: ShieldCheck },
 ];
 
 const learnerItems: Item[] = [
