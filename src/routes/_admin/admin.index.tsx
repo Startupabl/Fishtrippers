@@ -86,7 +86,7 @@ function OverviewPage() {
   if (error) return <p className="text-sm text-destructive">Failed to load overview.</p>;
   if (!data) return null;
 
-  const queueTotal = data.queue.pendingListings + data.queue.pendingInquiries + data.queue.openFlags;
+  const queueTotal = data.queue.pendingListings + data.queue.pendingInquiries + data.queue.openFlags + (data.queue.pendingCancellationDisputes ?? 0);
 
   return (
     <div className="space-y-6">
