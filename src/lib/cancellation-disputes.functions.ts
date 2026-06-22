@@ -34,7 +34,7 @@ export const submitCancellationDispute = createServerFn({ method: "POST" })
     // Verify the captain owns this booking AND it is cancelled.
     const { data: booking, error: bErr } = await supabase
       .from("bookings")
-      .select("id, aide_id, status, trip_date, trip_start_time:created_at")
+      .select("id, aide_id, status")
       .eq("id", data.bookingId)
       .maybeSingle();
     if (bErr) throw new Error(bErr.message);
