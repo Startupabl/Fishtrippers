@@ -236,18 +236,33 @@ function TripBookingsPage() {
                   );
                 }
                 return (
-                  <Button
-                    size="sm"
-                    variant="outline"
-                    onClick={() => setReceiptTarget(b)}
-                  >
-                    <ReceiptIcon className="mr-1.5 size-4" />
-                    View Receipt
-                  </Button>
+                  <div className="flex items-center justify-end gap-2">
+                    <Button
+                      size="sm"
+                      variant="outline"
+                      onClick={() => setReceiptTarget(b)}
+                    >
+                      <ReceiptIcon className="mr-1.5 size-4" />
+                      View Receipt
+                    </Button>
+                    <Button
+                      size="sm"
+                      variant="outline"
+                      className="border-red-300 text-red-700 hover:bg-red-50 hover:text-red-800"
+                      onClick={() => {
+                        setCancelReason("");
+                        setCancelTarget(b);
+                      }}
+                    >
+                      <XCircle className="mr-1.5 size-4" />
+                      Cancel Trip
+                    </Button>
+                  </div>
                 );
               }}
             />
           </TabsContent>
+
 
           <TabsContent value="past" className="mt-4">
             <BookingsTable
