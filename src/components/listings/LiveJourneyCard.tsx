@@ -81,11 +81,18 @@ export function LiveJourneyCard({ journey }: { journey: JourneyRow }) {
                 <span className="text-accent"> - Aide</span>
               </span>
             </div>
-            {(journey.review_count ?? 0) > 0 && (
+            {(journey.review_count ?? 0) > 0 ? (
               <div className="flex items-center gap-1 text-sm font-normal text-gray-900">
                 <Star className="size-3.5 fill-amber-400 text-amber-400" />
                 <span>{(journey.review_avg ?? 0).toFixed(1)}</span>
-                <span className="text-gray-500">({journey.review_count})</span>
+                <span className="text-gray-500">
+                  ({journey.review_count} review{journey.review_count === 1 ? "" : "s"})
+                </span>
+              </div>
+            ) : (
+              <div className="flex items-center gap-1 text-sm font-normal text-gray-700">
+                <Star className="size-3.5 fill-amber-400 text-amber-400" />
+                <span>Verified</span>
               </div>
             )}
           </div>
