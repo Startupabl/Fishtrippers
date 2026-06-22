@@ -126,6 +126,7 @@ function UpcomingSessionsPage() {
             rows.map((b) => {
               const sourceLabel =
                 b.source === "custom_offer" ? "Custom Offer" : "Instant Book";
+              const isCancelled = b.status === "cancelled";
               const statusLabel =
                 b.status === "pending_offer"
                   ? "Pending Offer"
@@ -135,9 +136,31 @@ function UpcomingSessionsPage() {
                       ? "Confirmed"
                       : b.status === "completed"
                         ? "Completed"
-                        : b.status;
+                        : b.status === "cancelled"
+                          ? "Cancelled"
+                          : b.status;
+
+              // 48h Report Issue window from scheduled departure
+              let reportWindowOpen = false;
+              if (isCancelled && b.trip_date) {
+                const startStr = `${b.trip_date}T${(b.trip_start_time ?? "08:00:00").slice(0, 8)}`;
+                const startMs = new Date(startStr).getTime();
+                if (!Number.isNaN(startMs)) {
+                  const now = Date.now();
+                  reportWindowOpen =
+                    now >= startMs && now <= startMs + 48 * 60 * 60 * 1000;
+                }
+              }
+
               return (
-                <TableRow key={b.id}>
+                <TableRow
+                  key={b.id}
+                  className={
+                    isCancelled
+                      ? "bg-gray-100 text-muted-foreground hover:bg-gray-100"
+                      : undefined
+                  }
+                >
                   <TableCell>
                     {b.trip_date}
                     {b.trip_start_time ? ` • ${b.trip_start_time.slice(0, 5)}` : ""}
@@ -156,41 +179,89 @@ function UpcomingSessionsPage() {
                   </TableCell>
                   <TableCell>{b.guests ?? "—"}</TableCell>
                   <TableCell>
-                    <Badge
-                      variant={
-                        b.status === "confirmed" || b.status === "completed"
-                          ? "default"
-                          : "secondary"
-                      }
-                    >
-                      {statusLabel}
-                    </Badge>
-                    {b.is_simulated && (
-                      <Badge variant="outline" className="ml-1 border-amber-500 text-amber-700">
-                        Sim
-                      </Badge>
-                    )}
+                    <div className="inline-flex items-center gap-1.5">
+                      {isCancelled ? (
+                        <>
+                          <Badge className="bg-red-100 text-red-800 hover:bg-red-100">
+                            Cancelled
+                          </Badge>
+                          <TooltipProvider delayDuration={150}>
+                            <Tooltip>
+                              <TooltipTrigger asChild>
+                                <button
+                                  type="button"
+                                  aria-label="View cancellation reason"
+                                  className="inline-flex text-muted-foreground hover:text-foreground"
+                                >
+                                  <Info className="size-4" />
+                                </button>
+                              </TooltipTrigger>
+                              <TooltipContent className="max-w-xs">
+                                {b.angler_written_reason
+                                  ? b.angler_written_reason
+                                  : "No reason provided."}
+                              </TooltipContent>
+                            </Tooltip>
+                          </TooltipProvider>
+                        </>
+                      ) : (
+                        <Badge
+                          variant={
+                            b.status === "confirmed" || b.status === "completed"
+                              ? "default"
+                              : "secondary"
+                          }
+                        >
+                          {statusLabel}
+                        </Badge>
+                      )}
+                      {b.is_simulated && (
+                        <Badge variant="outline" className="border-amber-500 text-amber-700">
+                          Sim
+                        </Badge>
+                      )}
+                    </div>
                   </TableCell>
                   <TableCell>
-                    {mode === "upcoming" && b.status === "pending_offer" && (
-                      <Button
-                        size="sm"
-                        variant="outline"
-                        className="text-red-600"
-                        disabled={tripActionBusy === b.id}
-                        onClick={() => handleCancelOffer(b.id)}
-                      >
-                        {tripActionBusy === b.id ? "…" : "Cancel Offer"}
-                      </Button>
-                    )}
-                    {mode === "upcoming" && b.status === "confirmed" && (
-                      <Button
-                        size="sm"
-                        disabled={tripActionBusy === b.id}
-                        onClick={() => handleMarkTripComplete(b.id)}
-                      >
-                        {tripActionBusy === b.id ? "…" : "Mark as Complete"}
-                      </Button>
+                    {isCancelled ? (
+                      reportWindowOpen ? (
+                        <Button
+                          size="sm"
+                          variant="outline"
+                          className="border-red-300 text-red-700 hover:bg-red-50 hover:text-red-800"
+                          onClick={() =>
+                            toast.message(
+                              "Report submitted to our support team. We'll review and reach out shortly.",
+                            )
+                          }
+                        >
+                          <AlertTriangle className="mr-1.5 size-4" />
+                          Report Issue
+                        </Button>
+                      ) : null
+                    ) : (
+                      <>
+                        {mode === "upcoming" && b.status === "pending_offer" && (
+                          <Button
+                            size="sm"
+                            variant="outline"
+                            className="text-red-600"
+                            disabled={tripActionBusy === b.id}
+                            onClick={() => handleCancelOffer(b.id)}
+                          >
+                            {tripActionBusy === b.id ? "…" : "Cancel Offer"}
+                          </Button>
+                        )}
+                        {mode === "upcoming" && b.status === "confirmed" && (
+                          <Button
+                            size="sm"
+                            disabled={tripActionBusy === b.id}
+                            onClick={() => handleMarkTripComplete(b.id)}
+                          >
+                            {tripActionBusy === b.id ? "…" : "Mark as Complete"}
+                          </Button>
+                        )}
+                      </>
                     )}
                   </TableCell>
                 </TableRow>
