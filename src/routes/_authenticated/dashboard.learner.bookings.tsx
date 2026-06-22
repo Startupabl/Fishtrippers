@@ -269,6 +269,17 @@ function TripBookingsPage() {
               rows={past}
               emptyText="No completed trips yet."
               renderAction={(b) => {
+                if (b.status === "cancelled") {
+                  return (
+                    <span
+                      className="inline-flex items-center gap-1.5 text-sm text-muted-foreground"
+                      title={b.angler_written_reason ?? undefined}
+                    >
+                      <XCircle className="size-4 text-red-500" />
+                      Trip cancelled
+                    </span>
+                  );
+                }
                 const reviewed = reviewedSet.has(b.id);
                 if (reviewed) {
                   return (
