@@ -593,8 +593,9 @@ function OpenInquiries() {
               />
             ) : (
               rows.map((t) => (
-                <>
-                  <TableRow key={t.id}>
+                <Fragment key={t.id}>
+                  <TableRow>
+
                     <TableCell className="font-mono text-xs">{t.id.slice(0, 8)}</TableCell>
                     <TableCell>
                       <div className="font-medium">{t.full_name}</div>
