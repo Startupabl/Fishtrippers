@@ -345,6 +345,74 @@ function TripBookingsPage() {
           )}
         </DialogContent>
       </Dialog>
+
+      <Dialog
+        open={!!cancelTarget}
+        onOpenChange={(o) => {
+          if (!o && !cancelMutation.isPending) {
+            setCancelTarget(null);
+            setCancelReason("");
+          }
+        }}
+      >
+        <DialogContent className="max-w-md">
+          <DialogHeader>
+            <DialogTitle>Cancel this trip?</DialogTitle>
+            <DialogDescription>
+              Are you sure you want to cancel this trip?
+              {cancelTarget?.trip_title ? ` "${cancelTarget.trip_title}"` : ""}
+              {" "}This action cannot be undone.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="space-y-2">
+            <Label htmlFor="cancel-reason">
+              Briefly state your reason for cancellation:
+            </Label>
+            <Textarea
+              id="cancel-reason"
+              value={cancelReason}
+              onChange={(e) => setCancelReason(e.target.value.slice(0, 100))}
+              maxLength={100}
+              rows={3}
+              placeholder="e.g. Weather concerns, schedule conflict…"
+              disabled={cancelMutation.isPending}
+            />
+            <div className="text-right text-xs text-muted-foreground">
+              {cancelReason.length}/100
+            </div>
+          </div>
+          <DialogFooter>
+            <Button
+              variant="outline"
+              onClick={() => {
+                setCancelTarget(null);
+                setCancelReason("");
+              }}
+              disabled={cancelMutation.isPending}
+            >
+              Keep Trip
+            </Button>
+            <Button
+              variant="destructive"
+              disabled={
+                cancelReason.trim().length === 0 || cancelMutation.isPending
+              }
+              onClick={() => {
+                if (!cancelTarget) return;
+                cancelMutation.mutate({
+                  bookingId: cancelTarget.id,
+                  reason: cancelReason.trim(),
+                });
+              }}
+            >
+              {cancelMutation.isPending && (
+                <Loader2 className="mr-1.5 size-4 animate-spin" />
+              )}
+              Confirm Cancellation
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
