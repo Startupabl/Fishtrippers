@@ -225,7 +225,7 @@ export const listAdminCancellationDisputes = createServerFn({ method: "POST" })
         cancellation_policy: b?.aide_id ? policyByOwner.get(b.aide_id) ?? null : null,
         angler_payout_method: (anglerProfile?.payout_method as any) ?? null,
         angler_payout_details:
-          (anglerProfile?.payout_details as Record<string, unknown> | null) ?? null,
+          (anglerProfile?.payout_details as { [k: string]: string | null } | null) ?? null,
         angler_address: anglerProfile
           ? {
               line1: anglerProfile.address_line1 ?? null,
