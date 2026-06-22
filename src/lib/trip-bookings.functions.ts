@@ -783,3 +783,44 @@ export const cancelPendingTripOffer = createServerFn({ method: "POST" })
   });
 
 
+
+// --------------------------------------------------------------------------
+// Angler self-cancellation of a trip booking.
+// --------------------------------------------------------------------------
+const CancelTripInput = z.object({
+  bookingId: z.string().uuid(),
+  reason: z.string().trim().min(1).max(100),
+});
+
+export const cancelTripBookingLearner = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((d) => CancelTripInput.parse(d))
+  .handler(async ({ data, context }): Promise<{ ok: true }> => {
+    const { supabase, userId } = context;
+    const { data: booking, error: bErr } = await supabase
+      .from("bookings")
+      .select("id, learner_id, status")
+      .eq("id", data.bookingId)
+      .maybeSingle();
+    if (bErr) throw new Error(bErr.message);
+    if (!booking || booking.learner_id !== userId) {
+      throw new Error("Booking not found");
+    }
+    if (
+      booking.status !== "confirmed" &&
+      booking.status !== "pending_offer" &&
+      booking.status !== "pending_payment"
+    ) {
+      throw new Error("This trip can no longer be cancelled");
+    }
+    const { error: uErr } = await supabase
+      .from("bookings")
+      .update({
+        status: "cancelled",
+        angler_written_reason: data.reason,
+        cancellation_timestamp: new Date().toISOString(),
+      })
+      .eq("id", data.bookingId);
+    if (uErr) throw new Error(uErr.message);
+    return { ok: true };
+  });
