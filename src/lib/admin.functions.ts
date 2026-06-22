@@ -167,7 +167,9 @@ export const getAdminOverview = createServerFn({ method: "GET" })
         pendingListings: pendingListings ?? 0,
         pendingInquiries,
         openFlags: openFlags ?? 0,
+        pendingCancellationDisputes: pendingCancellationDisputes ?? 0,
       },
+
     };
   });
 
