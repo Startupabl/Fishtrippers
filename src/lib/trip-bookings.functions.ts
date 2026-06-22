@@ -662,7 +662,7 @@ export const listMyTripBookingsAide = createServerFn({ method: "GET" })
       .from("bookings")
       .select(BOOKING_COLS)
       .eq("aide_id", userId)
-      .in("status", ["confirmed", "pending_payment", "pending_offer", "completed"])
+      .in("status", ["confirmed", "pending_payment", "pending_offer", "completed", "cancelled"])
       .not("trip_date", "is", null)
       .order("trip_date", { ascending: true });
     if (error) throw new Error(error.message);
