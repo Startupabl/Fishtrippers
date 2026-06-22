@@ -1,52 +1,67 @@
-## Goals
+## Goal
 
-1. When an angler cancels a trip, the captain gets (a) a header alert and (b) an email.
-2. Add a 4th "Cancellation Disputes" card to the Admin Overview, with a live count of pending (not-yet-reviewed) disputes.
-3. In the Admin Action Queue → Cancellation Disputes tab, show three additional fields on each dispute card: **Booked:** (original trip date/time), **Cancelled:** (timestamp the angler submitted the cancellation), and **Trip Policy:** (the captain's cancellation policy — flexible / moderate / strict).
+Reorganize all four Admin Action Queue tabs (Listing Applications, Support Tickets, Flagged Content, Cancellation Disputes) from stacked cards into scannable column tables, and add a **Queue / Completed** sub‑toggle on each so items move from one to the other after the admin takes action.
 
-## Changes
+Yes — this is feasible across every queue tab.
 
-### 1. Captain notification on angler cancellation
-File: `src/lib/trip-bookings.functions.ts` → `cancelTripBookingLearner` handler.
+## Layout pattern (applied to all four tabs)
 
-After the booking is updated to `cancelled`, run a best-effort block (wrapped in try/catch so the cancel itself never fails) that:
-- Looks up `aide_id`, trip title (from `trip_packages`), `trip_date`, and the captain's email/first name (from `profiles` / `auth.users`).
-- Inserts a `user_alerts` row for the captain. We need a new enum value `trip_cancelled_by_angler` on `public.user_alert_kind` — added via a tiny migration (`ALTER TYPE ... ADD VALUE`). Alert message: `"An angler cancelled their booking for \"<trip title>\" on <trip date>. Reason: <reason>"`.
-- Sends an email via the existing `sendEmail` helper to the captain with subject `"A guest cancelled their FishTrippers booking"` and a short body restating trip title, original date, cancellation reason, and a link to `/dashboard/upcoming-sessions` so they can review and (if appropriate) file a dispute.
+Each tab becomes:
 
-### 2. Admin Overview — add Cancellation Disputes stat card
-File: `src/lib/admin.functions.ts` (`getAdminOverview`):
-- Add a parallel `count` query against `cancellation_disputes` where `status = 'pending'`.
-- Return `queue.pendingCancellationDisputes`.
+```text
+[ Queue (n) | Completed (n) ]   <- sub-tabs inside the main tab
 
-File: `src/routes/_admin/admin.index.tsx`:
-- Widen the StatCard `manageSearch` prop type to include `"cancellations"`.
-- Include `pendingCancellationDisputes` in `queueTotal`.
-- Add a 4th row to the Action Queue card: `{ label: "Cancellation Disputes", value: String(data.queue.pendingCancellationDisputes) }`.
-- (Card layout stays single Action Queue card; the count is the row value, which highlights red when > 0 via the existing `alertRows` logic.)
-
-### 3. Admin Queue — extra fields per dispute
-File: `src/lib/cancellation-disputes.functions.ts` (`listAdminCancellationDisputes`):
-- Select `cancellation_timestamp` from bookings (already selected: add it).
-- Join `operators` by `owner_id = booking.aide_id` to fetch `cancellation_policy`.
-- Extend `CancellationDisputeRow` with:
-  - `trip_date: string | null` (already there — keep, used for "Booked")
-  - `cancellation_timestamp: string | null`
-  - `cancellation_policy: "flexible" | "moderate" | "strict" | null`
-
-File: `src/routes/_admin/admin.queue.tsx` (`CancellationDisputes`):
-- In the details grid, add three rows:
-  - **Booked:** formatted `trip_date` (date + time if available).
-  - **Cancelled:** formatted `cancellation_timestamp`.
-  - **Trip Policy:** capitalized policy name, with a "—" fallback.
-
-### 4. Migration
-Single small migration:
-```sql
-ALTER TYPE public.user_alert_kind ADD VALUE IF NOT EXISTS 'trip_cancelled_by_angler';
+┌────────────────────────────────────────────────────────────────────┐
+│ Col A │ Col B │ Col C │ Col D │ Col E │ Messages │ Actions          │
+├───────┼───────┼───────┼───────┼───────┼──────────┼──────────────────┤
+│ ...   │ ...   │ ...   │ ...   │ ...   │ View ▸   │ [Approve][Deny]  │
+└────────────────────────────────────────────────────────────────────┘
 ```
 
+Built with the existing shadcn `Table` primitives (already used on `admin.listings.tsx` and `admin.users.index.tsx`) so the visual language matches the rest of the admin.
+
+### Columns per tab
+
+**Cancellation Disputes**
+Order # · Listing Title · Captain · Booked · Cancelled · Messages (popover/drawer with angler reason + captain response) · Actions (Approve refund / Deny / View)
+
+**Listing Applications**
+Listing # · Title · Captain · Submitted · Location · Notes (popover) · Actions (Approve / Deny / Open)
+
+**Support Tickets**
+Ticket # · Subject · User · Type · Opened · Last Message (popover) · Actions (Reply / Resolve)
+
+**Flagged Content**
+Flag # · Target (listing/review/journey) · Reporter · Reason · Reported · Details (popover) · Actions (Dismiss / Remove / Open)
+
+### Queue vs Completed
+
+- **Queue** = current pending items (today's behavior).
+- **Completed** = items where the admin already took a terminal action (approved/denied/resolved/dismissed/removed). For each tab this maps to existing status fields:
+  - disputes: `status in ('approved','denied')`
+  - listings: `status in ('approved','denied')` after review
+  - tickets: `status = 'resolved'`
+  - flags: `status in ('dismissed','actioned')`
+- Counts shown on each sub-tab pill. Completed list is read‑only with a "Reopen" affordance only where it already exists; otherwise just a "View" link.
+- After an admin acts in Queue, the row disappears from Queue and appears in Completed on the next refetch (we already invalidate these queries today).
+
+### Messages column
+
+A compact "View ▸" button opens a popover (desktop) / drawer (mobile) showing the relevant text: angler cancellation reason + captain response for disputes, ticket thread for support, reporter note for flags, applicant note for listings. Keeps the row dense while preserving full context one click away.
+
+### Responsive behavior
+
+- ≥ md: full table with all columns.
+- < md: collapses to the current card layout automatically (table hidden, card list shown) so mobile admins aren't squeezed.
+
+## Files to touch
+
+- `src/routes/_admin/admin.queue.tsx` — rewrite the four section components (`ListingsToApprove`, `OpenInquiries`, `FlaggedContent`, `CancellationDisputes`) to use `Table` + Queue/Completed sub‑tabs. Extract a small shared `<QueueShell tab="queue|completed" counts={…}>` wrapper to keep markup consistent.
+- `src/lib/cancellation-disputes.functions.ts`, `src/lib/admin.functions.ts`, and the ticket/flag list functions — extend each `list…` server function to accept `{ scope: 'queue' | 'completed' }` and return the matching rows. No schema changes; we filter on existing status columns.
+- `src/routes/_admin/admin.index.tsx` — no change to the overview counts (still "pending" only), but the link target stays the same.
+
 ## Out of scope
-- No changes to the angler-facing cancel flow UI.
-- No changes to dispute submission flow.
-- No new admin role checks (existing `has_role` gating is reused).
+
+- No database/schema changes, no new statuses.
+- No change to the action semantics themselves (Approve/Deny/Resolve do exactly what they do today; we just relocate the row).
+- No change to the four top‑level tabs or to other admin pages (listings, users, transactions) — those are already columnar.
