@@ -89,8 +89,17 @@ function CreatePathPage() {
   useEffect(() => {
     if (server) {
       useOperatorOnboardingStore.getState().hydrateFromServer(server);
+      // When editing an existing listing, skip the one-time "Business type"
+      // step — the operator has already chosen it. Land them on Profile
+      // with their existing data populated.
+      if (isEditMode) {
+        const cur = useOperatorOnboardingStore.getState().currentStep;
+        if (cur === "business_type") {
+          useOperatorOnboardingStore.getState().setStep("profile");
+        }
+      }
     }
-  }, [server]);
+  }, [server, isEditMode]);
 
   const fetchTrips = useServerFn(listMyTrips);
   const { data: tripsData } = useQuery({
