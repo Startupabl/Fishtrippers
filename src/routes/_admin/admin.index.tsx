@@ -29,8 +29,9 @@ function StatCard({
   rows: { label: string; value: string }[];
   warn?: boolean;
   manageTo?: "/admin/users" | "/admin/listings" | "/admin/queue" | "/admin/transactions";
-  manageSearch?: { tab: "listings" | "inquiries" | "flags" };
+  manageSearch?: { tab: "listings" | "inquiries" | "flags" | "cancellations" };
   alertRows?: boolean;
+
 }) {
   return (
     <Card className="rounded-xl bg-white shadow-sm">
