@@ -1,7 +1,7 @@
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { useServerFn } from "@tanstack/react-start";
-import { useQuery, useQueryClient } from "@tanstack/react-query";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import {
@@ -19,13 +19,25 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
-import { Info, AlertTriangle } from "lucide-react";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
+import { Label } from "@/components/ui/label";
+import { Textarea } from "@/components/ui/textarea";
+import { Info, AlertTriangle, Loader2 } from "lucide-react";
 import { useAuthStore } from "@/stores/useAuthStore";
 import {
   listMyTripBookingsAide,
   markTripBookingComplete,
   cancelPendingTripOffer,
+  type TripBookingSummary,
 } from "@/lib/trip-bookings.functions";
+import { submitCancellationDispute } from "@/lib/cancellation-disputes.functions";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 
 const display = { fontFamily: "Montserrat, system-ui, sans-serif" };
