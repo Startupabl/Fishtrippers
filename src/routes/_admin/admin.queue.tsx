@@ -19,6 +19,10 @@ import {
   AlertTriangle,
   Archive,
   Ban,
+  Clock,
+  Hourglass,
+  DollarSign,
+  Copy,
 } from "lucide-react";
 import {
   listReportedListings,
@@ -39,6 +43,10 @@ import {
 import {
   listAdminCancellationDisputes,
   resolveCancellationDispute,
+  getCancellationDisputeStageCounts,
+  markCancellationDisputePaidOut,
+  type CancellationDisputeRow,
+  type DisputeScope,
 } from "@/lib/cancellation-disputes.functions";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
@@ -56,6 +64,16 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from "@/components/ui/popover";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 import { RejectListingDialog } from "@/components/admin/RejectListingDialog";
 import { cn } from "@/lib/utils";
 
