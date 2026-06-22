@@ -26,7 +26,7 @@ export interface CancellationDisputeRow {
   cancellation_timestamp: string | null;
   cancellation_policy: "flexible" | "moderate" | "strict" | null;
   angler_payout_method: "ach" | "wallet" | "address" | null;
-  angler_payout_details: Record<string, unknown> | null;
+  angler_payout_details: { [k: string]: string | null } | null;
   angler_address: {
     line1: string | null;
     line2: string | null;
@@ -134,7 +134,7 @@ export const listAdminCancellationDisputes = createServerFn({ method: "POST" })
     });
     if (filtered.length === 0) return [];
 
-    const bookingIds = Array.from(new Set(filtered.map((r: any) => r.booking_id)));
+    const bookingIds = Array.from(new Set(filtered.map((r: any) => r.booking_id as string))) as string[];
     const { data: bookings } = await supabaseAdmin
       .from("bookings")
       .select(
@@ -167,13 +167,13 @@ export const listAdminCancellationDisputes = createServerFn({ method: "POST" })
       ]),
     );
 
-    const userIds = Array.from(
+    const userIds: string[] = Array.from(
       new Set(
         (bookings ?? []).flatMap((b) =>
           [b.aide_id, b.learner_id].filter(Boolean) as string[],
         ),
       ),
-    );
+    ) as string[];
     const { data: profiles } = userIds.length
       ? await (supabaseAdmin as any)
           .from("profiles")
