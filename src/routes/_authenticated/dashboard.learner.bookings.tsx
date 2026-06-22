@@ -1,15 +1,18 @@
 import { useMemo, useState } from "react";
 import { createFileRoute } from "@tanstack/react-router";
 import { useServerFn } from "@tanstack/react-start";
-import { useQuery, useQueryClient } from "@tanstack/react-query";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { format, parseISO } from "date-fns";
+import { toast } from "sonner";
 import { useAuthStore } from "@/stores/useAuthStore";
 import { CustomOfferCard } from "@/components/chat/CustomOfferCard";
 import {
   Dialog,
   DialogContent,
+  DialogFooter,
   DialogHeader,
   DialogTitle,
+  DialogDescription,
 } from "@/components/ui/dialog";
 import {
   Ship,
@@ -19,10 +22,13 @@ import {
   MapPin,
   Phone,
   Receipt as ReceiptIcon,
+  XCircle,
 } from "lucide-react";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import { Label } from "@/components/ui/label";
+import { Textarea } from "@/components/ui/textarea";
 import {
   Table,
   TableBody,
@@ -33,6 +39,7 @@ import {
 } from "@/components/ui/table";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import {
+  cancelTripBookingLearner,
   listMyTripBookingsLearner,
   type TripBookingSummary,
 } from "@/lib/trip-bookings.functions";
@@ -47,6 +54,7 @@ export const Route = createFileRoute("/_authenticated/dashboard/learner/bookings
   head: () => ({ meta: [{ title: "My Bookings — FishTrippers" }] }),
   component: TripBookingsPage,
 });
+
 
 function statusBadge(status: string) {
   switch (status) {
