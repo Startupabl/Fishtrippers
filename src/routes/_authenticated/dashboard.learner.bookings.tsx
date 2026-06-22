@@ -1,15 +1,18 @@
 import { useMemo, useState } from "react";
 import { createFileRoute } from "@tanstack/react-router";
 import { useServerFn } from "@tanstack/react-start";
-import { useQuery, useQueryClient } from "@tanstack/react-query";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { format, parseISO } from "date-fns";
+import { toast } from "sonner";
 import { useAuthStore } from "@/stores/useAuthStore";
 import { CustomOfferCard } from "@/components/chat/CustomOfferCard";
 import {
   Dialog,
   DialogContent,
+  DialogFooter,
   DialogHeader,
   DialogTitle,
+  DialogDescription,
 } from "@/components/ui/dialog";
 import {
   Ship,
@@ -19,10 +22,13 @@ import {
   MapPin,
   Phone,
   Receipt as ReceiptIcon,
+  XCircle,
 } from "lucide-react";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import { Label } from "@/components/ui/label";
+import { Textarea } from "@/components/ui/textarea";
 import {
   Table,
   TableBody,
@@ -33,6 +39,7 @@ import {
 } from "@/components/ui/table";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import {
+  cancelTripBookingLearner,
   listMyTripBookingsLearner,
   type TripBookingSummary,
 } from "@/lib/trip-bookings.functions";
@@ -48,6 +55,7 @@ export const Route = createFileRoute("/_authenticated/dashboard/learner/bookings
   component: TripBookingsPage,
 });
 
+
 function statusBadge(status: string) {
   switch (status) {
     case "confirmed":
@@ -60,6 +68,12 @@ function statusBadge(status: string) {
       return (
         <Badge className="bg-slate-200 text-slate-800 hover:bg-slate-200">
           COMPLETED
+        </Badge>
+      );
+    case "cancelled":
+      return (
+        <Badge className="bg-red-100 text-red-800 hover:bg-red-100">
+          CANCELLED
         </Badge>
       );
     case "pending_offer":
@@ -119,6 +133,7 @@ function mapsUrl(location: string) {
 function TripBookingsPage() {
   const fetchBookings = useServerFn(listMyTripBookingsLearner);
   const fetchReviewed = useServerFn(getMyReviewedBookingIds);
+  const cancelTrip = useServerFn(cancelTripBookingLearner);
   const queryClient = useQueryClient();
   const user = useAuthStore((s) => s.user);
   const [reviewTarget, setReviewTarget] = useState<
@@ -130,6 +145,10 @@ function TripBookingsPage() {
   const [offerTarget, setOfferTarget] = useState<TripBookingSummary | null>(
     null,
   );
+  const [cancelTarget, setCancelTarget] = useState<TripBookingSummary | null>(
+    null,
+  );
+  const [cancelReason, setCancelReason] = useState("");
 
   const { data, isLoading, error } = useQuery({
     queryKey: ["learner-trip-bookings"],
@@ -141,6 +160,18 @@ function TripBookingsPage() {
   });
   const reviewedSet = useMemo(() => new Set(reviewedIds ?? []), [reviewedIds]);
 
+  const cancelMutation = useMutation({
+    mutationFn: (input: { bookingId: string; reason: string }) =>
+      cancelTrip({ data: input }),
+    onSuccess: () => {
+      toast.success("Trip cancelled");
+      setCancelTarget(null);
+      setCancelReason("");
+      queryClient.invalidateQueries({ queryKey: ["learner-trip-bookings"] });
+    },
+    onError: (e: Error) => toast.error(e.message || "Failed to cancel trip"),
+  });
+
   const { upcoming, past } = useMemo(() => {
     const rows = data ?? [];
     const up = rows.filter(
@@ -149,9 +180,12 @@ function TripBookingsPage() {
         b.status === "pending_offer" ||
         b.status === "pending_payment",
     );
-    const pa = rows.filter((b) => b.status === "completed");
+    const pa = rows.filter(
+      (b) => b.status === "completed" || b.status === "cancelled",
+    );
     return { upcoming: up, past: pa };
   }, [data]);
+
 
   return (
     <div className="mx-auto w-full max-w-[1400px] px-4 md:px-6 lg:px-8 py-8 md:py-12">
@@ -202,24 +236,50 @@ function TripBookingsPage() {
                   );
                 }
                 return (
-                  <Button
-                    size="sm"
-                    variant="outline"
-                    onClick={() => setReceiptTarget(b)}
-                  >
-                    <ReceiptIcon className="mr-1.5 size-4" />
-                    View Receipt
-                  </Button>
+                  <div className="flex items-center justify-end gap-2">
+                    <Button
+                      size="sm"
+                      variant="outline"
+                      onClick={() => setReceiptTarget(b)}
+                    >
+                      <ReceiptIcon className="mr-1.5 size-4" />
+                      View Receipt
+                    </Button>
+                    <Button
+                      size="sm"
+                      variant="outline"
+                      className="border-red-300 text-red-700 hover:bg-red-50 hover:text-red-800"
+                      onClick={() => {
+                        setCancelReason("");
+                        setCancelTarget(b);
+                      }}
+                    >
+                      <XCircle className="mr-1.5 size-4" />
+                      Cancel Trip
+                    </Button>
+                  </div>
                 );
               }}
             />
           </TabsContent>
+
 
           <TabsContent value="past" className="mt-4">
             <BookingsTable
               rows={past}
               emptyText="No completed trips yet."
               renderAction={(b) => {
+                if (b.status === "cancelled") {
+                  return (
+                    <span
+                      className="inline-flex items-center gap-1.5 text-sm text-muted-foreground"
+                      title={b.angler_written_reason ?? undefined}
+                    >
+                      <XCircle className="size-4 text-red-500" />
+                      Trip cancelled
+                    </span>
+                  );
+                }
                 const reviewed = reviewedSet.has(b.id);
                 if (reviewed) {
                   return (
@@ -283,6 +343,74 @@ function TripBookingsPage() {
               }}
             />
           )}
+        </DialogContent>
+      </Dialog>
+
+      <Dialog
+        open={!!cancelTarget}
+        onOpenChange={(o) => {
+          if (!o && !cancelMutation.isPending) {
+            setCancelTarget(null);
+            setCancelReason("");
+          }
+        }}
+      >
+        <DialogContent className="max-w-md">
+          <DialogHeader>
+            <DialogTitle>Cancel this trip?</DialogTitle>
+            <DialogDescription>
+              Are you sure you want to cancel this trip?
+              {cancelTarget?.trip_title ? ` "${cancelTarget.trip_title}"` : ""}
+              {" "}This action cannot be undone.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="space-y-2">
+            <Label htmlFor="cancel-reason">
+              Briefly state your reason for cancellation:
+            </Label>
+            <Textarea
+              id="cancel-reason"
+              value={cancelReason}
+              onChange={(e) => setCancelReason(e.target.value.slice(0, 100))}
+              maxLength={100}
+              rows={3}
+              placeholder="e.g. Weather concerns, schedule conflict…"
+              disabled={cancelMutation.isPending}
+            />
+            <div className="text-right text-xs text-muted-foreground">
+              {cancelReason.length}/100
+            </div>
+          </div>
+          <DialogFooter>
+            <Button
+              variant="outline"
+              onClick={() => {
+                setCancelTarget(null);
+                setCancelReason("");
+              }}
+              disabled={cancelMutation.isPending}
+            >
+              Keep Trip
+            </Button>
+            <Button
+              variant="destructive"
+              disabled={
+                cancelReason.trim().length === 0 || cancelMutation.isPending
+              }
+              onClick={() => {
+                if (!cancelTarget) return;
+                cancelMutation.mutate({
+                  bookingId: cancelTarget.id,
+                  reason: cancelReason.trim(),
+                });
+              }}
+            >
+              {cancelMutation.isPending && (
+                <Loader2 className="mr-1.5 size-4 animate-spin" />
+              )}
+              Confirm Cancellation
+            </Button>
+          </DialogFooter>
         </DialogContent>
       </Dialog>
     </div>

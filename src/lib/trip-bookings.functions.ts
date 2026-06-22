@@ -491,7 +491,7 @@ export const simulateTripDepositPayment = createServerFn({ method: "POST" })
 
 export interface TripBookingSummary {
   id: string;
-  status: "pending_payment" | "confirmed" | "declined" | "pending_offer" | "completed";
+  status: "pending_payment" | "confirmed" | "declined" | "pending_offer" | "completed" | "cancelled";
   trip_date: string | null;
   guests: number | null;
   total_price_minor: number;
@@ -517,10 +517,12 @@ export interface TripBookingSummary {
   is_simulated: boolean;
   source: "instant_book" | "custom_offer";
   thread_id: string | null;
+  angler_written_reason: string | null;
+  cancellation_timestamp: string | null;
 }
 
 const BOOKING_COLS =
-  "id, status, trip_date, guests, total_price, deposit_minor, balance_due_minor, aide_earnings, service_fee_amount, currency, created_at, course_id, aide_id, learner_id, primary_angler_name, phone, notes, stripe_checkout_session_id, thread_id";
+  "id, status, trip_date, guests, total_price, deposit_minor, balance_due_minor, aide_earnings, service_fee_amount, currency, created_at, course_id, aide_id, learner_id, primary_angler_name, phone, notes, stripe_checkout_session_id, thread_id, angler_written_reason, cancellation_timestamp";
 
 async function hydrateTripBookings(
   rows: any[],
@@ -624,6 +626,8 @@ async function hydrateTripBookings(
       is_simulated: Boolean(sessionId && sessionId.startsWith("sim_")),
       source: isCustomOffer ? "custom_offer" : "instant_book",
       thread_id: r.thread_id ?? null,
+      angler_written_reason: r.angler_written_reason ?? null,
+      cancellation_timestamp: r.cancellation_timestamp ?? null,
     };
   });
 }
@@ -636,7 +640,7 @@ export const listMyTripBookingsLearner = createServerFn({ method: "GET" })
       .from("bookings")
       .select(BOOKING_COLS)
       .eq("learner_id", userId)
-      .in("status", ["confirmed", "pending_payment", "pending_offer", "completed"])
+      .in("status", ["confirmed", "pending_payment", "pending_offer", "completed", "cancelled"])
       .not("trip_date", "is", null)
       .order("trip_date", { ascending: true });
     if (error) throw new Error(error.message);
@@ -783,3 +787,44 @@ export const cancelPendingTripOffer = createServerFn({ method: "POST" })
   });
 
 
+
+// --------------------------------------------------------------------------
+// Angler self-cancellation of a trip booking.
+// --------------------------------------------------------------------------
+const CancelTripInput = z.object({
+  bookingId: z.string().uuid(),
+  reason: z.string().trim().min(1).max(100),
+});
+
+export const cancelTripBookingLearner = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((d) => CancelTripInput.parse(d))
+  .handler(async ({ data, context }): Promise<{ ok: true }> => {
+    const { supabase, userId } = context;
+    const { data: booking, error: bErr } = await supabase
+      .from("bookings")
+      .select("id, learner_id, status")
+      .eq("id", data.bookingId)
+      .maybeSingle();
+    if (bErr) throw new Error(bErr.message);
+    if (!booking || booking.learner_id !== userId) {
+      throw new Error("Booking not found");
+    }
+    if (
+      booking.status !== "confirmed" &&
+      booking.status !== "pending_offer" &&
+      booking.status !== "pending_payment"
+    ) {
+      throw new Error("This trip can no longer be cancelled");
+    }
+    const { error: uErr } = await supabase
+      .from("bookings")
+      .update({
+        status: "cancelled",
+        angler_written_reason: data.reason,
+        cancellation_timestamp: new Date().toISOString(),
+      })
+      .eq("id", data.bookingId);
+    if (uErr) throw new Error(uErr.message);
+    return { ok: true };
+  });

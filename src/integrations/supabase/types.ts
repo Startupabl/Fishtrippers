@@ -140,7 +140,9 @@ export type Database = {
         Row: {
           aide_earnings: number
           aide_id: string
+          angler_written_reason: string | null
           balance_due_minor: number | null
+          cancellation_timestamp: string | null
           class_session_id: string | null
           course_id: string | null
           created_at: string
@@ -164,7 +166,9 @@ export type Database = {
         Insert: {
           aide_earnings: number
           aide_id: string
+          angler_written_reason?: string | null
           balance_due_minor?: number | null
+          cancellation_timestamp?: string | null
           class_session_id?: string | null
           course_id?: string | null
           created_at?: string
@@ -188,7 +192,9 @@ export type Database = {
         Update: {
           aide_earnings?: number
           aide_id?: string
+          angler_written_reason?: string | null
           balance_due_minor?: number | null
+          cancellation_timestamp?: string | null
           class_session_id?: string | null
           course_id?: string | null
           created_at?: string
@@ -1989,6 +1995,7 @@ export type Database = {
         | "pending_payment"
         | "confirmed"
         | "completed"
+        | "cancelled"
       class_session_status_t: "active" | "completed" | "cancelled"
       journey_moderation_status: "pending" | "approved" | "declined"
       journey_status: "draft" | "published" | "archived"
@@ -2147,6 +2154,7 @@ export const Constants = {
         "pending_payment",
         "confirmed",
         "completed",
+        "cancelled",
       ],
       class_session_status_t: ["active", "completed", "cancelled"],
       journey_moderation_status: ["pending", "approved", "declined"],

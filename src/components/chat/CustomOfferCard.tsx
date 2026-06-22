@@ -29,6 +29,7 @@ const STATUS_LABEL: Record<BookingDetail["status"], string> = {
   declined: "Declined",
   confirmed: "Confirmed",
   completed: "Completed",
+  cancelled: "Cancelled",
 };
 
 export function CustomOfferCard({ bookingId, viewerId, onChanged }: Props) {
