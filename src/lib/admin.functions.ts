@@ -1046,17 +1046,28 @@ export const submitListingReport = createServerFn({ method: "POST" })
     return { ok: true };
   });
 
-export const listReportedListings = createServerFn({ method: "GET" })
+export const listReportedListings = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
-  .handler(async ({ context }) => {
+  .inputValidator((input: unknown) =>
+    z
+      .object({ scope: z.enum(["queue", "completed"]).default("queue") })
+      .parse(input ?? {}),
+  )
+  .handler(async ({ context, data }) => {
     await assertAdmin(context.userId);
-    const { data: reports, error } = await supabaseAdmin
+    let q = supabaseAdmin
       .from("reported_listings")
       .select("id, listing_id, reporter_id, reason_category, custom_details, status, created_at")
-      .eq("status", "pending_review")
       .order("created_at", { ascending: false })
       .limit(200);
+    if (data.scope === "queue") {
+      q = q.eq("status", "pending_review");
+    } else {
+      q = q.neq("status", "pending_review");
+    }
+    const { data: reports, error } = await q;
     if (error) throw new Error(error.message);
+
 
     const ids = Array.from(new Set((reports ?? []).map((r) => r.listing_id)));
     if (ids.length === 0) return [];
