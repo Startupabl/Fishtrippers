@@ -161,6 +161,9 @@ export const listAdminCancellationDisputes = createServerFn({ method: "GET" })
         trip_title: b?.course_id ? tById.get(b.course_id)?.title ?? null : null,
         trip_date: b?.trip_date ?? null,
         angler_written_reason: b?.angler_written_reason ?? null,
+        cancellation_timestamp: b?.cancellation_timestamp ?? null,
+        cancellation_policy: b?.aide_id ? policyByOwner.get(b.aide_id) ?? null : null,
+
       };
     });
   });
