@@ -56,6 +56,27 @@ function UpcomingSessionsPage() {
   const fetchTripBookings = useServerFn(listMyTripBookingsAide);
   const markTripCompleteFn = useServerFn(markTripBookingComplete);
   const cancelTripOfferFn = useServerFn(cancelPendingTripOffer);
+  const submitDispute = useServerFn(submitCancellationDispute);
+
+  const [reportTarget, setReportTarget] = useState<TripBookingSummary | null>(null);
+  const [reportClaimType, setReportClaimType] =
+    useState<"policy_payout" | "other">("policy_payout");
+  const [reportDetails, setReportDetails] = useState("");
+
+  const reportMutation = useMutation({
+    mutationFn: (input: {
+      bookingId: string;
+      claimType: "policy_payout" | "other";
+      details: string;
+    }) => submitDispute({ data: input }),
+    onSuccess: () => {
+      toast.success("Claim submitted to admin team");
+      setReportTarget(null);
+      setReportDetails("");
+      setReportClaimType("policy_payout");
+    },
+    onError: (e: Error) => toast.error(e.message || "Failed to submit claim"),
+  });
 
   useEffect(() => {
     if (!user && typeof window !== "undefined") navigate({ to: "/login" });
