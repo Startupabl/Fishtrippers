@@ -133,6 +133,7 @@ function mapsUrl(location: string) {
 function TripBookingsPage() {
   const fetchBookings = useServerFn(listMyTripBookingsLearner);
   const fetchReviewed = useServerFn(getMyReviewedBookingIds);
+  const cancelTrip = useServerFn(cancelTripBookingLearner);
   const queryClient = useQueryClient();
   const user = useAuthStore((s) => s.user);
   const [reviewTarget, setReviewTarget] = useState<
@@ -144,6 +145,10 @@ function TripBookingsPage() {
   const [offerTarget, setOfferTarget] = useState<TripBookingSummary | null>(
     null,
   );
+  const [cancelTarget, setCancelTarget] = useState<TripBookingSummary | null>(
+    null,
+  );
+  const [cancelReason, setCancelReason] = useState("");
 
   const { data, isLoading, error } = useQuery({
     queryKey: ["learner-trip-bookings"],
@@ -155,6 +160,18 @@ function TripBookingsPage() {
   });
   const reviewedSet = useMemo(() => new Set(reviewedIds ?? []), [reviewedIds]);
 
+  const cancelMutation = useMutation({
+    mutationFn: (input: { bookingId: string; reason: string }) =>
+      cancelTrip({ data: input }),
+    onSuccess: () => {
+      toast.success("Trip cancelled");
+      setCancelTarget(null);
+      setCancelReason("");
+      queryClient.invalidateQueries({ queryKey: ["learner-trip-bookings"] });
+    },
+    onError: (e: Error) => toast.error(e.message || "Failed to cancel trip"),
+  });
+
   const { upcoming, past } = useMemo(() => {
     const rows = data ?? [];
     const up = rows.filter(
@@ -163,9 +180,12 @@ function TripBookingsPage() {
         b.status === "pending_offer" ||
         b.status === "pending_payment",
     );
-    const pa = rows.filter((b) => b.status === "completed");
+    const pa = rows.filter(
+      (b) => b.status === "completed" || b.status === "cancelled",
+    );
     return { upcoming: up, past: pa };
   }, [data]);
+
 
   return (
     <div className="mx-auto w-full max-w-[1400px] px-4 md:px-6 lg:px-8 py-8 md:py-12">
