@@ -1099,6 +1099,7 @@ export const listReportedListings = createServerFn({ method: "POST" })
         reason_category: r.reason_category,
         custom_details: r.custom_details,
         created_at: r.created_at,
+        status: r.status as string,
         journey_title: j?.title ?? "Unknown",
         journey_slug: j?.slug ?? null,
         journey_category: j?.category ?? null,
@@ -1106,6 +1107,7 @@ export const listReportedListings = createServerFn({ method: "POST" })
         mentor_name: mentorName,
         mentor_email: m?.email ?? null,
       };
+
     });
   });
 
