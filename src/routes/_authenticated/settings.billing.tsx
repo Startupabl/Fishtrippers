@@ -3,12 +3,13 @@ import { useEffect, useState } from "react";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
-import { Lock, ExternalLink } from "lucide-react";
+import { ExternalLink } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuthStore } from "@/stores/useAuthStore";
 import { formatCurrency } from "@/lib/format-currency";
 import { AddressForm, type AddressFormValue } from "@/components/settings/AddressForm";
 import { useProfileStore } from "@/stores/useProfileStore";
+import { PayoutSettingsSection } from "@/components/settings/PayoutSettingsSection";
 
 
 interface OrderRow {
@@ -77,27 +78,6 @@ function BillingPage() {
 
   return (
     <div className="space-y-6">
-      {/* Secure Payments notice */}
-      <Card className="p-6">
-        <div className="flex items-start gap-3">
-          <Lock className="mt-0.5 size-5 text-foreground/70" aria-hidden />
-          <div className="flex-1">
-            <div className="flex items-center justify-between gap-3">
-              <h2 className="text-sm font-semibold">Secure Payments</h2>
-              <span className="rounded border bg-muted px-2 py-0.5 text-[10px] font-medium uppercase tracking-wide text-muted-foreground">
-                Powered by Stripe
-              </span>
-            </div>
-            <p className="mt-2 text-sm text-muted-foreground">
-              Your payment security is our top priority. All payments and financial details are
-              securely processed and managed entirely by Stripe, a global leader trusted by
-              millions of businesses. We do not store or have access to your credit card data on
-              our servers.
-            </p>
-          </div>
-        </div>
-      </Card>
-
       {/* Billing address */}
       <Card className="p-6">
         <h2 className="text-xl font-semibold">Billing address</h2>
@@ -133,6 +113,9 @@ function BillingPage() {
           </Button>
         </div>
       </Card>
+
+      {/* Payout settings (captains/guides only) */}
+      <PayoutSettingsSection />
 
       {/* Transaction history */}
       <Card className="p-6">
