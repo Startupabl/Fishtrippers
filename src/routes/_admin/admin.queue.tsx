@@ -617,3 +617,127 @@ function EmptyState({ title }: { title: string }) {
     </div>
   );
 }
+
+/* -------------------- Cancellation Disputes -------------------- */
+
+function CancellationDisputes() {
+  const fetchDisputes = useServerFn(listAdminCancellationDisputes);
+  const resolveFn = useServerFn(resolveCancellationDispute);
+  const qc = useQueryClient();
+
+  const { data, isLoading } = useQuery({
+    queryKey: ["admin", "queue", "cancellations"],
+    queryFn: () => fetchDisputes(),
+  });
+
+  const mutation = useMutation({
+    mutationFn: (vars: { disputeId: string; decision: "approved" | "denied" }) =>
+      resolveFn({ data: vars }),
+    onSuccess: (_, v) => {
+      toast.success(
+        v.decision === "approved" ? "Captain payout approved" : "Claim denied",
+      );
+      void qc.invalidateQueries({ queryKey: ["admin", "queue", "cancellations"] });
+    },
+    onError: (e: Error) => toast.error(e.message),
+  });
+
+  if (isLoading) return <p className="text-sm text-muted-foreground">Loading…</p>;
+  const rows = data ?? [];
+  const pending = rows.filter((r) => r.status === "pending");
+  if (pending.length === 0 && rows.length === 0) {
+    return <EmptyState title="No cancellation disputes" />;
+  }
+
+  return (
+    <div className="space-y-3">
+      {rows.map((r) => {
+        const isPending = r.status === "pending";
+        return (
+          <div key={r.id} className="rounded-lg border bg-white p-4 shadow-sm">
+            <div className="flex flex-wrap items-start justify-between gap-3">
+              <div className="min-w-0 flex-1">
+                <div className="flex flex-wrap items-center gap-2">
+                  <StatusBadge tone={isPending ? "amber" : r.status === "approved" ? "green" : "red"}>
+                    {isPending ? "Pending" : r.status === "approved" ? "Approved" : "Denied"}
+                  </StatusBadge>
+                  <StatusBadge tone={r.claim_type === "policy_payout" ? "red" : "amber"}>
+                    {r.claim_type === "policy_payout" ? "Policy Payout" : "Other Issue"}
+                  </StatusBadge>
+                  <span className="text-xs text-muted-foreground">
+                    {relativeTime(r.created_at)}
+                  </span>
+                </div>
+                <div className="mt-2 grid gap-1 text-sm sm:grid-cols-2">
+                  <div>
+                    <span className="font-medium text-foreground">Order #:</span>{" "}
+                    <span className="text-muted-foreground">
+                      {r.order_number ?? r.booking_id.slice(0, 8)}
+                    </span>
+                  </div>
+                  <div>
+                    <span className="font-medium text-foreground">Trip:</span>{" "}
+                    <span className="text-muted-foreground">
+                      {r.trip_title ?? "—"}
+                      {r.trip_date ? ` · ${r.trip_date}` : ""}
+                    </span>
+                  </div>
+                  <div>
+                    <span className="font-medium text-foreground">Captain:</span>{" "}
+                    <span className="text-muted-foreground">{r.captain_name ?? "—"}</span>
+                  </div>
+                  <div>
+                    <span className="font-medium text-foreground">Angler:</span>{" "}
+                    <span className="text-muted-foreground">{r.angler_name ?? "—"}</span>
+                  </div>
+                </div>
+                <div className="mt-3">
+                  <div className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
+                    Captain's details
+                  </div>
+                  <div className="mt-1 rounded-md bg-muted/40 p-3 text-sm whitespace-pre-wrap">
+                    {r.captain_details}
+                  </div>
+                </div>
+                {r.angler_written_reason && (
+                  <div className="mt-3">
+                    <div className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
+                      Angler's cancellation reason
+                    </div>
+                    <div className="mt-1 rounded-md bg-muted/30 p-3 text-sm whitespace-pre-wrap">
+                      {r.angler_written_reason}
+                    </div>
+                  </div>
+                )}
+              </div>
+              {isPending && (
+                <div className="flex shrink-0 flex-col gap-2">
+                  <Button
+                    size="sm"
+                    className="bg-primary text-primary-foreground hover:opacity-95"
+                    disabled={mutation.isPending}
+                    onClick={() =>
+                      mutation.mutate({ disputeId: r.id, decision: "approved" })
+                    }
+                  >
+                    <Check className="size-4" /> Approve Captain Payout
+                  </Button>
+                  <Button
+                    size="sm"
+                    variant="destructive"
+                    disabled={mutation.isPending}
+                    onClick={() =>
+                      mutation.mutate({ disputeId: r.id, decision: "denied" })
+                    }
+                  >
+                    <Ban className="size-4" /> Deny Claim
+                  </Button>
+                </div>
+              )}
+            </div>
+          </div>
+        );
+      })}
+    </div>
+  );
+}
