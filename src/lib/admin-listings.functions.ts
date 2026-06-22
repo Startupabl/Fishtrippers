@@ -16,7 +16,7 @@ async function assertAdmin(userId: string) {
 }
 
 const ModerationFilterSchema = z
-  .enum(["pending", "approved", "declined", "all", "archived"])
+  .enum(["pending", "approved", "declined", "all", "archived", "reviewed"])
   .default("all");
 
 export const listAdminListings = createServerFn({ method: "POST" })
@@ -36,10 +36,13 @@ export const listAdminListings = createServerFn({ method: "POST" })
 
     if (data.moderation === "archived") {
       q = q.eq("status", "archived");
+    } else if (data.moderation === "reviewed") {
+      q = q.neq("status", "archived").in("moderation_status", ["approved", "declined"]);
     } else {
       q = q.neq("status", "archived");
       if (data.moderation !== "all") q = q.eq("moderation_status", data.moderation);
     }
+
 
     const { data: rows, error } = await q;
     if (error) throw new Error(error.message);
