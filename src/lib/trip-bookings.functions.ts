@@ -626,6 +626,8 @@ async function hydrateTripBookings(
       is_simulated: Boolean(sessionId && sessionId.startsWith("sim_")),
       source: isCustomOffer ? "custom_offer" : "instant_book",
       thread_id: r.thread_id ?? null,
+      angler_written_reason: r.angler_written_reason ?? null,
+      cancellation_timestamp: r.cancellation_timestamp ?? null,
     };
   });
 }
