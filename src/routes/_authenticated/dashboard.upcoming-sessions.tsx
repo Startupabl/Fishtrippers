@@ -173,15 +173,13 @@ function UpcomingSessionsPage() {
                           ? "Cancelled"
                           : b.status;
 
-              // 48h Report Issue window from scheduled departure
+              // Report Issue available from cancellation until 48h after departure
               let reportWindowOpen = false;
               if (isCancelled && b.trip_date) {
                 const startStr = `${b.trip_date}T${(b.trip_start_time ?? "08:00:00").slice(0, 8)}`;
                 const startMs = new Date(startStr).getTime();
                 if (!Number.isNaN(startMs)) {
-                  const now = Date.now();
-                  reportWindowOpen =
-                    now >= startMs && now <= startMs + 48 * 60 * 60 * 1000;
+                  reportWindowOpen = Date.now() <= startMs + 48 * 60 * 60 * 1000;
                 }
               }
 
