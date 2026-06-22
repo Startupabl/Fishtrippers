@@ -142,7 +142,9 @@ function OverviewPage() {
             { label: "New Listing Applications", value: String(data.queue.pendingListings) },
             { label: "Support tickets", value: String(data.queue.pendingInquiries) },
             { label: "Flagged content", value: String(data.queue.openFlags) },
+            { label: "Cancellation Disputes", value: String(data.queue.pendingCancellationDisputes ?? 0) },
           ]}
+
           manageTo="/admin/queue"
           manageSearch={{ tab: "listings" }}
           alertRows
