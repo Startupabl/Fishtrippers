@@ -1,59 +1,34 @@
-# Update Cancellation Policies + Add Manage Policies Page
+## Goal
 
-## 1. Rewrite policy copy (single source of truth)
+Confirm the "Write a Review" button is wired to the existing review system (no admin pre-approval), and make sure Listing Cards everywhere flip from the static "Verified" baseline to a real average rating once any reviews exist.
 
-Update `CANCELLATION_POLICY_DETAILS` in `src/lib/operators.shared.ts` so every screen (Step 6, listing preview, public listing, new Manage Policies page) reads the new text:
+## Findings
 
-- **Flexible** — "Best for attracting new customers"
-  - Up to 24 hours before departure: free cancellation (deposit refunded).
-  - Inside 24 hours: card on file is charged a 50% cancellation fee of the total trip price.
+- **Write a Review button** on `dashboard.learner.bookings.tsx` (Past Trips) already opens `WriteTripReviewDialog`, which calls `submitTripReview` in `src/lib/reviews.functions.ts`. Submitted rows land in `public.reviews` and immediately appear in:
+  - The listing page review feed (`ListingReviews` → `getListingReviews`)
+  - The admin panel (`/admin/reviews` → `listAdminReviews`, with view/edit/delete)
+  This part is already done — no code change needed.
+- **Listing cards**:
+  - `OperatorCard` already toggles: `review_count >= 1` → dynamic ⭐ + `(N reviews)`; else → static star + "Verified". ✓
+  - `LiveJourneyCard` only renders the dynamic star block when `review_count > 0` and has **no Verified baseline**. ✗
+  - Need to audit any other card component for the same gap.
 
-- **Moderate** — "Balanced protection for captain and guest"
-  - 7+ days before departure: free cancellation.
-  - Between 7 days and 24 hours before: card on file is charged a 50% cancellation fee of the total trip price.
-  - Inside 24 hours: card on file is charged a 90% cancellation fee (the full remaining balance).
+## Plan
 
-- **Strict** — "Best for high-demand seasons"
-  - 14+ days before departure: free cancellation.
-  - Inside 14 days: card on file is charged a 90% cancellation fee (the full remaining balance).
+### 1. Confirm review flow (no change)
+Leave `submitTripReview`, `WriteTripReviewDialog`, the Past Trips button, the listing-page review feed, and the admin reviews panel exactly as they are. New reviews continue to appear instantly with no moderation step.
 
-Also tighten `WEATHER_POLICY_DISCLAIMER` wording (kept as the standard, non-selectable weather clause shown on Step 6, Manage Policies, and the listing preview):
+### 2. Add the "Verified" baseline to `LiveJourneyCard`
+Update `src/components/listings/LiveJourneyCard.tsx` so the rating block always renders:
+- `review_count >= 1` → `⭐ {avg.toFixed(1)} (N reviews)` (current behavior)
+- else → static star + "Verified" (matches `OperatorCard`)
 
-> "Weather policy (standard for all trips): If the Captain cancels due to unsafe weather or sea conditions, the guest always receives a 100% refund."
+### 3. Audit other listing card surfaces
+Grep for other card components rendering listings (e.g. featured/related/search-result cards) and apply the same conditional pattern so the behavior is uniform site-wide. Likely candidates to check: any card under `src/components/listings/`, `src/components/operator-listing/`, and home/category route components. Only files missing the baseline get edited.
 
-Update the legacy short strings in `src/lib/cancellation-policies.ts` to match the new summaries so any consumer (checkout, emails) shows consistent copy.
-
-## 2. Step 6 (BookingRulesStep) + listing preview/view
-
-No structural change — they already render `CANCELLATION_POLICY_DETAILS` and `WEATHER_POLICY_DISCLAIMER`, so they pick up the new copy automatically. Confirm Step 6's weather paragraph is shown as a fixed, standard disclaimer (not selectable) and that `PoliciesBlock` on `operator.preview.tsx` / public listing renders the same three-card view + weather disclaimer.
-
-## 3. New "Manage Policies" page
-
-Create `src/routes/_authenticated/dashboard.manage-policies.tsx`:
-
-- Loads operator via `getMyOperator` (TanStack Query, loader + `useSuspenseQuery`).
-- Renders the same 3 cards as Step 6 (`CANCELLATION_POLICY_DETAILS`) with the captain's current selection highlighted.
-- Lets the captain click a card to select a new policy; a "Save policy" button calls a new server function `updateOperatorCancellationPolicy` (added to `src/lib/operators.functions.ts`, `requireSupabaseAuth`, validates input is one of `CANCELLATION_POLICIES`, updates `operators.cancellation_policy` for the owner's listing).
-- Standard weather policy disclaimer shown below the cards (read-only).
-- On success: toast + invalidate `["my-operator"]` query.
-
-## 4. Wire Manage Policies into manage-listing UI
-
-In `src/routes/_authenticated/dashboard.my-listing.tsx`:
-
-- Add a new icon button in the listing row's action group titled "Manage Policies" (Shield/FileText icon) linking to `/dashboard/manage-policies`.
-- Add a "Manage Policies" item to the row's `DropdownMenu` (with separator).
+### Out of scope
+- No DB changes, no moderation status, no new dialogs, no admin queue changes.
 
 ## Technical notes
-
-- No DB migration required — `operators.cancellation_policy` already exists and `BookingRulesStep` already writes to it. The new page just exposes editing it outside the wizard.
-- The new server fn must call `requireSupabaseAuth` and update only the row where `owner_id = userId`, relying on existing RLS.
-- Route file name uses flat dot convention: `dashboard.manage-policies.tsx` (child of `dashboard` layout, same as `dashboard.my-listing.tsx`).
-- Keep `cancellation-policies.ts` as-is structurally — only update the `text` fields so checkout/emails stay aligned.
-
-## Verification
-
-- Step 6 cards show new bullets; weather disclaimer is the standard line, not user-editable.
-- Listing preview (`/operator/preview`) and public listing show the new policy text via `PoliciesBlock`.
-- `/dashboard/manage-policies` loads, shows 3 cards with current policy highlighted, lets captain switch + save, and reflects the change on refresh.
-- Manage listing row shows a Manage Policies icon button and dropdown item linking to the new page.
+- Source of truth for card stats stays `operators-search.functions.ts` (operators) and `getListingReviewStats` (journeys/listings). No filter changes.
+- `OperatorCard` is the reference implementation for the two states — match its markup/classes for visual consistency.
