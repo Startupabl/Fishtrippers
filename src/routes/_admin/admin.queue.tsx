@@ -25,13 +25,17 @@ import {
   listSupportTickets,
   resolveSupportTicket,
 } from "@/lib/support-tickets.functions";
+import {
+  listAdminCancellationDisputes,
+  resolveCancellationDispute,
+} from "@/lib/cancellation-disputes.functions";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { RejectListingDialog } from "@/components/admin/RejectListingDialog";
 import { cn } from "@/lib/utils";
 
-const TAB_VALUES = ["listings", "inquiries", "flags"] as const;
+const TAB_VALUES = ["listings", "inquiries", "flags", "cancellations"] as const;
 type TabValue = (typeof TAB_VALUES)[number];
 
 const searchSchema = z.object({
