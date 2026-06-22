@@ -13,6 +13,13 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
+import { Info, AlertTriangle } from "lucide-react";
 import { useAuthStore } from "@/stores/useAuthStore";
 import {
   listMyTripBookingsAide,
