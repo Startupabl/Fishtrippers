@@ -262,11 +262,11 @@ function UpcomingSessionsPage() {
                           size="sm"
                           variant="outline"
                           className="border-red-300 text-red-700 hover:bg-red-50 hover:text-red-800"
-                          onClick={() =>
-                            toast.message(
-                              "Report submitted to our support team. We'll review and reach out shortly.",
-                            )
-                          }
+                          onClick={() => {
+                            setReportClaimType("policy_payout");
+                            setReportDetails("");
+                            setReportTarget(b);
+                          }}
                         >
                           <AlertTriangle className="mr-1.5 size-4" />
                           Report Issue
