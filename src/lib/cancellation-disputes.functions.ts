@@ -84,7 +84,7 @@ export const listAdminCancellationDisputes = createServerFn({ method: "GET" })
     const { data: bookings } = await supabaseAdmin
       .from("bookings")
       .select(
-        "id, course_id, aide_id, learner_id, primary_angler_name, angler_written_reason, trip_date",
+        "id, course_id, aide_id, learner_id, primary_angler_name, angler_written_reason, trip_date, cancellation_timestamp",
       )
       .in("id", bookingIds);
     const bById = new Map((bookings ?? []).map((b) => [b.id, b]));
@@ -96,6 +96,21 @@ export const listAdminCancellationDisputes = createServerFn({ method: "GET" })
       ? await supabaseAdmin.from("trip_packages").select("id, title").in("id", tripIds)
       : { data: [] as Array<{ id: string; title: string }> };
     const tById = new Map((trips ?? []).map((t) => [t.id, t]));
+
+    // Lookup captain cancellation policy via operators.owner_id
+    const aideIds = Array.from(
+      new Set((bookings ?? []).map((b) => b.aide_id).filter(Boolean) as string[]),
+    );
+    const { data: operators } = aideIds.length
+      ? await supabaseAdmin
+          .from("operators")
+          .select("owner_id, cancellation_policy")
+          .in("owner_id", aideIds)
+      : { data: [] as Array<{ owner_id: string; cancellation_policy: string | null }> };
+    const policyByOwner = new Map(
+      (operators ?? []).map((o: any) => [o.owner_id, o.cancellation_policy as "flexible" | "moderate" | "strict" | null]),
+    );
+
 
     const userIds = Array.from(
       new Set(
