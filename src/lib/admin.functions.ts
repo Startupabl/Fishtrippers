@@ -125,6 +125,7 @@ export const getAdminOverview = createServerFn({ method: "GET" })
       { count: pendingListings },
       { count: pendingTickets },
       { count: openFlags },
+      { count: pendingCancellationDisputes },
     ] = await Promise.all([
       supabaseAdmin
         .from("operators")
@@ -139,8 +140,13 @@ export const getAdminOverview = createServerFn({ method: "GET" })
         .from("reported_listings")
         .select("*", { count: "exact", head: true })
         .eq("status", "pending_review"),
+      supabaseAdmin
+        .from("cancellation_disputes")
+        .select("*", { count: "exact", head: true })
+        .eq("status", "pending"),
     ]);
     const pendingInquiries = pendingTickets ?? 0;
+
 
     return {
       registrations: {
