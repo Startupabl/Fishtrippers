@@ -1,67 +1,71 @@
 ## Goal
+Replace the current 2-tab Queue/Completed view on the Cancellation Disputes admin tab with a 4-step payout pipeline, drive the stage shift automatically off a 60-day clock, and add a manual-payout confirmation flow.
 
-Reorganize all four Admin Action Queue tabs (Listing Applications, Support Tickets, Flagged Content, Cancellation Disputes) from stacked cards into scannable column tables, and add a **Queue / Completed** sub‑toggle on each so items move from one to the other after the admin takes action.
+## 1. Data model changes (one migration)
 
-Yes — this is feasible across every queue tab.
+`cancellation_disputes`:
+- Extend `cancellation_dispute_status_t` enum with `paid_out`.
+- Add `paid_out_at timestamptz` (set when admin confirms payout).
+- Use the existing `resolved_at` (already set on approve/deny) as the start of the 60-day hold for approved disputes.
 
-## Layout pattern (applied to all four tabs)
+`profiles` (angler payout preferences — currently missing):
+- Add `payout_method text` (`ach` | `wallet` | `address`, nullable).
+- Add `payout_details jsonb` (free-form: ACH routing/account, wallet handle, etc.). Address fallback uses existing `address_line1/2`, `city`, `state_province`, `postal_code`, `country`.
+- A small "Preferred Payout Method" form in the angler profile is out of scope for this change — the admin UI will display whatever exists, plus the mailing address fallback. (Flag if you want me to add the angler-side form too.)
 
-Each tab becomes:
+No new tables. RLS unchanged (admins already read all disputes/profiles).
+
+## 2. Stage derivation
+
+Stages are derived in the list query — no scheduled job required, so the shift happens "the exact minute" a record crosses 60 days the next time anyone loads the page:
 
 ```text
-[ Queue (n) | Completed (n) ]   <- sub-tabs inside the main tab
-
-┌────────────────────────────────────────────────────────────────────┐
-│ Col A │ Col B │ Col C │ Col D │ Col E │ Messages │ Actions          │
-├───────┼───────┼───────┼───────┼───────┼──────────┼──────────────────┤
-│ ...   │ ...   │ ...   │ ...   │ ...   │ View ▸   │ [Approve][Deny]  │
-└────────────────────────────────────────────────────────────────────┘
+active   = status = 'pending'
+holding  = status = 'approved' AND resolved_at > now() - interval '60 days' AND paid_out_at IS NULL
+ready    = status = 'approved' AND resolved_at <= now() - interval '60 days' AND paid_out_at IS NULL
+completed = status = 'paid_out' OR status = 'denied'
 ```
 
-Built with the existing shadcn `Table` primitives (already used on `admin.listings.tsx` and `admin.users.index.tsx`) so the visual language matches the rest of the admin.
+`listAdminCancellationDisputes` gets a `scope: 'active' | 'holding' | 'ready' | 'completed'` param and applies the matching filter. A second tiny server fn `getCancellationDisputeStageCounts` returns all four counts in one round trip for the tab badges.
 
-### Columns per tab
+Optional belt-and-suspenders: a pg_cron job that just touches `updated_at` nightly so realtime subscribers refresh — not required for correctness, skip unless you ask for it.
 
-**Cancellation Disputes**
-Order # · Listing Title · Captain · Booked · Cancelled · Messages (popover/drawer with angler reason + captain response) · Actions (Approve refund / Deny / View)
+## 3. Server functions
 
-**Listing Applications**
-Listing # · Title · Captain · Submitted · Location · Notes (popover) · Actions (Approve / Deny / Open)
+- `listAdminCancellationDisputes({ scope })` — extend existing fn; include `resolved_at`, `paid_out_at`, and (for `ready`/`completed`) the angler's `payout_method`, `payout_details`, and address columns from `profiles`.
+- `getCancellationDisputeStageCounts()` — returns `{ active, holding, ready, completed }`.
+- `markCancellationDisputePaidOut({ disputeId })` — admin-only, sets `status='paid_out'`, `paid_out_at=now()`, appends to `admin_notes` ("Manual payout confirmed by <admin> at <ts>"). Invalidates the queue queries.
 
-**Support Tickets**
-Ticket # · Subject · User · Type · Opened · Last Message (popover) · Actions (Reply / Resolve)
+Admin overview count (`getAdminOverview.pendingCancellationDisputes`) keeps counting only `status='pending'` so the dashboard badge keeps its current meaning. The "Ready for Payout" needs-action signal lives on the Queue page itself (see UI).
 
-**Flagged Content**
-Flag # · Target (listing/review/journey) · Reporter · Reason · Reported · Details (popover) · Actions (Dismiss / Remove / Open)
+## 4. UI (`src/routes/_admin/admin.queue.tsx`)
 
-### Queue vs Completed
+Replace the current `<ScopeTabs queue|completed>` inside the Cancellation Disputes section with a 4-tab strip:
 
-- **Queue** = current pending items (today's behavior).
-- **Completed** = items where the admin already took a terminal action (approved/denied/resolved/dismissed/removed). For each tab this maps to existing status fields:
-  - disputes: `status in ('approved','denied')`
-  - listings: `status in ('approved','denied')` after review
-  - tickets: `status = 'resolved'`
-  - flags: `status in ('dismissed','actioned')`
-- Counts shown on each sub-tab pill. Completed list is read‑only with a "Reopen" affordance only where it already exists; otherwise just a "View" link.
-- After an admin acts in Queue, the row disappears from Queue and appears in Completed on the next refetch (we already invalidate these queries today).
+```text
+[ Active Disputes (n) ] [ Holding Pool (n) ] [ Ready for Payout (n) ⬤ ] [ Completed (n) ]
+```
 
-### Messages column
+- Amber dot + `Needs Action` badge on "Ready for Payout" whenever its count > 0. Same amber badge mirrored on the section header card so it's visible before opening the tab.
+- Each tab is a `Table` with stage-appropriate columns:
+  - **Active Disputes**: Order #, Listing, Captain, Angler, Booked, Cancelled, Trip Policy, Captain message, Angler reason, Approve / Deny.
+  - **Holding Pool**: Order #, Listing, Captain, Angler, Approved on, **Days remaining** (live `60 - daysSince(resolved_at)`, red when ≤ 7), Releases on, View.
+  - **Ready for Payout**: Order #, Listing, Captain, Angler, Approved on, Payout due since, **Preferred Payout Details** (method label + copy-buttons for each field; falls back to mailing address block), **Confirm Manual Payment Sent** button → calls `markCancellationDisputePaidOut`.
+  - **Completed**: Order #, Listing, Captain, Angler, Final status (Paid out / Denied), Resolved on, Paid out on, View.
 
-A compact "View ▸" button opens a popover (desktop) / drawer (mobile) showing the relevant text: angler cancellation reason + captain response for disputes, ticket thread for support, reporter note for flags, applicant note for listings. Keeps the row dense while preserving full context one click away.
+Countdown is computed client-side from `resolved_at` (re-renders on a 60s timer); no extra server round-trip.
 
-### Responsive behavior
+`Confirm Manual Payment Sent` opens a small confirm dialog ("This logs payout completion and archives the dispute. Continue?") to avoid misclicks, then mutates and invalidates `["admin","queue","cancellations",*]` and the stage-counts query so the row jumps to Completed immediately.
 
-- ≥ md: full table with all columns.
-- < md: collapses to the current card layout automatically (table hidden, card list shown) so mobile admins aren't squeezed.
+## 5. Files touched
 
-## Files to touch
-
-- `src/routes/_admin/admin.queue.tsx` — rewrite the four section components (`ListingsToApprove`, `OpenInquiries`, `FlaggedContent`, `CancellationDisputes`) to use `Table` + Queue/Completed sub‑tabs. Extract a small shared `<QueueShell tab="queue|completed" counts={…}>` wrapper to keep markup consistent.
-- `src/lib/cancellation-disputes.functions.ts`, `src/lib/admin.functions.ts`, and the ticket/flag list functions — extend each `list…` server function to accept `{ scope: 'queue' | 'completed' }` and return the matching rows. No schema changes; we filter on existing status columns.
-- `src/routes/_admin/admin.index.tsx` — no change to the overview counts (still "pending" only), but the link target stays the same.
+- `supabase/migrations/<new>.sql` — enum value, `paid_out_at`, profile payout columns.
+- `src/lib/cancellation-disputes.functions.ts` — `scope` param, stage counts fn, `markCancellationDisputePaidOut`, payout-detail fields in select.
+- `src/routes/_admin/admin.queue.tsx` — replace the cancellations section's tabs/columns/actions; add amber needs-action indicator on section header.
+- `src/integrations/supabase/types.ts` — regenerated after migration.
 
 ## Out of scope
 
-- No database/schema changes, no new statuses.
-- No change to the action semantics themselves (Approve/Deny/Resolve do exactly what they do today; we just relocate the row).
-- No change to the four top‑level tabs or to other admin pages (listings, users, transactions) — those are already columnar.
+- Angler-side UI to enter payout preferences (flagged above).
+- Automatic ACH/Stripe transfer — this flow is manual ("Confirm Manual Payment Sent").
+- Changing the structure of the other three queue tabs (listings / inquiries / flags).
