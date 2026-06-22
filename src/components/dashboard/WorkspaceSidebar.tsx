@@ -9,6 +9,7 @@ import {
   Plus,
   Search,
   Ship,
+  ShieldCheck,
 } from "lucide-react";
 import {
   Sidebar,
