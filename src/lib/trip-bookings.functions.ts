@@ -803,7 +803,7 @@ export const cancelTripBookingLearner = createServerFn({ method: "POST" })
     const { supabase, userId } = context;
     const { data: booking, error: bErr } = await supabase
       .from("bookings")
-      .select("id, learner_id, status")
+      .select("id, learner_id, aide_id, course_id, trip_date, status")
       .eq("id", data.bookingId)
       .maybeSingle();
     if (bErr) throw new Error(bErr.message);
@@ -826,5 +826,71 @@ export const cancelTripBookingLearner = createServerFn({ method: "POST" })
       })
       .eq("id", data.bookingId);
     if (uErr) throw new Error(uErr.message);
+
+    // Best-effort: notify the captain via header alert + email.
+    try {
+      const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+      let tripTitle = "your upcoming trip";
+      if (booking.course_id) {
+        const { data: trip } = await supabaseAdmin
+          .from("trip_packages")
+          .select("title")
+          .eq("id", booking.course_id)
+          .maybeSingle();
+        if (trip?.title) tripTitle = trip.title;
+      }
+      const tripDateStr = booking.trip_date
+        ? new Date(booking.trip_date).toLocaleDateString(undefined, {
+            year: "numeric",
+            month: "short",
+            day: "numeric",
+          })
+        : "the scheduled date";
+
+      if (booking.aide_id) {
+        await supabaseAdmin.from("user_alerts").insert({
+          user_id: booking.aide_id,
+          kind: "trip_cancelled_by_angler" as never,
+          journey_id: null,
+          message: `An angler cancelled their booking for "${tripTitle}" on ${tripDateStr}. Reason: ${data.reason}`,
+        });
+
+        // Send email
+        try {
+          const { data: captain } = await supabaseAdmin
+            .from("profiles")
+            .select("email, first_name")
+            .eq("id", booking.aide_id)
+            .maybeSingle();
+          if (captain?.email) {
+            const { sendEmail } = await import("@/lib/email-sender.server");
+            const greeting = captain.first_name ? `Hi ${captain.first_name},` : "Hi,";
+            await sendEmail({
+              to: captain.email,
+              subject: "A guest cancelled their FishTrippers booking",
+              body: `${greeting}
+
+A guest has cancelled their booking on FishTrippers.
+
+Trip: ${tripTitle}
+Original date: ${tripDateStr}
+Reason from angler: ${data.reason}
+
+You can review this cancellation — and, if it falls outside your cancellation policy, file a dispute with the FishTrippers admin team — from your schedule:
+
+https://fishtrippers.com/dashboard/upcoming-sessions
+
+— The FishTrippers Team`,
+            });
+          }
+        } catch (e) {
+          console.error("[cancelTripBookingLearner] email failed", e);
+        }
+      }
+    } catch (e) {
+      console.error("[cancelTripBookingLearner] captain notification failed", e);
+    }
+
     return { ok: true };
   });
+

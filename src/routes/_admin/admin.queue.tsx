@@ -679,7 +679,34 @@ function CancellationDisputes() {
                     <span className="font-medium text-foreground">Trip:</span>{" "}
                     <span className="text-muted-foreground">
                       {r.trip_title ?? "—"}
-                      {r.trip_date ? ` · ${r.trip_date}` : ""}
+                    </span>
+                  </div>
+                  <div>
+                    <span className="font-medium text-foreground">Booked:</span>{" "}
+                    <span className="text-muted-foreground">
+                      {r.trip_date
+                        ? new Date(r.trip_date).toLocaleString(undefined, {
+                            year: "numeric",
+                            month: "short",
+                            day: "numeric",
+                            hour: "numeric",
+                            minute: "2-digit",
+                          })
+                        : "—"}
+                    </span>
+                  </div>
+                  <div>
+                    <span className="font-medium text-foreground">Cancelled:</span>{" "}
+                    <span className="text-muted-foreground">
+                      {r.cancellation_timestamp
+                        ? new Date(r.cancellation_timestamp).toLocaleString(undefined, {
+                            year: "numeric",
+                            month: "short",
+                            day: "numeric",
+                            hour: "numeric",
+                            minute: "2-digit",
+                          })
+                        : "—"}
                     </span>
                   </div>
                   <div>
@@ -690,7 +717,16 @@ function CancellationDisputes() {
                     <span className="font-medium text-foreground">Angler:</span>{" "}
                     <span className="text-muted-foreground">{r.angler_name ?? "—"}</span>
                   </div>
+                  <div className="sm:col-span-2">
+                    <span className="font-medium text-foreground">Trip Policy:</span>{" "}
+                    <span className="text-muted-foreground">
+                      {r.cancellation_policy
+                        ? r.cancellation_policy.charAt(0).toUpperCase() + r.cancellation_policy.slice(1)
+                        : "—"}
+                    </span>
+                  </div>
                 </div>
+
                 <div className="mt-3">
                   <div className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
                     Captain's details

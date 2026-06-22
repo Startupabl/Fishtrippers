@@ -29,8 +29,9 @@ function StatCard({
   rows: { label: string; value: string }[];
   warn?: boolean;
   manageTo?: "/admin/users" | "/admin/listings" | "/admin/queue" | "/admin/transactions";
-  manageSearch?: { tab: "listings" | "inquiries" | "flags" };
+  manageSearch?: { tab: "listings" | "inquiries" | "flags" | "cancellations" };
   alertRows?: boolean;
+
 }) {
   return (
     <Card className="rounded-xl bg-white shadow-sm">
@@ -85,7 +86,7 @@ function OverviewPage() {
   if (error) return <p className="text-sm text-destructive">Failed to load overview.</p>;
   if (!data) return null;
 
-  const queueTotal = data.queue.pendingListings + data.queue.pendingInquiries + data.queue.openFlags;
+  const queueTotal = data.queue.pendingListings + data.queue.pendingInquiries + data.queue.openFlags + (data.queue.pendingCancellationDisputes ?? 0);
 
   return (
     <div className="space-y-6">
@@ -141,7 +142,9 @@ function OverviewPage() {
             { label: "New Listing Applications", value: String(data.queue.pendingListings) },
             { label: "Support tickets", value: String(data.queue.pendingInquiries) },
             { label: "Flagged content", value: String(data.queue.openFlags) },
+            { label: "Cancellation Disputes", value: String(data.queue.pendingCancellationDisputes ?? 0) },
           ]}
+
           manageTo="/admin/queue"
           manageSearch={{ tab: "listings" }}
           alertRows
