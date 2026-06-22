@@ -114,6 +114,9 @@ function BillingPage() {
         </div>
       </Card>
 
+      {/* Payout settings (captains/guides only) */}
+      <PayoutSettingsSection />
+
       {/* Transaction history */}
       <Card className="p-6">
         <h2 className="text-xl font-semibold">Transaction history</h2>
