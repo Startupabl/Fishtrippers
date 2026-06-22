@@ -70,6 +70,12 @@ function statusBadge(status: string) {
           COMPLETED
         </Badge>
       );
+    case "cancelled":
+      return (
+        <Badge className="bg-red-100 text-red-800 hover:bg-red-100">
+          CANCELLED
+        </Badge>
+      );
     case "pending_offer":
     case "pending_payment":
       return (
