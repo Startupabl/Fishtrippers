@@ -676,7 +676,8 @@ function OpenInquiries() {
                       </TableCell>
                     </TableRow>
                   )}
-                </>
+                </Fragment>
+
               ))
             )}
           </TableBody>
