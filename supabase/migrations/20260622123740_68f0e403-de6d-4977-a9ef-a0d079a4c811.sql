@@ -1,0 +1,1 @@
+ALTER TYPE public.user_alert_kind ADD VALUE IF NOT EXISTS 'trip_cancelled_by_angler';
