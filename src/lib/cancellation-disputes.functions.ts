@@ -18,7 +18,10 @@ export interface CancellationDisputeRow {
   trip_title: string | null;
   trip_date: string | null;
   angler_written_reason: string | null;
+  cancellation_timestamp: string | null;
+  cancellation_policy: "flexible" | "moderate" | "strict" | null;
 }
+
 
 const SubmitInput = z.object({
   bookingId: z.string().uuid(),
