@@ -930,147 +930,473 @@ function FlaggedContent() {
    Cancellation Disputes
    ============================================================ */
 
+const HOLD_DAYS = 60;
+const MS_PER_DAY = 24 * 60 * 60 * 1000;
+
+function daysRemaining(resolvedAt: string | null): number {
+  if (!resolvedAt) return HOLD_DAYS;
+  const elapsed = (Date.now() - new Date(resolvedAt).getTime()) / MS_PER_DAY;
+  return Math.max(0, Math.ceil(HOLD_DAYS - elapsed));
+}
+
+function releaseDate(resolvedAt: string | null): string | null {
+  if (!resolvedAt) return null;
+  return new Date(new Date(resolvedAt).getTime() + HOLD_DAYS * MS_PER_DAY).toISOString();
+}
+
+function CopyButton({ value }: { value: string }) {
+  return (
+    <Button
+      type="button"
+      size="sm"
+      variant="ghost"
+      className="h-6 px-1.5"
+      onClick={() => {
+        void navigator.clipboard.writeText(value);
+        toast.success("Copied");
+      }}
+    >
+      <Copy className="size-3" />
+    </Button>
+  );
+}
+
+function PayoutDetailsBlock({ row }: { row: CancellationDisputeRow }) {
+  const method = row.angler_payout_method;
+  const details = row.angler_payout_details ?? {};
+  const addr = row.angler_address;
+
+  const lines: Array<{ label: string; value: string }> = [];
+
+  if (method === "ach") {
+    if (details.bank_name) lines.push({ label: "Bank", value: String(details.bank_name) });
+    if (details.account_holder)
+      lines.push({ label: "Account holder", value: String(details.account_holder) });
+    if (details.routing_number)
+      lines.push({ label: "Routing #", value: String(details.routing_number) });
+    if (details.account_number)
+      lines.push({ label: "Account #", value: String(details.account_number) });
+  } else if (method === "wallet") {
+    if (details.wallet_provider)
+      lines.push({ label: "Provider", value: String(details.wallet_provider) });
+    if (details.wallet_handle)
+      lines.push({ label: "Handle", value: String(details.wallet_handle) });
+    if (details.wallet_email)
+      lines.push({ label: "Email", value: String(details.wallet_email) });
+  }
+
+  const hasAddress =
+    addr && (addr.line1 || addr.city || addr.state_province || addr.postal_code);
+  const showAddress = method === "address" || (lines.length === 0 && hasAddress);
+
+  if (showAddress && hasAddress) {
+    const addrStr = [
+      addr!.line1,
+      addr!.line2,
+      [addr!.city, addr!.state_province, addr!.postal_code].filter(Boolean).join(", "),
+      addr!.country,
+    ]
+      .filter(Boolean)
+      .join("\n");
+    lines.push({ label: "Mailing address", value: addrStr });
+  }
+
+  if (lines.length === 0) {
+    return (
+      <div className="text-xs text-muted-foreground">
+        No payout preference on file
+        {row.angler_email ? (
+          <>
+            {" — "}
+            <span className="font-medium text-foreground">{row.angler_email}</span>
+          </>
+        ) : null}
+      </div>
+    );
+  }
+
+  const methodLabel =
+    method === "ach"
+      ? "ACH"
+      : method === "wallet"
+        ? "Digital wallet"
+        : method === "address"
+          ? "Mailing address"
+          : "Address (fallback)";
+
+  return (
+    <div className="min-w-[240px] space-y-1.5">
+      <div className="text-[10px] font-semibold uppercase tracking-wide text-muted-foreground">
+        {methodLabel}
+      </div>
+      {lines.map((l) => (
+        <div key={l.label} className="flex items-start gap-1.5 text-xs">
+          <div className="min-w-[88px] text-muted-foreground">{l.label}</div>
+          <div className="flex-1 whitespace-pre-wrap font-medium text-foreground">
+            {l.value}
+          </div>
+          <CopyButton value={l.value} />
+        </div>
+      ))}
+      {row.angler_email ? (
+        <div className="flex items-start gap-1.5 text-xs">
+          <div className="min-w-[88px] text-muted-foreground">Email</div>
+          <div className="flex-1 font-medium text-foreground">{row.angler_email}</div>
+          <CopyButton value={row.angler_email} />
+        </div>
+      ) : null}
+    </div>
+  );
+}
+
 function CancellationDisputes() {
-  const [scope, setScope] = useState<Scope>("queue");
+  const [stage, setStage] = useState<DisputeScope>("active");
+  const [payoutTarget, setPayoutTarget] = useState<CancellationDisputeRow | null>(null);
   const fetchDisputes = useServerFn(listAdminCancellationDisputes);
+  const fetchCounts = useServerFn(getCancellationDisputeStageCounts);
   const resolveFn = useServerFn(resolveCancellationDispute);
+  const payoutFn = useServerFn(markCancellationDisputePaidOut);
   const qc = useQueryClient();
 
-  const { data, isLoading } = useQuery({
-    queryKey: ["admin", "queue", "cancellations"],
-    queryFn: () => fetchDisputes(),
+  const countsQ = useQuery({
+    queryKey: ["admin", "queue", "cancellations", "counts"],
+    queryFn: () => fetchCounts(),
+    refetchInterval: 60_000,
   });
 
-  const mutation = useMutation({
+  const { data: rows, isLoading } = useQuery({
+    queryKey: ["admin", "queue", "cancellations", stage],
+    queryFn: () => fetchDisputes({ data: { scope: stage } }),
+    refetchInterval: stage === "holding" || stage === "ready" ? 60_000 : undefined,
+  });
+
+  const invalidate = () => {
+    void qc.invalidateQueries({ queryKey: ["admin", "queue", "cancellations"] });
+    void qc.invalidateQueries({ queryKey: ["admin", "overview"] });
+  };
+
+  const resolveMutation = useMutation({
     mutationFn: (vars: { disputeId: string; decision: "approved" | "denied" }) =>
       resolveFn({ data: vars }),
     onSuccess: (_, v) => {
       toast.success(
-        v.decision === "approved" ? "Captain payout approved" : "Claim denied",
+        v.decision === "approved"
+          ? "Approved — moved to 60-day holding pool"
+          : "Claim denied",
       );
-      void qc.invalidateQueries({ queryKey: ["admin", "queue", "cancellations"] });
-      void qc.invalidateQueries({ queryKey: ["admin", "overview"] });
+      invalidate();
     },
     onError: (e: Error) => toast.error(e.message),
   });
 
-  const all = data ?? [];
-  const queueRows = all.filter((r) => r.status === "pending");
-  const completedRows = all.filter((r) => r.status !== "pending");
-  const rows = scope === "queue" ? queueRows : completedRows;
+  const payoutMutation = useMutation({
+    mutationFn: (vars: { disputeId: string }) => payoutFn({ data: vars }),
+    onSuccess: () => {
+      toast.success("Payout recorded — moved to Completed");
+      setPayoutTarget(null);
+      invalidate();
+    },
+    onError: (e: Error) => toast.error(e.message),
+  });
+
+  const counts = countsQ.data ?? { active: 0, holding: 0, ready: 0, completed: 0 };
+  const hasReadyAlert = counts.ready > 0;
+  const list = rows ?? [];
+
+  const stageDef: Array<{
+    value: DisputeScope;
+    label: string;
+    count: number;
+    alert?: boolean;
+  }> = [
+    { value: "active", label: "Active Disputes", count: counts.active },
+    { value: "holding", label: "Holding Pool (60d)", count: counts.holding },
+    { value: "ready", label: "Ready for Payout", count: counts.ready, alert: hasReadyAlert },
+    { value: "completed", label: "Completed", count: counts.completed },
+  ];
 
   return (
-    <ScopeTabs
-      scope={scope}
-      setScope={setScope}
-      queueCount={queueRows.length}
-      completedCount={completedRows.length}
-    >
-      <div className="overflow-x-auto rounded-lg border bg-white shadow-sm">
-        <Table>
-          <TableHeader>
-            <TableRow>
-              <TableHead>Order #</TableHead>
-              <TableHead>Listing Title</TableHead>
-              <TableHead>Captain</TableHead>
-              <TableHead>Angler</TableHead>
-              <TableHead>Booked</TableHead>
-              <TableHead>Cancelled</TableHead>
-              <TableHead>Policy</TableHead>
-              <TableHead>Messages</TableHead>
-              <TableHead className="text-right">Actions</TableHead>
-            </TableRow>
-          </TableHeader>
-          <TableBody>
-            {isLoading ? (
-              <LoadingRow colSpan={9} />
-            ) : rows.length === 0 ? (
-              <EmptyRow
-                colSpan={9}
-                title={
-                  scope === "queue"
-                    ? "No cancellation disputes"
-                    : "No completed disputes yet"
-                }
-              />
-            ) : (
-              rows.map((r) => {
-                const isPending = r.status === "pending";
-                return (
-                  <TableRow key={r.id}>
-                    <TableCell className="font-mono text-xs">
-                      {r.order_number ?? r.booking_id.slice(0, 8)}
-                    </TableCell>
-                    <TableCell className="font-medium">{r.trip_title ?? "—"}</TableCell>
-                    <TableCell className="text-sm text-muted-foreground">
-                      {r.captain_name ?? "—"}
-                    </TableCell>
-                    <TableCell className="text-sm text-muted-foreground">
-                      {r.angler_name ?? "—"}
-                    </TableCell>
-                    <TableCell className="text-sm text-muted-foreground whitespace-nowrap">
-                      {fmtDateTime(r.trip_date)}
-                    </TableCell>
-                    <TableCell className="text-sm text-muted-foreground whitespace-nowrap">
-                      {fmtDateTime(r.cancellation_timestamp)}
-                    </TableCell>
-                    <TableCell>
-                      <StatusBadge tone="gray">
-                        {r.cancellation_policy
-                          ? r.cancellation_policy.charAt(0).toUpperCase() +
-                            r.cancellation_policy.slice(1)
-                          : "—"}
-                      </StatusBadge>
-                    </TableCell>
-                    <TableCell>
-                      <MessagesPopover
-                        title={r.trip_title ?? "Dispute"}
-                        sections={[
-                          { heading: "Captain's details", body: r.captain_details },
-                          { heading: "Angler's reason", body: r.angler_written_reason },
-                        ]}
-                      />
-                    </TableCell>
-                    <TableCell>
-                      <div className="flex flex-wrap justify-end gap-1.5">
-                        {isPending ? (
-                          <>
+    <div className="space-y-4">
+      {hasReadyAlert ? (
+        <div className="flex items-center gap-2 rounded-md border border-amber-300 bg-amber-50 px-3 py-2 text-sm text-amber-900">
+          <AlertTriangle className="size-4" />
+          <span className="font-medium">
+            {counts.ready} dispute{counts.ready === 1 ? "" : "s"} ready for manual payout.
+          </span>
+          {stage !== "ready" ? (
+            <Button
+              size="sm"
+              variant="outline"
+              className="ml-auto h-7 border-amber-400 bg-white px-2 text-amber-900 hover:bg-amber-100"
+              onClick={() => setStage("ready")}
+            >
+              Review now
+            </Button>
+          ) : null}
+        </div>
+      ) : null}
+
+      <Tabs value={stage} onValueChange={(v) => setStage(v as DisputeScope)} className="w-full">
+        <TabsList className="grid w-full grid-cols-4 sm:max-w-3xl">
+          {stageDef.map((s) => (
+            <TabsTrigger key={s.value} value={s.value} className="relative">
+              <span>{s.label}</span>
+              <span className="ml-1 text-xs opacity-70">({s.count})</span>
+              {s.alert ? (
+                <span className="ml-1.5 inline-block size-2 rounded-full bg-amber-500 ring-2 ring-amber-200" />
+              ) : null}
+            </TabsTrigger>
+          ))}
+        </TabsList>
+
+        <div className="mt-4 overflow-x-auto rounded-lg border bg-white shadow-sm">
+          <Table>
+            <TableHeader>
+              <TableRow>
+                <TableHead>Order #</TableHead>
+                <TableHead>Listing Title</TableHead>
+                <TableHead>Captain</TableHead>
+                <TableHead>Angler</TableHead>
+                {stage === "active" ? (
+                  <>
+                    <TableHead>Booked</TableHead>
+                    <TableHead>Cancelled</TableHead>
+                    <TableHead>Policy</TableHead>
+                    <TableHead>Messages</TableHead>
+                  </>
+                ) : stage === "holding" ? (
+                  <>
+                    <TableHead>Approved</TableHead>
+                    <TableHead>Days remaining</TableHead>
+                    <TableHead>Releases on</TableHead>
+                  </>
+                ) : stage === "ready" ? (
+                  <>
+                    <TableHead>Approved</TableHead>
+                    <TableHead>Payout due since</TableHead>
+                    <TableHead>Preferred Payout Details</TableHead>
+                  </>
+                ) : (
+                  <>
+                    <TableHead>Final status</TableHead>
+                    <TableHead>Resolved</TableHead>
+                    <TableHead>Paid out</TableHead>
+                  </>
+                )}
+                <TableHead className="text-right">Actions</TableHead>
+              </TableRow>
+            </TableHeader>
+            <TableBody>
+              {isLoading ? (
+                <LoadingRow colSpan={9} />
+              ) : list.length === 0 ? (
+                <EmptyRow
+                  colSpan={9}
+                  title={
+                    stage === "active"
+                      ? "No active disputes"
+                      : stage === "holding"
+                        ? "Nothing in the 60-day holding pool"
+                        : stage === "ready"
+                          ? "Nothing ready for payout"
+                          : "No completed records yet"
+                  }
+                />
+              ) : (
+                list.map((r) => {
+                  const release = releaseDate(r.resolved_at);
+                  const remaining = daysRemaining(r.resolved_at);
+                  return (
+                    <TableRow key={r.id}>
+                      <TableCell className="font-mono text-xs">
+                        {r.order_number ?? r.booking_id.slice(0, 8)}
+                      </TableCell>
+                      <TableCell className="font-medium">{r.trip_title ?? "—"}</TableCell>
+                      <TableCell className="text-sm text-muted-foreground">
+                        {r.captain_name ?? "—"}
+                      </TableCell>
+                      <TableCell className="text-sm text-muted-foreground">
+                        {r.angler_name ?? "—"}
+                      </TableCell>
+
+                      {stage === "active" ? (
+                        <>
+                          <TableCell className="whitespace-nowrap text-sm text-muted-foreground">
+                            {fmtDateTime(r.trip_date)}
+                          </TableCell>
+                          <TableCell className="whitespace-nowrap text-sm text-muted-foreground">
+                            {fmtDateTime(r.cancellation_timestamp)}
+                          </TableCell>
+                          <TableCell>
+                            <StatusBadge tone="gray">
+                              {r.cancellation_policy
+                                ? r.cancellation_policy.charAt(0).toUpperCase() +
+                                  r.cancellation_policy.slice(1)
+                                : "—"}
+                            </StatusBadge>
+                          </TableCell>
+                          <TableCell>
+                            <MessagesPopover
+                              title={r.trip_title ?? "Dispute"}
+                              sections={[
+                                { heading: "Captain's details", body: r.captain_details },
+                                { heading: "Angler's reason", body: r.angler_written_reason },
+                              ]}
+                            />
+                          </TableCell>
+                        </>
+                      ) : stage === "holding" ? (
+                        <>
+                          <TableCell className="whitespace-nowrap text-sm text-muted-foreground">
+                            {fmtDate(r.resolved_at)}
+                          </TableCell>
+                          <TableCell>
+                            <span
+                              className={cn(
+                                "inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-xs font-semibold",
+                                remaining <= 7
+                                  ? "bg-red-100 text-red-800"
+                                  : "bg-amber-100 text-amber-900",
+                              )}
+                            >
+                              <Hourglass className="size-3" />
+                              {remaining} day{remaining === 1 ? "" : "s"}
+                            </span>
+                          </TableCell>
+                          <TableCell className="whitespace-nowrap text-sm text-muted-foreground">
+                            {fmtDate(release)}
+                          </TableCell>
+                        </>
+                      ) : stage === "ready" ? (
+                        <>
+                          <TableCell className="whitespace-nowrap text-sm text-muted-foreground">
+                            {fmtDate(r.resolved_at)}
+                          </TableCell>
+                          <TableCell className="whitespace-nowrap text-sm">
+                            <span className="inline-flex items-center gap-1 rounded-full bg-amber-100 px-2 py-0.5 text-xs font-semibold text-amber-900">
+                              <Clock className="size-3" />
+                              {fmtDate(release)}
+                            </span>
+                          </TableCell>
+                          <TableCell>
+                            <PayoutDetailsBlock row={r} />
+                          </TableCell>
+                        </>
+                      ) : (
+                        <>
+                          <TableCell>
+                            <StatusBadge tone={r.status === "paid_out" ? "green" : "red"}>
+                              {r.status === "paid_out" ? "Paid out" : "Denied"}
+                            </StatusBadge>
+                          </TableCell>
+                          <TableCell className="whitespace-nowrap text-sm text-muted-foreground">
+                            {fmtDate(r.resolved_at)}
+                          </TableCell>
+                          <TableCell className="whitespace-nowrap text-sm text-muted-foreground">
+                            {fmtDate(r.paid_out_at)}
+                          </TableCell>
+                        </>
+                      )}
+
+                      <TableCell>
+                        <div className="flex flex-wrap justify-end gap-1.5">
+                          {stage === "active" ? (
+                            <>
+                              <Button
+                                size="sm"
+                                className="h-7 px-2 bg-primary text-primary-foreground hover:opacity-95"
+                                disabled={resolveMutation.isPending}
+                                onClick={() =>
+                                  resolveMutation.mutate({
+                                    disputeId: r.id,
+                                    decision: "approved",
+                                  })
+                                }
+                              >
+                                <Check className="size-3.5" /> Approve
+                              </Button>
+                              <Button
+                                size="sm"
+                                variant="destructive"
+                                className="h-7 px-2"
+                                disabled={resolveMutation.isPending}
+                                onClick={() =>
+                                  resolveMutation.mutate({
+                                    disputeId: r.id,
+                                    decision: "denied",
+                                  })
+                                }
+                              >
+                                <Ban className="size-3.5" /> Deny
+                              </Button>
+                            </>
+                          ) : stage === "holding" ? (
+                            <StatusBadge tone="amber">In holding</StatusBadge>
+                          ) : stage === "ready" ? (
                             <Button
                               size="sm"
-                              className="h-7 px-2 bg-primary text-primary-foreground hover:opacity-95"
-                              disabled={mutation.isPending}
-                              onClick={() =>
-                                mutation.mutate({ disputeId: r.id, decision: "approved" })
-                              }
+                              className="h-8 gap-1 bg-amber-500 px-3 text-white hover:bg-amber-600"
+                              onClick={() => setPayoutTarget(r)}
                             >
-                              <Check className="size-3.5" /> Approve
+                              <DollarSign className="size-3.5" />
+                              Confirm Manual Payment Sent
                             </Button>
-                            <Button
-                              size="sm"
-                              variant="destructive"
-                              className="h-7 px-2"
-                              disabled={mutation.isPending}
-                              onClick={() =>
-                                mutation.mutate({ disputeId: r.id, decision: "denied" })
-                              }
+                          ) : (
+                            <StatusBadge
+                              tone={r.status === "paid_out" ? "green" : "gray"}
                             >
-                              <Ban className="size-3.5" /> Deny
-                            </Button>
-                          </>
-                        ) : (
-                          <StatusBadge tone={r.status === "approved" ? "green" : "red"}>
-                            {r.status === "approved" ? "Approved" : "Denied"}
-                          </StatusBadge>
-                        )}
-                      </div>
-                    </TableCell>
-                  </TableRow>
-                );
-              })
-            )}
-          </TableBody>
-        </Table>
-      </div>
-    </ScopeTabs>
+                              {r.status === "paid_out" ? "Archived" : "Closed"}
+                            </StatusBadge>
+                          )}
+                        </div>
+                      </TableCell>
+                    </TableRow>
+                  );
+                })
+              )}
+            </TableBody>
+          </Table>
+        </div>
+      </Tabs>
+
+      <AlertDialog
+        open={!!payoutTarget}
+        onOpenChange={(o) => {
+          if (!o) setPayoutTarget(null);
+        }}
+      >
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Confirm manual payment sent</AlertDialogTitle>
+            <AlertDialogDescription>
+              This logs payout completion for{" "}
+              <span className="font-medium text-foreground">
+                {payoutTarget?.order_number ?? payoutTarget?.booking_id.slice(0, 8)}
+              </span>{" "}
+              and archives the dispute in the Completed tab. This action cannot be undone.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel disabled={payoutMutation.isPending}>
+              Cancel
+            </AlertDialogCancel>
+            <AlertDialogAction
+              disabled={payoutMutation.isPending}
+              onClick={(e) => {
+                e.preventDefault();
+                if (!payoutTarget) return;
+                payoutMutation.mutate({ disputeId: payoutTarget.id });
+              }}
+            >
+              {payoutMutation.isPending ? (
+                <Loader2 className="size-4 animate-spin" />
+              ) : (
+                "Confirm payment sent"
+              )}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+    </div>
   );
 }
