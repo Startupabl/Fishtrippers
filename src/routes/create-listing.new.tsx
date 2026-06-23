@@ -79,8 +79,12 @@ function CreatePathPage() {
   }, [initialized, authUser, listingLoaded, hasListing, isEditMode, navigate]);
 
   // Hydrate from server once.
+  // NOTE: must NOT share the ["my-operator", userId] key with
+  // useHasActiveListing — that hook caches a lite row (id, business_type,
+  // status, display_name only) and would overwrite hydration here with
+  // empty fields, blanking the edit form when arriving from /dashboard/my-listing.
   const { data: server } = useQuery({
-    queryKey: ["my-operator", authUser?.id],
+    queryKey: ["my-operator-full", authUser?.id],
     queryFn: () => fetchMine(),
     enabled: !!authUser,
     staleTime: 60_000,
