@@ -346,7 +346,7 @@ function ListingsPage() {
               <th className="px-2 py-2 font-semibold">Category</th>
               <th className="px-2 py-2 font-semibold">Captain/Guide</th>
               <th className="px-2 py-2 font-semibold">Status</th>
-              <th className="px-2 py-2 font-semibold">Stripe Payout Status</th>
+              
               <th className="px-2 py-2 font-semibold">Featured</th>
               <th className="px-2 py-2 text-right font-semibold">Manage</th>
             </tr>
@@ -527,17 +527,6 @@ function ListingRowView({
           >
             {statusLabel(row.moderation_status)}
           </button>
-        )}
-      </td>
-      <td className="whitespace-nowrap px-2 py-1.5">
-        {row.mentor_is_payout_ready ? (
-          <span className="inline-flex items-center rounded-full bg-emerald-100 px-2 py-0.5 text-[11px] font-medium text-emerald-800">
-            🟩 Connected
-          </span>
-        ) : (
-          <span className="inline-flex items-center rounded-full bg-amber-100 px-2 py-0.5 text-[11px] font-medium text-amber-800">
-            🟨 Missing Stripe Setup
-          </span>
         )}
       </td>
       <td className="whitespace-nowrap px-2 py-1.5">
