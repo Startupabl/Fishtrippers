@@ -15,6 +15,7 @@ import { useServerFn } from "@tanstack/react-start";
 import { getTripDateAvailability } from "@/lib/host-availability.functions";
 import { useNavigate } from "@tanstack/react-router";
 import { cn } from "@/lib/utils";
+import { isSharedTripType } from "@/lib/trips.shared";
 
 interface Props {
   open: boolean;
@@ -49,7 +50,7 @@ export function CheckDatesDialog({
     enabled: open && !!hostId && !!tripId,
   });
 
-  const isShared = data?.charter_type === "shared_tour";
+  const isShared = isSharedTripType(data?.charter_type ?? null);
   const seatsAvailable = data?.seats_available ?? 0;
 
   const blockedSet = useMemo(() => {

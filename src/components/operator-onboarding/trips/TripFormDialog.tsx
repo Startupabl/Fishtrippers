@@ -38,7 +38,13 @@ import { toast } from "sonner";
 import { X } from "lucide-react";
 import { upsertTrip, getMyCapabilities } from "@/lib/trips.functions";
 import { saveDefaultDeparture } from "@/lib/operators.functions";
-import { DURATION_OPTIONS, CHARTER_TYPE_OPTIONS } from "@/lib/trips.shared";
+import {
+  DURATION_OPTIONS,
+  getTripTypeOptions,
+  isSharedTripType,
+  isPrivateTripType,
+  type TripType,
+} from "@/lib/trips.shared";
 import {
   FISHING_ENVIRONMENTS,
   FISHING_TECHNIQUES,
@@ -60,7 +66,7 @@ export interface TripEditorState {
   max_party_size: number | null;
   template_key?: string | null;
   booking_type: "instant_book" | "request_to_book";
-  charter_type: "private_charter" | "shared_tour";
+  charter_type: TripType;
   seats_available: number | null;
   min_seats_to_sail?: number | null;
 
@@ -134,23 +140,29 @@ export function TripFormDialog({ open, onOpenChange, initial }: Props) {
   const captainCurrency = caps?.base_currency ?? "USD";
   const captainSpecies = useMemo(() => caps?.target_species ?? [], [caps]);
   const captainEnvs = useMemo(() => caps?.fishing_environments ?? [], [caps]);
+  const businessType = caps?.business_type ?? null;
+  const tripTypeOptions = useMemo(() => getTripTypeOptions(businessType), [businessType]);
+  const isGuide = businessType === "guide";
+  const defaultPrivateType: TripType = isGuide ? "private_trip" : "private_charter";
 
   useEffect(() => {
     if (open) {
       const next = initial ?? empty;
       // Inherit environments from profile when creating new (allow narrowing).
+      // For new trips, default the trip-type pair to the operator's business type.
       const seeded: TripEditorState = next.id
         ? next
         : {
             ...next,
             environments: next.environments.length > 0 ? next.environments : captainEnvs,
+            charter_type: defaultPrivateType,
           };
       setForm(seeded);
       setPriceInput(seeded.price_minor != null ? (seeded.price_minor / 100).toString() : "");
       setExtraInput(seeded.per_extra_minor != null ? (seeded.per_extra_minor / 100).toString() : "0");
       setSaveAsDefault(!hasDefault);
     }
-  }, [open, initial, hasDefault, captainEnvs]);
+  }, [open, initial, hasDefault, captainEnvs, defaultPrivateType]);
 
   const mutation = useMutation({
     mutationFn: async () => {
@@ -158,7 +170,7 @@ export function TripFormDialog({ open, onOpenChange, initial }: Props) {
       if (!form.duration_minutes) throw new Error("Pick a duration");
       if (form.price_minor == null || form.price_minor < 0)
         throw new Error("Enter a base price");
-      if (form.charter_type === "private_charter") {
+      if (isPrivateTripType(form.charter_type)) {
         if (form.max_party_size == null || form.max_party_size < 1)
           throw new Error("Enter max party size");
       }
@@ -170,14 +182,14 @@ export function TripFormDialog({ open, onOpenChange, initial }: Props) {
       if (form.environments.length > 2) throw new Error("Max 2 environments per trip");
       if (form.techniques.length === 0) throw new Error("Pick at least one fishing style");
       if (!form.departure_address.trim()) throw new Error("Pick a departure point");
-      if (form.charter_type === "shared_tour") {
+      if (isSharedTripType(form.charter_type)) {
         if (form.seats_available == null || form.seats_available < 1)
-          throw new Error("Enter total seats available");
+          throw new Error(isGuide ? "Enter total spots available" : "Enter total seats available");
         if (
           form.min_seats_to_sail != null &&
           form.min_seats_to_sail > (form.seats_available ?? 0)
         )
-          throw new Error("Minimum seats to sail can't exceed total seats available");
+          throw new Error(isGuide ? "Minimum spots required can't exceed total spots available" : "Minimum seats to sail can't exceed total seats available");
       }
 
 
@@ -192,7 +204,7 @@ export function TripFormDialog({ open, onOpenChange, initial }: Props) {
           per_extra_minor: form.per_extra_minor ?? 0,
           min_party_size: form.min_party_size ?? 1,
           max_party_size:
-            form.charter_type === "shared_tour"
+            isSharedTripType(form.charter_type)
               ? (form.seats_available ?? 1)
               : form.max_party_size!,
 
@@ -201,9 +213,9 @@ export function TripFormDialog({ open, onOpenChange, initial }: Props) {
           booking_type: form.booking_type,
           charter_type: form.charter_type,
           seats_available:
-            form.charter_type === "shared_tour" ? form.seats_available : null,
+            isSharedTripType(form.charter_type) ? form.seats_available : null,
           min_seats_to_sail:
-            form.charter_type === "shared_tour" ? form.min_seats_to_sail ?? null : null,
+            isSharedTripType(form.charter_type) ? form.min_seats_to_sail ?? null : null,
 
           target_species: form.target_species,
           environments: form.environments,
@@ -247,7 +259,7 @@ export function TripFormDialog({ open, onOpenChange, initial }: Props) {
     onError: (e: any) => toast.error(e?.message ?? "Could not save trip"),
   });
 
-  const isShared = form.charter_type === "shared_tour";
+  const isShared = isSharedTripType(form.charter_type);
   const totalPreview = isShared
     ? form.price_minor != null && form.seats_available && form.seats_available > 0
       ? form.price_minor * form.seats_available
@@ -265,13 +277,13 @@ export function TripFormDialog({ open, onOpenChange, initial }: Props) {
         </DialogHeader>
 
         <div className="space-y-6">
-          {/* 0. Booking type (charter vs shared) */}
+          {/* 0. Trip type (private vs shared, scoped to operator business type) */}
           <section className="space-y-3 rounded-xl border-2 border-primary/20 bg-primary/5 p-4">
             <h3 className="text-sm font-semibold uppercase tracking-wide text-primary">
-              Booking type
+              Trip type
             </h3>
             <div className="grid gap-3 sm:grid-cols-2">
-              {CHARTER_TYPE_OPTIONS.map((opt) => {
+              {tripTypeOptions.map((opt) => {
                 const selected = form.charter_type === opt.value;
                 return (
                   <button
@@ -281,7 +293,7 @@ export function TripFormDialog({ open, onOpenChange, initial }: Props) {
                       setForm((f) => ({
                         ...f,
                         charter_type: opt.value,
-                        ...(opt.value === "shared_tour"
+                        ...(isSharedTripType(opt.value)
                           ? {
                               per_extra_minor: 0,
                               seats_available:
@@ -479,7 +491,7 @@ export function TripFormDialog({ open, onOpenChange, initial }: Props) {
             <div className="grid grid-cols-2 gap-3">
               <div className="space-y-2">
                 <Label htmlFor="trip-price">
-                  {isShared ? "Price per Seat" : "Base price (1st angler)"}
+                  {isShared ? (isGuide ? "Price per Person" : "Price per Seat") : "Base price (1st angler)"}
                 </Label>
                 <div className="relative">
                   <span className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-sm text-muted-foreground">
@@ -506,14 +518,18 @@ export function TripFormDialog({ open, onOpenChange, initial }: Props) {
                 </div>
                 {isShared && (
                   <p className="text-xs text-muted-foreground">
-                    Enter the cost for an individual seat on this trip.
+                    {isGuide
+                      ? "Enter the cost for an individual spot on this trip."
+                      : "Enter the cost for an individual seat on this trip."}
                   </p>
                 )}
               </div>
               {isShared ? (
                 <div className="space-y-4">
                   <div className="space-y-2">
-                    <Label htmlFor="trip-seats">Total Seats Available</Label>
+                    <Label htmlFor="trip-seats">
+                      {isGuide ? "Total Spots Available" : "Total Seats Available"}
+                    </Label>
                     <Input
                       id="trip-seats"
                       type="number"
@@ -528,11 +544,15 @@ export function TripFormDialog({ open, onOpenChange, initial }: Props) {
                       placeholder="e.g. 6"
                     />
                     <p className="text-xs text-muted-foreground">
-                      Enter the maximum number of individual seats you can sell in total for this shared trip (e.g., 6).
+                      {isGuide
+                        ? "Enter the maximum number of individual spots you can sell in total for this trip (e.g., 6)."
+                        : "Enter the maximum number of individual seats you can sell in total for this shared trip (e.g., 6)."}
                     </p>
                   </div>
                   <div className="space-y-2">
-                    <Label htmlFor="trip-min-sail">Minimum Seats to Sail (optional)</Label>
+                    <Label htmlFor="trip-min-sail">
+                      {isGuide ? "Minimum Spots Required (optional)" : "Minimum Seats to Sail (optional)"}
+                    </Label>
                     <Input
                       id="trip-min-sail"
                       type="number"
@@ -563,7 +583,9 @@ export function TripFormDialog({ open, onOpenChange, initial }: Props) {
                       form.seats_available != null &&
                       form.min_seats_to_sail > form.seats_available && (
                         <p className="text-xs text-destructive">
-                          Minimum can&apos;t exceed total seats ({form.seats_available}).
+                          {isGuide
+                            ? `Minimum can't exceed total spots (${form.seats_available}).`
+                            : `Minimum can't exceed total seats (${form.seats_available}).`}
                         </p>
                       )}
                   </div>
@@ -651,7 +673,9 @@ export function TripFormDialog({ open, onOpenChange, initial }: Props) {
                         </div>
                         <div className="text-xs text-muted-foreground">
                           {isShared
-                            ? `Assumes all ${form.seats_available ?? 0} seats are sold.`
+                            ? isGuide
+                              ? `Assumes all ${form.seats_available ?? 0} spots are sold.`
+                              : `Assumes all ${form.seats_available ?? 0} seats are sold.`
                             : `Assumes the trip is booked to your max party size of ${form.max_party_size} guests.`}
                         </div>
 

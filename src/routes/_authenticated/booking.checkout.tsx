@@ -387,9 +387,16 @@ function BookingReviewPage() {
                   <Users className="mt-0.5 size-4 shrink-0 text-muted-foreground" />
                   <span>
                     {details.guests} guest{details.guests === 1 ? "" : "s"}
-                    {details.trip.charter_type === "shared_tour"
-                      ? " (shared tour)"
-                      : " (private charter)"}
+                    {" ("}
+                    {(
+                      {
+                        private_charter: "private charter",
+                        shared_tour: "shared tour",
+                        private_trip: "private trip",
+                        small_group_trip: "small group trip",
+                      } as Record<string, string>
+                    )[details.trip.charter_type] ?? "private charter"}
+                    {")"}
                   </span>
                 </li>
               </ul>

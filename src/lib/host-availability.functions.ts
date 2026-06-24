@@ -3,6 +3,7 @@ import { createClient } from "@supabase/supabase-js";
 import { z } from "zod";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 import type { Database } from "@/integrations/supabase/types";
+import { isSharedTripType, type TripType } from "@/lib/trips.shared";
 
 export interface HostAvailabilityRow {
   date: string; // YYYY-MM-DD
@@ -116,7 +117,7 @@ export const getPublicHostAvailability = createServerFn({ method: "GET" })
   });
 
 export interface TripDateAvailability {
-  charter_type: "private_charter" | "shared_tour";
+  charter_type: TripType;
   seats_available: number | null;
   max_party_size: number | null;
   bookedByDate: Record<string, number>;
@@ -155,13 +156,12 @@ export const getTripDateAvailability = createServerFn({ method: "GET" })
 
     const blockedDates = (avail ?? []).map((r: any) => r.date as string);
     const charter_type =
-      ((trip as any)?.charter_type as "private_charter" | "shared_tour" | null) ??
-      "private_charter";
+      ((trip as any)?.charter_type as TripType | null) ?? "private_charter";
     const seats_available = (trip as any)?.seats_available ?? null;
     const max_party_size = (trip as any)?.max_party_size ?? null;
 
     const bookedByDate: Record<string, number> = {};
-    if (charter_type === "shared_tour") {
+    if (isSharedTripType(charter_type)) {
       const { data: counts, error: cntErr } = await client.rpc(
         "trip_seats_booked_by_date" as any,
         { _trip_id: data.trip_id },

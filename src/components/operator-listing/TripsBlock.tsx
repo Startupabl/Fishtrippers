@@ -29,6 +29,11 @@ import {
   speciesLabel,
   fishingEnvironmentLabel,
 } from "@/lib/operators.shared";
+import {
+  isSharedTripType,
+  TRIP_TYPE_LABELS,
+  type TripType,
+} from "@/lib/trips.shared";
 import { CurrencyDisclaimer } from "./CurrencyDisclaimer";
 import { CheckDatesDialog } from "./CheckDatesDialog";
 import { RequestToBookDialog } from "./RequestToBookDialog";
@@ -49,7 +54,7 @@ interface Trip {
   techniques?: string[] | null;
   departure_address?: string | null;
   booking_type?: "instant_book" | "request_to_book" | null;
-  charter_type?: "private_charter" | "shared_tour" | null;
+  charter_type?: TripType | null;
   seats_available?: number | null;
 }
 
@@ -92,10 +97,10 @@ function TripCard({
 }) {
   const minParty = Math.max(1, trip.min_party_size ?? 1);
   const maxParty = Math.max(minParty, trip.max_party_size ?? 1);
-  const isShared = trip.charter_type === "shared_tour";
+  const isShared = isSharedTripType(trip.charter_type ?? null);
   const seatsAvailable = trip.seats_available ?? 0;
   const capacity = isShared ? (seatsAvailable || maxParty) : maxParty;
-  const charterLabel = isShared ? "Shared trip" : "Private trip";
+  const charterLabel = TRIP_TYPE_LABELS[(trip.charter_type ?? "private_charter") as TripType];
 
   const [selectedDate, setSelectedDate] = useState<string | null>(null);
   const [remainingSeats, setRemainingSeats] = useState<number | null>(null);

@@ -51,7 +51,25 @@ export const BOOKING_TYPE_OPTIONS = [
   { value: "request_to_book", label: "Request to Book", hint: "Buyers send a request; you approve before payment." },
 ] as const;
 
-export const CHARTER_TYPE_OPTIONS = [
+export type TripType =
+  | "private_charter"
+  | "shared_tour"
+  | "private_trip"
+  | "small_group_trip";
+
+export const isSharedTripType = (t: TripType | null | undefined): boolean =>
+  t === "shared_tour" || t === "small_group_trip";
+export const isPrivateTripType = (t: TripType | null | undefined): boolean =>
+  t === "private_charter" || t === "private_trip";
+
+export const TRIP_TYPE_LABELS: Record<TripType, string> = {
+  private_charter: "Private Charter",
+  shared_tour: "Shared Tour",
+  private_trip: "Private Trip",
+  small_group_trip: "Small Group Trip",
+};
+
+const CHARTER_TRIP_TYPE_OPTIONS = [
   {
     value: "private_charter",
     label: "Private Charter (Book the entire boat)",
@@ -63,6 +81,34 @@ export const CHARTER_TYPE_OPTIONS = [
     hint: "Guests book individual seats. Set a price per seat and total seats available.",
   },
 ] as const;
+
+const GUIDE_TRIP_TYPE_OPTIONS = [
+  {
+    value: "private_trip",
+    label: "Private Trip (One group at a time)",
+    hint: "You take a single group out. Set a base price plus an extra-angler fee.",
+  },
+  {
+    value: "small_group_trip",
+    label: "Small Group Trip (Per-person)",
+    hint: "Anglers book individual spots. Set a price per person and total spots available.",
+  },
+] as const;
+
+export type TripTypeOption = {
+  value: TripType;
+  label: string;
+  hint: string;
+};
+
+export function getTripTypeOptions(
+  businessType: "charter" | "guide" | null | undefined,
+): readonly TripTypeOption[] {
+  return businessType === "guide" ? GUIDE_TRIP_TYPE_OPTIONS : CHARTER_TRIP_TYPE_OPTIONS;
+}
+
+// Back-compat export — charter pair.
+export const CHARTER_TYPE_OPTIONS = CHARTER_TRIP_TYPE_OPTIONS;
 
 export const tripInputSchema = z
   .object({
@@ -78,7 +124,9 @@ export const tripInputSchema = z
     currency: z.string().default("USD"),
     template_key: z.string().nullable().optional(),
     booking_type: z.enum(["instant_book", "request_to_book"]).default("request_to_book"),
-    charter_type: z.enum(["private_charter", "shared_tour"]).default("private_charter"),
+    charter_type: z
+      .enum(["private_charter", "shared_tour", "private_trip", "small_group_trip"])
+      .default("private_charter"),
     seats_available: z.number().int().min(1).max(50).nullable().optional(),
     min_seats_to_sail: z.number().int().min(1).max(50).nullable().optional(),
     target_species: z.array(z.string()).min(1, "Pick at least one target fish").max(50),
@@ -94,19 +142,20 @@ export const tripInputSchema = z
     path: ["min_party_size"],
   })
   .refine(
-    (d) => d.charter_type !== "shared_tour" || (d.seats_available != null && d.seats_available >= 1),
-    { message: "Enter total seats available for this shared trip", path: ["seats_available"] },
+    (d) => !isSharedTripType(d.charter_type) || (d.seats_available != null && d.seats_available >= 1),
+    { message: "Enter total spots available for this shared trip", path: ["seats_available"] },
   )
   .refine(
     (d) =>
-      d.charter_type !== "shared_tour" ||
+      !isSharedTripType(d.charter_type) ||
       d.min_seats_to_sail == null ||
       (d.seats_available != null && d.min_seats_to_sail <= d.seats_available),
     {
-      message: "Minimum seats to sail can't exceed total seats available",
+      message: "Minimum spots required can't exceed total spots available",
       path: ["min_seats_to_sail"],
     },
   );
+
 
 
 export type TripInput = z.infer<typeof tripInputSchema>;
