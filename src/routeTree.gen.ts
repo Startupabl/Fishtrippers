@@ -90,6 +90,8 @@ import { Route as AuthenticatedDashboardMessagesIndexRouteImport } from './route
 import { Route as AdminAdminUsersIndexRouteImport } from './routes/_admin/admin.users.index'
 import { Route as AdminAdminSearchSeoIndexRouteImport } from './routes/_admin/admin.search-seo.index'
 import { Route as LovableEmailQueueProcessRouteImport } from './routes/lovable/email/queue/process'
+import { Route as LovableEmailAuthWebhookRouteImport } from './routes/lovable/email/auth/webhook'
+import { Route as LovableEmailAuthPreviewRouteImport } from './routes/lovable/email/auth/preview'
 import { Route as ApiPublicStripeWebhookRouteImport } from './routes/api/public/stripe/webhook'
 import { Route as ApiPublicHooksCleanupOldMessagesRouteImport } from './routes/api/public/hooks/cleanup-old-messages'
 import { Route as AuthenticatedDashboardMessagesThreadIdRouteImport } from './routes/_authenticated/dashboard.messages.$threadId'
@@ -541,6 +543,16 @@ const LovableEmailQueueProcessRoute =
     path: '/lovable/email/queue/process',
     getParentRoute: () => rootRouteImport,
   } as any)
+const LovableEmailAuthWebhookRoute = LovableEmailAuthWebhookRouteImport.update({
+  id: '/lovable/email/auth/webhook',
+  path: '/lovable/email/auth/webhook',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const LovableEmailAuthPreviewRoute = LovableEmailAuthPreviewRouteImport.update({
+  id: '/lovable/email/auth/preview',
+  path: '/lovable/email/auth/preview',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const ApiPublicStripeWebhookRoute = ApiPublicStripeWebhookRouteImport.update({
   id: '/api/public/stripe/webhook',
   path: '/api/public/stripe/webhook',
@@ -750,6 +762,8 @@ export interface FileRoutesByFullPath {
   '/dashboard/messages/$threadId': typeof AuthenticatedDashboardMessagesThreadIdRoute
   '/api/public/hooks/cleanup-old-messages': typeof ApiPublicHooksCleanupOldMessagesRoute
   '/api/public/stripe/webhook': typeof ApiPublicStripeWebhookRoute
+  '/lovable/email/auth/preview': typeof LovableEmailAuthPreviewRoute
+  '/lovable/email/auth/webhook': typeof LovableEmailAuthWebhookRoute
   '/lovable/email/queue/process': typeof LovableEmailQueueProcessRoute
   '/admin/search-seo/': typeof AdminAdminSearchSeoIndexRoute
   '/admin/users/': typeof AdminAdminUsersIndexRoute
@@ -848,6 +862,8 @@ export interface FileRoutesByTo {
   '/dashboard/messages/$threadId': typeof AuthenticatedDashboardMessagesThreadIdRoute
   '/api/public/hooks/cleanup-old-messages': typeof ApiPublicHooksCleanupOldMessagesRoute
   '/api/public/stripe/webhook': typeof ApiPublicStripeWebhookRoute
+  '/lovable/email/auth/preview': typeof LovableEmailAuthPreviewRoute
+  '/lovable/email/auth/webhook': typeof LovableEmailAuthWebhookRoute
   '/lovable/email/queue/process': typeof LovableEmailQueueProcessRoute
   '/admin/search-seo': typeof AdminAdminSearchSeoIndexRoute
   '/admin/users': typeof AdminAdminUsersIndexRoute
@@ -952,6 +968,8 @@ export interface FileRoutesById {
   '/_authenticated/dashboard/messages/$threadId': typeof AuthenticatedDashboardMessagesThreadIdRoute
   '/api/public/hooks/cleanup-old-messages': typeof ApiPublicHooksCleanupOldMessagesRoute
   '/api/public/stripe/webhook': typeof ApiPublicStripeWebhookRoute
+  '/lovable/email/auth/preview': typeof LovableEmailAuthPreviewRoute
+  '/lovable/email/auth/webhook': typeof LovableEmailAuthWebhookRoute
   '/lovable/email/queue/process': typeof LovableEmailQueueProcessRoute
   '/_admin/admin/search-seo/': typeof AdminAdminSearchSeoIndexRoute
   '/_admin/admin/users/': typeof AdminAdminUsersIndexRoute
@@ -1055,6 +1073,8 @@ export interface FileRouteTypes {
     | '/dashboard/messages/$threadId'
     | '/api/public/hooks/cleanup-old-messages'
     | '/api/public/stripe/webhook'
+    | '/lovable/email/auth/preview'
+    | '/lovable/email/auth/webhook'
     | '/lovable/email/queue/process'
     | '/admin/search-seo/'
     | '/admin/users/'
@@ -1153,6 +1173,8 @@ export interface FileRouteTypes {
     | '/dashboard/messages/$threadId'
     | '/api/public/hooks/cleanup-old-messages'
     | '/api/public/stripe/webhook'
+    | '/lovable/email/auth/preview'
+    | '/lovable/email/auth/webhook'
     | '/lovable/email/queue/process'
     | '/admin/search-seo'
     | '/admin/users'
@@ -1256,6 +1278,8 @@ export interface FileRouteTypes {
     | '/_authenticated/dashboard/messages/$threadId'
     | '/api/public/hooks/cleanup-old-messages'
     | '/api/public/stripe/webhook'
+    | '/lovable/email/auth/preview'
+    | '/lovable/email/auth/webhook'
     | '/lovable/email/queue/process'
     | '/_admin/admin/search-seo/'
     | '/_admin/admin/users/'
@@ -1308,6 +1332,8 @@ export interface RootRouteChildren {
   ChartersLocationBusinessSlugRoute: typeof ChartersLocationBusinessSlugRoute
   ApiPublicHooksCleanupOldMessagesRoute: typeof ApiPublicHooksCleanupOldMessagesRoute
   ApiPublicStripeWebhookRoute: typeof ApiPublicStripeWebhookRoute
+  LovableEmailAuthPreviewRoute: typeof LovableEmailAuthPreviewRoute
+  LovableEmailAuthWebhookRoute: typeof LovableEmailAuthWebhookRoute
   LovableEmailQueueProcessRoute: typeof LovableEmailQueueProcessRoute
 }
 
@@ -1880,6 +1906,20 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof LovableEmailQueueProcessRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/lovable/email/auth/webhook': {
+      id: '/lovable/email/auth/webhook'
+      path: '/lovable/email/auth/webhook'
+      fullPath: '/lovable/email/auth/webhook'
+      preLoaderRoute: typeof LovableEmailAuthWebhookRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/lovable/email/auth/preview': {
+      id: '/lovable/email/auth/preview'
+      path: '/lovable/email/auth/preview'
+      fullPath: '/lovable/email/auth/preview'
+      preLoaderRoute: typeof LovableEmailAuthPreviewRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/api/public/stripe/webhook': {
       id: '/api/public/stripe/webhook'
       path: '/api/public/stripe/webhook'
@@ -2331,6 +2371,8 @@ const rootRouteChildren: RootRouteChildren = {
   ChartersLocationBusinessSlugRoute: ChartersLocationBusinessSlugRoute,
   ApiPublicHooksCleanupOldMessagesRoute: ApiPublicHooksCleanupOldMessagesRoute,
   ApiPublicStripeWebhookRoute: ApiPublicStripeWebhookRoute,
+  LovableEmailAuthPreviewRoute: LovableEmailAuthPreviewRoute,
+  LovableEmailAuthWebhookRoute: LovableEmailAuthWebhookRoute,
   LovableEmailQueueProcessRoute: LovableEmailQueueProcessRoute,
 }
 export const routeTree = rootRouteImport
