@@ -1,71 +1,54 @@
 ## Goal
-Replace the current 2-tab Queue/Completed view on the Cancellation Disputes admin tab with a 4-step payout pipeline, drive the stage shift automatically off a 60-day clock, and add a manual-payout confirmation flow.
 
-## 1. Data model changes (one migration)
+Make every email the platform sends — both app/transactional **and** Supabase Auth emails (signup confirmation, password reset, magic link, email change, reauthentication, team invite) — come from `hello@fishtrippers.com` via Resend.
 
-`cancellation_disputes`:
-- Extend `cancellation_dispute_status_t` enum with `paid_out`.
-- Add `paid_out_at timestamptz` (set when admin confirms payout).
-- Use the existing `resolved_at` (already set on approve/deny) as the start of the 60-day hold for approved disputes.
+## Current state
 
-`profiles` (angler payout preferences — currently missing):
-- Add `payout_method text` (`ach` | `wallet` | `address`, nullable).
-- Add `payout_details jsonb` (free-form: ACH routing/account, wallet handle, etc.). Address fallback uses existing `address_line1/2`, `city`, `state_province`, `postal_code`, `country`.
-- A small "Preferred Payout Method" form in the angler profile is out of scope for this change — the admin UI will display whatever exists, plus the mailing address fallback. (Flag if you want me to add the angler-side form too.)
+- App/transactional emails (booking confirmation to angler + captain, new chat message, custom offer, listing approval/rejection, payout sent, urgent message) already go through `sendEmail()` in `src/lib/email-sender.server.ts` → Resend → `FishTrippers <hello@fishtrippers.com>`. No change needed.
+- Auth emails are still sent by Supabase Auth's built-in sender (generic Supabase domain). The `welcome_user`, `email_verification`, `password_reset`, and `magic_link` templates exist in the admin email-templates manager but nothing wires them into the Supabase auth flow.
 
-No new tables. RLS unchanged (admins already read all disputes/profiles).
+## What to build
 
-## 2. Stage derivation
+### 1. Supabase Send Email Hook (edge function)
 
-Stages are derived in the list query — no scheduled job required, so the shift happens "the exact minute" a record crosses 60 days the next time anyone loads the page:
+Create `supabase/functions/auth-email-hook/index.ts`. Supabase Auth posts every outbound auth email to this hook; the hook renders the right branded template and sends via Resend.
 
-```text
-active   = status = 'pending'
-holding  = status = 'approved' AND resolved_at > now() - interval '60 days' AND paid_out_at IS NULL
-ready    = status = 'approved' AND resolved_at <= now() - interval '60 days' AND paid_out_at IS NULL
-completed = status = 'paid_out' OR status = 'denied'
-```
+- Verify the request signature using a hook secret (`SEND_EMAIL_HOOK_SECRET`, generated and stored automatically).
+- Read the payload: `user.email`, `email_data.email_action_type` (`signup` | `recovery` | `magiclink` | `email_change` | `email_change_current` | `invite` | `reauthentication`), `token_hash`, `redirect_to`, `site_url`, plus user metadata for first name.
+- Build the confirmation URL using `site_url` + `/auth/verify?token_hash=...&type=...&redirect_to=...` (standard Supabase verify endpoint).
+- Map each `email_action_type` to one of the existing admin-editable templates (loaded via `email-templates.server.ts`, with the seeded defaults as fallback):
+  - `signup` → `email_verification`
+  - `recovery` → `password_reset`
+  - `magiclink` → `magic_link`
+  - `invite` → reuse `email_verification` copy with an "invited" subject override
+  - `email_change` / `email_change_current` → reuse `email_verification` copy with subject "Confirm your new email"
+  - `reauthentication` → short-circuit template that just contains the OTP token
+- Call `sendEmail()` from `email-sender.server.ts` — already pinned to `FishTrippers <hello@fishtrippers.com>`.
+- Update template variables so the existing `{{verification_url}}`, `{{reset_url}}`, `{{magic_link}}`, `{{first_name}}` tokens populate correctly. Replace any `"Lumin"` strings in seeded defaults with `"FishTrippers"` so branding is consistent (admin can override later).
 
-`listAdminCancellationDisputes` gets a `scope: 'active' | 'holding' | 'ready' | 'completed'` param and applies the matching filter. A second tiny server fn `getCancellationDisputeStageCounts` returns all four counts in one round trip for the tab badges.
+### 2. Wire the hook into Supabase Auth
 
-Optional belt-and-suspenders: a pg_cron job that just touches `updated_at` nightly so realtime subscribers refresh — not required for correctness, skip unless you ask for it.
+- Register the function in `supabase/config.toml` with `verify_jwt = false` (Supabase calls it unauthenticated and signs the body instead).
+- Generate `SEND_EMAIL_HOOK_SECRET` and set it as a project secret so the hook can verify Supabase's HMAC signature.
+- Enable the Send Email Hook in Supabase Auth pointing at this function URL.
 
-## 3. Server functions
+### 3. Brand-consistency cleanup
 
-- `listAdminCancellationDisputes({ scope })` — extend existing fn; include `resolved_at`, `paid_out_at`, and (for `ready`/`completed`) the angler's `payout_method`, `payout_details`, and address columns from `profiles`.
-- `getCancellationDisputeStageCounts()` — returns `{ active, holding, ready, completed }`.
-- `markCancellationDisputePaidOut({ disputeId })` — admin-only, sets `status='paid_out'`, `paid_out_at=now()`, appends to `admin_notes` ("Manual payout confirmed by <admin> at <ts>"). Invalidates the queue queries.
+- Update the four auth-related rows in `email-templates.defaults.ts` (`welcome_user`, `email_verification`, `password_reset`, `magic_link`) to replace "Lumin" copy with "FishTrippers" + the existing brand voice, so any future "Reset to default" click in the admin gives the right text. (No DB migration — the defaults file is the source of truth, admins re-seed on demand.)
 
-Admin overview count (`getAdminOverview.pendingCancellationDisputes`) keeps counting only `status='pending'` so the dashboard badge keeps its current meaning. The "Ready for Payout" needs-action signal lives on the Queue page itself (see UI).
+### 4. Verification
 
-## 4. UI (`src/routes/_admin/admin.queue.tsx`)
-
-Replace the current `<ScopeTabs queue|completed>` inside the Cancellation Disputes section with a 4-tab strip:
-
-```text
-[ Active Disputes (n) ] [ Holding Pool (n) ] [ Ready for Payout (n) ⬤ ] [ Completed (n) ]
-```
-
-- Amber dot + `Needs Action` badge on "Ready for Payout" whenever its count > 0. Same amber badge mirrored on the section header card so it's visible before opening the tab.
-- Each tab is a `Table` with stage-appropriate columns:
-  - **Active Disputes**: Order #, Listing, Captain, Angler, Booked, Cancelled, Trip Policy, Captain message, Angler reason, Approve / Deny.
-  - **Holding Pool**: Order #, Listing, Captain, Angler, Approved on, **Days remaining** (live `60 - daysSince(resolved_at)`, red when ≤ 7), Releases on, View.
-  - **Ready for Payout**: Order #, Listing, Captain, Angler, Approved on, Payout due since, **Preferred Payout Details** (method label + copy-buttons for each field; falls back to mailing address block), **Confirm Manual Payment Sent** button → calls `markCancellationDisputePaidOut`.
-  - **Completed**: Order #, Listing, Captain, Angler, Final status (Paid out / Denied), Resolved on, Paid out on, View.
-
-Countdown is computed client-side from `resolved_at` (re-renders on a 60s timer); no extra server round-trip.
-
-`Confirm Manual Payment Sent` opens a small confirm dialog ("This logs payout completion and archives the dispute. Continue?") to avoid misclicks, then mutates and invalidates `["admin","queue","cancellations",*]` and the stage-counts query so the row jumps to Completed immediately.
-
-## 5. Files touched
-
-- `supabase/migrations/<new>.sql` — enum value, `paid_out_at`, profile payout columns.
-- `src/lib/cancellation-disputes.functions.ts` — `scope` param, stage counts fn, `markCancellationDisputePaidOut`, payout-detail fields in select.
-- `src/routes/_admin/admin.queue.tsx` — replace the cancellations section's tabs/columns/actions; add amber needs-action indicator on section header.
-- `src/integrations/supabase/types.ts` — regenerated after migration.
+- Trigger a test signup → expect a "Verify your email" email from `hello@fishtrippers.com`.
+- Trigger a password reset on `/auth` → expect the reset email from the same sender.
+- Trigger a magic-link sign-in → same.
+- Confirm an existing booking confirmation still arrives (regression check on the transactional path).
 
 ## Out of scope
 
-- Angler-side UI to enter payout preferences (flagged above).
-- Automatic ACH/Stripe transfer — this flow is manual ("Confirm Manual Payment Sent").
-- Changing the structure of the other three queue tabs (listings / inquiries / flags).
+- No SMTP swap inside Supabase (we use the hook, which keeps templates editable in the admin UI).
+- No new template kinds — we reuse what already exists in `email_templates`.
+- No change to the transactional `sendEmail` flow.
+
+## Prerequisite confirmed by user
+
+`fishtrippers.com` is already verified as a Resend sending domain, so `hello@fishtrippers.com` can ship today.
