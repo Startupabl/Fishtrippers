@@ -9,6 +9,7 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
+import { Route as UnsubscribeRouteImport } from './routes/unsubscribe'
 import { Route as TrustAndSafetyRouteImport } from './routes/trust-and-safety'
 import { Route as TermsRouteImport } from './routes/terms'
 import { Route as SitemapDotxmlRouteImport } from './routes/sitemap[.]xml'
@@ -116,6 +117,11 @@ import { Route as AuthenticatedDashboardListingsJourneyIdShowcaseRouteImport } f
 import { Route as AuthenticatedDashboardListingsJourneyIdCouponsRouteImport } from './routes/_authenticated/dashboard.listings.$journeyId.coupons'
 import { Route as AdminAdminSettingsPagesPageIdRouteImport } from './routes/_admin/admin.settings.pages.$pageId'
 
+const UnsubscribeRoute = UnsubscribeRouteImport.update({
+  id: '/unsubscribe',
+  path: '/unsubscribe',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const TrustAndSafetyRoute = TrustAndSafetyRouteImport.update({
   id: '/trust-and-safety',
   path: '/trust-and-safety',
@@ -717,6 +723,7 @@ export interface FileRoutesByFullPath {
   '/sitemap.xml': typeof SitemapDotxmlRoute
   '/terms': typeof TermsRoute
   '/trust-and-safety': typeof TrustAndSafetyRoute
+  '/unsubscribe': typeof UnsubscribeRoute
   '/admin': typeof AdminAdminRouteWithChildren
   '/booking-review': typeof AuthenticatedBookingReviewRoute
   '/dashboard': typeof AuthenticatedDashboardRouteWithChildren
@@ -823,6 +830,7 @@ export interface FileRoutesByTo {
   '/sitemap.xml': typeof SitemapDotxmlRoute
   '/terms': typeof TermsRoute
   '/trust-and-safety': typeof TrustAndSafetyRoute
+  '/unsubscribe': typeof UnsubscribeRoute
   '/booking-review': typeof AuthenticatedBookingReviewRoute
   '/dashboard': typeof AuthenticatedDashboardRouteWithChildren
   '/my-learning': typeof AuthenticatedMyLearningRoute
@@ -929,6 +937,7 @@ export interface FileRoutesById {
   '/sitemap.xml': typeof SitemapDotxmlRoute
   '/terms': typeof TermsRoute
   '/trust-and-safety': typeof TrustAndSafetyRoute
+  '/unsubscribe': typeof UnsubscribeRoute
   '/_admin/admin': typeof AdminAdminRouteWithChildren
   '/_authenticated/booking-review': typeof AuthenticatedBookingReviewRoute
   '/_authenticated/dashboard': typeof AuthenticatedDashboardRouteWithChildren
@@ -1037,6 +1046,7 @@ export interface FileRouteTypes {
     | '/sitemap.xml'
     | '/terms'
     | '/trust-and-safety'
+    | '/unsubscribe'
     | '/admin'
     | '/booking-review'
     | '/dashboard'
@@ -1143,6 +1153,7 @@ export interface FileRouteTypes {
     | '/sitemap.xml'
     | '/terms'
     | '/trust-and-safety'
+    | '/unsubscribe'
     | '/booking-review'
     | '/dashboard'
     | '/my-learning'
@@ -1248,6 +1259,7 @@ export interface FileRouteTypes {
     | '/sitemap.xml'
     | '/terms'
     | '/trust-and-safety'
+    | '/unsubscribe'
     | '/_admin/admin'
     | '/_authenticated/booking-review'
     | '/_authenticated/dashboard'
@@ -1357,6 +1369,7 @@ export interface RootRouteChildren {
   SitemapDotxmlRoute: typeof SitemapDotxmlRoute
   TermsRoute: typeof TermsRoute
   TrustAndSafetyRoute: typeof TrustAndSafetyRoute
+  UnsubscribeRoute: typeof UnsubscribeRoute
   CreateListingNewRoute: typeof CreateListingNewRoute
   EmailUnsubscribeRoute: typeof EmailUnsubscribeRoute
   MMentorSlugRoute: typeof MMentorSlugRoute
@@ -1380,6 +1393,13 @@ export interface RootRouteChildren {
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
+    '/unsubscribe': {
+      id: '/unsubscribe'
+      path: '/unsubscribe'
+      fullPath: '/unsubscribe'
+      preLoaderRoute: typeof UnsubscribeRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/trust-and-safety': {
       id: '/trust-and-safety'
       path: '/trust-and-safety'
@@ -2419,6 +2439,7 @@ const rootRouteChildren: RootRouteChildren = {
   SitemapDotxmlRoute: SitemapDotxmlRoute,
   TermsRoute: TermsRoute,
   TrustAndSafetyRoute: TrustAndSafetyRoute,
+  UnsubscribeRoute: UnsubscribeRoute,
   CreateListingNewRoute: CreateListingNewRoute,
   EmailUnsubscribeRoute: EmailUnsubscribeRoute,
   MMentorSlugRoute: MMentorSlugRoute,
