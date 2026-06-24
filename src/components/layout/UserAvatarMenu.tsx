@@ -104,7 +104,7 @@ export function UserAvatarMenu() {
           </Avatar>
           <div className="min-w-0 flex-1">
             <p className="truncate text-sm font-bold text-foreground">
-              {user.displayName?.trim() ? user.displayName : "AI Made Refreshing™"}
+              {user.displayName?.trim() ? user.displayName : "FishTrippers"}
             </p>
             <p className="truncate text-xs text-muted-foreground">{user.email}</p>
           </div>
