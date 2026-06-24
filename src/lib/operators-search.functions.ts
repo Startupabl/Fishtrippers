@@ -2,7 +2,7 @@ import { createServerFn } from "@tanstack/react-start";
 import { createClient } from "@supabase/supabase-js";
 import type { Database } from "@/integrations/supabase/types";
 import { z } from "zod";
-import { parseCityStateCountry } from "@/components/operator-onboarding/trips/DeparturePointPicker";
+import { parseCityStateCountry } from "@/lib/address.shared";
 
 
 export type OperatorCardDTO = {

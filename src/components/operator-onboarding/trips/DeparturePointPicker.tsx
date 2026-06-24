@@ -5,15 +5,8 @@ import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { useServerFn } from "@tanstack/react-start";
 import { resolvePlace } from "@/lib/trips.functions";
+import { parseCityStateCountry } from "@/lib/address.shared";
 
-// Best-effort fallback when Google's structured addressComponents don't
-// surface a locality (e.g. rural area, custom POI). Parses the last 3-4
-// comma-separated segments of a formatted address:
-//   "1850 Ocean Front St, San Diego, CA 92107, USA"
-//   → { city: "San Diego", state: "CA", country: "USA" }
-export function parseCityStateCountry(
-  address: string | null | undefined,
-): { city: string | null; state: string | null; country: string | null } {
   if (!address) return { city: null, state: null, country: null };
   const parts = address.split(",").map((s) => s.trim()).filter(Boolean);
   if (parts.length < 2) return { city: null, state: null, country: null };
