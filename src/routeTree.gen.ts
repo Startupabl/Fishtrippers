@@ -76,7 +76,6 @@ import { Route as AuthenticatedDashboardEarningsBookingsRouteImport } from './ro
 import { Route as AuthenticatedDashboardEarningsRouteImport } from './routes/_authenticated/dashboard.earnings'
 import { Route as AuthenticatedDashboardBookingsRouteImport } from './routes/_authenticated/dashboard.bookings'
 import { Route as AuthenticatedDashboardAideRouteImport } from './routes/_authenticated/dashboard.aide'
-import { Route as AuthenticatedClassroomOrderIdRouteImport } from './routes/_authenticated/classroom.$orderId'
 import { Route as AuthenticatedCertificateOrderIdRouteImport } from './routes/_authenticated/certificate.$orderId'
 import { Route as AuthenticatedBookingCheckoutRouteImport } from './routes/_authenticated/booking.checkout'
 import { Route as AdminAdminTransactionsRouteImport } from './routes/_admin/admin.transactions'
@@ -467,12 +466,6 @@ const AuthenticatedDashboardAideRoute =
     path: '/aide',
     getParentRoute: () => AuthenticatedDashboardRoute,
   } as any)
-const AuthenticatedClassroomOrderIdRoute =
-  AuthenticatedClassroomOrderIdRouteImport.update({
-    id: '/classroom/$orderId',
-    path: '/classroom/$orderId',
-    getParentRoute: () => AuthenticatedRoute,
-  } as any)
 const AuthenticatedCertificateOrderIdRoute =
   AuthenticatedCertificateOrderIdRouteImport.update({
     id: '/certificate/$orderId',
@@ -722,7 +715,6 @@ export interface FileRoutesByFullPath {
   '/admin/transactions': typeof AdminAdminTransactionsRoute
   '/booking/checkout': typeof AuthenticatedBookingCheckoutRoute
   '/certificate/$orderId': typeof AuthenticatedCertificateOrderIdRoute
-  '/classroom/$orderId': typeof AuthenticatedClassroomOrderIdRoute
   '/dashboard/aide': typeof AuthenticatedDashboardAideRouteWithChildren
   '/dashboard/bookings': typeof AuthenticatedDashboardBookingsRoute
   '/dashboard/earnings': typeof AuthenticatedDashboardEarningsRoute
@@ -823,7 +815,6 @@ export interface FileRoutesByTo {
   '/admin/transactions': typeof AdminAdminTransactionsRoute
   '/booking/checkout': typeof AuthenticatedBookingCheckoutRoute
   '/certificate/$orderId': typeof AuthenticatedCertificateOrderIdRoute
-  '/classroom/$orderId': typeof AuthenticatedClassroomOrderIdRoute
   '/dashboard/aide': typeof AuthenticatedDashboardAideRouteWithChildren
   '/dashboard/bookings': typeof AuthenticatedDashboardBookingsRoute
   '/dashboard/earnings': typeof AuthenticatedDashboardEarningsRoute
@@ -928,7 +919,6 @@ export interface FileRoutesById {
   '/_admin/admin/transactions': typeof AdminAdminTransactionsRoute
   '/_authenticated/booking/checkout': typeof AuthenticatedBookingCheckoutRoute
   '/_authenticated/certificate/$orderId': typeof AuthenticatedCertificateOrderIdRoute
-  '/_authenticated/classroom/$orderId': typeof AuthenticatedClassroomOrderIdRoute
   '/_authenticated/dashboard/aide': typeof AuthenticatedDashboardAideRouteWithChildren
   '/_authenticated/dashboard/bookings': typeof AuthenticatedDashboardBookingsRoute
   '/_authenticated/dashboard/earnings': typeof AuthenticatedDashboardEarningsRoute
@@ -1033,7 +1023,6 @@ export interface FileRouteTypes {
     | '/admin/transactions'
     | '/booking/checkout'
     | '/certificate/$orderId'
-    | '/classroom/$orderId'
     | '/dashboard/aide'
     | '/dashboard/bookings'
     | '/dashboard/earnings'
@@ -1134,7 +1123,6 @@ export interface FileRouteTypes {
     | '/admin/transactions'
     | '/booking/checkout'
     | '/certificate/$orderId'
-    | '/classroom/$orderId'
     | '/dashboard/aide'
     | '/dashboard/bookings'
     | '/dashboard/earnings'
@@ -1238,7 +1226,6 @@ export interface FileRouteTypes {
     | '/_admin/admin/transactions'
     | '/_authenticated/booking/checkout'
     | '/_authenticated/certificate/$orderId'
-    | '/_authenticated/classroom/$orderId'
     | '/_authenticated/dashboard/aide'
     | '/_authenticated/dashboard/bookings'
     | '/_authenticated/dashboard/earnings'
@@ -1808,13 +1795,6 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedDashboardAideRouteImport
       parentRoute: typeof AuthenticatedDashboardRoute
     }
-    '/_authenticated/classroom/$orderId': {
-      id: '/_authenticated/classroom/$orderId'
-      path: '/classroom/$orderId'
-      fullPath: '/classroom/$orderId'
-      preLoaderRoute: typeof AuthenticatedClassroomOrderIdRouteImport
-      parentRoute: typeof AuthenticatedRoute
-    }
     '/_authenticated/certificate/$orderId': {
       id: '/_authenticated/certificate/$orderId'
       path: '/certificate/$orderId'
@@ -2273,7 +2253,6 @@ interface AuthenticatedRouteChildren {
   AuthenticatedSettingsRoute: typeof AuthenticatedSettingsRouteWithChildren
   AuthenticatedBookingCheckoutRoute: typeof AuthenticatedBookingCheckoutRoute
   AuthenticatedCertificateOrderIdRoute: typeof AuthenticatedCertificateOrderIdRoute
-  AuthenticatedClassroomOrderIdRoute: typeof AuthenticatedClassroomOrderIdRoute
   AuthenticatedOperatorPreviewRoute: typeof AuthenticatedOperatorPreviewRoute
 }
 
@@ -2284,7 +2263,6 @@ const AuthenticatedRouteChildren: AuthenticatedRouteChildren = {
   AuthenticatedSettingsRoute: AuthenticatedSettingsRouteWithChildren,
   AuthenticatedBookingCheckoutRoute: AuthenticatedBookingCheckoutRoute,
   AuthenticatedCertificateOrderIdRoute: AuthenticatedCertificateOrderIdRoute,
-  AuthenticatedClassroomOrderIdRoute: AuthenticatedClassroomOrderIdRoute,
   AuthenticatedOperatorPreviewRoute: AuthenticatedOperatorPreviewRoute,
 }
 
@@ -2378,3 +2356,13 @@ const rootRouteChildren: RootRouteChildren = {
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
+
+import type { getRouter } from './router.tsx'
+import type { startInstance } from './start.ts'
+declare module '@tanstack/react-start' {
+  interface Register {
+    ssr: true
+    router: Awaited<ReturnType<typeof getRouter>>
+    config: Awaited<ReturnType<typeof startInstance.getOptions>>
+  }
+}

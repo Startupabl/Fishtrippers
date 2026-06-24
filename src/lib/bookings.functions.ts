@@ -348,8 +348,7 @@ export const listPublicUpcomingCohorts = createServerFn({ method: "POST" })
 
 
 // Look up the schedule for the class session linked to a given booking
-// (or order, via its booking_id). Live-classroom join info now comes from
-// `getDailyJoinInfo` in `src/lib/classroom.functions.ts`.
+// (or order, via its booking_id).
 export interface ClassSessionInfo {
   class_session_id: string;
   listing_title: string;
