@@ -1,5 +1,5 @@
 import { createFileRoute, Link, Outlet, useRouterState } from "@tanstack/react-router";
-import { Tags, Mail, ChevronRight, FileText } from "lucide-react";
+import { Tags, ChevronRight, FileText } from "lucide-react";
 import { Card } from "@/components/ui/card";
 
 const GREEN = "#0A2540";
@@ -20,12 +20,6 @@ const CARDS = [
     title: "Page Settings",
     desc: "Manage informational pages and the dynamic footer links.",
     icon: FileText,
-  },
-  {
-    to: "/admin/settings/email-templates",
-    title: "Platform Communications",
-    desc: "Manage automated emails and short header bell alert copy.",
-    icon: Mail,
   },
 ] as const;
 
