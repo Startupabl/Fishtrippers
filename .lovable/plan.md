@@ -1,14 +1,38 @@
-Fix the operator card capsule overflow so the "Verified" segment no longer breaks out of the pill.
+## Update vessel capsule with info icon + guest capacity
 
-What we will do:
-- Update `src/components/listings/OperatorCard.tsx`.
-- Increase the floating pill width from `w-[90%]` to `w-[95%]` so it uses more of the card width.
-- Replace `whitespace-nowrap` on each segment with `truncate` (or `line-clamp-1`) so long vessel text like "32 ft Center Console" clips with ellipsis instead of forcing the pill wider.
-- Keep the existing split-line separator between the left segment and the Verified segment.
-- Leave guides unchanged (they use the same capsule layout, so they will also benefit from the extra width and truncation).
+**File:** `src/components/listings/OperatorCard.tsx`
 
-Verification:
-- Check the card preview for a charter with a long boat name to confirm the pill stays fully inside the card and the text ends with "...".
-- Check a guide card to confirm no regression.
+### Changes
 
-No backend or search changes are needed; this is purely a presentation fix in the card component.
+1. **Add an `Info` icon (lucide-react)** to the left of the "32 ft Boat" label inside the vessel segment, sized `size-3.5` with `text-muted-foreground` so it reads as a subtle "more info" affordance without competing visually with the bold label.
+
+2. **Upgrade from the native `title` attribute to the shadcn `Tooltip`** component (already present at `src/components/ui/tooltip.tsx`). The native `title` can't render two styled lines and only appears after a long delay, so users miss it. The shadcn tooltip:
+   - Appears quickly on hover/focus (also keyboard-accessible)
+   - Renders two lines:
+     - **Line 1 (bold):** full vessel label, e.g. `32 ft Center Console`
+     - **Line 2 (muted, smaller):** `Up to {vessel_capacity} Anglers` — only rendered when `vessel_capacity` is present; singular handled (`1 Angler`)
+   - Falls back gracefully: if no boat type, just shows length; if no capacity, only line 1 shows
+
+3. **Wrap the listings page (or app root) with `TooltipProvider`** if not already wrapped, so tooltips work. I'll check `__root.tsx` first and add it there once globally if missing, rather than per-card.
+
+### Data
+`vessel_capacity` is already returned by `OperatorCardDTO` (sourced from `vessels.max_passenger_capacity`) — no backend or search changes required.
+
+### Icon choice
+`Info` (lucide) — the standard "tap/hover for more" affordance. Alternatives considered: `HelpCircle` (feels like "I'm confused"), `ChevronDown` (implies expand). `Info` is the clearest fit.
+
+### Visual sketch
+
+```text
+┌─────────────────────────────────┐
+│  ⓘ 32 ft Boat  │  ★ 4.8 (12)   │   ← capsule
+└─────────────────────────────────┘
+        ▲ hover
+   ┌────────────────────────┐
+   │ 32 ft Center Console   │
+   │ Up to 6 Anglers        │
+   └────────────────────────┘
+```
+
+### Verification
+Inspect a charter card: confirm the `ⓘ` icon shows left of "32 ft Boat", hover reveals the two-line tooltip with the full type and "Up to N Anglers", and a card without capacity shows only the type line. Guide cards unaffected.

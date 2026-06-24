@@ -1,6 +1,7 @@
 import { Link } from "@tanstack/react-router";
-import { ShieldCheck, MapPin, Zap, Star, Ship, Footprints, Sparkles } from "lucide-react";
+import { ShieldCheck, MapPin, Zap, Star, Ship, Footprints, Sparkles, Info } from "lucide-react";
 import type { OperatorCardDTO } from "@/lib/operators-search.functions";
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 
 export function OperatorCard({ operator }: { operator: OperatorCardDTO }) {
   const businessSlug = operator.slug ?? operator.id;
@@ -25,10 +26,30 @@ export function OperatorCard({ operator }: { operator: OperatorCardDTO }) {
       operator.vessel_length_ft != null ? `${operator.vessel_length_ft} ft` : null;
     const fullVesselLabel = [lengthLabel, operator.boat_type_name].filter(Boolean).join(" ");
     const compactVesselLabel = lengthLabel ? `${lengthLabel} Boat` : "Boat";
+    const capacity = operator.vessel_capacity;
     if (operator.boat_type_name || operator.vessel_length_ft != null) {
       segments.push({
         key: "vessel",
-        content: <span title={fullVesselLabel}>{compactVesselLabel}</span>,
+        content: (
+          <TooltipProvider delayDuration={150}>
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <span className="flex items-center gap-1.5 min-w-0">
+                  <Info className="size-3.5 shrink-0 text-muted-foreground" aria-hidden />
+                  <span className="truncate">{compactVesselLabel}</span>
+                </span>
+              </TooltipTrigger>
+              <TooltipContent side="top" className="text-center">
+                <div className="font-semibold">{fullVesselLabel}</div>
+                {capacity != null && (
+                  <div className="text-xs text-muted-foreground">
+                    Up to {capacity} Angler{capacity === 1 ? "" : "s"}
+                  </div>
+                )}
+              </TooltipContent>
+            </Tooltip>
+          </TooltipProvider>
+        ),
       });
     }
   }
