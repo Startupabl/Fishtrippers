@@ -3,6 +3,7 @@ import { createClient } from "@supabase/supabase-js";
 import type { Database } from "@/integrations/supabase/types";
 import { z } from "zod";
 import { parseCityStateCountry } from "@/lib/address.shared";
+import { isSharedTripType } from "@/lib/trips.shared";
 
 
 export type OperatorCardDTO = {
@@ -98,7 +99,7 @@ export const searchOperatorsServer = createServerFn({ method: "POST" })
         default_departure_city, default_departure_state, default_departure_country,
         cover_image_url, booking_type, fishing_environments, featured, priority_order, created_at,
         vessels ( length_ft, max_passenger_capacity, boat_type_id, boat_types ( icon_url, subcategory_name ) ),
-        ${tripJoin} ( price_minor, currency, status, duration_minutes, start_time, techniques, target_species )
+        ${tripJoin} ( price_minor, per_extra_minor, charter_type, currency, status, duration_minutes, start_time, techniques, target_species )
       `,
       )
 
@@ -178,14 +179,27 @@ export const searchOperatorsServer = createServerFn({ method: "POST" })
 
     const items: OperatorCardDTO[] = (rows ?? []).map((row: any) => {
       const vessel = Array.isArray(row.vessels) ? row.vessels[0] : row.vessels;
-      const trips: Array<{ price_minor: number; currency: string; status: string }> =
-        row.trip_packages ?? [];
+      const trips: Array<{
+        price_minor: number;
+        per_extra_minor: number | null;
+        charter_type: string | null;
+        currency: string;
+        status: string;
+      }> = row.trip_packages ?? [];
       const active = trips.filter((t) => t.status === "active");
       const candidates = active.length > 0 ? active : trips;
+      // Card "From" price = per-additional-guest rate for private trips
+      // (falls back to price_minor when per_extra is unset), or per-person
+      // price for shared trips (price_minor already is per-person).
+      const cardPriceFor = (t: { price_minor: number; per_extra_minor: number | null; charter_type: string | null }) => {
+        if (isSharedTripType(t.charter_type as any)) return t.price_minor;
+        return t.per_extra_minor && t.per_extra_minor > 0 ? t.per_extra_minor : t.price_minor;
+      };
       let cheapest: { price_minor: number; currency: string } | null = null;
       for (const t of candidates) {
-        if (!cheapest || t.price_minor < cheapest.price_minor) {
-          cheapest = { price_minor: t.price_minor, currency: t.currency };
+        const p = cardPriceFor(t);
+        if (!cheapest || p < cheapest.price_minor) {
+          cheapest = { price_minor: p, currency: t.currency };
         }
       }
 
