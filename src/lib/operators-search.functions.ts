@@ -92,12 +92,14 @@ export const searchOperatorsServer = createServerFn({ method: "POST" })
       .select(
         `
         id, slug, location_slug, display_name, business_type, owner_id,
+        default_departure_address,
         default_departure_city, default_departure_state, default_departure_country,
         cover_image_url, booking_type, fishing_environments, featured, priority_order, created_at,
         vessels ( length_ft, max_passenger_capacity, boat_type_id, boat_types ( icon_url, subcategory_name ) ),
         ${tripJoin} ( price_minor, currency, status, duration_minutes, start_time, techniques, target_species )
       `,
       )
+
 
       .eq("moderation_status", "approved")
       .eq("status", "published");
