@@ -1,30 +1,46 @@
 ## Goal
 
-Remove the Daily.co video integration without breaking the surrounding booking, schedule, and class-session features that remain live. Per your decision, the `/classroom/$orderId` route is retired and Daily-related code is deleted.
+Retire the legacy "class sessions / cohorts" concept entirely. It's a holdover from a prior version of the app and is unused by the live fishing-trip booking flow (which runs on `trip_packages` + `trip_date` + `host_availability`). DB confirms: 2 rows in `class_sessions`, 0 bookings reference them.
 
-## What gets removed
+## Frontend code to remove
 
-1. **`@daily-co/daily-js` package** — uninstall via `bun remove`. Lockfile / `package.json` updated.
-2. **`src/components/classroom/DailyEmbed.tsx`** — delete.
-3. **`src/lib/classroom.functions.ts`** — delete (server fn `getDailyJoinInfo`, Daily REST token minting, `DAILY_API_KEY` usage).
-4. **`src/routes/_authenticated/classroom.$orderId.tsx`** — delete the route file; the TanStack Router plugin will regenerate `routeTree.gen.ts`.
-5. **`DAILY_API_KEY` secret** — flag for removal from project secrets (no longer referenced).
+1. **`src/lib/cohorts.functions.ts`** — delete. Provides `listPublicCohorts` and `bookSeat`. Nothing in the live trip-booking flow uses them.
+2. **`src/components/schedule/RescheduleProposalsSection.tsx`** — delete. Cohort reschedule UI; not part of trip booking.
+3. **Listing detail page (`src/routes/c.$categorySlug.$listingSlug.tsx`)** — remove the "Cohorts" / class-session list, the `handleBook` cohort call, the expanded-cohort state, and the `bookSeat` import. Keep the trip-package booking UI intact.
+4. **Learner schedule (`src/routes/_authenticated/dashboard.learner.schedule.tsx`)** — drop the `cohortQueries` block and any cohort merging into `rows`. Keep the existing per-booking schedule.
+5. **`src/components/orders/OrderSchedulePanel.tsx`** — drop the `getClassSessionForOrder` query and `cohort?.listing_title` fallback; rely on the order snapshot fields already used.
+6. **`src/lib/bookings.functions.ts`** — remove `getClassSessionForOrder`, `startClassSession`, `endClassSession`, and any helpers that read/write `class_sessions`.
+7. **`src/lib/schedule.functions.ts`** — remove anything that selects from `class_sessions` (keep trip / availability logic).
+8. **`src/lib/admin-availability.functions.ts`** — drop the `class_sessions` lookup; keep the bookings/host_availability surface.
+9. **`src/lib/orders.functions.ts`** — stop selecting `class_session_id` on bookings and drop the cohort enrichment block.
+10. **`src/routes/api/public/stripe/webhook.ts`** — remove the `increment_class_session_seats` call path and stop selecting `class_session_id`. Stripe confirmation still updates the booking; the seat-increment RPC is no longer relevant since trips track seats on `bookings.guests`.
 
-## Where in-app links to the classroom get cleaned up
+## Server function callers / minor cleanups
 
-- **`src/routes/_authenticated/dashboard.learner.schedule.tsx`** — drop the `launchClassroom` function, the `onLaunch` prop on `ScheduleTable` / row components, and the "Launch" button (the inline `<Button onClick={onLaunch}>` at line ~433). Keep the rest of the schedule UI intact.
-- **`src/components/orders/OrderSchedulePanel.tsx`** — remove the `onLaunch` prop, the `Rocket` import, and the "Launch" button block (lines ~171–179). The "Add to Google Calendar" button and the completion flow stay.
-- **`src/components/checkout/AddToCalendarMenu.tsx`** — rewrite the calendar `details` text so it no longer points at `/classroom/<sessionId>`. New text: a neutral confirmation like "Your FishTrippers session — your host will share joining details before the trip." This is the only content change; the calendar export keeps working.
-- **`src/lib/bookings.functions.ts`** — delete the stale comment at line ~350 that references `getDailyJoinInfo`.
+- Remove the contact-form "Virtual Classroom Tech Issue" topic in `src/components/contact/ContactSupportForm.tsx` and the matching label in `src/routes/_admin/admin.queue.tsx`. They reference a feature we no longer have.
+- Remove the now-unused `_authenticated/classroom` directory references and any imports of deleted modules.
+
+## Database migration (single migration file)
+
+After the code stops touching `class_sessions`, ship one migration that:
+
+1. `ALTER TABLE public.bookings DROP COLUMN class_session_id;`
+2. `DROP FUNCTION public.increment_class_session_seats(uuid);`
+3. `DROP TABLE public.class_sessions;`
+4. `DROP TYPE public.class_session_status_t;`
+
+No data loss: 2 unused rows in `class_sessions`, 0 booking references.
+
+The auto-regenerated `src/integrations/supabase/types.ts` will drop the `class_sessions`, `class_session_status_t`, `bookings.class_session_id`, and `increment_class_session_seats` definitions.
 
 ## What stays untouched (intentionally)
 
-- The `class_sessions` table, the `bookings.class_session_id` column, `increment_class_session_seats`, cohort booking, reschedule proposals, `startClassSession` / `endClassSession`, and every other server function that operates on class sessions. These power booking, schedule, and admin availability — none of them depend on Daily.
-- The admin queue "Virtual Classroom Tech Issue" support topic and the contact form option — these are pre-existing support-ticket categories, not video infrastructure. Renaming or removing them is out of scope unless you ask.
-- No database migrations. Nothing in `supabase/` changes.
+- `trip_packages`, `vessels`, `boat_types`, `operators`, `host_availability`, `bookings` (minus the dropped column), `orders`, the Stripe trip-booking flow, schedule UI for trips, host availability calendar — all the live fishing-trip functionality.
+- Reviews, certificates, messaging, support tickets, admin queue (minus the one removed topic).
 
 ## Verification
 
-- Confirm the project typechecks after the deletions (no dangling imports of `DailyEmbed`, `getDailyJoinInfo`, or `@daily-co/daily-js`).
-- Spot-check `/dashboard/learner/schedule` and the order schedule panel render with the Launch column gone and no console errors.
-- Confirm `routeTree.gen.ts` no longer lists `/classroom/$orderId` after the route file is removed.
+1. Typecheck passes after the deletions (no dangling imports of `bookSeat`, `getClassSessionForOrder`, `startClassSession`, `endClassSession`, `increment_class_session_seats`, or `class_sessions` types).
+2. Trip booking end-to-end still works against the preview: listing → checkout → Stripe webhook → confirmed booking → schedule row.
+3. Database linter clean after the migration.
+4. Re-run security scan to confirm no new RLS warnings on the leftover tables.
