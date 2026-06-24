@@ -2,7 +2,7 @@
 // surface as a clear runtime error rather than a module-load crash.
 import { Resend } from "resend";
 
-const FROM_ADDRESS = "FishTrippers <hello@fishtrippers.com>";
+const FROM_ADDRESS = "FishTrippers <noreply@fishtrippers.com>";
 
 let _client: Resend | null = null;
 function client(): Resend {

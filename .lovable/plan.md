@@ -1,54 +1,49 @@
 ## Goal
 
-Route all Supabase Auth emails through `hello@fishtrippers.com` using **Resend SMTP**, since Send Email Hooks are not exposed in the Lovable Cloud UI.
+Make every email FishTrippers sends — auth (signup, password reset, magic link, email change, reauth, invite) and app emails (booking confirmations, messages, payouts, listing approvals, etc.) — go out from `noreply@fishtrippers.com`, with auth emails powered by Lovable's native auth email scaffolder.
 
-## Why this path
+## Pieces involved
 
-- Lovable Cloud doesn't expose Supabase Auth Hooks configuration, so the `auth-email-hook` edge function we built has no UI to be activated. Without activation, Supabase will never call it.
-- Cloud DOES expose Custom SMTP under Cloud → Users → Auth Settings → Email settings. Pointing it at Resend's SMTP server with `hello@fishtrippers.com` as sender achieves the same end result: every auth email goes out from your domain via Resend.
-- The transactional path (booking confirmations, messages, payouts, etc.) is untouched — it continues to use `sendEmail()` → Resend SDK directly.
+1. **Lovable email domain** — DNS-verified sender domain managed by Lovable. Lovable delegates a subdomain (e.g. `notify.fishtrippers.com`) via NS records that you add at your DNS provider; that subdomain handles SPF/DKIM/MX internally. The visible "From" header can still be `noreply@fishtrippers.com` (root domain) via Lovable's display-from-root setting.
+2. **Lovable email infrastructure** — pgmq queue, send log, suppression list, cron processor. Set up once via `setup_email_infra`.
+3. **Auth email scaffolder** — creates `/lovable/email/auth/webhook` + 6 React Email templates (signup, magic-link, recovery, invite, email-change, reauthentication). Activates immediately for Lovable Cloud auth flows.
+4. **Existing Resend path** for app/transactional emails — currently pinned to `FishTrippers <hello@fishtrippers.com>`. Change the From to `noreply@fishtrippers.com` so it matches the auth emails. Keep Resend in place (booking confirmation to angler + captain, new message alerts, payout-sent, etc. continue to use the existing admin-editable templates in `public.email_templates`).
 
-## What you'll do (one-time, in Cloud UI)
+## Step-by-step
 
-Cloud → Users → Auth Settings → Email settings → **Enable custom SMTP**, then enter:
+### Step 1 — Set up the email domain (you do this in the dialog)
 
-| Field | Value |
-| --- | --- |
-| Sender email | `hello@fishtrippers.com` |
-| Sender name | `FishTrippers` |
-| SMTP host | `smtp.resend.com` |
-| SMTP port | `465` |
-| SMTP user | `resend` |
-| SMTP password | your `RESEND_API_KEY` value (the same one already stored as a project secret) |
-| Minimum interval | leave default |
+I open the email-setup dialog. You enter `fishtrippers.com` (Lovable will delegate a subdomain such as `notify.fishtrippers.com`) and add the NS records Lovable shows to your DNS provider. DNS verification can take up to 72 hours but doesn't block the rest of the setup.
 
-Save. Auth emails immediately start routing through Resend.
+### Step 2 — Provision shared email infrastructure
 
-## What I'll do in code
+Run `setup_email_infra`. Creates pgmq queues (`auth_emails`, `transactional_emails`), RPC wrappers, send log, suppression list, unsubscribe tokens, and the cron job that drains the queue every 5 seconds. One-time, idempotent.
 
-### 1. Remove the dead auth-email-hook function
+### Step 3 — Scaffold auth email templates
 
-Delete `supabase/functions/auth-email-hook/` and its `config.toml` block. It can't be wired up in Cloud, so leaving it there is just confusing.
+Run `scaffold_auth_email_templates`. Creates:
 
-### 2. Delete the unused hook secret
+- `src/routes/lovable/email/auth/webhook.ts` — the webhook Supabase Auth calls
+- `src/lib/email-templates/auth/*.tsx` — 6 React Email templates
 
-Remove `SEND_EMAIL_HOOK_SECRET` from project secrets — nothing reads it now.
+I then style those templates to match FishTrippers (logo color, navy header, button color, footer copy) and set the sender to `noreply@fishtrippers.com` with display name `FishTrippers`.
 
-### 3. Customize the Supabase auth email templates in Cloud
+### Step 4 — Unify the From address on the existing Resend path
 
-Supabase ships default templates ("Confirm signup", "Reset password", "Magic link", "Change email"). After SMTP is enabled, I'll give you the exact branded HTML to paste into each of those templates in Cloud → Users → Auth Settings → Email templates — matching the FishTrippers tone we already use for the admin-editable templates, with the right `{{ .ConfirmationURL }}` / `{{ .Token }}` Supabase variables.
+In `src/lib/email-sender.server.ts`, change the pinned `FROM_ADDRESS` from `FishTrippers <hello@fishtrippers.com>` to `FishTrippers <noreply@fishtrippers.com>`. Every existing transactional email (booking confirmation to angler + captain, new chat message, custom offer received, listing approved/rejected, payout sent, urgent message) instantly inherits the new From — no other code touched.
 
-### 4. Brand cleanup (already done last turn, keep as-is)
+### Step 5 — Clean up the dead Send Email Hook artifacts
 
-The `welcome_user`, `email_verification`, `password_reset`, `magic_link` defaults in `src/lib/email-templates.defaults.ts` are already rewritten to FishTrippers branding. They remain useful as the source-of-truth for the in-app templates manager, even though Supabase Auth won't read them.
+Delete `supabase/functions/auth-email-hook/` and the matching block in `supabase/config.toml`. They were built last turn for an activation path that isn't available on Cloud.
 
-## Verification
+### Step 6 — Verify
 
-1. After you save SMTP settings, request a password reset on `/auth`. Email should arrive from `hello@fishtrippers.com`.
-2. Sign up a new test user. Confirmation email should arrive from the same address.
-3. Existing booking confirmation flow continues to work (regression sanity check).
+1. Trigger a password reset on `/auth` — confirm email arrives from `noreply@fishtrippers.com`.
+2. Sign up a fresh user — confirm verification email arrives from same.
+3. Trigger a booking confirmation (existing Resend path) — confirm From shows `noreply@fishtrippers.com`.
 
-## Out of scope
+## Notes / decisions
 
-- Send Email Hook (not available in Cloud UI).
-- Switching transactional emails away from the Resend SDK — they already send from `hello@fishtrippers.com`.
+- **`hello@` vs `noreply@`**: per your message, going with `noreply@fishtrippers.com` across the board. If you'd prefer `hello@` for marketing-style emails and `noreply@` only for auth, say so before we start and I'll split.
+- **Email infrastructure conflict with Resend**: Lovable delegates only a subdomain (e.g. `notify.fishtrippers.com`); your root `fishtrippers.com` stays in Resend. No DNS conflict — the two coexist on different subdomains. Visible From can still read `noreply@fishtrippers.com` on both paths.
+- **Auth template editing later**: auth templates live in code as `.tsx` files (React Email). You won't edit them from your admin Email Management page — that page continues to govern the Resend-side transactional templates only. If you want a future migration of those transactional emails onto Lovable's path too, that's a follow-up project.
