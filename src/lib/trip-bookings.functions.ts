@@ -7,6 +7,7 @@ import { getRequestHost } from "@tanstack/react-start/server";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 import { computeFeeBreakdown } from "@/lib/fees";
 import { getPlatformFeeRate } from "@/lib/platform-fee.server";
+import { isSharedTripType, type TripType } from "@/lib/trips.shared";
 import { createCheckoutSession as gwCreateCheckoutSession } from "@/lib/stripe.server";
 
 export interface TripReviewDetails {
@@ -17,7 +18,7 @@ export interface TripReviewDetails {
     duration_minutes: number;
     price_minor: number;
     per_extra_minor: number;
-    charter_type: "private_charter" | "shared_tour";
+    charter_type: TripType;
     currency: string;
     departure_address: string | null;
   };
@@ -48,13 +49,13 @@ export interface TripReviewDetails {
 }
 
 function computeTripTotal(
-  charter: "private_charter" | "shared_tour",
+  charter: TripType,
   price_minor: number,
   per_extra_minor: number,
   guests: number,
 ): number {
   const g = Math.max(1, guests);
-  if (charter === "shared_tour") return price_minor * g;
+  if (isSharedTripType(charter)) return price_minor * g;
   return price_minor + per_extra_minor * Math.max(0, g - 1);
 }
 
@@ -100,7 +101,7 @@ export const getTripReviewDetails = createServerFn({ method: "POST" })
       "Your captain";
 
     // Capacity recheck for shared tours
-    if (trip.charter_type === "shared_tour") {
+    if (isSharedTripType(trip.charter_type as TripType)) {
       const { data: bookedRows } = await supabase.rpc(
         "trip_seats_booked_by_date",
         { _trip_id: trip.id },
@@ -117,7 +118,7 @@ export const getTripReviewDetails = createServerFn({ method: "POST" })
     }
 
     const total_minor = computeTripTotal(
-      trip.charter_type,
+      trip.charter_type as TripType,
       trip.price_minor,
       trip.per_extra_minor ?? 0,
       data.guests,
@@ -139,7 +140,7 @@ export const getTripReviewDetails = createServerFn({ method: "POST" })
         duration_minutes: trip.duration_minutes,
         price_minor: trip.price_minor,
         per_extra_minor: trip.per_extra_minor ?? 0,
-        charter_type: trip.charter_type,
+        charter_type: trip.charter_type as TripType,
         currency: trip.currency,
         departure_address: trip.departure_address,
       },
@@ -203,7 +204,7 @@ export const createTripDepositCheckout = createServerFn({ method: "POST" })
     if (!operator) throw new Error("Operator not found.");
 
     // Capacity recheck for shared tours
-    if (trip.charter_type === "shared_tour") {
+    if (isSharedTripType(trip.charter_type as TripType)) {
       const { data: bookedRows } = await supabase.rpc(
         "trip_seats_booked_by_date",
         { _trip_id: trip.id },
@@ -220,7 +221,7 @@ export const createTripDepositCheckout = createServerFn({ method: "POST" })
     }
 
     const total_minor = computeTripTotal(
-      trip.charter_type,
+      trip.charter_type as TripType,
       trip.price_minor,
       trip.per_extra_minor ?? 0,
       data.guests,
@@ -348,7 +349,7 @@ export const simulateTripDepositPayment = createServerFn({ method: "POST" })
       .maybeSingle();
     if (!operator) throw new Error("Operator not found.");
 
-    if (trip.charter_type === "shared_tour") {
+    if (isSharedTripType(trip.charter_type as TripType)) {
       const { data: bookedRows } = await supabase.rpc(
         "trip_seats_booked_by_date",
         { _trip_id: trip.id },
@@ -365,7 +366,7 @@ export const simulateTripDepositPayment = createServerFn({ method: "POST" })
     }
 
     const total_minor = computeTripTotal(
-      trip.charter_type,
+      trip.charter_type as TripType,
       trip.price_minor,
       trip.per_extra_minor ?? 0,
       data.guests,
