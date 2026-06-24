@@ -1,6 +1,7 @@
 import { Link } from "@tanstack/react-router";
-import { ShieldCheck, MapPin, Zap, Star, Ship, Footprints, Sparkles } from "lucide-react";
+import { ShieldCheck, MapPin, Zap, Star, Ship, Footprints, Sparkles, Info } from "lucide-react";
 import type { OperatorCardDTO } from "@/lib/operators-search.functions";
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 
 export function OperatorCard({ operator }: { operator: OperatorCardDTO }) {
   const businessSlug = operator.slug ?? operator.id;
