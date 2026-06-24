@@ -1,7 +1,7 @@
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useEffect, useMemo, useState } from "react";
 import { useServerFn } from "@tanstack/react-start";
-import { useQueries, useQuery } from "@tanstack/react-query";
+import { useQuery } from "@tanstack/react-query";
 import { Award, Star, CalendarPlus, MessageCircle, Loader2 } from "lucide-react";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
@@ -25,13 +25,11 @@ import {
   listMyOrdersLearner,
   listSessionCompletions,
 } from "@/lib/orders.functions";
-import { getClassSessionForOrder } from "@/lib/bookings.functions";
 import { buildGoogleCalendarUrl } from "@/lib/calendar-links";
 import { ensureThreadForJourney } from "@/lib/messages.functions";
 import { getMyReviewedOrderIds } from "@/lib/reviews.functions";
 import { WriteReviewDialog } from "@/components/reviews/WriteReviewDialog";
 import { cn } from "@/lib/utils";
-import { RescheduleProposalsSection } from "@/components/schedule/RescheduleProposalsSection";
 
 const display = { fontFamily: "Montserrat, system-ui, sans-serif" };
 
@@ -76,7 +74,6 @@ function LearnerSchedule() {
   const user = useAuthStore((s) => s.user);
   const navigate = useNavigate();
   const fetchOrders = useServerFn(listMyOrdersLearner);
-  const fetchCohort = useServerFn(getClassSessionForOrder);
   const listCompletionsFn = useServerFn(listSessionCompletions);
 
   useEffect(() => {
@@ -91,14 +88,6 @@ function LearnerSchedule() {
 
   const orderList = orders ?? [];
   const orderIds = orderList.map((o) => o.id);
-
-  const cohortQueries = useQueries({
-    queries: orderList.map((o) => ({
-      queryKey: ["class-session-for-order", o.id],
-      queryFn: () => fetchCohort({ data: { order_id: o.id } }),
-      enabled: !!user,
-    })),
-  });
 
   const { data: completions } = useQuery({
     queryKey: ["session-completions", "learner", orderIds.join(",")],
@@ -125,18 +114,14 @@ function LearnerSchedule() {
     return set;
   }, [completions]);
 
-  // Fallback: orders where every session is marked complete, even if
-  // order_status was never flipped to 'completed'.
   const fullyDoneOrderIds = useMemo(() => {
     const counts = new Map<string, number>();
     (completions ?? []).forEach((c) => {
       counts.set(c.order_id, (counts.get(c.order_id) ?? 0) + 1);
     });
     const totalsByOrder = new Map<string, number>();
-    orderList.forEach((o, i) => {
-      const cohort = cohortQueries[i]?.data;
+    orderList.forEach((o) => {
       const total =
-        (cohort?.session_dates_times_array?.length ?? 0) ||
         (o.snapshot_session_titles?.length ?? 0) ||
         (o.snapshot_total_sessions ?? 0);
       if (total > 0) totalsByOrder.set(o.id, total);
@@ -146,32 +131,18 @@ function LearnerSchedule() {
       if ((counts.get(orderId) ?? 0) >= total) set.add(orderId);
     });
     return set;
-  }, [completions, orderList, cohortQueries.map((q) => q.dataUpdatedAt).join("|")]);
+  }, [completions, orderList]);
 
   const rows: SessionRow[] = useMemo(() => {
     const out: SessionRow[] = [];
-    orderList.forEach((o, i) => {
-      const cohort = cohortQueries[i]?.data;
+    orderList.forEach((o) => {
       const fallbackDuration = o.snapshot_session_duration ?? 60;
-      const title =
-        cohort?.listing_title ?? o.snapshot_course_title ?? "Fishing Trip session";
+      const title = o.snapshot_course_title ?? "Fishing Trip session";
 
-      const unified =
-        cohort && (cohort.session_dates_times_array?.length ?? 0) > 0
-          ? [...cohort.session_dates_times_array]
-              .sort(
-                (a, b) =>
-                  new Date(a.starts_at).getTime() -
-                  new Date(b.starts_at).getTime(),
-              )
-              .map((s) => ({
-                startIso: s.starts_at,
-                duration: s.duration_minutes ?? fallbackDuration,
-              }))
-          : (o.snapshot_session_titles ?? []).map((s) => ({
-              startIso: s.scheduled_time,
-              duration: fallbackDuration,
-            }));
+      const unified = (o.snapshot_session_titles ?? []).map((s) => ({
+        startIso: s.scheduled_time,
+        duration: fallbackDuration,
+      }));
 
       const total = unified.length;
       unified.forEach((s, idx) => {
@@ -189,7 +160,7 @@ function LearnerSchedule() {
       });
     });
     return out;
-  }, [orderList, cohortQueries.map((q) => q.dataUpdatedAt).join("|")]);
+  }, [orderList]);
 
   const enrolled = useMemo(() => {
     return rows
@@ -219,11 +190,9 @@ function LearnerSchedule() {
       );
   }, [rows, completedSet, fullyDoneOrderIds]);
 
-
   if (!user) return null;
 
-  const cohortsLoading = cohortQueries.some((q) => q.isLoading);
-  const loading = isLoading || cohortsLoading;
+  const loading = isLoading;
 
   return (
     <main className="mx-auto max-w-[1600px] px-4 md:px-6 lg:px-8 py-12">
@@ -231,12 +200,8 @@ function LearnerSchedule() {
         My Schedule
       </h1>
       <p className="mt-2 text-muted-foreground">
-        Every session you've enrolled in — flattened into a clean chronological timeline.
+        Every trip you've booked — flattened into a clean chronological timeline.
       </p>
-
-      <RescheduleProposalsSection />
-
-
 
       <Tabs defaultValue="enrolled" className="mt-6">
         <TabsList>
@@ -373,7 +338,6 @@ function ScheduleRow({
       setOpeningThread(false);
     }
   }
-
 
   return (
     <TableRow>
