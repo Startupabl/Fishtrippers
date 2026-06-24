@@ -243,3 +243,113 @@ export function getOperatorCardImage(
 ): string | null {
   return operator?.cover_image_url ?? null;
 }
+
+/**
+ * Admin-only one-shot backfill: for every operator that has a
+ * default_departure_address but missing city/state/country, derive those
+ * fields (preferring Google for rows with a place_id, falling back to
+ * parseCityStateCountry) and persist them.
+ *
+ * Idempotent — re-running only touches rows still missing structured fields.
+ */
+export const backfillOperatorPlaceComponents = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .handler(async ({ context }) => {
+    const { supabase, userId } = context;
+    const { data: isAdmin, error: roleErr } = await supabase.rpc("has_role", {
+      _user_id: userId,
+      _role: "admin",
+    });
+    if (roleErr) throw new Error(roleErr.message);
+    if (!isAdmin) throw new Error("Forbidden");
+
+    const { parseCityStateCountry } = await import("./address.shared");
+    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+
+    const { data: rows, error } = await supabaseAdmin
+      .from("operators")
+      .select(
+        "id, default_departure_address, default_departure_place_id, default_departure_city, default_departure_state, default_departure_country",
+      )
+      .not("default_departure_address", "is", null)
+      .is("default_departure_city", null);
+    if (error) throw new Error(error.message);
+
+    const lovableKey = process.env.LOVABLE_API_KEY;
+    const mapsKey = process.env.GOOGLE_MAPS_API_KEY;
+    const canCallGoogle = !!lovableKey && !!mapsKey;
+
+    let updated = 0;
+    const failures: Array<{ id: string; reason: string }> = [];
+    for (const row of rows ?? []) {
+      let city: string | null = null;
+      let state: string | null = null;
+      let country: string | null = null;
+
+      if (canCallGoogle && row.default_departure_place_id) {
+        try {
+          const res = await fetch(
+            `https://connector-gateway.lovable.dev/google_maps/places/v1/places/${encodeURIComponent(
+              row.default_departure_place_id,
+            )}`,
+            {
+              headers: {
+                Authorization: `Bearer ${lovableKey}`,
+                "X-Connection-Api-Key": mapsKey!,
+                "X-Goog-FieldMask": "addressComponents,formattedAddress",
+              },
+            },
+          );
+          if (res.ok) {
+            const json: any = await res.json();
+            const comps: any[] = Array.isArray(json.addressComponents)
+              ? json.addressComponents
+              : [];
+            const find = (t: string, short = false): string | null => {
+              const c = comps.find(
+                (x) => Array.isArray(x.types) && x.types.includes(t),
+              );
+              if (!c) return null;
+              return (short ? c.shortText : c.longText) ?? c.longText ?? c.shortText ?? null;
+            };
+            city =
+              find("locality") ||
+              find("postal_town") ||
+              find("sublocality") ||
+              find("administrative_area_level_2") ||
+              null;
+            state = find("administrative_area_level_1", true);
+            country = find("country", true);
+          }
+        } catch (e) {
+          failures.push({ id: row.id, reason: (e as Error).message });
+        }
+      }
+
+      if (!city || !state) {
+        const parsed = parseCityStateCountry(row.default_departure_address);
+        city = city || parsed.city;
+        state = state || parsed.state;
+        country = country || parsed.country;
+      }
+
+      if (!city && !state && !country) continue;
+
+      const { error: upErr } = await supabaseAdmin
+        .from("operators")
+        .update({
+          default_departure_city: city,
+          default_departure_state: state,
+          default_departure_country: country,
+        })
+        .eq("id", row.id);
+      if (upErr) {
+        failures.push({ id: row.id, reason: upErr.message });
+        continue;
+      }
+      updated += 1;
+    }
+
+    return { scanned: rows?.length ?? 0, updated, failures };
+  });
+

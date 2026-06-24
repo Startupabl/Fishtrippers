@@ -2,6 +2,8 @@ import { createServerFn } from "@tanstack/react-start";
 import { createClient } from "@supabase/supabase-js";
 import type { Database } from "@/integrations/supabase/types";
 import { z } from "zod";
+import { parseCityStateCountry } from "@/lib/address.shared";
+
 
 export type OperatorCardDTO = {
   id: string;
@@ -92,12 +94,14 @@ export const searchOperatorsServer = createServerFn({ method: "POST" })
       .select(
         `
         id, slug, location_slug, display_name, business_type, owner_id,
+        default_departure_address,
         default_departure_city, default_departure_state, default_departure_country,
         cover_image_url, booking_type, fishing_environments, featured, priority_order, created_at,
         vessels ( length_ft, max_passenger_capacity, boat_type_id, boat_types ( icon_url, subcategory_name ) ),
         ${tripJoin} ( price_minor, currency, status, duration_minutes, start_time, techniques, target_species )
       `,
       )
+
 
       .eq("moderation_status", "approved")
       .eq("status", "published");
@@ -195,14 +199,24 @@ export const searchOperatorsServer = createServerFn({ method: "POST" })
       const reviewCount = ownerStats?.count ?? 0;
       const reviewAvg = ownerStats && ownerStats.count > 0 ? ownerStats.sum / ownerStats.count : null;
 
+      const cityFromDb = row.default_departure_city ?? null;
+      const stateFromDb = row.default_departure_state ?? null;
+      const countryFromDb = row.default_departure_country ?? null;
+      const needsFallback =
+        (!cityFromDb || !stateFromDb) && !!row.default_departure_address;
+      const fallback = needsFallback
+        ? parseCityStateCountry(row.default_departure_address as string)
+        : { city: null, state: null, country: null };
+
       return {
         id: row.id,
         slug: row.slug ?? null,
         location_slug: row.location_slug ?? null,
         display_name: row.display_name ?? "Untitled listing",
-        city: row.default_departure_city ?? null,
-        state: row.default_departure_state ?? null,
-        country: row.default_departure_country ?? null,
+        city: cityFromDb || fallback.city,
+        state: stateFromDb || fallback.state,
+        country: countryFromDb || fallback.country,
+
         cover_image_url: row.cover_image_url ?? null,
         vessel_length_ft: vessel?.length_ft != null ? Number(vessel.length_ft) : null,
         vessel_capacity: vessel?.max_passenger_capacity ?? null,
