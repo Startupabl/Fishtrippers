@@ -76,7 +76,7 @@ export const listAvailabilityHolds = createServerFn({ method: "GET" })
     if (bookingIds.length) {
       const { data: bookings } = await supabaseAdmin
         .from("bookings")
-        .select("id,course_id,class_session_id,learner_id,trip_date")
+        .select("id,course_id,trip_session_id,learner_id,trip_date")
         .in("id", bookingIds);
       bookingMap = new Map((bookings ?? []).map((b) => [b.id, b]));
 
@@ -104,12 +104,12 @@ export const listAvailabilityHolds = createServerFn({ method: "GET" })
 
       const sessionIds = Array.from(
         new Set(
-          (bookings ?? []).map((b) => b.class_session_id).filter((x): x is string => !!x),
+          (bookings ?? []).map((b) => b.trip_session_id).filter((x): x is string => !!x),
         ),
       );
       if (sessionIds.length) {
         const { data: sessions } = await supabaseAdmin
-          .from("class_sessions")
+          .from("trip_sessions")
           .select("id,session_dates_times_array,listing_title")
           .in("id", sessionIds);
         sessionMap = new Map((sessions ?? []).map((s) => [s.id, s]));
@@ -143,7 +143,7 @@ export const listAvailabilityHolds = createServerFn({ method: "GET" })
 
       const booking = h.booking_id ? bookingMap.get(h.booking_id) : null;
       const trip = booking?.course_id ? tripMap.get(booking.course_id) : null;
-      const session = booking?.class_session_id ? sessionMap.get(booking.class_session_id) : null;
+      const session = booking?.trip_session_id ? sessionMap.get(booking.trip_session_id) : null;
       const learner = booking?.learner_id ? learnerMap.get(booking.learner_id) : null;
       const learnerName =
         (learner?.display_name as string | undefined) ||

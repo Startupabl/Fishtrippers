@@ -137,7 +137,7 @@ async function handleCheckoutCompleted(session: any) {
       const { data: booking, error: bErr } = await supabaseAdmin
         .from("bookings")
         .select(
-          "id, aide_id, learner_id, course_id, class_session_id, total_price, service_fee_amount, aide_earnings, currency",
+          "id, aide_id, learner_id, course_id, trip_session_id, total_price, service_fee_amount, aide_earnings, currency",
         )
         .eq("id", meta.booking_id)
         .maybeSingle();
@@ -146,14 +146,14 @@ async function handleCheckoutCompleted(session: any) {
       if (booking && booking.course_id) {
         let snapshotTitle: string | null = null;
         let slots: { starts_at: string; duration_minutes?: number }[] = [];
-        if (booking.class_session_id) {
-          const { data: cs } = await supabaseAdmin
-            .from("class_sessions")
+        if (booking.trip_session_id) {
+          const { data: ts } = await supabaseAdmin
+            .from("trip_sessions")
             .select("listing_title, session_dates_times_array")
-            .eq("id", booking.class_session_id)
+            .eq("id", booking.trip_session_id)
             .maybeSingle();
-          snapshotTitle = cs?.listing_title ?? null;
-          slots = (cs?.session_dates_times_array ?? []) as typeof slots;
+          snapshotTitle = ts?.listing_title ?? null;
+          slots = (ts?.session_dates_times_array ?? []) as typeof slots;
         }
         if (!snapshotTitle) {
           const { data: j } = await supabaseAdmin
@@ -227,23 +227,9 @@ async function handleCheckoutCompleted(session: any) {
         stripe_checkout_session_id: session.id,
       })
       .eq("id", meta.booking_id)
-      .select("id, aide_id, learner_id, course_id, class_session_id")
+      .select("id, aide_id, learner_id, course_id")
       .maybeSingle();
     if (error) console.error("[payments-webhook] booking confirm error", error);
-
-    // Bump filled_seats on the linked cohort (if any).
-    if (updated?.class_session_id) {
-      try {
-        const { error: rpcErr } = await supabaseAdmin.rpc(
-          "increment_class_session_seats",
-          { _class_session_id: updated.class_session_id },
-        );
-        if (rpcErr)
-          console.error("[payments-webhook] seat increment error", rpcErr);
-      } catch (e) {
-        console.error("[payments-webhook] seat increment threw", e);
-      }
-    }
 
     // Notify the instructor with an in-app alert + staged transactional email.
     if (updated?.aide_id) {
