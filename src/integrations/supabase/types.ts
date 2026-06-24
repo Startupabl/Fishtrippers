@@ -143,7 +143,6 @@ export type Database = {
           angler_written_reason: string | null
           balance_due_minor: number | null
           cancellation_timestamp: string | null
-          class_session_id: string | null
           course_id: string | null
           created_at: string
           currency: string
@@ -161,6 +160,7 @@ export type Database = {
           thread_id: string | null
           total_price: number
           trip_date: string | null
+          trip_session_id: string | null
           updated_at: string
         }
         Insert: {
@@ -169,7 +169,6 @@ export type Database = {
           angler_written_reason?: string | null
           balance_due_minor?: number | null
           cancellation_timestamp?: string | null
-          class_session_id?: string | null
           course_id?: string | null
           created_at?: string
           currency?: string
@@ -187,6 +186,7 @@ export type Database = {
           thread_id?: string | null
           total_price: number
           trip_date?: string | null
+          trip_session_id?: string | null
           updated_at?: string
         }
         Update: {
@@ -195,7 +195,6 @@ export type Database = {
           angler_written_reason?: string | null
           balance_due_minor?: number | null
           cancellation_timestamp?: string | null
-          class_session_id?: string | null
           course_id?: string | null
           created_at?: string
           currency?: string
@@ -213,14 +212,15 @@ export type Database = {
           thread_id?: string | null
           total_price?: number
           trip_date?: string | null
+          trip_session_id?: string | null
           updated_at?: string
         }
         Relationships: [
           {
             foreignKeyName: "bookings_class_session_id_fkey"
-            columns: ["class_session_id"]
+            columns: ["trip_session_id"]
             isOneToOne: false
-            referencedRelation: "class_sessions"
+            referencedRelation: "trip_sessions"
             referencedColumns: ["id"]
           },
           {
@@ -331,84 +331,6 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
-      }
-      class_sessions: {
-        Row: {
-          admin_label: string | null
-          aide_id: string
-          cohort_title: string | null
-          course_id: string | null
-          created_at: string
-          currency: string | null
-          expires_at: string | null
-          filled_seats: number
-          id: string
-          is_live: boolean
-          is_public_cohort: boolean
-          listing_title: string
-          live_ended_at: string | null
-          live_started_at: string | null
-          max_seats: number
-          meeting_point_address: string | null
-          meeting_point_lat: number | null
-          meeting_point_lng: number | null
-          meeting_point_place_id: string | null
-          price_minor: number | null
-          session_dates_times_array: Json
-          status: Database["public"]["Enums"]["class_session_status_t"]
-          updated_at: string
-        }
-        Insert: {
-          admin_label?: string | null
-          aide_id: string
-          cohort_title?: string | null
-          course_id?: string | null
-          created_at?: string
-          currency?: string | null
-          expires_at?: string | null
-          filled_seats?: number
-          id?: string
-          is_live?: boolean
-          is_public_cohort?: boolean
-          listing_title: string
-          live_ended_at?: string | null
-          live_started_at?: string | null
-          max_seats?: number
-          meeting_point_address?: string | null
-          meeting_point_lat?: number | null
-          meeting_point_lng?: number | null
-          meeting_point_place_id?: string | null
-          price_minor?: number | null
-          session_dates_times_array?: Json
-          status?: Database["public"]["Enums"]["class_session_status_t"]
-          updated_at?: string
-        }
-        Update: {
-          admin_label?: string | null
-          aide_id?: string
-          cohort_title?: string | null
-          course_id?: string | null
-          created_at?: string
-          currency?: string | null
-          expires_at?: string | null
-          filled_seats?: number
-          id?: string
-          is_live?: boolean
-          is_public_cohort?: boolean
-          listing_title?: string
-          live_ended_at?: string | null
-          live_started_at?: string | null
-          max_seats?: number
-          meeting_point_address?: string | null
-          meeting_point_lat?: number | null
-          meeting_point_lng?: number | null
-          meeting_point_place_id?: string | null
-          price_minor?: number | null
-          session_dates_times_array?: Json
-          status?: Database["public"]["Enums"]["class_session_status_t"]
-          updated_at?: string
-        }
-        Relationships: []
       }
       contact_messages: {
         Row: {
@@ -1970,6 +1892,51 @@ export type Database = {
           },
         ]
       }
+      trip_sessions: {
+        Row: {
+          aide_id: string
+          course_id: string | null
+          created_at: string
+          id: string
+          listing_title: string
+          meeting_point_address: string | null
+          meeting_point_lat: number | null
+          meeting_point_lng: number | null
+          meeting_point_place_id: string | null
+          session_dates_times_array: Json
+          status: Database["public"]["Enums"]["class_session_status_t"]
+          updated_at: string
+        }
+        Insert: {
+          aide_id: string
+          course_id?: string | null
+          created_at?: string
+          id?: string
+          listing_title: string
+          meeting_point_address?: string | null
+          meeting_point_lat?: number | null
+          meeting_point_lng?: number | null
+          meeting_point_place_id?: string | null
+          session_dates_times_array?: Json
+          status?: Database["public"]["Enums"]["class_session_status_t"]
+          updated_at?: string
+        }
+        Update: {
+          aide_id?: string
+          course_id?: string | null
+          created_at?: string
+          id?: string
+          listing_title?: string
+          meeting_point_address?: string | null
+          meeting_point_lat?: number | null
+          meeting_point_lng?: number | null
+          meeting_point_place_id?: string | null
+          session_dates_times_array?: Json
+          status?: Database["public"]["Enums"]["class_session_status_t"]
+          updated_at?: string
+        }
+        Relationships: []
+      }
       user_alerts: {
         Row: {
           created_at: string
@@ -2139,10 +2106,6 @@ export type Database = {
           _user_id: string
         }
         Returns: boolean
-      }
-      increment_class_session_seats: {
-        Args: { _class_session_id: string }
-        Returns: Json
       }
       list_unknown_tags: {
         Args: never
