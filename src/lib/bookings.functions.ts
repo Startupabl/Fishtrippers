@@ -449,18 +449,108 @@ export const confirmBookingDraft = createServerFn({ method: "POST" })
     const { supabase, userId } = context;
     const { data: b, error } = await supabase
       .from("bookings")
-      .select("id, learner_id, status")
+      .select(
+        "id, learner_id, aide_id, status, trip_date, guests, total_price, currency, trip_session_id",
+      )
       .eq("id", data.booking_id)
       .maybeSingle();
     if (error || !b) throw new Error("Booking not found.");
     if (b.learner_id !== userId) throw new Error("Only the learner can confirm.");
-    if (b.status === "pending_offer") {
+
+    const wasPendingOffer = b.status === "pending_offer";
+    if (wasPendingOffer) {
       const { error: uErr } = await supabase
         .from("bookings")
         .update({ status: "pending_payment" })
         .eq("id", b.id);
       if (uErr) throw new Error(uErr.message);
     }
+
+    // Notify the captain (in-app alert + email) — fire-and-forget, never block confirmation.
+    if (wasPendingOffer && b.aide_id) {
+      try {
+        // Look up captain + angler + trip details
+        const [{ data: captain }, { data: angler }, { data: session }] = await Promise.all([
+          supabaseAdmin
+            .from("profiles")
+            .select("id, email, first_name, last_name")
+            .eq("id", b.aide_id)
+            .maybeSingle(),
+          supabaseAdmin
+            .from("profiles")
+            .select("first_name, last_name")
+            .eq("id", b.learner_id)
+            .maybeSingle(),
+          b.trip_session_id
+            ? supabaseAdmin
+                .from("trip_sessions")
+                .select("title, starts_at, meeting_point_address")
+                .eq("id", b.trip_session_id)
+                .maybeSingle()
+            : Promise.resolve({ data: null } as never),
+        ]);
+
+        const anglerName =
+          [angler?.first_name, angler?.last_name].filter(Boolean).join(" ") ||
+          "An angler";
+        const captainName = captain?.first_name || "Captain";
+        const tripTitle = (session as any)?.title || "your trip";
+        const meetingPoint = (session as any)?.meeting_point_address || "";
+        const startsAtRaw = (session as any)?.starts_at as string | undefined;
+        let tripDate = "";
+        let tripTime = "";
+        if (startsAtRaw) {
+          const d = new Date(startsAtRaw);
+          tripDate = d.toLocaleDateString("en-US", {
+            weekday: "short",
+            month: "short",
+            day: "numeric",
+          });
+          tripTime = d.toLocaleTimeString("en-US", {
+            hour: "numeric",
+            minute: "2-digit",
+          });
+        } else if (b.trip_date) {
+          tripDate = b.trip_date;
+        }
+        const totalPrice = b.total_price
+          ? `${(b.total_price / 100).toFixed(2)} ${b.currency || ""}`.trim()
+          : "";
+
+        // In-app alert (uses SECURITY DEFINER not available, so use admin)
+        await supabaseAdmin.from("user_alerts").insert({
+          user_id: b.aide_id,
+          kind: "booking_received",
+          message: `🎣 New booking from ${anglerName}: ${tripTitle}${tripDate ? ` (${tripDate})` : ""}`,
+        } as never);
+
+        // Email captain
+        if (captain?.email) {
+          const { sendTransactionalEmailInternal } = await import(
+            "@/lib/email/send-internal.server"
+          );
+          await sendTransactionalEmailInternal({
+            templateName: "booking-notification",
+            recipientEmail: captain.email,
+            idempotencyKey: `booking-received-${b.id}`,
+            templateData: {
+              captainName,
+              anglerName,
+              tripTitle,
+              tripDate,
+              tripTime,
+              meetingPoint,
+              guests: b.guests ?? 1,
+              totalPrice,
+              bookingUrl: "https://fishtrippers.com/dashboard/aide",
+            },
+          });
+        }
+      } catch (e) {
+        console.error("[confirmBookingDraft] captain notification failed", e);
+      }
+    }
+
     return { ok: true };
   });
 

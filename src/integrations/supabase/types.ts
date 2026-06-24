@@ -2186,6 +2186,8 @@ export type Database = {
         | "reschedule_accepted"
         | "reschedule_declined"
         | "trip_cancelled_by_angler"
+        | "custom_offer_received"
+        | "booking_received"
       user_status_t: "unverified" | "verified" | "blocked" | "archived"
     }
     CompositeTypes: {
@@ -2354,6 +2356,8 @@ export const Constants = {
         "reschedule_accepted",
         "reschedule_declined",
         "trip_cancelled_by_angler",
+        "custom_offer_received",
+        "booking_received",
       ],
       user_status_t: ["unverified", "verified", "blocked", "archived"],
     },

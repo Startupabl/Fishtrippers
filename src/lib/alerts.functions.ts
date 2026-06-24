@@ -8,7 +8,13 @@ export interface UserAlertRow {
     | "listing_pending"
     | "listing_live"
     | "listing_declined"
-    | "booking_confirmed";
+    | "booking_confirmed"
+    | "booking_received"
+    | "custom_offer_received"
+    | "reschedule_requested"
+    | "reschedule_accepted"
+    | "reschedule_declined"
+    | "trip_cancelled_by_angler";
   journey_id: string | null;
   message: string;
   read_at: string | null;

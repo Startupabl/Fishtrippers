@@ -9,6 +9,7 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
+import { Route as UnsubscribeRouteImport } from './routes/unsubscribe'
 import { Route as TrustAndSafetyRouteImport } from './routes/trust-and-safety'
 import { Route as TermsRouteImport } from './routes/terms'
 import { Route as SitemapDotxmlRouteImport } from './routes/sitemap[.]xml'
@@ -46,6 +47,7 @@ import { Route as OnboardingChoiceRouteImport } from './routes/onboarding.choice
 import { Route as MessagesThreadIdRouteImport } from './routes/messages.$threadId'
 import { Route as MMentorSlugRouteImport } from './routes/m.$mentorSlug'
 import { Route as GiftSuccessRouteImport } from './routes/gift.success'
+import { Route as EmailUnsubscribeRouteImport } from './routes/email/unsubscribe'
 import { Route as CreateListingNewRouteImport } from './routes/create-listing.new'
 import { Route as CheckoutSuccessRouteImport } from './routes/checkout.success'
 import { Route as AuthenticatedSettingsRouteImport } from './routes/_authenticated/settings'
@@ -57,6 +59,7 @@ import { Route as AdminAdminIndexRouteImport } from './routes/_admin/admin.index
 import { Route as OnboardingLearnerResultsRouteImport } from './routes/onboarding.learner.results'
 import { Route as OnboardingLearnerPaceRouteImport } from './routes/onboarding.learner.pace'
 import { Route as OnboardingLearnerDeviceRouteImport } from './routes/onboarding.learner.device'
+import { Route as LovableEmailSuppressionRouteImport } from './routes/lovable/email/suppression'
 import { Route as ChartersLocationBusinessSlugRouteImport } from './routes/charters.$location.$businessSlug'
 import { Route as CCategorySlugListingSlugRouteImport } from './routes/c.$categorySlug.$listingSlug'
 import { Route as AuthenticatedSettingsSecurityRouteImport } from './routes/_authenticated/settings.security'
@@ -88,6 +91,8 @@ import { Route as AdminAdminAvailabilityRouteImport } from './routes/_admin/admi
 import { Route as AuthenticatedDashboardMessagesIndexRouteImport } from './routes/_authenticated/dashboard.messages.index'
 import { Route as AdminAdminUsersIndexRouteImport } from './routes/_admin/admin.users.index'
 import { Route as AdminAdminSearchSeoIndexRouteImport } from './routes/_admin/admin.search-seo.index'
+import { Route as LovableEmailTransactionalSendRouteImport } from './routes/lovable/email/transactional/send'
+import { Route as LovableEmailTransactionalPreviewRouteImport } from './routes/lovable/email/transactional/preview'
 import { Route as LovableEmailQueueProcessRouteImport } from './routes/lovable/email/queue/process'
 import { Route as LovableEmailAuthWebhookRouteImport } from './routes/lovable/email/auth/webhook'
 import { Route as LovableEmailAuthPreviewRouteImport } from './routes/lovable/email/auth/preview'
@@ -112,6 +117,11 @@ import { Route as AuthenticatedDashboardListingsJourneyIdShowcaseRouteImport } f
 import { Route as AuthenticatedDashboardListingsJourneyIdCouponsRouteImport } from './routes/_authenticated/dashboard.listings.$journeyId.coupons'
 import { Route as AdminAdminSettingsPagesPageIdRouteImport } from './routes/_admin/admin.settings.pages.$pageId'
 
+const UnsubscribeRoute = UnsubscribeRouteImport.update({
+  id: '/unsubscribe',
+  path: '/unsubscribe',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const TrustAndSafetyRoute = TrustAndSafetyRouteImport.update({
   id: '/trust-and-safety',
   path: '/trust-and-safety',
@@ -295,6 +305,11 @@ const GiftSuccessRoute = GiftSuccessRouteImport.update({
   path: '/success',
   getParentRoute: () => GiftRoute,
 } as any)
+const EmailUnsubscribeRoute = EmailUnsubscribeRouteImport.update({
+  id: '/email/unsubscribe',
+  path: '/email/unsubscribe',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const CreateListingNewRoute = CreateListingNewRouteImport.update({
   id: '/create-listing/new',
   path: '/create-listing/new',
@@ -351,6 +366,11 @@ const OnboardingLearnerDeviceRoute = OnboardingLearnerDeviceRouteImport.update({
   id: '/device',
   path: '/device',
   getParentRoute: () => OnboardingLearnerRoute,
+} as any)
+const LovableEmailSuppressionRoute = LovableEmailSuppressionRouteImport.update({
+  id: '/lovable/email/suppression',
+  path: '/lovable/email/suppression',
+  getParentRoute: () => rootRouteImport,
 } as any)
 const ChartersLocationBusinessSlugRoute =
   ChartersLocationBusinessSlugRouteImport.update({
@@ -530,6 +550,18 @@ const AdminAdminSearchSeoIndexRoute =
     path: '/',
     getParentRoute: () => AdminAdminSearchSeoRoute,
   } as any)
+const LovableEmailTransactionalSendRoute =
+  LovableEmailTransactionalSendRouteImport.update({
+    id: '/lovable/email/transactional/send',
+    path: '/lovable/email/transactional/send',
+    getParentRoute: () => rootRouteImport,
+  } as any)
+const LovableEmailTransactionalPreviewRoute =
+  LovableEmailTransactionalPreviewRouteImport.update({
+    id: '/lovable/email/transactional/preview',
+    path: '/lovable/email/transactional/preview',
+    getParentRoute: () => rootRouteImport,
+  } as any)
 const LovableEmailQueueProcessRoute =
   LovableEmailQueueProcessRouteImport.update({
     id: '/lovable/email/queue/process',
@@ -691,6 +723,7 @@ export interface FileRoutesByFullPath {
   '/sitemap.xml': typeof SitemapDotxmlRoute
   '/terms': typeof TermsRoute
   '/trust-and-safety': typeof TrustAndSafetyRoute
+  '/unsubscribe': typeof UnsubscribeRoute
   '/admin': typeof AdminAdminRouteWithChildren
   '/booking-review': typeof AuthenticatedBookingReviewRoute
   '/dashboard': typeof AuthenticatedDashboardRouteWithChildren
@@ -698,6 +731,7 @@ export interface FileRoutesByFullPath {
   '/settings': typeof AuthenticatedSettingsRouteWithChildren
   '/checkout/success': typeof CheckoutSuccessRoute
   '/create-listing/new': typeof CreateListingNewRoute
+  '/email/unsubscribe': typeof EmailUnsubscribeRoute
   '/gift/success': typeof GiftSuccessRoute
   '/m/$mentorSlug': typeof MMentorSlugRoute
   '/messages/$threadId': typeof MessagesThreadIdRoute
@@ -734,6 +768,7 @@ export interface FileRoutesByFullPath {
   '/settings/security': typeof AuthenticatedSettingsSecurityRoute
   '/c/$categorySlug/$listingSlug': typeof CCategorySlugListingSlugRoute
   '/charters/$location/$businessSlug': typeof ChartersLocationBusinessSlugRoute
+  '/lovable/email/suppression': typeof LovableEmailSuppressionRoute
   '/onboarding/learner/device': typeof OnboardingLearnerDeviceRoute
   '/onboarding/learner/pace': typeof OnboardingLearnerPaceRoute
   '/onboarding/learner/results': typeof OnboardingLearnerResultsRoute
@@ -757,6 +792,8 @@ export interface FileRoutesByFullPath {
   '/lovable/email/auth/preview': typeof LovableEmailAuthPreviewRoute
   '/lovable/email/auth/webhook': typeof LovableEmailAuthWebhookRoute
   '/lovable/email/queue/process': typeof LovableEmailQueueProcessRoute
+  '/lovable/email/transactional/preview': typeof LovableEmailTransactionalPreviewRoute
+  '/lovable/email/transactional/send': typeof LovableEmailTransactionalSendRoute
   '/admin/search-seo/': typeof AdminAdminSearchSeoIndexRoute
   '/admin/users/': typeof AdminAdminUsersIndexRoute
   '/dashboard/messages/': typeof AuthenticatedDashboardMessagesIndexRoute
@@ -793,12 +830,14 @@ export interface FileRoutesByTo {
   '/sitemap.xml': typeof SitemapDotxmlRoute
   '/terms': typeof TermsRoute
   '/trust-and-safety': typeof TrustAndSafetyRoute
+  '/unsubscribe': typeof UnsubscribeRoute
   '/booking-review': typeof AuthenticatedBookingReviewRoute
   '/dashboard': typeof AuthenticatedDashboardRouteWithChildren
   '/my-learning': typeof AuthenticatedMyLearningRoute
   '/settings': typeof AuthenticatedSettingsRouteWithChildren
   '/checkout/success': typeof CheckoutSuccessRoute
   '/create-listing/new': typeof CreateListingNewRoute
+  '/email/unsubscribe': typeof EmailUnsubscribeRoute
   '/gift/success': typeof GiftSuccessRoute
   '/m/$mentorSlug': typeof MMentorSlugRoute
   '/messages/$threadId': typeof MessagesThreadIdRoute
@@ -833,6 +872,7 @@ export interface FileRoutesByTo {
   '/settings/security': typeof AuthenticatedSettingsSecurityRoute
   '/c/$categorySlug/$listingSlug': typeof CCategorySlugListingSlugRoute
   '/charters/$location/$businessSlug': typeof ChartersLocationBusinessSlugRoute
+  '/lovable/email/suppression': typeof LovableEmailSuppressionRoute
   '/onboarding/learner/device': typeof OnboardingLearnerDeviceRoute
   '/onboarding/learner/pace': typeof OnboardingLearnerPaceRoute
   '/onboarding/learner/results': typeof OnboardingLearnerResultsRoute
@@ -856,6 +896,8 @@ export interface FileRoutesByTo {
   '/lovable/email/auth/preview': typeof LovableEmailAuthPreviewRoute
   '/lovable/email/auth/webhook': typeof LovableEmailAuthWebhookRoute
   '/lovable/email/queue/process': typeof LovableEmailQueueProcessRoute
+  '/lovable/email/transactional/preview': typeof LovableEmailTransactionalPreviewRoute
+  '/lovable/email/transactional/send': typeof LovableEmailTransactionalSendRoute
   '/admin/search-seo': typeof AdminAdminSearchSeoIndexRoute
   '/admin/users': typeof AdminAdminUsersIndexRoute
   '/dashboard/messages': typeof AuthenticatedDashboardMessagesIndexRoute
@@ -895,6 +937,7 @@ export interface FileRoutesById {
   '/sitemap.xml': typeof SitemapDotxmlRoute
   '/terms': typeof TermsRoute
   '/trust-and-safety': typeof TrustAndSafetyRoute
+  '/unsubscribe': typeof UnsubscribeRoute
   '/_admin/admin': typeof AdminAdminRouteWithChildren
   '/_authenticated/booking-review': typeof AuthenticatedBookingReviewRoute
   '/_authenticated/dashboard': typeof AuthenticatedDashboardRouteWithChildren
@@ -902,6 +945,7 @@ export interface FileRoutesById {
   '/_authenticated/settings': typeof AuthenticatedSettingsRouteWithChildren
   '/checkout/success': typeof CheckoutSuccessRoute
   '/create-listing/new': typeof CreateListingNewRoute
+  '/email/unsubscribe': typeof EmailUnsubscribeRoute
   '/gift/success': typeof GiftSuccessRoute
   '/m/$mentorSlug': typeof MMentorSlugRoute
   '/messages/$threadId': typeof MessagesThreadIdRoute
@@ -938,6 +982,7 @@ export interface FileRoutesById {
   '/_authenticated/settings/security': typeof AuthenticatedSettingsSecurityRoute
   '/c/$categorySlug/$listingSlug': typeof CCategorySlugListingSlugRoute
   '/charters/$location/$businessSlug': typeof ChartersLocationBusinessSlugRoute
+  '/lovable/email/suppression': typeof LovableEmailSuppressionRoute
   '/onboarding/learner/device': typeof OnboardingLearnerDeviceRoute
   '/onboarding/learner/pace': typeof OnboardingLearnerPaceRoute
   '/onboarding/learner/results': typeof OnboardingLearnerResultsRoute
@@ -961,6 +1006,8 @@ export interface FileRoutesById {
   '/lovable/email/auth/preview': typeof LovableEmailAuthPreviewRoute
   '/lovable/email/auth/webhook': typeof LovableEmailAuthWebhookRoute
   '/lovable/email/queue/process': typeof LovableEmailQueueProcessRoute
+  '/lovable/email/transactional/preview': typeof LovableEmailTransactionalPreviewRoute
+  '/lovable/email/transactional/send': typeof LovableEmailTransactionalSendRoute
   '/_admin/admin/search-seo/': typeof AdminAdminSearchSeoIndexRoute
   '/_admin/admin/users/': typeof AdminAdminUsersIndexRoute
   '/_authenticated/dashboard/messages/': typeof AuthenticatedDashboardMessagesIndexRoute
@@ -999,6 +1046,7 @@ export interface FileRouteTypes {
     | '/sitemap.xml'
     | '/terms'
     | '/trust-and-safety'
+    | '/unsubscribe'
     | '/admin'
     | '/booking-review'
     | '/dashboard'
@@ -1006,6 +1054,7 @@ export interface FileRouteTypes {
     | '/settings'
     | '/checkout/success'
     | '/create-listing/new'
+    | '/email/unsubscribe'
     | '/gift/success'
     | '/m/$mentorSlug'
     | '/messages/$threadId'
@@ -1042,6 +1091,7 @@ export interface FileRouteTypes {
     | '/settings/security'
     | '/c/$categorySlug/$listingSlug'
     | '/charters/$location/$businessSlug'
+    | '/lovable/email/suppression'
     | '/onboarding/learner/device'
     | '/onboarding/learner/pace'
     | '/onboarding/learner/results'
@@ -1065,6 +1115,8 @@ export interface FileRouteTypes {
     | '/lovable/email/auth/preview'
     | '/lovable/email/auth/webhook'
     | '/lovable/email/queue/process'
+    | '/lovable/email/transactional/preview'
+    | '/lovable/email/transactional/send'
     | '/admin/search-seo/'
     | '/admin/users/'
     | '/dashboard/messages/'
@@ -1101,12 +1153,14 @@ export interface FileRouteTypes {
     | '/sitemap.xml'
     | '/terms'
     | '/trust-and-safety'
+    | '/unsubscribe'
     | '/booking-review'
     | '/dashboard'
     | '/my-learning'
     | '/settings'
     | '/checkout/success'
     | '/create-listing/new'
+    | '/email/unsubscribe'
     | '/gift/success'
     | '/m/$mentorSlug'
     | '/messages/$threadId'
@@ -1141,6 +1195,7 @@ export interface FileRouteTypes {
     | '/settings/security'
     | '/c/$categorySlug/$listingSlug'
     | '/charters/$location/$businessSlug'
+    | '/lovable/email/suppression'
     | '/onboarding/learner/device'
     | '/onboarding/learner/pace'
     | '/onboarding/learner/results'
@@ -1164,6 +1219,8 @@ export interface FileRouteTypes {
     | '/lovable/email/auth/preview'
     | '/lovable/email/auth/webhook'
     | '/lovable/email/queue/process'
+    | '/lovable/email/transactional/preview'
+    | '/lovable/email/transactional/send'
     | '/admin/search-seo'
     | '/admin/users'
     | '/dashboard/messages'
@@ -1202,6 +1259,7 @@ export interface FileRouteTypes {
     | '/sitemap.xml'
     | '/terms'
     | '/trust-and-safety'
+    | '/unsubscribe'
     | '/_admin/admin'
     | '/_authenticated/booking-review'
     | '/_authenticated/dashboard'
@@ -1209,6 +1267,7 @@ export interface FileRouteTypes {
     | '/_authenticated/settings'
     | '/checkout/success'
     | '/create-listing/new'
+    | '/email/unsubscribe'
     | '/gift/success'
     | '/m/$mentorSlug'
     | '/messages/$threadId'
@@ -1245,6 +1304,7 @@ export interface FileRouteTypes {
     | '/_authenticated/settings/security'
     | '/c/$categorySlug/$listingSlug'
     | '/charters/$location/$businessSlug'
+    | '/lovable/email/suppression'
     | '/onboarding/learner/device'
     | '/onboarding/learner/pace'
     | '/onboarding/learner/results'
@@ -1268,6 +1328,8 @@ export interface FileRouteTypes {
     | '/lovable/email/auth/preview'
     | '/lovable/email/auth/webhook'
     | '/lovable/email/queue/process'
+    | '/lovable/email/transactional/preview'
+    | '/lovable/email/transactional/send'
     | '/_admin/admin/search-seo/'
     | '/_admin/admin/users/'
     | '/_authenticated/dashboard/messages/'
@@ -1307,7 +1369,9 @@ export interface RootRouteChildren {
   SitemapDotxmlRoute: typeof SitemapDotxmlRoute
   TermsRoute: typeof TermsRoute
   TrustAndSafetyRoute: typeof TrustAndSafetyRoute
+  UnsubscribeRoute: typeof UnsubscribeRoute
   CreateListingNewRoute: typeof CreateListingNewRoute
+  EmailUnsubscribeRoute: typeof EmailUnsubscribeRoute
   MMentorSlugRoute: typeof MMentorSlugRoute
   MessagesThreadIdRoute: typeof MessagesThreadIdRoute
   OnboardingChoiceRoute: typeof OnboardingChoiceRoute
@@ -1317,15 +1381,25 @@ export interface RootRouteChildren {
   CreateListingIndexRoute: typeof CreateListingIndexRoute
   CCategorySlugListingSlugRoute: typeof CCategorySlugListingSlugRoute
   ChartersLocationBusinessSlugRoute: typeof ChartersLocationBusinessSlugRoute
+  LovableEmailSuppressionRoute: typeof LovableEmailSuppressionRoute
   ApiPublicHooksCleanupOldMessagesRoute: typeof ApiPublicHooksCleanupOldMessagesRoute
   ApiPublicStripeWebhookRoute: typeof ApiPublicStripeWebhookRoute
   LovableEmailAuthPreviewRoute: typeof LovableEmailAuthPreviewRoute
   LovableEmailAuthWebhookRoute: typeof LovableEmailAuthWebhookRoute
   LovableEmailQueueProcessRoute: typeof LovableEmailQueueProcessRoute
+  LovableEmailTransactionalPreviewRoute: typeof LovableEmailTransactionalPreviewRoute
+  LovableEmailTransactionalSendRoute: typeof LovableEmailTransactionalSendRoute
 }
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
+    '/unsubscribe': {
+      id: '/unsubscribe'
+      path: '/unsubscribe'
+      fullPath: '/unsubscribe'
+      preLoaderRoute: typeof UnsubscribeRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/trust-and-safety': {
       id: '/trust-and-safety'
       path: '/trust-and-safety'
@@ -1585,6 +1659,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof GiftSuccessRouteImport
       parentRoute: typeof GiftRoute
     }
+    '/email/unsubscribe': {
+      id: '/email/unsubscribe'
+      path: '/email/unsubscribe'
+      fullPath: '/email/unsubscribe'
+      preLoaderRoute: typeof EmailUnsubscribeRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/create-listing/new': {
       id: '/create-listing/new'
       path: '/create-listing/new'
@@ -1661,6 +1742,13 @@ declare module '@tanstack/react-router' {
       fullPath: '/onboarding/learner/device'
       preLoaderRoute: typeof OnboardingLearnerDeviceRouteImport
       parentRoute: typeof OnboardingLearnerRoute
+    }
+    '/lovable/email/suppression': {
+      id: '/lovable/email/suppression'
+      path: '/lovable/email/suppression'
+      fullPath: '/lovable/email/suppression'
+      preLoaderRoute: typeof LovableEmailSuppressionRouteImport
+      parentRoute: typeof rootRouteImport
     }
     '/charters/$location/$businessSlug': {
       id: '/charters/$location/$businessSlug'
@@ -1878,6 +1966,20 @@ declare module '@tanstack/react-router' {
       fullPath: '/admin/search-seo/'
       preLoaderRoute: typeof AdminAdminSearchSeoIndexRouteImport
       parentRoute: typeof AdminAdminSearchSeoRoute
+    }
+    '/lovable/email/transactional/send': {
+      id: '/lovable/email/transactional/send'
+      path: '/lovable/email/transactional/send'
+      fullPath: '/lovable/email/transactional/send'
+      preLoaderRoute: typeof LovableEmailTransactionalSendRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/lovable/email/transactional/preview': {
+      id: '/lovable/email/transactional/preview'
+      path: '/lovable/email/transactional/preview'
+      fullPath: '/lovable/email/transactional/preview'
+      preLoaderRoute: typeof LovableEmailTransactionalPreviewRouteImport
+      parentRoute: typeof rootRouteImport
     }
     '/lovable/email/queue/process': {
       id: '/lovable/email/queue/process'
@@ -2337,7 +2439,9 @@ const rootRouteChildren: RootRouteChildren = {
   SitemapDotxmlRoute: SitemapDotxmlRoute,
   TermsRoute: TermsRoute,
   TrustAndSafetyRoute: TrustAndSafetyRoute,
+  UnsubscribeRoute: UnsubscribeRoute,
   CreateListingNewRoute: CreateListingNewRoute,
+  EmailUnsubscribeRoute: EmailUnsubscribeRoute,
   MMentorSlugRoute: MMentorSlugRoute,
   MessagesThreadIdRoute: MessagesThreadIdRoute,
   OnboardingChoiceRoute: OnboardingChoiceRoute,
@@ -2347,11 +2451,14 @@ const rootRouteChildren: RootRouteChildren = {
   CreateListingIndexRoute: CreateListingIndexRoute,
   CCategorySlugListingSlugRoute: CCategorySlugListingSlugRoute,
   ChartersLocationBusinessSlugRoute: ChartersLocationBusinessSlugRoute,
+  LovableEmailSuppressionRoute: LovableEmailSuppressionRoute,
   ApiPublicHooksCleanupOldMessagesRoute: ApiPublicHooksCleanupOldMessagesRoute,
   ApiPublicStripeWebhookRoute: ApiPublicStripeWebhookRoute,
   LovableEmailAuthPreviewRoute: LovableEmailAuthPreviewRoute,
   LovableEmailAuthWebhookRoute: LovableEmailAuthWebhookRoute,
   LovableEmailQueueProcessRoute: LovableEmailQueueProcessRoute,
+  LovableEmailTransactionalPreviewRoute: LovableEmailTransactionalPreviewRoute,
+  LovableEmailTransactionalSendRoute: LovableEmailTransactionalSendRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
