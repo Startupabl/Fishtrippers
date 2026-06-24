@@ -152,32 +152,41 @@ export function DeparturePointPicker({ value, onChange }: Props) {
     try {
       setLoading(true);
       const r = await resolvePlaceFn({ data: { placeId: s.placeId } });
+      const fullAddress = r.address || `${s.primaryText}, ${s.secondaryText}`;
+      const fallback = parseCityStateCountry(fullAddress);
       onChange({
-        address: r.address || `${s.primaryText}, ${s.secondaryText}`,
+        address: fullAddress,
         lat: r.lat,
         lng: r.lng,
         placeId: r.placeId,
-        city: (r as any).city ?? null,
-        state: (r as any).state ?? null,
-        country: (r as any).country ?? null,
+        city: ((r as any).city ?? null) || fallback.city,
+        state: ((r as any).state ?? null) || fallback.state,
+        country: ((r as any).country ?? null) || fallback.country,
       });
       if (placesLibRef.current) {
         sessionTokenRef.current = new placesLibRef.current.AutocompleteSessionToken();
       }
-    } catch {
+    } catch (err) {
+      const fallbackAddress = `${s.primaryText}, ${s.secondaryText}`;
+      const fallback = parseCityStateCountry(fallbackAddress);
+      toast.error(
+        "Couldn't fully verify that address with Google — we saved it, but please double-check city/region.",
+      );
+      console.warn("resolvePlace failed", err);
       onChange({
-        address: `${s.primaryText}, ${s.secondaryText}`,
+        address: fallbackAddress,
         lat: null,
         lng: null,
         placeId: s.placeId,
-        city: null,
-        state: null,
-        country: null,
+        city: fallback.city,
+        state: fallback.state,
+        country: fallback.country,
       });
     } finally {
       setLoading(false);
     }
   };
+
 
   return (
     <div className="space-y-2">
