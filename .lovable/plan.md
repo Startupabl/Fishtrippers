@@ -1,38 +1,41 @@
-## Update vessel capsule with info icon + guest capacity
+### Tooltip text color fix
 
-**File:** `src/components/listings/OperatorCard.tsx`
+The vessel tooltip in `OperatorCard` currently shows the capacity line in `text-muted-foreground`, which makes it hard to read against the tooltip background. Both the boat type and the capacity line should be the same bright white color.
 
-### Changes
+### Change
 
-1. **Add an `Info` icon (lucide-react)** to the left of the "32 ft Boat" label inside the vessel segment, sized `size-3.5` with `text-muted-foreground` so it reads as a subtle "more info" affordance without competing visually with the bold label.
+In `src/components/listings/OperatorCard.tsx`, update the `TooltipContent`:
 
-2. **Upgrade from the native `title` attribute to the shadcn `Tooltip`** component (already present at `src/components/ui/tooltip.tsx`). The native `title` can't render two styled lines and only appears after a long delay, so users miss it. The shadcn tooltip:
-   - Appears quickly on hover/focus (also keyboard-accessible)
-   - Renders two lines:
-     - **Line 1 (bold):** full vessel label, e.g. `32 ft Center Console`
-     - **Line 2 (muted, smaller):** `Up to {vessel_capacity} Anglers` — only rendered when `vessel_capacity` is present; singular handled (`1 Angler`)
-   - Falls back gracefully: if no boat type, just shows length; if no capacity, only line 1 shows
+- Remove the per-line styling overrides and let both lines render as bright white (`text-white`).
+- Keep the boat type line bold and the capacity line smaller.
 
-3. **Wrap the listings page (or app root) with `TooltipProvider`** if not already wrapped, so tooltips work. I'll check `__root.tsx` first and add it there once globally if missing, rather than per-card.
+Current tooltip content:
 
-### Data
-`vessel_capacity` is already returned by `OperatorCardDTO` (sourced from `vessels.max_passenger_capacity`) — no backend or search changes required.
+```tsx
+<TooltipContent side="top" className="text-center">
+  <div className="font-semibold">{fullVesselLabel}</div>
+  {capacity != null && (
+    <div className="text-xs text-muted-foreground">
+      Up to {capacity} Angler{capacity === 1 ? "" : "s"}
+    </div>
+  )}
+</TooltipContent>
+```
 
-### Icon choice
-`Info` (lucide) — the standard "tap/hover for more" affordance. Alternatives considered: `HelpCircle` (feels like "I'm confused"), `ChevronDown` (implies expand). `Info` is the clearest fit.
+Updated:
 
-### Visual sketch
-
-```text
-┌─────────────────────────────────┐
-│  ⓘ 32 ft Boat  │  ★ 4.8 (12)   │   ← capsule
-└─────────────────────────────────┘
-        ▲ hover
-   ┌────────────────────────┐
-   │ 32 ft Center Console   │
-   │ Up to 6 Anglers        │
-   └────────────────────────┘
+```tsx
+<TooltipContent side="top" className="text-center text-white">
+  <div className="font-semibold">{fullVesselLabel}</div>
+  {capacity != null && (
+    <div className="text-xs">
+      Up to {capacity} Angler{capacity === 1 ? "" : "s"}
+    </div>
+  )}
+</TooltipContent>
 ```
 
 ### Verification
-Inspect a charter card: confirm the `ⓘ` icon shows left of "32 ft Boat", hover reveals the two-line tooltip with the full type and "Up to N Anglers", and a card without capacity shows only the type line. Guide cards unaffected.
+
+- Hover the vessel pill on a charter card and confirm both lines are bright white and readable.
+- Confirm no other visual changes to the card or its hover behavior.

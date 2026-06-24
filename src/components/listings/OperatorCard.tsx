@@ -39,10 +39,10 @@ export function OperatorCard({ operator }: { operator: OperatorCardDTO }) {
                   <span className="truncate">{compactVesselLabel}</span>
                 </span>
               </TooltipTrigger>
-              <TooltipContent side="top" className="text-center">
+              <TooltipContent side="top" className="text-center text-white">
                 <div className="font-semibold">{fullVesselLabel}</div>
                 {capacity != null && (
-                  <div className="text-xs text-muted-foreground">
+                  <div className="text-xs">
                     Up to {capacity} Angler{capacity === 1 ? "" : "s"}
                   </div>
                 )}
