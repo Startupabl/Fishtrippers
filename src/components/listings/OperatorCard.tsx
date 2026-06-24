@@ -1,5 +1,5 @@
 import { Link } from "@tanstack/react-router";
-import { Sailboat, Users, ShieldCheck, MapPin, Zap, Star, Ship, Footprints, Sparkles } from "lucide-react";
+import { Users, ShieldCheck, MapPin, Zap, Star, Ship, Footprints, Sparkles } from "lucide-react";
 import type { OperatorCardDTO } from "@/lib/operators-search.functions";
 
 export function OperatorCard({ operator }: { operator: OperatorCardDTO }) {
@@ -20,29 +20,18 @@ export function OperatorCard({ operator }: { operator: OperatorCardDTO }) {
         </>
       ),
     });
-  } else if (operator.vessel_length_ft != null) {
-    segments.push({
-      key: "length",
-      content: (
-        <>
-          <Sailboat className="size-4 text-foreground" />
-          <span>{operator.vessel_length_ft} ft</span>
-        </>
-      ),
-    });
+  } else {
+    const lengthLabel =
+      operator.vessel_length_ft != null ? `${operator.vessel_length_ft} ft` : null;
+    const parts = [lengthLabel, operator.boat_type_name].filter(Boolean);
+    if (parts.length > 0) {
+      segments.push({
+        key: "vessel",
+        content: <span>{parts.join(" ")}</span>,
+      });
+    }
   }
 
-  if (operator.vessel_capacity != null) {
-    segments.push({
-      key: "capacity",
-      content: (
-        <>
-          <Users className="size-4 text-foreground" />
-          <span>{operator.vessel_capacity}</span>
-        </>
-      ),
-    });
-  }
 
   const reviewCount = operator.review_count ?? 0;
   if (reviewCount >= 1 && operator.rating != null) {
