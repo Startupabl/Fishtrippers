@@ -141,7 +141,9 @@ function OperatorListingPage() {
               trips={trips as any}
               hostId={op?.id ?? null}
               hostHasAvailability={data.hostHasAvailability}
+              ownerId={op?.owner_id ?? null}
             />
+
             <PoliciesBlock cancellationPolicy={op?.cancellation_policy ?? null} />
             <MeetingPointMap
               address={op?.default_departure_address ?? null}
