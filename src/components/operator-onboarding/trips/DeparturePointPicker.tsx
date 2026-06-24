@@ -7,20 +7,7 @@ import { useServerFn } from "@tanstack/react-start";
 import { resolvePlace } from "@/lib/trips.functions";
 import { parseCityStateCountry } from "@/lib/address.shared";
 
-  if (!address) return { city: null, state: null, country: null };
-  const parts = address.split(",").map((s) => s.trim()).filter(Boolean);
-  if (parts.length < 2) return { city: null, state: null, country: null };
-  const hasCountry = parts.length >= 4;
-  const country = hasCountry ? parts[parts.length - 1] : null;
-  const stateZipIdx = hasCountry ? parts.length - 2 : parts.length - 1;
-  const cityIdx = stateZipIdx - 1;
-  if (cityIdx < 0) return { city: null, state: null, country };
-  const city = parts[cityIdx] || null;
-  const stateZip = parts[stateZipIdx] || "";
-  const stateMatch = stateZip.match(/^([A-Za-z]{2,})\b/);
-  const state = stateMatch ? stateMatch[1].toUpperCase() : null;
-  return { city, state, country };
-}
+
 
 
 interface SelectedPlace {
