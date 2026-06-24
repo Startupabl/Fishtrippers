@@ -140,7 +140,7 @@ export function OperatorCard({ operator }: { operator: OperatorCardDTO }) {
           )}
 
           {operator.booking_type === "inquiry" && (
-            <p className="mt-1 flex items-center gap-1.5 text-sm text-accent">
+            <p className="mt-1 flex items-center gap-1.5 text-sm text-primary">
               <Sparkles className="size-3.5" />
               Bespoke Trip
             </p>
