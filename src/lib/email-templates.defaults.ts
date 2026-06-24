@@ -27,53 +27,61 @@ export const EMAIL_TEMPLATE_DEFAULTS: Record<EmailTemplatePurpose, EmailTemplate
   welcome_user: {
     display_name: "Welcome Email",
     description: "Sent when a new user completes signup.",
-    subject: "Welcome to Lumin, {{first_name}}!",
+    subject: "Welcome to FishTrippers, {{first_name}}!",
     body: `Hi {{first_name}},
 
-Welcome to Lumin! We're thrilled to have you join our community of curious learners.
+Welcome to FishTrippers! We're thrilled to have you join our community of anglers and captains.
 
-Start exploring courses and connect with expert instructors today:
+Start exploring trips and connect with captains today:
 {{app_url}}
 
-— The Lumin Team`,
+— The FishTrippers Team`,
     variables: ["first_name", "app_url"],
   },
   email_verification: {
     display_name: "Email Verification",
     description: "Sent to confirm a user's email address.",
-    subject: "Verify your email address",
+    subject: "Verify your FishTrippers email address",
     body: `Hi {{first_name}},
 
-Please confirm your email address by clicking the link below:
+Please confirm your email address to activate your FishTrippers account:
 
 {{verification_url}}
 
-This link will expire in 24 hours.`,
+This link will expire in 24 hours.
+
+— The FishTrippers Team`,
     variables: ["first_name", "verification_url"],
   },
   password_reset: {
     display_name: "Password Reset",
     description: "Sent when a user requests a password reset.",
-    subject: "Reset your Lumin password",
+    subject: "Reset your FishTrippers password",
     body: `Hi {{first_name}},
 
-We received a request to reset your password. Click the link below to choose a new one:
+We received a request to reset your FishTrippers password. Click the link below to choose a new one:
 
 {{reset_url}}
 
-If you didn't request this, you can safely ignore this email.`,
+If you didn't request this, you can safely ignore this email.
+
+— The FishTrippers Team`,
     variables: ["first_name", "reset_url"],
   },
   magic_link: {
     display_name: "Magic Sign-in Link",
     description: "Passwordless sign-in link.",
-    subject: "Your Lumin sign-in link",
-    body: `Click the link below to sign in to Lumin:
+    subject: "Your FishTrippers sign-in link",
+    body: `Hi {{first_name}},
+
+Click the link below to sign in to FishTrippers:
 
 {{magic_link}}
 
-This link expires in 15 minutes.`,
-    variables: ["magic_link"],
+This link expires in 15 minutes.
+
+— The FishTrippers Team`,
+    variables: ["first_name", "magic_link"],
   },
   new_chat_message: {
     display_name: "New Chat Message",
