@@ -47,7 +47,7 @@ export const getMyCapabilities = createServerFn({ method: "GET" })
     const { supabase, userId } = context;
     const { data, error } = await supabase
       .from("operators")
-      .select("target_species, fishing_environments, base_currency")
+      .select("target_species, fishing_environments, base_currency, business_type")
       .eq("owner_id", userId)
       .maybeSingle();
     if (error) throw new Error(error.message);
@@ -55,8 +55,10 @@ export const getMyCapabilities = createServerFn({ method: "GET" })
       target_species: (data?.target_species as string[]) ?? [],
       fishing_environments: (data?.fishing_environments as string[]) ?? [],
       base_currency: (data?.base_currency as string) ?? "USD",
+      business_type: (data?.business_type as "charter" | "guide" | null) ?? null,
     };
   });
+
 
 export const upsertTrip = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
@@ -227,7 +229,7 @@ export const listUndersoldSharedTrips = createServerFn({ method: "GET" })
       .from("trip_packages")
       .select("id, title, min_seats_to_sail, seats_available")
       .eq("operator_id", op.id)
-      .eq("charter_type", "shared_tour")
+      .in("charter_type", ["shared_tour", "small_group_trip"])
       .not("min_seats_to_sail", "is", null);
     if (tripErr) throw new Error(tripErr.message);
     if (!trips || trips.length === 0) return [];
