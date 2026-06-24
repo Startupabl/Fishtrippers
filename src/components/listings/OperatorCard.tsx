@@ -85,11 +85,11 @@ export function OperatorCard({ operator }: { operator: OperatorCardDTO }) {
 
           {segments.length > 0 && (
             <div className="pointer-events-none absolute inset-x-0 bottom-0 z-10 flex translate-y-1/2 justify-center px-4">
-              <div className="pointer-events-auto flex w-[90%] items-stretch rounded-full border border-border/60 bg-card text-sm font-semibold text-foreground shadow-md">
+              <div className="pointer-events-auto flex w-[95%] items-stretch rounded-full border border-border/60 bg-card text-sm font-semibold text-foreground shadow-md">
                 {segments.map((seg, idx) => (
                   <div
                     key={seg.key}
-                    className={`flex flex-1 items-center justify-center gap-1.5 whitespace-nowrap px-2 py-2 ${
+                    className={`flex min-w-0 flex-1 items-center justify-center gap-1.5 px-2 py-2 [&>span]:truncate ${
                       idx > 0 ? "border-l border-border/70" : ""
                     }`}
                   >

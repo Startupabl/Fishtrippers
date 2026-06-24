@@ -1,28 +1,14 @@
-Switch the "From {price}" label on operator cards to per-additional-guest pricing instead of first-guest pricing.
+Fix the operator card capsule overflow so the "Verified" segment no longer breaks out of the pill.
 
-## Logic
+What we will do:
+- Update `src/components/listings/OperatorCard.tsx`.
+- Increase the floating pill width from `w-[90%]` to `w-[95%]` so it uses more of the card width.
+- Replace `whitespace-nowrap` on each segment with `truncate` (or `line-clamp-1`) so long vessel text like "32 ft Center Console" clips with ellipsis instead of forcing the pill wider.
+- Keep the existing split-line separator between the left segment and the Verified segment.
+- Leave guides unchanged (they use the same capsule layout, so they will also benefit from the extra width and truncation).
 
-For each `trip_packages` row, compute a "per-person card price":
-- **Shared types** (`shared_tour`, `small_group_trip`): use `price_minor` — already the per-person rate.
-- **Private types** (`private_charter`, `private_trip`): use `per_extra_minor` when it is set and > 0; otherwise fall back to `price_minor` (legacy/older trips that never set per-extra).
+Verification:
+- Check the card preview for a charter with a long boat name to confirm the pill stays fully inside the card and the text ends with "...".
+- Check a guide card to confirm no regression.
 
-Pick the cheapest of those values across the operator's active trips, format with `formatPrice` and the trip's `currency`, and return as `lowest_price_label`.
-
-## Files touched
-
-- `src/lib/operators-search.functions.ts`
-  - Add `per_extra_minor, charter_type` to the trip-package projection.
-  - Replace the cheapest-by-`price_minor` loop with a cheapest-by-card-price loop using `isSharedTripType` from `src/lib/trips.shared.ts`.
-  - No DTO field rename — `lowest_price_label` keeps its name and shape.
-
-## Out of scope
-
-- Card UI (`OperatorCard.tsx`) — already renders `lowest_price_label` verbatim, no change needed.
-- Trip-level price filters (`priceMinMinor`/`priceMaxMinor`) — left filtering on `price_minor` for now; user didn't ask to retune the search filter.
-- Checkout/order math — unchanged.
-
-## Verification
-
-- Spot check: Blue Ocean Charters' Private Charter (price 400, per-extra 200) should now show "From US $200".
-- A Shared Tour priced at $85/person should still show "From US $85".
-- A private trip with `per_extra_minor` null should still show its original `price_minor`.
+No backend or search changes are needed; this is purely a presentation fix in the card component.
