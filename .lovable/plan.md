@@ -1,54 +1,54 @@
 ## Goal
 
-Make every email the platform sends — both app/transactional **and** Supabase Auth emails (signup confirmation, password reset, magic link, email change, reauthentication, team invite) — come from `hello@fishtrippers.com` via Resend.
+Route all Supabase Auth emails through `hello@fishtrippers.com` using **Resend SMTP**, since Send Email Hooks are not exposed in the Lovable Cloud UI.
 
-## Current state
+## Why this path
 
-- App/transactional emails (booking confirmation to angler + captain, new chat message, custom offer, listing approval/rejection, payout sent, urgent message) already go through `sendEmail()` in `src/lib/email-sender.server.ts` → Resend → `FishTrippers <hello@fishtrippers.com>`. No change needed.
-- Auth emails are still sent by Supabase Auth's built-in sender (generic Supabase domain). The `welcome_user`, `email_verification`, `password_reset`, and `magic_link` templates exist in the admin email-templates manager but nothing wires them into the Supabase auth flow.
+- Lovable Cloud doesn't expose Supabase Auth Hooks configuration, so the `auth-email-hook` edge function we built has no UI to be activated. Without activation, Supabase will never call it.
+- Cloud DOES expose Custom SMTP under Cloud → Users → Auth Settings → Email settings. Pointing it at Resend's SMTP server with `hello@fishtrippers.com` as sender achieves the same end result: every auth email goes out from your domain via Resend.
+- The transactional path (booking confirmations, messages, payouts, etc.) is untouched — it continues to use `sendEmail()` → Resend SDK directly.
 
-## What to build
+## What you'll do (one-time, in Cloud UI)
 
-### 1. Supabase Send Email Hook (edge function)
+Cloud → Users → Auth Settings → Email settings → **Enable custom SMTP**, then enter:
 
-Create `supabase/functions/auth-email-hook/index.ts`. Supabase Auth posts every outbound auth email to this hook; the hook renders the right branded template and sends via Resend.
+| Field | Value |
+| --- | --- |
+| Sender email | `hello@fishtrippers.com` |
+| Sender name | `FishTrippers` |
+| SMTP host | `smtp.resend.com` |
+| SMTP port | `465` |
+| SMTP user | `resend` |
+| SMTP password | your `RESEND_API_KEY` value (the same one already stored as a project secret) |
+| Minimum interval | leave default |
 
-- Verify the request signature using a hook secret (`SEND_EMAIL_HOOK_SECRET`, generated and stored automatically).
-- Read the payload: `user.email`, `email_data.email_action_type` (`signup` | `recovery` | `magiclink` | `email_change` | `email_change_current` | `invite` | `reauthentication`), `token_hash`, `redirect_to`, `site_url`, plus user metadata for first name.
-- Build the confirmation URL using `site_url` + `/auth/verify?token_hash=...&type=...&redirect_to=...` (standard Supabase verify endpoint).
-- Map each `email_action_type` to one of the existing admin-editable templates (loaded via `email-templates.server.ts`, with the seeded defaults as fallback):
-  - `signup` → `email_verification`
-  - `recovery` → `password_reset`
-  - `magiclink` → `magic_link`
-  - `invite` → reuse `email_verification` copy with an "invited" subject override
-  - `email_change` / `email_change_current` → reuse `email_verification` copy with subject "Confirm your new email"
-  - `reauthentication` → short-circuit template that just contains the OTP token
-- Call `sendEmail()` from `email-sender.server.ts` — already pinned to `FishTrippers <hello@fishtrippers.com>`.
-- Update template variables so the existing `{{verification_url}}`, `{{reset_url}}`, `{{magic_link}}`, `{{first_name}}` tokens populate correctly. Replace any `"Lumin"` strings in seeded defaults with `"FishTrippers"` so branding is consistent (admin can override later).
+Save. Auth emails immediately start routing through Resend.
 
-### 2. Wire the hook into Supabase Auth
+## What I'll do in code
 
-- Register the function in `supabase/config.toml` with `verify_jwt = false` (Supabase calls it unauthenticated and signs the body instead).
-- Generate `SEND_EMAIL_HOOK_SECRET` and set it as a project secret so the hook can verify Supabase's HMAC signature.
-- Enable the Send Email Hook in Supabase Auth pointing at this function URL.
+### 1. Remove the dead auth-email-hook function
 
-### 3. Brand-consistency cleanup
+Delete `supabase/functions/auth-email-hook/` and its `config.toml` block. It can't be wired up in Cloud, so leaving it there is just confusing.
 
-- Update the four auth-related rows in `email-templates.defaults.ts` (`welcome_user`, `email_verification`, `password_reset`, `magic_link`) to replace "Lumin" copy with "FishTrippers" + the existing brand voice, so any future "Reset to default" click in the admin gives the right text. (No DB migration — the defaults file is the source of truth, admins re-seed on demand.)
+### 2. Delete the unused hook secret
 
-### 4. Verification
+Remove `SEND_EMAIL_HOOK_SECRET` from project secrets — nothing reads it now.
 
-- Trigger a test signup → expect a "Verify your email" email from `hello@fishtrippers.com`.
-- Trigger a password reset on `/auth` → expect the reset email from the same sender.
-- Trigger a magic-link sign-in → same.
-- Confirm an existing booking confirmation still arrives (regression check on the transactional path).
+### 3. Customize the Supabase auth email templates in Cloud
+
+Supabase ships default templates ("Confirm signup", "Reset password", "Magic link", "Change email"). After SMTP is enabled, I'll give you the exact branded HTML to paste into each of those templates in Cloud → Users → Auth Settings → Email templates — matching the FishTrippers tone we already use for the admin-editable templates, with the right `{{ .ConfirmationURL }}` / `{{ .Token }}` Supabase variables.
+
+### 4. Brand cleanup (already done last turn, keep as-is)
+
+The `welcome_user`, `email_verification`, `password_reset`, `magic_link` defaults in `src/lib/email-templates.defaults.ts` are already rewritten to FishTrippers branding. They remain useful as the source-of-truth for the in-app templates manager, even though Supabase Auth won't read them.
+
+## Verification
+
+1. After you save SMTP settings, request a password reset on `/auth`. Email should arrive from `hello@fishtrippers.com`.
+2. Sign up a new test user. Confirmation email should arrive from the same address.
+3. Existing booking confirmation flow continues to work (regression sanity check).
 
 ## Out of scope
 
-- No SMTP swap inside Supabase (we use the hook, which keeps templates editable in the admin UI).
-- No new template kinds — we reuse what already exists in `email_templates`.
-- No change to the transactional `sendEmail` flow.
-
-## Prerequisite confirmed by user
-
-`fishtrippers.com` is already verified as a Resend sending domain, so `hello@fishtrippers.com` can ship today.
+- Send Email Hook (not available in Cloud UI).
+- Switching transactional emails away from the Resend SDK — they already send from `hello@fishtrippers.com`.
