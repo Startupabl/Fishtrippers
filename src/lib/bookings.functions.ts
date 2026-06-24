@@ -1,6 +1,10 @@
 // Server functions for the negotiated booking flow:
-// Aide creates a Custom Offer (price + scheduled slots) -> Learner accepts/declines ->
+// Guide creates a Custom Trip (price + scheduled slot + meeting point) -> Angler accepts/declines ->
 // Booking Review -> Stripe Checkout -> webhook confirms.
+//
+// Custom trips are stored as a `trip_sessions` row that holds the meeting
+// point and schedule for the trip; the linked `bookings` row references it
+// via `trip_session_id`.
 
 import { createServerFn } from "@tanstack/react-start";
 import { z } from "zod";
@@ -57,25 +61,6 @@ const CreateOfferInput = z.object({
   expires_at: z.string().datetime().nullable().optional(),
 });
 
-function buildAdminLabel(opts: {
-  title: string;
-  firstSlotIso: string;
-  learnerName: string;
-}): string {
-  const d = new Date(opts.firstSlotIso);
-  const dow = d.toLocaleDateString("en-US", { weekday: "long" });
-  const time = d.toLocaleTimeString("en-US", {
-    hour: "numeric",
-    minute: "2-digit",
-  });
-  const startDate = d.toLocaleDateString("en-US", {
-    month: "short",
-    day: "numeric",
-  });
-  return `[${opts.title}] ${dow}s @ ${time} • Starts ${startDate} (with Angler: ${opts.learnerName})`;
-}
-
-
 export const createCustomOffer = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .inputValidator((i: unknown) => CreateOfferInput.parse(i))
@@ -95,17 +80,6 @@ export const createCustomOffer = createServerFn({ method: "POST" })
     if (thread.mentor_id !== userId)
       throw new Error("Only the guide can send a custom trip.");
 
-    const { data: angler } = await supabase
-      .from("profiles")
-      .select("first_name, last_name, display_name, email")
-      .eq("id", thread.learner_id)
-      .maybeSingle();
-    const anglerName =
-      angler?.display_name?.trim() ||
-      [angler?.first_name, angler?.last_name].filter(Boolean).join(" ").trim() ||
-      angler?.email?.split("@")[0] ||
-      "Angler";
-
     const { data: guide } = await supabase
       .from("profiles")
       .select("first_name, last_name, display_name, email")
@@ -117,14 +91,8 @@ export const createCustomOffer = createServerFn({ method: "POST" })
       guide?.email?.split("@")[0] ||
       "Your guide";
 
-    const adminLabel = buildAdminLabel({
-      title: data.title,
-      firstSlotIso: data.starts_at,
-      learnerName: anglerName,
-    });
-
-    const { data: cs, error: csErr } = await supabase
-      .from("class_sessions")
+    const { data: ts, error: tsErr } = await supabase
+      .from("trip_sessions")
       .insert({
         aide_id: userId,
         course_id: thread.journey_id,
@@ -135,20 +103,17 @@ export const createCustomOffer = createServerFn({ method: "POST" })
             duration_minutes: data.duration_minutes,
           },
         ],
-        max_seats: data.total_anglers,
-        filled_seats: 0,
-        admin_label: adminLabel,
         status: "active",
         meeting_point_address: data.meeting_point_address,
         meeting_point_lat: data.meeting_point_lat ?? null,
         meeting_point_lng: data.meeting_point_lng ?? null,
         meeting_point_place_id: data.meeting_point_place_id ?? null,
-      } as any)
+      } as never)
       .select("id")
       .single();
-    if (csErr || !cs)
-      throw new Error(csErr?.message ?? "Could not create custom trip.");
-    const classSessionId = cs.id;
+    if (tsErr || !ts)
+      throw new Error(tsErr?.message ?? "Could not create custom trip.");
+    const tripSessionId = ts.id;
 
     // The deposit is what the angler actually pays at checkout — fees are
     // computed off the deposit so the existing checkout flow charges the
@@ -164,7 +129,7 @@ export const createCustomOffer = createServerFn({ method: "POST" })
         learner_id: thread.learner_id,
         course_id: thread.journey_id,
         thread_id: thread.id,
-        class_session_id: classSessionId,
+        trip_session_id: tripSessionId,
         total_price: data.deposit_minor,
         deposit_minor: data.deposit_minor,
         balance_due_minor: balanceDueMinor,
@@ -174,7 +139,7 @@ export const createCustomOffer = createServerFn({ method: "POST" })
         status: "pending_offer",
         trip_date: data.trip_date,
         guests: data.total_anglers,
-      } as any)
+      } as never)
       .select("id")
       .single();
     if (bErr || !booking)
@@ -197,13 +162,13 @@ export const createCustomOffer = createServerFn({ method: "POST" })
     if (mErr || !msg)
       throw new Error(mErr?.message ?? "Could not post custom trip message.");
 
-    // In-app alert for the angler (real-time alert; email infra not wired yet)
+    // In-app alert for the angler
     try {
       await supabaseAdmin.from("user_alerts").insert({
         user_id: thread.learner_id,
         kind: "custom_offer_received",
         message: `🎣 ${guideName} sent you a custom trip: ${data.title}`,
-      } as any);
+      } as never);
     } catch (e) {
       console.error("[createCustomOffer] alert insert failed", e);
     }
@@ -211,244 +176,11 @@ export const createCustomOffer = createServerFn({ method: "POST" })
     return {
       booking_id: booking.id,
       message_id: msg.id,
-      class_session_id: classSessionId,
+      trip_session_id: tripSessionId,
     };
   });
 
-// Lists the current aide's upcoming cohorts that still have seats.
-export interface AvailableCohort {
-  id: string;
-  listing_title: string;
-  session_dates_times_array: { starts_at: string; duration_minutes: number }[];
-  max_seats: number;
-  filled_seats: number;
-  admin_label: string | null;
-}
-
-export const listAvailableCohorts = createServerFn({ method: "POST" })
-  .middleware([requireSupabaseAuth])
-  .handler(async ({ context }): Promise<AvailableCohort[]> => {
-    const { supabase, userId } = context;
-    const { data, error } = await supabase
-      .from("class_sessions")
-      .select(
-        "id, listing_title, session_dates_times_array, max_seats, filled_seats, admin_label",
-      )
-      .eq("aide_id", userId)
-      .eq("status", "active")
-      .order("created_at", { ascending: false });
-    if (error) throw new Error(error.message);
-    const now = Date.now();
-    return (data ?? []).filter((cs: any) => {
-      if (cs.filled_seats >= cs.max_seats) return false;
-      const arr = (cs.session_dates_times_array ?? []) as { starts_at: string }[];
-      if (arr.length === 0) return false;
-      // keep cohorts whose latest session is still in the future
-      const lastIso = arr.reduce(
-        (max, s) => (s.starts_at > max ? s.starts_at : max),
-        arr[0].starts_at,
-      );
-      return new Date(lastIso).getTime() >= now;
-    }) as AvailableCohort[];
-  });
-
-// Public (anonymous-safe) read of upcoming cohort sessions for a given course.
-// Returns one row per cohort (class_session) with its full schedule + cohort
-// metadata, so the listing page can render a "Book Seat" CTA per cohort.
-// Uses the admin client to bypass class_sessions RLS (which intentionally
-// denies anonymous reads); returns only non-sensitive scheduling fields.
-export interface PublicUpcomingCohort {
-  class_session_id: string;
-  cohort_title: string | null;
-  price_minor: number | null;
-  currency: string | null;
-  max_seats: number;
-  seats_left: number;
-  slots: { starts_at: string; duration_minutes: number }[];
-}
-
-const PublicUpcomingCohortsInput = z.object({
-  course_id: z.string().uuid(),
-});
-
-export const listPublicUpcomingCohorts = createServerFn({ method: "POST" })
-  .inputValidator((i: unknown) => PublicUpcomingCohortsInput.parse(i))
-  .handler(async ({ data }): Promise<PublicUpcomingCohort[]> => {
-    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
-    const nowIso = new Date().toISOString();
-    const { data: rows, error } = await supabaseAdmin
-      .from("class_sessions")
-      .select(
-        "id, cohort_title, price_minor, currency, max_seats, expires_at, is_public_cohort, session_dates_times_array",
-      )
-      .eq("course_id", data.course_id)
-      .eq("status", "active")
-      .or("is_public_cohort.eq.true,max_seats.gte.2");
-    if (error) throw new Error(error.message);
-
-    // Drop expired cohorts up front.
-    const live = (rows ?? []).filter(
-      (r) => !r.expires_at || r.expires_at > nowIso,
-    );
-
-    // Live confirmed-booking counts per cohort.
-    const cohortIds = live.map((r) => r.id);
-    const confirmedByCohort = new Map<string, number>();
-    if (cohortIds.length > 0) {
-      const { data: bookings, error: bErr } = await supabaseAdmin
-        .from("bookings")
-        .select("class_session_id")
-        .in("class_session_id", cohortIds)
-        .eq("status", "confirmed");
-      if (bErr) throw new Error(bErr.message);
-      for (const b of bookings ?? []) {
-        if (!b.class_session_id) continue;
-        confirmedByCohort.set(
-          b.class_session_id,
-          (confirmedByCohort.get(b.class_session_id) ?? 0) + 1,
-        );
-      }
-    }
-
-    const now = Date.now();
-    const out: PublicUpcomingCohort[] = [];
-    for (const cs of live) {
-      const confirmed = confirmedByCohort.get(cs.id) ?? 0;
-      const seatsLeft = Math.max(0, (cs.max_seats ?? 0) - confirmed);
-
-      const arr = (cs.session_dates_times_array ?? []) as {
-        starts_at: string;
-        duration_minutes?: number;
-      }[];
-      const sorted = arr
-        .filter((s) => !!s?.starts_at)
-        .map((s) => ({
-          starts_at: s.starts_at,
-          duration_minutes: s.duration_minutes ?? 45,
-        }))
-        .sort((a, b) => a.starts_at.localeCompare(b.starts_at));
-      // Exclude the entire cohort once its FIRST session has started — no
-      // mid-course enrollment, and cohorts auto-disappear after completion.
-      if (sorted.length === 0 || new Date(sorted[0].starts_at).getTime() < now) continue;
-      const upcoming = sorted;
-      if (upcoming.length === 0) continue;
-      out.push({
-        class_session_id: cs.id,
-        cohort_title: cs.cohort_title ?? null,
-        price_minor: cs.price_minor ?? null,
-        currency: cs.currency ?? null,
-        max_seats: cs.max_seats ?? 1,
-        seats_left: seatsLeft,
-        slots: upcoming,
-      });
-    }
-    out.sort((a, b) => a.slots[0].starts_at.localeCompare(b.slots[0].starts_at));
-    return out.slice(0, 12);
-  });
-
-
-// Look up the schedule for the class session linked to a given booking
-// (or order, via its booking_id).
-export interface ClassSessionInfo {
-  class_session_id: string;
-  listing_title: string;
-  session_dates_times_array: { starts_at: string; duration_minutes: number }[];
-  max_seats: number;
-  filled_seats: number;
-  is_live: boolean;
-}
-
-const ClassSessionForOrderInput = z.object({
-  order_id: z.string().uuid(),
-});
-
-export const getClassSessionForOrder = createServerFn({ method: "POST" })
-  .middleware([requireSupabaseAuth])
-  .inputValidator((i: unknown) => ClassSessionForOrderInput.parse(i))
-  .handler(async ({ data, context }): Promise<ClassSessionInfo | null> => {
-    const { supabase, userId } = context;
-    const { data: order, error: oErr } = await supabase
-      .from("orders")
-      .select("id, learner_id, mentor_id, booking_id")
-      .eq("id", data.order_id)
-      .maybeSingle();
-    if (oErr || !order) throw new Error("Order not found.");
-    if (order.learner_id !== userId && order.mentor_id !== userId)
-      throw new Error("Not authorized.");
-    if (!order.booking_id) return null;
-
-    const { data: booking } = await supabase
-      .from("bookings")
-      .select("class_session_id")
-      .eq("id", order.booking_id)
-      .maybeSingle();
-    if (!booking?.class_session_id) return null;
-
-    const { data: cs } = await supabase
-      .from("class_sessions")
-      .select(
-        "id, listing_title, session_dates_times_array, max_seats, filled_seats, is_live",
-      )
-      .eq("id", booking.class_session_id)
-      .maybeSingle();
-    if (!cs) return null;
-    return {
-      class_session_id: cs.id,
-      listing_title: cs.listing_title,
-      session_dates_times_array: (cs.session_dates_times_array ?? []) as any,
-      max_seats: cs.max_seats,
-      filled_seats: cs.filled_seats,
-      is_live: (cs as any).is_live ?? false,
-    };
-  });
-
-const ClassSessionIdInput = z.object({ class_session_id: z.string().uuid() });
-
-export const startClassSession = createServerFn({ method: "POST" })
-  .middleware([requireSupabaseAuth])
-  .inputValidator((i: unknown) => ClassSessionIdInput.parse(i))
-  .handler(async ({ data, context }) => {
-    const { userId } = context;
-    const { data: cs } = await supabaseAdmin
-      .from("class_sessions")
-      .select("aide_id")
-      .eq("id", data.class_session_id)
-      .maybeSingle();
-    if (!cs) throw new Error("Class session not found.");
-    if (cs.aide_id !== userId)
-      throw new Error("Only the Aide can start this session.");
-    const { error } = await supabaseAdmin
-      .from("class_sessions")
-      .update({
-        is_live: true,
-        live_started_at: new Date().toISOString(),
-        live_ended_at: null,
-      })
-      .eq("id", data.class_session_id);
-    if (error) throw new Error(error.message);
-    return { ok: true };
-  });
-
-export const endClassSession = createServerFn({ method: "POST" })
-  .middleware([requireSupabaseAuth])
-  .inputValidator((i: unknown) => ClassSessionIdInput.parse(i))
-  .handler(async ({ data, context }) => {
-    const { userId } = context;
-    const { data: cs } = await supabaseAdmin
-      .from("class_sessions")
-      .select("aide_id")
-      .eq("id", data.class_session_id)
-      .maybeSingle();
-    if (!cs) throw new Error("Class session not found.");
-    if (cs.aide_id !== userId)
-      throw new Error("Only the Aide can end this session.");
-    const { error } = await supabaseAdmin
-      .from("class_sessions")
-      .update({ is_live: false, live_ended_at: new Date().toISOString() })
-      .eq("id", data.class_session_id);
-    if (error) throw new Error(error.message);
-    return { ok: true };
-  });
+// ---------- My Bookings list ----------
 
 const BookingIdInput = z.object({ booking_id: z.string().uuid() });
 
@@ -474,7 +206,7 @@ export const listMyBookings = createServerFn({ method: "POST" })
     const { data: rows, error } = await supabase
       .from("bookings")
       .select(
-        "id, aide_id, learner_id, course_id, class_session_id, total_price, currency, status, created_at",
+        "id, aide_id, learner_id, course_id, trip_session_id, total_price, currency, status, created_at",
       )
       .or(`learner_id.eq.${userId},aide_id.eq.${userId}`)
       .order("created_at", { ascending: false });
@@ -482,8 +214,8 @@ export const listMyBookings = createServerFn({ method: "POST" })
     if (!rows || rows.length === 0) return [];
 
     const bookingIds = rows.map((r) => r.id);
-    const cohortIds = Array.from(
-      new Set(rows.map((r) => r.class_session_id).filter(Boolean) as string[]),
+    const tripSessionIds = Array.from(
+      new Set(rows.map((r) => r.trip_session_id).filter(Boolean) as string[]),
     );
     const courseIds = Array.from(
       new Set(rows.map((r) => r.course_id).filter(Boolean) as string[]),
@@ -494,21 +226,21 @@ export const listMyBookings = createServerFn({ method: "POST" })
       ),
     );
 
-    const [slotsRes, cohortsRes, journeysRes, profilesRes] = await Promise.all([
+    const [slotsRes, sessionsRes, journeysRes, profilesRes] = await Promise.all([
       supabase
         .from("booking_slots")
         .select("booking_id, starts_at")
         .in("booking_id", bookingIds)
         .order("starts_at", { ascending: true }),
-      cohortIds.length
+      tripSessionIds.length
         ? supabase
-            .from("class_sessions")
+            .from("trip_sessions")
             .select("id, listing_title, session_dates_times_array")
-            .in("id", cohortIds)
-        : Promise.resolve({ data: [] as any[] } as const),
+            .in("id", tripSessionIds)
+        : Promise.resolve({ data: [] as never[] } as const),
       courseIds.length
         ? supabase.from("journeys").select("id, title").in("id", courseIds)
-        : Promise.resolve({ data: [] as any[] } as const),
+        : Promise.resolve({ data: [] as never[] } as const),
       supabase
         .from("profiles")
         .select("id, first_name, last_name, display_name, email, avatar_url")
@@ -516,21 +248,23 @@ export const listMyBookings = createServerFn({ method: "POST" })
     ]);
 
     const slotsByBooking = new Map<string, { starts_at: string }[]>();
-    for (const s of (slotsRes.data ?? []) as any[]) {
+    for (const s of (slotsRes.data ?? []) as { booking_id: string; starts_at: string }[]) {
       const arr = slotsByBooking.get(s.booking_id) ?? [];
       arr.push({ starts_at: s.starts_at });
       slotsByBooking.set(s.booking_id, arr);
     }
-    const cohortById = new Map<string, any>(
-      ((cohortsRes.data ?? []) as any[]).map((c) => [c.id, c]),
+    const sessionById = new Map<string, { listing_title: string; session_dates_times_array: { starts_at: string }[] }>(
+      ((sessionsRes.data ?? []) as { id: string; listing_title: string; session_dates_times_array: { starts_at: string }[] }[]).map(
+        (c) => [c.id, c],
+      ),
     );
     const journeyTitle = new Map<string, string>(
-      ((journeysRes.data ?? []) as any[]).map((j) => [j.id, j.title]),
+      ((journeysRes.data ?? []) as { id: string; title: string }[]).map((j) => [j.id, j.title]),
     );
-    const profileById = new Map<string, any>(
-      ((profilesRes.data ?? []) as any[]).map((p) => [p.id, p]),
+    const profileById = new Map<string, { display_name?: string | null; first_name?: string | null; last_name?: string | null; email?: string | null; avatar_url?: string | null }>(
+      ((profilesRes.data ?? []) as never[]).map((p: { id: string }) => [p.id, p as never]),
     );
-    const nameOf = (p: any) => {
+    const nameOf = (p: { display_name?: string | null; first_name?: string | null; last_name?: string | null; email?: string | null } | undefined) => {
       if (!p) return "User";
       if (p.display_name?.trim()) return p.display_name.trim();
       const full = [p.first_name, p.last_name].filter(Boolean).join(" ").trim();
@@ -539,12 +273,11 @@ export const listMyBookings = createServerFn({ method: "POST" })
 
     const now = Date.now();
     return rows.map((r) => {
-      // Cohort wins over legacy booking_slots when present.
-      const cohort = r.class_session_id
-        ? cohortById.get(r.class_session_id)
+      const tripSession = r.trip_session_id
+        ? sessionById.get(r.trip_session_id)
         : null;
-      const slots: { starts_at: string }[] = cohort
-        ? ((cohort.session_dates_times_array ?? []) as any[]).map((s) => ({
+      const slots: { starts_at: string }[] = tripSession
+        ? ((tripSession.session_dates_times_array ?? []) as { starts_at: string }[]).map((s) => ({
             starts_at: s.starts_at,
           }))
         : (slotsByBooking.get(r.id) ?? []);
@@ -564,7 +297,7 @@ export const listMyBookings = createServerFn({ method: "POST" })
         currency: r.currency,
         created_at: r.created_at,
         course_title:
-          cohort?.listing_title ??
+          tripSession?.listing_title ??
           (r.course_id ? (journeyTitle.get(r.course_id) ?? null) : null),
         counterparty_name: nameOf(other),
         counterparty_avatar_url: other?.avatar_url ?? null,
@@ -587,7 +320,7 @@ export const getBooking = createServerFn({ method: "POST" })
     const { data: b, error } = await supabase
       .from("bookings")
       .select(
-        "id, aide_id, learner_id, course_id, thread_id, class_session_id, total_price, service_fee_amount, aide_earnings, currency, status, created_at",
+        "id, aide_id, learner_id, course_id, thread_id, trip_session_id, total_price, service_fee_amount, aide_earnings, currency, status, created_at",
       )
       .eq("id", data.booking_id)
       .maybeSingle();
@@ -595,7 +328,7 @@ export const getBooking = createServerFn({ method: "POST" })
     if (b.aide_id !== userId && b.learner_id !== userId)
       throw new Error("Not authorized.");
 
-    const [slotsRes, journeyRes, aideRes, learnerRes, msgRes, csRes] =
+    const [slotsRes, journeyRes, aideRes, learnerRes, msgRes, tsRes] =
       await Promise.all([
         supabase
           .from("booking_slots")
@@ -627,36 +360,32 @@ export const getBooking = createServerFn({ method: "POST" })
           .order("created_at", { ascending: true })
           .limit(1)
           .maybeSingle(),
-        b.class_session_id
+        b.trip_session_id
           ? supabase
-              .from("class_sessions")
-              .select(
-                "listing_title, session_dates_times_array",
-              )
-              .eq("id", b.class_session_id)
+              .from("trip_sessions")
+              .select("listing_title, session_dates_times_array")
+              .eq("id", b.trip_session_id)
               .maybeSingle()
           : Promise.resolve({ data: null } as const),
       ]);
 
-    const nameOf = (p: any) => {
+    const nameOf = (p: { display_name?: string | null; first_name?: string | null; last_name?: string | null; email?: string | null } | null | undefined) => {
       if (!p) return "User";
       if (p.display_name?.trim()) return p.display_name.trim();
       const full = [p.first_name, p.last_name].filter(Boolean).join(" ").trim();
       return full || (p.email?.split("@")[0] ?? "User");
     };
 
-    // If this booking is linked to a class session, schedule is authoritative
-    // from class_sessions.session_dates_times_array (the cohort "venue").
-    const csData = csRes.data as
+    const tsData = tsRes.data as
       | {
           listing_title: string;
           session_dates_times_array: { starts_at: string; duration_minutes: number }[];
         }
       | null;
 
-    const slots: BookingSlot[] = csData
-      ? (csData.session_dates_times_array ?? []).map((s, i) => ({
-          id: `cs-${i}`,
+    const slots: BookingSlot[] = tsData
+      ? (tsData.session_dates_times_array ?? []).map((s, i) => ({
+          id: `ts-${i}`,
           starts_at: s.starts_at,
           duration_minutes: s.duration_minutes ?? 45,
         }))
@@ -665,7 +394,7 @@ export const getBooking = createServerFn({ method: "POST" })
     return {
       ...b,
       slots,
-      course_title: csData?.listing_title ?? journeyRes.data?.title ?? null,
+      course_title: tsData?.listing_title ?? journeyRes.data?.title ?? null,
       aide_name: nameOf(aideRes.data),
       aide_avatar_url: aideRes.data?.avatar_url ?? null,
       learner_name: nameOf(learnerRes.data),
@@ -764,9 +493,6 @@ export const createBookingCheckoutSession = createServerFn({ method: "POST" })
     if (b.status !== "pending_payment" && b.status !== "pending_offer")
       throw new Error("This booking is not available for payment.");
 
-    // Pricing baseline (Option B / inside-out): `total_price` is the gross
-    // the learner pays. The platform fee is carved OUT of that gross, so
-    // `aide_earnings = total_price − fee`. Promo discounts apply to the gross.
     const feeRate = await getPlatformFeeRate();
     const originalGross = b.total_price;
     let grossMinor = originalGross;
@@ -805,9 +531,6 @@ export const createBookingCheckoutSession = createServerFn({ method: "POST" })
       throw new Error("Discounted total is below the minimum charge amount.");
     }
 
-    // Persist the (possibly discounted) pricing so webhooks and reads agree.
-    // Use the admin client because RLS now restricts authenticated UPDATE on
-    // bookings to the `status` column only — financial fields are server-trusted.
     const { supabaseAdmin: bookingAdmin } = await import(
       "@/integrations/supabase/client.server"
     );
@@ -821,7 +544,6 @@ export const createBookingCheckoutSession = createServerFn({ method: "POST" })
       })
       .eq("id", b.id);
 
-    // Defensive integer guard — Stripe rejects floats in minor-unit fields.
     if (
       !Number.isInteger(grossMinor) ||
       !Number.isInteger(newFee) ||
@@ -830,8 +552,6 @@ export const createBookingCheckoutSession = createServerFn({ method: "POST" })
       throw new Error("Internal pricing error — non-integer minor units.");
     }
 
-    // Aide Connect preflight — must have a connected, payout-ready Stripe account
-    // before we can route an application_fee_amount + transfer_data destination.
     const { data: aide } = await supabaseAdmin
       .from("profiles")
       .select("stripe_connect_id, is_payout_ready")
@@ -846,16 +566,14 @@ export const createBookingCheckoutSession = createServerFn({ method: "POST" })
     let host = "";
     try {
       host = getRequestHost();
-    } catch {}
+    } catch {
+      // no host available (e.g. local dev) — fall back to relative URLs
+    }
     const proto = host.includes("localhost") ? "http" : "https";
     const origin = host ? `${proto}://${host}` : "";
 
-    // Deterministic idempotency key. Includes the pricing fingerprint so a
-    // genuine price change (e.g. promo applied/removed) naturally produces a
-    // fresh Stripe session, while pure double-clicks dedupe.
     const idemBase = `bk_${b.id}_${grossMinor}_${newFee}_${promoRowId ?? "none"}`;
 
-    // Lazy product/price for this booking
     const { createStripeProduct, createStripePrice } = await import("@/lib/stripe.server");
     const product = await createStripeProduct({
       name: `Custom Offer · Booking ${b.id.slice(0, 8)}`,
@@ -878,7 +596,7 @@ export const createBookingCheckoutSession = createServerFn({ method: "POST" })
         booking_id: b.id,
         course_id: b.course_id ?? "",
         parent_id: b.learner_id,
-        learner_id: b.learner_id, // backwards-compat alias
+        learner_id: b.learner_id,
         aide_id: b.aide_id,
         promo_code_id: promoRowId ?? "",
       },
@@ -894,4 +612,3 @@ export const createBookingCheckoutSession = createServerFn({ method: "POST" })
 
     return { url: session.url, id: session.id };
   });
-

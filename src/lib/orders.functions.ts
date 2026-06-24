@@ -333,7 +333,7 @@ async function enrichOrders(
     bookingIds.length
       ? supabase
           .from("bookings")
-          .select("id, thread_id, class_session_id")
+          .select("id, thread_id, trip_session_id")
           .in("id", bookingIds)
       : Promise.resolve({ data: [] as any[] }),
     viewerRole === "aide"
@@ -341,18 +341,18 @@ async function enrichOrders(
       : Promise.resolve({ data: [] as any[] }),
   ]);
 
-  const cohortIds = Array.from(
+  const tripSessionIds = Array.from(
     new Set(
       ((bookingsRes.data ?? []) as any[])
-        .map((b) => b.class_session_id)
+        .map((b) => b.trip_session_id)
         .filter(Boolean) as string[],
     ),
   );
-  const cohortsRes = cohortIds.length
+  const tripSessionsRes = tripSessionIds.length
     ? await supabaseAdmin
-        .from("class_sessions")
+        .from("trip_sessions")
         .select("id, session_dates_times_array")
-        .in("id", cohortIds)
+        .in("id", tripSessionIds)
     : { data: [] as any[] };
 
   const profileById = new Map<string, any>(
@@ -367,8 +367,8 @@ async function enrichOrders(
   const threadByBooking = new Map<string, string | null>(
     ((bookingsRes.data ?? []) as any[]).map((b) => [b.id, b.thread_id]),
   );
-  const cohortCountById = new Map<string, number>(
-    ((cohortsRes.data ?? []) as any[]).map((c) => [
+  const tripSessionCountById = new Map<string, number>(
+    ((tripSessionsRes.data ?? []) as any[]).map((c) => [
       c.id,
       Array.isArray(c.session_dates_times_array)
         ? c.session_dates_times_array.length
@@ -411,7 +411,7 @@ async function enrichOrders(
       viewer_role: viewerRole,
       total_sessions:
         (r.booking_id
-          ? cohortCountById.get(bookingMap.get(r.booking_id)?.class_session_id) ?? 0
+          ? tripSessionCountById.get(bookingMap.get(r.booking_id)?.trip_session_id) ?? 0
           : 0) ||
         (Array.isArray(r.snapshot_session_titles)
           ? r.snapshot_session_titles.length

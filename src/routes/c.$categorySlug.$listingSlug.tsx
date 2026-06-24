@@ -2,12 +2,9 @@ import { useEffect, useState } from "react";
 import { createFileRoute, Link, notFound, redirect, isRedirect, useNavigate } from "@tanstack/react-router";
 import { useServerFn } from "@tanstack/react-start";
 import { useQuery } from "@tanstack/react-query";
-import { listPublicUpcomingCohorts } from "@/lib/bookings.functions";
 import { ensureThreadForJourney } from "@/lib/messages.functions";
-import { createCohortBookingCheckout } from "@/lib/cohorts.functions";
 import { formatUtcInZone, tzAbbrev, resolveViewerTimezone } from "@/lib/tz";
-import { Pencil, Clock, Camera, Sparkles, MessageCircle, ChevronDown, Eye, ArrowLeft, Trash2, CalendarPlus } from "lucide-react";
-import { ScheduleLiveDateDialog } from "@/components/listings/ScheduleLiveDateDialog";
+import { Pencil, Clock, Camera, Sparkles, MessageCircle, ChevronDown, Eye, ArrowLeft, Trash2 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { setJourneyFeatured, deleteJourney } from "@/lib/admin.functions";
 import { Switch } from "@/components/ui/switch";
@@ -238,7 +235,7 @@ function PathPage() {
   const [editInitialSection, setEditInitialSection] = useState<"basics" | "story" | "image">("basics");
   const [coverOpen, setCoverOpen] = useState(false);
   const [availabilityOpen, setAvailabilityOpen] = useState(false);
-  const [scheduleOpen, setScheduleOpen] = useState(false);
+  
   const [availabilityVersion, setAvailabilityVersion] = useState(0);
   const [previewMode, setPreviewMode] = useState(false);
   const [mentorProfile, setMentorProfile] = useState<PublicMentorProfile | null>(null);
@@ -633,31 +630,9 @@ function PathPage() {
               </DropdownMenuItem>
             </DropdownMenuContent>
           </DropdownMenu>
-          <Button
-            type="button"
-            variant="info"
-            className="rounded-2xl"
-            onClick={() => setScheduleOpen(true)}
-          >
-            <CalendarPlus className="size-4" />
-            Schedule Live Date
-          </Button>
         </div>
       )}
-      <ScheduleLiveDateDialog
-        row={
-          scheduleOpen && dbJourney
-            ? {
-                id: dbJourney.id,
-                title: dbJourney.title,
-                base_price_minor: dbJourney.base_price_minor,
-                currency: dbJourney.currency,
-                moderation_status: dbJourney.moderation_status,
-              }
-            : null
-        }
-        onOpenChange={(o) => !o && setScheduleOpen(false)}
-      />
+
 
 
       <div className="md:relative">
@@ -1118,24 +1093,9 @@ function PathBookingSidebar({
           </li>
         </ul>
 
-        {dbJourneyId && (
-          <>
-            <Separator className="my-4" />
-            <HowBookingsWorkAccordion courseId={dbJourneyId} />
-          </>
-        )}
       </div>
 
 
-      {/* 2. Upcoming Live Sessions (own card, only when cohorts exist) */}
-      {dbJourneyId && (
-        <UpcomingCohortSessions
-          courseId={dbJourneyId}
-          fallbackPriceMinor={path.priceMinor}
-          fallbackCurrency={path.currency}
-          isOwner={isOwner}
-        />
-      )}
 
       {/* 3. General Availability (grid + Check Specific Dates) */}
       <section className="rounded-2xl border border-border bg-card p-5 space-y-4">
@@ -1309,216 +1269,5 @@ function SyllabusList({ items, isOwner, onSaveDescription }: SyllabusListProps) 
   );
 }
 
-function UpcomingCohortSessions({
-  courseId,
-  fallbackPriceMinor,
-  fallbackCurrency,
-  isOwner,
-}: {
-  courseId: string;
-  fallbackPriceMinor: number;
-  fallbackCurrency: string;
-  isOwner: boolean;
-}) {
-  const fetchUpcoming = useServerFn(listPublicUpcomingCohorts);
-  const bookSeat = useServerFn(createCohortBookingCheckout);
-  const user = useAuthStore((s) => s.user);
-  const navigate = useNavigate();
-  const [expanded, setExpanded] = useState<Record<string, boolean>>({});
-  const [bookingId, setBookingId] = useState<string | null>(null);
-
-  const { data: cohorts } = useQuery({
-    queryKey: ["public-upcoming-cohorts", courseId],
-    queryFn: () => fetchUpcoming({ data: { course_id: courseId } }),
-    staleTime: 60_000,
-  });
-
-  if (!cohorts || cohorts.length === 0) return null;
-
-  const viewerTz = resolveViewerTimezone(null);
-  const fmtSlot = (iso: string, duration: number) => {
-    const when = formatUtcInZone(iso, viewerTz, {
-      weekday: "short",
-      month: "short",
-      day: "numeric",
-      hour: "numeric",
-      minute: "2-digit",
-    });
-    const abbrev = tzAbbrev(viewerTz, new Date(iso));
-    return `${when}${abbrev ? ` ${abbrev}` : ""} · ${duration} min`;
-  };
-
-  const handleBook = async (classSessionId: string) => {
-    if (!user) {
-      const next = encodeURIComponent(window.location.pathname);
-      navigate({ to: "/login", search: { next } as never });
-      return;
-    }
-    try {
-      setBookingId(classSessionId);
-      const res = await bookSeat({ data: { class_session_id: classSessionId } });
-      if (res?.booking_id) {
-        navigate({ to: "/booking-review", search: { bookingId: res.booking_id } });
-      } else {
-        toast.error("Could not start checkout.");
-        setBookingId(null);
-      }
-    } catch (err) {
-      toast.error(err instanceof Error ? err.message : "Could not book seat.");
-      setBookingId(null);
-    }
-  };
-
-  return (
-    <section className="rounded-2xl border border-border bg-card p-5">
-      <h2
-        className="text-2xl font-bold text-foreground md:text-3xl"
-        style={{ fontFamily: DESIGN_SYSTEM.fonts.serif }}
-      >
-        Upcoming Live Sessions
-      </h2>
-
-      <ul className="mt-3 space-y-3">
-        {cohorts.map((c) => {
-          const title = c.cohort_title ?? "Live Cohort";
-          const priceMinor = c.price_minor ?? fallbackPriceMinor;
-          const currency = c.currency ?? fallbackCurrency;
-          const priceLabel = formatCurrency(priceMinor, currency);
-          const isSoldOut = c.seats_left <= 0;
-          const seatsLabel = isSoldOut
-            ? "Sold out"
-            : c.seats_left === 1
-              ? "Last seat"
-              : `${c.seats_left} seats remaining`;
-          const first = c.slots[0];
-          const isOpen = !!expanded[c.class_session_id];
-          const isSubmitting = bookingId === c.class_session_id;
-
-          return (
-            <li
-              key={c.class_session_id}
-              className="rounded-lg border border-border bg-card p-3"
-            >
-              <div className="flex flex-wrap items-start justify-between gap-3">
-                <div className="min-w-0 flex-1">
-                  <div className="flex flex-wrap items-center gap-2">
-                    <span className="font-semibold text-foreground">{title}</span>
-                    {c.slots.length > 1 && (
-                      <Badge variant="secondary" className="text-xs">
-                        {c.slots.length} Sessions Total
-                      </Badge>
-                    )}
-                  </div>
-                  <div className="mt-1 text-sm text-foreground">
-                    {fmtSlot(first.starts_at, first.duration_minutes)}
-                  </div>
-                  <div className="mt-1 flex flex-wrap items-center gap-x-3 gap-y-1 text-xs text-muted-foreground">
-                    <span className="font-medium text-foreground">
-                      {priceLabel}
-                    </span>
-                    <span>{seatsLabel}</span>
-                  </div>
-                </div>
-                <div className="flex shrink-0 items-center gap-2">
-                  <Button
-                    size="sm"
-                    variant={isSoldOut ? "secondary" : "default"}
-                    onClick={() => handleBook(c.class_session_id)}
-                    disabled={isOwner || isSubmitting || isSoldOut}
-                    title={isOwner ? "This is what learners see" : undefined}
-                  >
-                    {isSoldOut ? "Sold Out" : isSubmitting ? "Starting…" : "Book Seat"}
-                  </Button>
-                </div>
-              </div>
-
-
-              {c.slots.length > 1 && (
-                <div className="mt-2">
-                  <button
-                    type="button"
-                    onClick={() =>
-                      setExpanded((s) => ({
-                        ...s,
-                        [c.class_session_id]: !isOpen,
-                      }))
-                    }
-                    className="inline-flex items-center gap-1 text-xs font-medium text-info hover:underline"
-                  >
-                    <ChevronDown
-                      className={`h-3 w-3 transition-transform ${
-                        isOpen ? "rotate-180" : ""
-                      }`}
-                    />
-                    {isOpen ? "Hide full schedule" : "View full schedule"}
-                  </button>
-                  {isOpen && (
-                    <ul className="mt-2 space-y-1 border-t border-border pt-2 text-sm text-foreground/90">
-                      {c.slots.slice(1).map((s) => (
-                        <li key={s.starts_at} className="text-sm">
-                          {fmtSlot(s.starts_at, s.duration_minutes)}
-                        </li>
-                      ))}
-                    </ul>
-                  )}
-                </div>
-              )}
-            </li>
-          );
-        })}
-      </ul>
-    </section>
-
-  );
-}
-
-function HowBookingsWorkAccordion({ courseId }: { courseId: string }) {
-  const fetchUpcoming = useServerFn(listPublicUpcomingCohorts);
-  const { data: cohorts } = useQuery({
-    queryKey: ["public-upcoming-cohorts", courseId],
-    queryFn: () => fetchUpcoming({ data: { course_id: courseId } }),
-    staleTime: 60_000,
-  });
-  const hasUpcoming = !!cohorts && cohorts.length > 0;
-
-  return (
-    <Accordion type="single" collapsible>
-      <AccordionItem value="how-bookings-work" className="border-b-0">
-        <AccordionTrigger className="py-0 text-base font-semibold text-info hover:no-underline [&>svg]:text-info">
-          How Bookings Work
-        </AccordionTrigger>
-
-          <AccordionContent className="pb-5">
-            <ul className="list-none space-y-3 text-[15px] leading-[1.6] text-foreground">
-              {hasUpcoming && (
-                <li className="flex gap-2">
-                  <span aria-hidden="true">🎟️</span>
-                  <span>
-                    Choose the <strong>'Book Seat'</strong> option from the upcoming sessions list to instantly secure your spot.
-                  </span>
-                </li>
-              )}
-              {hasUpcoming ? (
-                <li className="flex gap-2">
-                  <span aria-hidden="true">💬</span>
-                  <span>
-                    Need a different time or a 1-on-1? Click <strong>'Message Guide'</strong> to coordinate a custom schedule.
-                  </span>
-                </li>
-              ) : (
-                <li className="flex gap-2">
-                  <span aria-hidden="true">💬</span>
-                  <span>
-                    No sessions currently scheduled? Click <strong>'Message Guide'</strong> directly to request a 1-on-1 session or inquire about joining the next upcoming group cohort. Once you and the Guide agree on a time, they will send a personal booking link straight to your chat inbox.
-                  </span>
-                </li>
-              )}
-            </ul>
-          </AccordionContent>
-        </AccordionItem>
-      </Accordion>
-  );
-
-}
 
 
