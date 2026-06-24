@@ -18,6 +18,7 @@ import { toast } from "sonner";
 import { HowBookingsWorkDialog } from "@/components/HowBookingsWorkDialog";
 import { Link } from "@tanstack/react-router";
 import { Button } from "@/components/ui/button";
+import { useAuthStore } from "@/stores/useAuthStore";
 import { formatCurrency } from "@/lib/format-currency";
 import { convertMinor } from "@/lib/currency";
 import {
@@ -56,6 +57,7 @@ interface Props {
   trips: Trip[];
   hostId?: string | null;
   hostHasAvailability?: boolean;
+  ownerId?: string | null;
 }
 
 function formatDuration(mins: number) {
@@ -475,8 +477,15 @@ function TripCard({
   );
 }
 
-export function TripsBlock({ trips, hostId, hostHasAvailability }: Props) {
+export function TripsBlock({ trips, hostId, hostHasAvailability, ownerId }: Props) {
   const [helpOpen, setHelpOpen] = useState(false);
+  const currentUserId = useAuthStore((s) => s.user?.id ?? null);
+  const isOwner = ownerId != null && currentUserId === ownerId;
+
+  if (trips.length === 0 && ownerId != null && !isOwner) {
+    return null;
+  }
+
 
   return (
     <section id="trips" className="scroll-mt-32 space-y-4">
