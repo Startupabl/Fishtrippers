@@ -23,11 +23,12 @@ export function OperatorCard({ operator }: { operator: OperatorCardDTO }) {
   } else {
     const lengthLabel =
       operator.vessel_length_ft != null ? `${operator.vessel_length_ft} ft` : null;
-    const parts = [lengthLabel, operator.boat_type_name].filter(Boolean);
-    if (parts.length > 0) {
+    const fullVesselLabel = [lengthLabel, operator.boat_type_name].filter(Boolean).join(" ");
+    const compactVesselLabel = lengthLabel ? `${lengthLabel} Boat` : "Boat";
+    if (operator.boat_type_name || operator.vessel_length_ft != null) {
       segments.push({
         key: "vessel",
-        content: <span>{parts.join(" ")}</span>,
+        content: <span title={fullVesselLabel}>{compactVesselLabel}</span>,
       });
     }
   }
