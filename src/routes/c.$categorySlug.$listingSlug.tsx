@@ -235,7 +235,7 @@ function PathPage() {
   const [editInitialSection, setEditInitialSection] = useState<"basics" | "story" | "image">("basics");
   const [coverOpen, setCoverOpen] = useState(false);
   const [availabilityOpen, setAvailabilityOpen] = useState(false);
-  const [scheduleOpen, setScheduleOpen] = useState(false);
+  
   const [availabilityVersion, setAvailabilityVersion] = useState(0);
   const [previewMode, setPreviewMode] = useState(false);
   const [mentorProfile, setMentorProfile] = useState<PublicMentorProfile | null>(null);
@@ -630,31 +630,9 @@ function PathPage() {
               </DropdownMenuItem>
             </DropdownMenuContent>
           </DropdownMenu>
-          <Button
-            type="button"
-            variant="info"
-            className="rounded-2xl"
-            onClick={() => setScheduleOpen(true)}
-          >
-            <CalendarPlus className="size-4" />
-            Schedule Live Date
-          </Button>
         </div>
       )}
-      <ScheduleLiveDateDialog
-        row={
-          scheduleOpen && dbJourney
-            ? {
-                id: dbJourney.id,
-                title: dbJourney.title,
-                base_price_minor: dbJourney.base_price_minor,
-                currency: dbJourney.currency,
-                moderation_status: dbJourney.moderation_status,
-              }
-            : null
-        }
-        onOpenChange={(o) => !o && setScheduleOpen(false)}
-      />
+
 
 
       <div className="md:relative">
@@ -1115,24 +1093,9 @@ function PathBookingSidebar({
           </li>
         </ul>
 
-        {dbJourneyId && (
-          <>
-            <Separator className="my-4" />
-            <HowBookingsWorkAccordion courseId={dbJourneyId} />
-          </>
-        )}
       </div>
 
 
-      {/* 2. Upcoming Live Sessions (own card, only when cohorts exist) */}
-      {dbJourneyId && (
-        <UpcomingCohortSessions
-          courseId={dbJourneyId}
-          fallbackPriceMinor={path.priceMinor}
-          fallbackCurrency={path.currency}
-          isOwner={isOwner}
-        />
-      )}
 
       {/* 3. General Availability (grid + Check Specific Dates) */}
       <section className="rounded-2xl border border-border bg-card p-5 space-y-4">
