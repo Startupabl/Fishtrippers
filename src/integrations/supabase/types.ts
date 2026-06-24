@@ -2175,7 +2175,11 @@ export type Database = {
       site_page_category: "explore" | "resources" | "legal"
       site_page_status: "live" | "draft"
       trip_booking_type: "instant_book" | "request_to_book"
-      trip_charter_type: "private_charter" | "shared_tour"
+      trip_charter_type:
+        | "private_charter"
+        | "shared_tour"
+        | "private_trip"
+        | "small_group_trip"
       trip_package_status: "draft" | "active" | "archived"
       user_alert_kind:
         | "listing_pending"
@@ -2345,7 +2349,12 @@ export const Constants = {
       site_page_category: ["explore", "resources", "legal"],
       site_page_status: ["live", "draft"],
       trip_booking_type: ["instant_book", "request_to_book"],
-      trip_charter_type: ["private_charter", "shared_tour"],
+      trip_charter_type: [
+        "private_charter",
+        "shared_tour",
+        "private_trip",
+        "small_group_trip",
+      ],
       trip_package_status: ["draft", "active", "archived"],
       user_alert_kind: [
         "listing_pending",
