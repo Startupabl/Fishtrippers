@@ -23,7 +23,7 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
-import { Pencil, Clock, Trash2, BookOpen, Users, DollarSign, Plus, Sparkles, Ticket, ChevronDown, CheckCircle2, FileEdit, AlertTriangle, CalendarPlus } from "lucide-react";
+import { Pencil, Clock, Trash2, BookOpen, Users, DollarSign, Plus, Sparkles, Ticket, ChevronDown, CheckCircle2, FileEdit, AlertTriangle } from "lucide-react";
 import { toast } from "sonner";
 import { useAuthStore } from "@/stores/useAuthStore";
 import {
@@ -42,7 +42,7 @@ import { formatCurrency } from "@/lib/format-currency";
 import { DESIGN_SYSTEM } from "@/lib/brand";
 import { startNewMentorExpressListing } from "@/stores/useMentorExpressStore";
 import { useProfileGuard } from "@/components/onboarding/ProfileCompletionGuard";
-import { ScheduleLiveDateDialog } from "@/components/listings/ScheduleLiveDateDialog";
+
 
 const lora = { fontFamily: DESIGN_SYSTEM.fonts.serif };
 const LEAF = DESIGN_SYSTEM.colors.leafGreen;
@@ -182,7 +182,7 @@ function MyCoursesPage() {
     | { kind: "archive" | "delete"; row: JourneyWithStats }
     | null
   >(null);
-  const [scheduleFor, setScheduleFor] = useState<JourneyRow | null>(null);
+  
 
   useEffect(() => {
     if (!user && typeof window !== "undefined") {
@@ -467,18 +467,6 @@ function MyCoursesPage() {
                               </TooltipTrigger>
                               <TooltipContent>Add Showcase</TooltipContent>
                             </Tooltip>
-                            <Tooltip>
-                              <TooltipTrigger asChild>
-                                <Button
-                                  size="icon"
-                                  variant="ghost"
-                                  onClick={() => setScheduleFor(j)}
-                                >
-                                  <CalendarPlus className="size-4" />
-                                </Button>
-                              </TooltipTrigger>
-                              <TooltipContent>Schedule Live Date</TooltipContent>
-                            </Tooltip>
                             <Button
                               size="icon"
                               variant="ghost"
@@ -551,20 +539,6 @@ function MyCoursesPage() {
         }}
       />
 
-      <ScheduleLiveDateDialog
-        row={
-          scheduleFor
-            ? {
-                id: scheduleFor.id,
-                title: scheduleFor.title,
-                base_price_minor: scheduleFor.base_price_minor,
-                currency: scheduleFor.currency,
-                moderation_status: scheduleFor.moderation_status,
-              }
-            : null
-        }
-        onOpenChange={(o) => !o && setScheduleFor(null)}
-      />
 
       <AlertDialog open={!!confirm} onOpenChange={(o) => !o && setConfirm(null)}>
         <AlertDialogContent>
