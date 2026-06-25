@@ -17,6 +17,8 @@ const CATEGORY_LABEL: Record<Category, string> = {
 };
 
 const HIDDEN_FOOTER_SLUGS = ["how-it-works-for-anglers", "how-bookings-work-for-guides"];
+
+const SOCIALS: Array<{
   href: string;
   label: string;
   icon: React.ComponentType<{ className?: string }>;
