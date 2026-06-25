@@ -609,7 +609,7 @@ export function TripFormDialog({ open, onOpenChange, initial }: Props) {
                 </div>
               )}
             </div>
-            <div className="space-y-2 max-w-full pr-1.5 sm:max-w-[50%]">
+            <div className="space-y-2">
               <Label htmlFor="trip-min-party">Min trip size</Label>
               <Input
                 id="trip-min-party"
