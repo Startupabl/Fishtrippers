@@ -16,6 +16,8 @@ const CATEGORY_LABEL: Record<Category, string> = {
   legal: "Legal",
 };
 
+const HIDDEN_FOOTER_SLUGS = ["how-it-works-for-anglers", "how-bookings-work-for-guides"];
+
 const SOCIALS: Array<{
   href: string;
   label: string;
@@ -128,11 +130,13 @@ export function SiteFooter() {
                 {CATEGORY_LABEL[cat]}
               </h2>
               <ul className="flex flex-col gap-1">
-                {(byCategory[cat] ?? []).map((p) => (
-                  <li key={p.id}>
-                    <FooterPageLink page={p} />
-                  </li>
-                ))}
+                {(byCategory[cat] ?? [])
+                  .filter((p) => !HIDDEN_FOOTER_SLUGS.includes(p.slug))
+                  .map((p) => (
+                    <li key={p.id}>
+                      <FooterPageLink page={p} />
+                    </li>
+                  ))}
               </ul>
             </div>
           ))}
