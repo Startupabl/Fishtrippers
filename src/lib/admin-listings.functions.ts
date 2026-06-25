@@ -186,6 +186,14 @@ export const setListingModeration = createServerFn({ method: "POST" })
       .update(updates)
       .eq("id", data.journeyId);
     if (error) throw new Error(error.message);
+
+    if (data.moderation === "approved") {
+      await (supabaseAdmin.from("trip_packages") as any)
+        .update({ status: "active" })
+        .eq("operator_id", data.journeyId)
+        .eq("status", "draft");
+    }
+
     return { ok: true };
   });
 
