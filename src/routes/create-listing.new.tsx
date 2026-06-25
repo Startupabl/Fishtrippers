@@ -257,19 +257,19 @@ function CreatePathPage() {
   return (
     <div className="min-h-screen bg-background">
       <header className="border-b">
-        <div className="mx-auto flex h-14 max-w-6xl items-center justify-between px-4">
+        <div className="mx-auto flex h-14 max-w-6xl items-center justify-between gap-2 px-3 sm:px-4">
           <Logo />
-          <span className="text-sm text-muted-foreground">
+          <span className="truncate text-xs text-muted-foreground sm:text-sm">
             {isEditMode ? "Edit your listing" : "List your trip"}
           </span>
         </div>
       </header>
 
       {!hasListing && !isEditMode && (
-        <div className="mx-auto max-w-6xl px-4 pt-6">
+        <div className="mx-auto max-w-6xl px-3 pt-4 sm:px-4 sm:pt-6">
           <div
             role="status"
-            className="rounded-2xl border border-emerald-200 bg-emerald-50 px-5 py-4 text-sm leading-relaxed text-emerald-900 shadow-sm sm:text-base"
+            className="rounded-2xl border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm leading-relaxed text-emerald-900 shadow-sm sm:px-5 sm:py-4 sm:text-base"
           >
             <span aria-hidden="true" className="mr-1">⚓</span>
             <span className="font-semibold">Let's launch your profile!</span>{" "}
@@ -282,7 +282,7 @@ function CreatePathPage() {
         </div>
       )}
 
-      <div className="mx-auto grid max-w-6xl gap-6 px-4 py-8 lg:grid-cols-[260px_minmax(0,1fr)]">
+      <div className="mx-auto grid max-w-6xl gap-4 px-3 py-4 sm:gap-6 sm:px-4 sm:py-8 lg:grid-cols-[260px_minmax(0,1fr)]">
         <aside className="hidden lg:block">
           <div className="sticky top-8 rounded-2xl border bg-card">
             <OnboardingSidebar
@@ -293,9 +293,9 @@ function CreatePathPage() {
           </div>
         </aside>
 
-        {/* Mobile stepper: horizontal chip row */}
-        <div className="lg:hidden">
-          <div className="flex gap-2 overflow-x-auto pb-2">
+        {/* Mobile stepper: sticky horizontal chip row */}
+        <div className="sticky top-0 z-30 -mx-3 border-b bg-background/95 px-3 py-2 backdrop-blur lg:hidden">
+          <div className="flex gap-2 overflow-x-auto">
             {steps.map((s, i) => (
               <button
                 key={s.id}
@@ -315,7 +315,7 @@ function CreatePathPage() {
         </div>
 
         <main className="min-w-0">
-          <div className="rounded-2xl border bg-card p-6 sm:p-8">
+          <div className="rounded-2xl border bg-card p-4 sm:p-6 md:p-8">
             {state.currentStep === "business_type" && <BusinessTypeStep onNext={advance} />}
             {state.currentStep === "profile" && (
               <ProfileStep onBack={back} onNext={advance} />

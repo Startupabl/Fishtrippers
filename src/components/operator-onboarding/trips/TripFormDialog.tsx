@@ -271,7 +271,7 @@ export function TripFormDialog({ open, onOpenChange, initial }: Props) {
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
+      <DialogContent className="w-[calc(100vw-1rem)] max-w-2xl max-h-[92vh] overflow-y-auto p-4 sm:p-6">
         <DialogHeader>
           <DialogTitle>{form.id ? "Edit trip" : "Create a trip"}</DialogTitle>
         </DialogHeader>
@@ -333,7 +333,7 @@ export function TripFormDialog({ open, onOpenChange, initial }: Props) {
             <h3 className="text-sm font-semibold uppercase tracking-wide text-muted-foreground">
               Trip details
             </h3>
-            <div className="grid grid-cols-2 gap-3">
+            <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
               <div className="space-y-2">
                 <Label htmlFor="trip-start">Start time</Label>
                 <Input
@@ -488,7 +488,7 @@ export function TripFormDialog({ open, onOpenChange, initial }: Props) {
             <h3 className="text-sm font-semibold uppercase tracking-wide text-muted-foreground">
               Pricing
             </h3>
-            <div className="grid grid-cols-2 gap-3">
+            <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
               <div className="space-y-2">
                 <Label htmlFor="trip-price">
                   {isShared ? (isGuide ? "Price per Person" : "Price per Seat") : "Base price (1st angler)"}
@@ -609,7 +609,7 @@ export function TripFormDialog({ open, onOpenChange, initial }: Props) {
                 </div>
               )}
             </div>
-            <div className="space-y-2 max-w-[50%] pr-1.5">
+            <div className="space-y-2 max-w-full pr-1.5 sm:max-w-[50%]">
               <Label htmlFor="trip-min-party">Min trip size</Label>
               <Input
                 id="trip-min-party"
@@ -753,11 +753,11 @@ export function TripFormDialog({ open, onOpenChange, initial }: Props) {
           </div>
         </div>
 
-        <DialogFooter>
-          <Button variant="ghost" onClick={() => onOpenChange(false)}>
+        <DialogFooter className="gap-2">
+          <Button variant="ghost" onClick={() => onOpenChange(false)} className="w-full sm:w-auto">
             Cancel
           </Button>
-          <Button onClick={() => mutation.mutate()} disabled={mutation.isPending}>
+          <Button onClick={() => mutation.mutate()} disabled={mutation.isPending} className="w-full sm:w-auto">
             {mutation.isPending ? "Saving…" : form.id ? "Save changes" : "Add trip"}
           </Button>
         </DialogFooter>
