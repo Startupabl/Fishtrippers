@@ -1,23 +1,47 @@
 ## Problem
-When admin approves a new listing, the `operators` row flips to `published`, but the trip(s) the user added during onboarding stay as `draft` in `trip_packages`. Result: live listing page shows no trips, and the user's "My Listing" page shows the trip as unpublished.
+The current "Login As" flow generates a Supabase magic link and opens it in a new tab with `window.open(actionLink, "_blank", "noopener")`. This fails in multiple ways:
+- Popup blockers can swallow the new tab silently.
+- The magic-link URL hits Supabase's `/verify` endpoint, which only redirects to `redirectTo` if it's in the project's allow-list — otherwise it falls back to `site_url` (or errors), so the admin ends up nowhere useful.
+- Even when it succeeds, it replaces the admin session in the same browser, so the admin gets locked out (the existing toast literally warns about this).
 
-## Fix
-Update `approveListing` in `src/lib/admin-listings.functions.ts` so that whenever admin sets moderation to `approved`, we also flip any `draft` trips belonging to that operator to `active` in the same transaction.
+Server logs show no `impersonateUser` invocation for the recent click, meaning the user is getting a client-side failure / silent popup-block, not a backend error.
 
-### Change (in `approveListing` handler, inside the `if (data.moderation === "approved")` block, after the operators update succeeds)
+## Fix — rebuild impersonation as in-tab session swap
 
-```ts
-await (supabaseAdmin.from("trip_packages") as any)
-  .update({ status: "active" })
-  .eq("operator_id", data.journeyId)
-  .eq("status", "draft");
-```
+Stop relying on the magic-link redirect flow. Use the same generated token, but exchange it directly with Supabase from the admin's browser, after saving the admin session so they can swap back.
 
-### Scope rules
-- Only runs on `approved` (not on `declined` or `pending`).
-- Only touches `draft` trips — never demotes/changes trips the captain has intentionally paused or archived later.
-- No schema migration needed; no UI changes needed. The "My Listing" trip toggle already reads `status === 'active'`, so it will reflect the new state on next load.
+### 1. `src/lib/admin.functions.ts` — `impersonateUser`
+- Drop the `redirectTo` input and allow-list check (no longer needed).
+- Return `{ email, tokenHash }` from `properties.hashed_token` (instead of `actionLink`).
+- Keep the `assertAdmin` guard and `auth.admin.generateLink({ type: 'magiclink', email })` call.
+
+### 2. New helper `src/lib/impersonation.ts`
+- `IMPERSONATION_KEY = "lovable.admin_session_v1"`
+- `startImpersonation({ tokenHash, targetUserId })`:
+  - `const { data: { session } } = await supabase.auth.getSession()` → store `{ access_token, refresh_token, admin_user_id, target_user_id }` in `sessionStorage`.
+  - `await supabase.auth.verifyOtp({ token_hash: tokenHash, type: 'magiclink' })`.
+- `stopImpersonation()`:
+  - Read saved tokens, call `supabase.auth.setSession({ access_token, refresh_token })`, remove the storage key, return `admin_user_id` for redirect.
+- `getImpersonationState()` → null or `{ admin_user_id, target_user_id }`.
+
+### 3. `src/routes/_admin/admin.users.$userId.tsx`
+- Mutation calls server fn → `await startImpersonation({ tokenHash, targetUserId: userId })` → `navigate({ to: '/dashboard', search: { impersonating: 1 } })`.
+- Toast error if `verifyOtp` returns an error (real error surfaces now).
+
+### 4. New `<ImpersonationBanner />` in `src/routes/__root.tsx`
+- Reads `getImpersonationState()` on mount + listens to `storage` event.
+- When active: fixed top banner "Impersonating {email} — [Switch back to admin]" using existing lime styling.
+- "Switch back" → `stopImpersonation()` → `navigate({ to: '/admin/users/$userId', params: { userId: admin_target_user_id } })`.
+
+This replaces the existing `search.impersonating` inline banner on the admin user page (now redundant, since the admin is no longer on that page during impersonation).
+
+## Why this works
+- No popup, no new tab — the button "just signs you in as them" in the same tab, exactly what was asked.
+- No dependency on Supabase redirect allow-list or `site_url` — token exchange is direct.
+- Admin session is preserved in `sessionStorage` (per-tab, auto-cleared on tab close) so the admin can switch back with one click.
+- Real errors from `verifyOtp` / `generateLink` surface as toasts instead of silent popup blocks.
 
 ## Out of scope
-- Re-approval flows for listings that have been edited after first approval (existing behavior unchanged).
-- Trips the captain creates *after* approval — those already follow the normal draft→active toggle in the UI.
+- Audit-log table for impersonation events.
+- Multi-tab/persistent impersonation (sessionStorage is intentional — closing the tab restores admin via normal sign-in).
+- Changing Supabase Auth allow-list URLs.
