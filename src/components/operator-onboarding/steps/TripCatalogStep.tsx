@@ -118,7 +118,7 @@ export function TripCatalogStep({ onBack, onNext }: Props) {
     return (
       <div className="space-y-6">
         <header>
-          <h1 className="text-3xl font-bold tracking-tight">Trip catalog</h1>
+          <h1 className="text-2xl font-bold tracking-tight sm:text-3xl">Trip catalog</h1>
           <p className="mt-2 text-muted-foreground">
             Pick a primary fishing focus first so we can suggest the right trip templates.
           </p>
@@ -144,7 +144,7 @@ export function TripCatalogStep({ onBack, onNext }: Props) {
   return (
     <div className="space-y-8">
       <header>
-        <h1 className="text-3xl font-bold tracking-tight">Build your trip catalog</h1>
+        <h1 className="text-2xl font-bold tracking-tight sm:text-3xl">Build your trip catalog</h1>
         <p className="mt-2 text-muted-foreground">
           Start from a template tailored to your focus, or build a custom trip from scratch. You
           need at least one trip to continue.

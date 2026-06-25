@@ -23,7 +23,7 @@ export function FishingFocusStep({ onBack, onNext }: Props) {
   return (
     <div className="space-y-8">
       <header>
-        <h1 className="text-3xl font-bold tracking-tight">Fishing focus</h1>
+        <h1 className="text-2xl font-bold tracking-tight sm:text-3xl">Fishing focus</h1>
         <p className="mt-2 text-muted-foreground">
           Tell us what you specialize in. This drives where you appear in search and which trip
           templates we suggest next.
@@ -31,7 +31,7 @@ export function FishingFocusStep({ onBack, onNext }: Props) {
       </header>
 
       {/* Fishing Environments */}
-      <section className="space-y-4 rounded-2xl border bg-card p-6">
+      <section className="space-y-4 rounded-2xl border bg-card p-4 sm:p-6">
         <div className="flex flex-wrap items-end justify-between gap-3">
           <div>
             <h2 className="text-lg font-semibold">Fishing environments</h2>
@@ -84,7 +84,7 @@ export function FishingFocusStep({ onBack, onNext }: Props) {
       </section>
 
       {/* Target Species */}
-      <section className="space-y-4 rounded-2xl border bg-card p-6">
+      <section className="space-y-4 rounded-2xl border bg-card p-4 sm:p-6">
         <div className="flex flex-wrap items-end justify-between gap-3">
           <div>
             <h2 className="text-lg font-semibold">Targeted Species</h2>

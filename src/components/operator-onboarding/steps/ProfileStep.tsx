@@ -159,13 +159,13 @@ export function ProfileStep({ onBack, onNext }: Props) {
   return (
     <div className="space-y-8">
       <header>
-        <h1 className="text-3xl font-bold tracking-tight">Your business profile</h1>
+        <h1 className="text-2xl font-bold tracking-tight sm:text-3xl">Your business profile</h1>
         <p className="mt-2 text-muted-foreground">
           This is what customers will see in the directory.
         </p>
       </header>
 
-      <div className="space-y-6 rounded-2xl border bg-card p-6">
+      <div className="space-y-6 rounded-2xl border bg-card p-4 sm:p-6">
         {/* Profile image */}
         <div className="space-y-3">
           <div>

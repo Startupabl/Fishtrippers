@@ -36,7 +36,7 @@ export function BookingRulesStep({ onBack, onNext }: Props) {
   return (
     <div className="space-y-8">
       <header>
-        <h1 className="text-3xl font-bold tracking-tight">Booking rules & policy</h1>
+        <h1 className="text-2xl font-bold tracking-tight sm:text-3xl">Booking rules & policy</h1>
         <p className="mt-2 text-muted-foreground">
           Last stop before submitting — set your booking notice and cancellation terms.
           You'll choose Instant Book or Request to Book from your Manage Availability page after submitting.
@@ -45,7 +45,7 @@ export function BookingRulesStep({ onBack, onNext }: Props) {
 
 
       {/* Advance notice */}
-      <section className="space-y-3 rounded-2xl border bg-card p-6">
+      <section className="space-y-3 rounded-2xl border bg-card p-4 sm:p-6">
         <div>
           <h2 className="text-lg font-semibold">Advance notice</h2>
           <p className="text-sm text-muted-foreground">
@@ -77,7 +77,7 @@ export function BookingRulesStep({ onBack, onNext }: Props) {
       </section>
 
       {/* Cancellation policy */}
-      <section className="space-y-4 rounded-2xl border bg-card p-6">
+      <section className="space-y-4 rounded-2xl border bg-card p-4 sm:p-6">
         <div>
           <h2 className="text-lg font-semibold">Cancellation & refund policy</h2>
           <p className="text-sm text-muted-foreground">
