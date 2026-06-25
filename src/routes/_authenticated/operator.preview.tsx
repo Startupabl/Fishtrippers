@@ -259,6 +259,7 @@ function OperatorPreviewPage() {
               avatarUrl={owner?.avatar_url}
               verified={approved}
               operatorId={op?.id ?? ""}
+              businessType={op?.business_type ?? state.business_type}
             />
             <SpeciesGrid species={(op?.target_species as string[]) ?? []} />
             {op?.business_type === "charter" && (
