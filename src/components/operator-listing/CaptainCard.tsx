@@ -9,11 +9,13 @@ interface Props {
   avatarUrl?: string | null;
   verified?: boolean;
   operatorId: string;
+  businessType?: string | null;
 }
 
-export function CaptainCard({ name, avatarUrl, verified, operatorId }: Props) {
+export function CaptainCard({ name, avatarUrl, verified, operatorId, businessType }: Props) {
   const [open, setOpen] = useState(false);
-  const initials = (name || "C")
+  const roleLabel = businessType === "guide" ? "Guide" : "Captain";
+  const initials = (name || roleLabel)
     .split(/\s+/)
     .map((p) => p[0])
     .slice(0, 2)
@@ -27,8 +29,8 @@ export function CaptainCard({ name, avatarUrl, verified, operatorId }: Props) {
           <AvatarFallback>{initials}</AvatarFallback>
         </Avatar>
         <div className="min-w-0">
-          <div className="text-xs uppercase tracking-wider text-muted-foreground">Captain</div>
-          <div className="truncate text-lg font-semibold">{name || "Captain"}</div>
+          <div className="text-xs uppercase tracking-wider text-muted-foreground">{roleLabel}</div>
+          <div className="truncate text-lg font-semibold">{name || roleLabel}</div>
         </div>
       </div>
       {verified && (
@@ -39,13 +41,14 @@ export function CaptainCard({ name, avatarUrl, verified, operatorId }: Props) {
       )}
       <Button className="mt-4 w-full" onClick={() => setOpen(true)}>
         <MessageCircle className="mr-2 h-4 w-4" />
-        Contact captain
+        Contact {roleLabel.toLowerCase()}
       </Button>
       <ContactCaptainDialog
         open={open}
         onOpenChange={setOpen}
         operatorId={operatorId}
         captainName={name}
+        roleLabel={roleLabel}
       />
     </div>
   );
