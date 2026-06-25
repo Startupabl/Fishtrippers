@@ -1,44 +1,48 @@
-# Mobile responsiveness fixes — Create / Edit Listing wizard
+## Goal
 
-Goal: make every step of the operator onboarding wizard (and the trip editor modal it opens) fully usable at 320–414px widths without horizontal scrolling, cropped buttons, or cramped two-column inputs.
+Make the Create/Edit Listing wizard (all 6 steps + the Trip editor dialog) fully usable on phones (320–414 px) with zero horizontal scroll.
 
-## Files to edit
+## Diagnosis
 
-### 1. `src/routes/create-listing.new.tsx` (wizard shell)
-- Reduce outer horizontal padding on phones: `px-4` → `px-3 sm:px-4` on the header, banner, and grid container.
-- Header label: shrink `text-sm` → `text-xs sm:text-sm` and add `truncate` + `gap-2` so "Edit your listing" never pushes the logo off-screen.
-- Card padding: `p-6 sm:p-8` → `p-4 sm:p-6 md:p-8` so form fields get more usable width on phones.
-- Mobile step chips: make the chip row **sticky** at the top of the viewport on `<lg`, with `bg-background/95 backdrop-blur` and a bottom border, so users can always jump between steps without scrolling back up.
+Walked the wizard shell, each step file, and the Trip editor. The shell itself does not overflow (probed at 371 px, body = 371 px, no offending children) — but the experience still feels cut off because:
 
-### 2. `src/components/operator-onboarding/trips/TripFormDialog.tsx` (biggest issue)
-- `DialogContent`: change `max-w-2xl max-h-[90vh] overflow-y-auto` to `w-[calc(100vw-1rem)] max-w-2xl max-h-[92vh] overflow-y-auto p-4 sm:p-6` — gives 8px breathing room on phones and trims inner padding.
-- Trip-details grid (Start time + Duration): `grid grid-cols-2 gap-3` → `grid grid-cols-1 sm:grid-cols-2 gap-3`.
-- Pricing grid (Price + Seats/Max party): `grid grid-cols-2 gap-3` → `grid grid-cols-1 sm:grid-cols-2 gap-3`.
-- Min trip size container: `max-w-[50%]` → `max-w-full sm:max-w-[50%]`.
-- DialogFooter buttons: add `w-full sm:w-auto` on Cancel + Save and `gap-2` so they stack cleanly on mobile.
+1. There is no site-wide guard against accidental horizontal scroll. Any future overflowing element silently breaks the whole page.
+2. Several inner blocks ignore mobile sizing: 2-column grids that don’t collapse, `max-w-md` selects, dialog content that constrains an inner column to `sm:max-w-[50%]` mid-section.
+3. The Trip editor `DialogContent` (`w-[calc(100vw-1rem)] max-w-2xl`) renders fine, but the form rows inside still use `grid grid-cols-2` in places that should stack on mobile.
+4. Boat-type `<SelectTrigger>` shows an image + long label without a `min-w-0 truncate` guard — overflows narrow viewports when a long subcategory is chosen.
 
-### 3. Step components — `src/components/operator-onboarding/steps/*.tsx`
-Apply the same two small tweaks to each step so the inside of the card matches the new outer padding:
-- Each step's `<h1 className="text-3xl ...">` → `text-2xl sm:text-3xl` (fits one line on phones).
-- Inner section cards `rounded-2xl border bg-card p-6` → `p-4 sm:p-6`.
+## Scope (frontend only)
 
-Files touched:
-- `ProfileStep.tsx` — about/profile cards.
-- `BoatDetailsStep.tsx` — boat info / engine / capacity / features sections (4 cards).
-- `FishingFocusStep.tsx` — environments + species cards.
-- `BookingRulesStep.tsx` — advance notice + cancellation + weather sections.
-- `TripCatalogStep.tsx` — header sizing only; existing list/grid is already responsive.
-- `BusinessTypeStep.tsx` — header sizing only.
+### 1. Global overflow guard
+`src/styles.css` — add:
+```css
+html, body { overflow-x: hidden; max-width: 100%; }
+```
 
-### 4. `src/components/operator-listing/PreviewBanner.tsx` (used on the final preview/edit screen)
-- Wrap the action buttons (`Edit Listing`, `Submit for approval`) so they wrap to a new row on small viewports — already uses `flex-wrap`, but the truncating message can crowd them. Add `w-full sm:w-auto` to each Button and `justify-end` to the action group so they sit on their own row on mobile.
+### 2. Wizard shell — `src/routes/create-listing.new.tsx`
+- Outer wrapper: add `overflow-x-hidden`.
+- Confirm grid children carry `min-w-0` (sidebar aside is `hidden lg:block`, main already has `min-w-0`).
+- Sticky mobile stepper: keep `overflow-x-auto` but constrain to viewport width.
 
-### 5. `src/routes/_authenticated/operator.preview.tsx` (edit-mode review screen)
-- `px-4` on `<main>` is fine; no changes needed besides what `PreviewBanner` gets above.
+### 3. Step components — collapse 2-col grids on mobile and prevent fixed widths
+- `ProfileStep.tsx`: avatar row → wrap on phones (`flex flex-wrap`), label/button stack vertically <sm.
+- `BoatDetailsStep.tsx`:
+  - Boat-type `<SelectTrigger>` — remove `max-w-md`, add `min-w-0` + `truncate` on inner label; image `shrink-0`.
+  - The "Restored" checkbox cell in the engine grid → `sm:col-span-1`, full width on mobile.
+- `FishingFocusStep.tsx`: environment grid is already `sm:grid-cols-2`; ensure inner card `min-w-0` so descriptions wrap.
+- `BookingRulesStep.tsx`: cancellation cards `md:grid-cols-3` → already collapses; ensure `min-w-0` on each card so policy bullets wrap.
+- `TripCatalogStep.tsx`: templates grid `sm:grid-cols-3` — already responsive; row item already responsive.
+- `BusinessTypeStep.tsx`: spot-check, add `min-w-0` if needed.
 
-## Out of scope (intentionally)
-- Desktop layout, server logic, schema, or RBAC — unchanged.
-- The public listing view (`/charters/$location/$businessSlug`) — already adjusted in earlier turns.
-- The Dashboard "My listing" hub — separate request if needed.
+### 4. Trip editor — `src/components/operator-onboarding/trips/TripFormDialog.tsx`
+- Replace any `grid grid-cols-2` with `grid grid-cols-1 sm:grid-cols-2` (timing, pricing, party-size rows).
+- Line 612 — remove `sm:max-w-[50%]`; let column flex naturally.
+- Ensure inputs use `w-full` (Tailwind UI Input already does, but verify wrappers don’t set fixed widths).
+- Selected-chip rows (species/environments/techniques) — add `flex flex-wrap min-w-0`.
 
-After approval I'll batch all edits in parallel.
+### 5. Verification
+- Re-probe via preview JS at 375 px after the build: `documentScrollWidth === clientWidth`, no element with `right > vw`.
+- Smoke-screenshot each step with Playwright headless at 375×812 (wizard + Trip dialog open).
+
+## Out of scope
+Business logic, server functions, schema, and copy stay untouched. The Trip dialog data flow is not altered — only its layout classes.
