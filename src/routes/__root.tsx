@@ -16,6 +16,8 @@ import { BottomNav } from "@/components/layout/BottomNav";
 import { useAuthListener } from "@/hooks/useAuthListener";
 import { useFxRates } from "@/hooks/useFxRates";
 import { ProfileCompletionRedirector } from "@/components/auth/ProfileCompletionRedirector";
+import { ImpersonationBanner } from "@/components/admin/ImpersonationBanner";
+
 
 function NotFoundComponent() {
   return (
