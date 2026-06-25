@@ -175,8 +175,8 @@ export function ProfileStep({ onBack, onNext }: Props) {
               high-quality logo or a clear professional photo works best.
             </p>
           </div>
-          <div className="flex items-center gap-4">
-            <Avatar className="h-24 w-24">
+          <div className="flex flex-wrap items-center gap-4">
+            <Avatar className="h-24 w-24 shrink-0">
               {avatarUrl ? <AvatarImage src={avatarUrl} alt="Profile" /> : null}
               <AvatarFallback className="text-xl font-semibold">
                 {initials}

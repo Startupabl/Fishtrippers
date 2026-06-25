@@ -118,7 +118,7 @@ export function BoatDetailsStep({ onBack, onNext }: Props) {
             value={vessel.boat_type_id || undefined}
             onValueChange={(v) => setVessel({ boat_type_id: v })}
           >
-            <SelectTrigger id="boat_type" className="max-w-md">
+            <SelectTrigger id="boat_type" className="w-full min-w-0 sm:max-w-md [&>span]:truncate">
               <SelectValue placeholder="Choose a boat type" />
             </SelectTrigger>
             <SelectContent className="max-h-80">
@@ -127,16 +127,16 @@ export function BoatDetailsStep({ onBack, onNext }: Props) {
                   <SelectLabel>{group}</SelectLabel>
                   {items.map((bt) => (
                     <SelectItem key={bt.id} value={bt.id} className="pl-8 py-2">
-                      <span className="flex items-center gap-3">
+                      <span className="flex min-w-0 items-center gap-3">
                         {bt.icon_url ? (
                           <img
                             src={bt.icon_url}
                             alt=""
                             loading="lazy"
-                            className="h-7 w-12 object-contain shrink-0"
+                            className="h-7 w-12 shrink-0 object-contain"
                           />
                         ) : null}
-                        <span>{bt.subcategory_name}</span>
+                        <span className="truncate">{bt.subcategory_name}</span>
                       </span>
                     </SelectItem>
                   ))}
