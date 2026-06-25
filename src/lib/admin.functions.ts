@@ -784,44 +784,7 @@ export const getAdminUserDetail = createServerFn({ method: "POST" })
 export const impersonateUser = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .inputValidator((input: unknown) =>
-    z
-      .object({
-        userId: z.string().uuid(),
-        redirectTo: z
-          .string()
-          .url()
-          .refine(
-            (u) => {
-              // SECURITY: only allow redirects back to our own app domains.
-              // Without this allowlist, a magic-link with an attacker-controlled
-              // redirectTo could exfiltrate the impersonated user's session token.
-              const allowed = new Set(
-                [
-                  process.env.APP_URL ?? "https://fishtrippers.com",
-                  "https://fishtrippers.com",
-                  "https://www.fishtrippers.com",
-                ].map((o) => {
-                  try {
-                    return new URL(o).origin;
-                  } catch {
-                    return o;
-                  }
-                }),
-              );
-              try {
-                const url = new URL(u);
-                if (allowed.has(url.origin)) return true;
-                if (url.protocol === "https:" && url.hostname.endsWith(".lovable.app")) return true;
-                return false;
-              } catch {
-                return false;
-              }
-            },
-            { message: "redirectTo must be on the app domain" },
-          )
-          .optional(),
-      })
-      .parse(input),
+    z.object({ userId: z.string().uuid() }).parse(input),
   )
   .handler(async ({ context, data }) => {
     await assertAdmin(context.userId);
@@ -832,11 +795,13 @@ export const impersonateUser = createServerFn({ method: "POST" })
     const { data: link, error } = await supabaseAdmin.auth.admin.generateLink({
       type: "magiclink",
       email,
-      options: data.redirectTo ? { redirectTo: data.redirectTo } : undefined,
     });
     if (error) throw new Error(error.message);
-    return { actionLink: link?.properties?.action_link ?? null };
+    const tokenHash = link?.properties?.hashed_token ?? null;
+    if (!tokenHash) throw new Error("Could not generate impersonation token");
+    return { email, tokenHash };
   });
+
 
 export const listAdminFlags = createServerFn({ method: "GET" })
   .middleware([requireSupabaseAuth])

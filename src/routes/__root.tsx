@@ -16,6 +16,8 @@ import { BottomNav } from "@/components/layout/BottomNav";
 import { useAuthListener } from "@/hooks/useAuthListener";
 import { useFxRates } from "@/hooks/useFxRates";
 import { ProfileCompletionRedirector } from "@/components/auth/ProfileCompletionRedirector";
+import { ImpersonationBanner } from "@/components/admin/ImpersonationBanner";
+
 
 function NotFoundComponent() {
   return (
@@ -164,6 +166,7 @@ function RootComponent() {
     return (
       <QueryClientProvider client={queryClient}>
         <FxRatesLoader />
+        <ImpersonationBanner />
         <Outlet />
         <Toaster />
       </QueryClientProvider>
@@ -174,6 +177,7 @@ function RootComponent() {
     <QueryClientProvider client={queryClient}>
       <FxRatesLoader />
       <ProfileCompletionRedirector />
+      <ImpersonationBanner />
       <SiteHeader />
       <div className="min-w-0 max-w-full overflow-x-hidden pb-20 lg:pb-0">
         <Outlet />
@@ -184,4 +188,5 @@ function RootComponent() {
     </QueryClientProvider>
   );
 }
+
 

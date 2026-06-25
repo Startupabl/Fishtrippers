@@ -1,6 +1,6 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
-import { createFileRoute, Link, useSearch } from "@tanstack/react-router";
+import { createFileRoute, Link, useRouter, useSearch } from "@tanstack/react-router";
 import { ArrowLeft, Copy } from "lucide-react";
 import { toast } from "sonner";
 import { z } from "zod";
@@ -17,6 +17,8 @@ import { useAuthStore } from "@/stores/useAuthStore";
 import { formatCurrency } from "@/lib/format-currency";
 import { formatPhoneDisplay } from "@/lib/phone-format";
 import { formatAddressLines, hasAnyAddress, type AddressFields } from "@/lib/address-format";
+import { startImpersonation } from "@/lib/impersonation";
+
 
 const searchSchema = z.object({
   impersonating: z.coerce.boolean().optional(),
@@ -93,23 +95,24 @@ function UserDetailPage() {
     onError: (e) => toast.error(e instanceof Error ? e.message : "Failed to block IP"),
   });
 
+  const router = useRouter();
   const impersonateMut = useMutation({
-    mutationFn: () =>
-      impersonateFn({
-        data: {
-          userId,
-          redirectTo: `${window.location.origin}/dashboard?impersonating=1`,
-        },
-      }),
-    onSuccess: (r) => {
-      if (!r.actionLink) return toast.error("No link returned");
-      window.open(r.actionLink, "_blank", "noopener");
-      toast.success(
-        "Login link opened in a new tab. Heads up: it will replace your admin session in this browser — use an incognito window to keep both sessions side by side.",
-      );
+    mutationFn: async () => {
+      const r = await impersonateFn({ data: { userId } });
+      await startImpersonation({
+        tokenHash: r.tokenHash,
+        targetUserId: userId,
+        targetEmail: r.email ?? null,
+      });
+      return r;
+    },
+    onSuccess: () => {
+      toast.success("Signed in as user");
+      router.navigate({ to: "/dashboard" });
     },
     onError: (e) => toast.error(e instanceof Error ? e.message : "Failed to start impersonation"),
   });
+
 
   const stripeLinkFn = useServerFn(generateStripeDashboardLink);
   const stripeLinkMut = useMutation({
