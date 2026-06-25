@@ -24,6 +24,7 @@ interface Props {
   onOpenChange: (open: boolean) => void;
   operatorId: string;
   captainName: string;
+  roleLabel?: string;
 }
 
 export function ContactCaptainDialog({
@@ -31,6 +32,7 @@ export function ContactCaptainDialog({
   onOpenChange,
   operatorId,
   captainName,
+  roleLabel = "Captain",
 }: Props) {
   const [body, setBody] = useState("");
   const user = useAuthStore((s) => s.user);
@@ -84,9 +86,9 @@ export function ContactCaptainDialog({
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="sm:max-w-md">
         <DialogHeader>
-          <DialogTitle>Contact {captainName || "the captain"}</DialogTitle>
+          <DialogTitle>Contact {captainName || `the ${roleLabel.toLowerCase()}`}</DialogTitle>
           <DialogDescription>
-            Send a quick note — your captain will reply in your inbox.
+            Send a quick note — your {roleLabel.toLowerCase()} will reply in your inbox.
           </DialogDescription>
         </DialogHeader>
 
@@ -94,7 +96,7 @@ export function ContactCaptainDialog({
           <Textarea
             value={body}
             onChange={(e) => setBody(e.target.value)}
-            placeholder={`Hi ${captainName || "Captain"}, I'm interested in your trips and have a few questions…`}
+            placeholder={`Hi ${captainName || roleLabel}, I'm interested in your trips and have a few questions…`}
             rows={6}
             maxLength={1000}
             disabled={mutation.isPending}
