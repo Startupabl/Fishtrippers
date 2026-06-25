@@ -161,6 +161,7 @@ export function OperatorCard({ operator }: { operator: OperatorCardDTO }) {
             {operator.lowest_price_label ? (
               <span className="text-base font-bold text-emerald-700">
                 {operator.lowest_price_label}
+                <span className="text-base font-bold text-emerald-700"> / person</span>
               </span>
             ) : (
               <span className="text-xs text-muted-foreground">Contact for pricing</span>
