@@ -29,7 +29,7 @@ export function BusinessTypeStep({ onNext }: Props) {
   return (
     <div className="space-y-8">
       <header>
-        <h1 className="text-3xl font-bold tracking-tight">What kind of operator are you?</h1>
+        <h1 className="text-2xl font-bold tracking-tight sm:text-3xl">What kind of operator are you?</h1>
         <p className="mt-2 text-muted-foreground">
           This shapes what we ask next. You can change it later before submitting.
         </p>

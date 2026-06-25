@@ -31,11 +31,11 @@ export function PreviewBanner({ status, canSubmit, submitting, onSubmit }: Props
             You are currently in Preview Mode. This is how your listing will appear to guests.
           </p>
         </div>
-        <div className="flex flex-wrap items-center gap-2">
+        <div className="flex flex-wrap items-center justify-end gap-2">
           <Badge variant="outline" className="border-gold-deep bg-white text-gold-deep">
             {label}
           </Badge>
-          <Button asChild size="sm" variant="outline" className="border-gold text-gold-deep hover:bg-gold/10">
+          <Button asChild size="sm" variant="outline" className="w-full border-gold text-gold-deep hover:bg-gold/10 sm:w-auto">
             <Link to="/create-listing/new" search={{ edit: true } as never}>
               <Pencil className="mr-1.5 h-3.5 w-3.5" />
               Edit Listing
@@ -47,7 +47,7 @@ export function PreviewBanner({ status, canSubmit, submitting, onSubmit }: Props
               onClick={onSubmit}
               disabled={submitting || !canSubmit}
               title={!canSubmit ? "Complete all steps before submitting" : undefined}
-              className="bg-gold text-ocean-deep hover:bg-gold-deep"
+              className="w-full bg-gold text-ocean-deep hover:bg-gold-deep sm:w-auto"
             >
               {submitting ? <Loader2 className="mr-1.5 h-3.5 w-3.5 animate-spin" /> : null}
               Submit for approval

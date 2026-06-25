@@ -77,7 +77,7 @@ export function BoatDetailsStep({ onBack, onNext }: Props) {
     return (
       <div className="space-y-8">
         <header>
-          <h1 className="text-3xl font-bold tracking-tight">Boat details</h1>
+          <h1 className="text-2xl font-bold tracking-tight sm:text-3xl">Boat details</h1>
           <p className="mt-2 text-muted-foreground">
             You're listed as an Independent Guide — no boat details needed. Skip ahead.
           </p>
@@ -100,14 +100,14 @@ export function BoatDetailsStep({ onBack, onNext }: Props) {
   return (
     <div className="space-y-8">
       <header>
-        <h1 className="text-3xl font-bold tracking-tight">Your boat</h1>
+        <h1 className="text-2xl font-bold tracking-tight sm:text-3xl">Your boat</h1>
         <p className="mt-2 text-muted-foreground">
           Tell us about the vessel you'll run trips on.
         </p>
       </header>
 
       {/* Boat info */}
-      <section className="space-y-6 rounded-2xl border bg-card p-6">
+      <section className="space-y-6 rounded-2xl border bg-card p-4 sm:p-6">
         <h2 className="text-lg font-semibold">Boat info</h2>
 
         <div className="space-y-2">
@@ -208,7 +208,7 @@ export function BoatDetailsStep({ onBack, onNext }: Props) {
       </section>
 
       {/* Engine */}
-      <section className="space-y-4 rounded-2xl border bg-card p-6">
+      <section className="space-y-4 rounded-2xl border bg-card p-4 sm:p-6">
         <h2 className="text-lg font-semibold">Engine</h2>
         <div className="grid gap-4 sm:grid-cols-2">
           <div className="space-y-2">
@@ -262,7 +262,7 @@ export function BoatDetailsStep({ onBack, onNext }: Props) {
       </section>
 
       {/* Capacity */}
-      <section className="space-y-3 rounded-2xl border bg-card p-6">
+      <section className="space-y-3 rounded-2xl border bg-card p-4 sm:p-6">
         <Label htmlFor="capacity" className="text-base">
           Max Passenger Capacity / Number of Seats{" "}
           <span className="text-destructive">*</span>
@@ -285,7 +285,7 @@ export function BoatDetailsStep({ onBack, onNext }: Props) {
       </section>
 
       {/* Features */}
-      <section className="space-y-6 rounded-2xl border bg-card p-6">
+      <section className="space-y-6 rounded-2xl border bg-card p-4 sm:p-6">
         <div>
           <h2 className="text-lg font-semibold">Boat Features</h2>
           <p className="text-sm text-muted-foreground">
