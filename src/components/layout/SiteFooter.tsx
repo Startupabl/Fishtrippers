@@ -16,7 +16,7 @@ const CATEGORY_LABEL: Record<Category, string> = {
   legal: "Legal",
 };
 
-const SOCIALS: Array<{
+const HIDDEN_FOOTER_SLUGS = ["how-it-works-for-anglers", "how-bookings-work-for-guides"];
   href: string;
   label: string;
   icon: React.ComponentType<{ className?: string }>;
