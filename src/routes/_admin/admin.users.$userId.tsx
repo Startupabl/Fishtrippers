@@ -17,6 +17,8 @@ import { useAuthStore } from "@/stores/useAuthStore";
 import { formatCurrency } from "@/lib/format-currency";
 import { formatPhoneDisplay } from "@/lib/phone-format";
 import { formatAddressLines, hasAnyAddress, type AddressFields } from "@/lib/address-format";
+import { startImpersonation } from "@/lib/impersonation";
+
 
 const searchSchema = z.object({
   impersonating: z.coerce.boolean().optional(),
