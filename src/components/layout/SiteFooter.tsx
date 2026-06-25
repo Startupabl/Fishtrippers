@@ -130,11 +130,13 @@ export function SiteFooter() {
                 {CATEGORY_LABEL[cat]}
               </h2>
               <ul className="flex flex-col gap-1">
-                {(byCategory[cat] ?? []).map((p) => (
-                  <li key={p.id}>
-                    <FooterPageLink page={p} />
-                  </li>
-                ))}
+                {(byCategory[cat] ?? [])
+                  .filter((p) => !HIDDEN_FOOTER_SLUGS.includes(p.slug))
+                  .map((p) => (
+                    <li key={p.id}>
+                      <FooterPageLink page={p} />
+                    </li>
+                  ))}
               </ul>
             </div>
           ))}
