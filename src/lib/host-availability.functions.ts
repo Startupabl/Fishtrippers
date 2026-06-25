@@ -94,6 +94,14 @@ export const setAllTripsBookingType = createServerFn({ method: "POST" })
       .update({ booking_type: data.booking_type } as any)
       .eq("operator_id", opId);
     if (error) throw new Error(error.message);
+    // Keep operators.booking_type in sync so search cards reflect the choice.
+    const operatorBookingType =
+      data.booking_type === "instant_book" ? "instant" : "inquiry";
+    const { error: opErr } = await supabase
+      .from("operators")
+      .update({ booking_type: operatorBookingType } as any)
+      .eq("id", opId);
+    if (opErr) throw new Error(opErr.message);
     return { ok: true };
   });
 
