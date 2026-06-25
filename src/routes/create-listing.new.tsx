@@ -282,7 +282,7 @@ function CreatePathPage() {
         </div>
       )}
 
-      <div className="mx-auto grid max-w-6xl gap-4 px-3 py-4 sm:gap-6 sm:px-4 sm:py-8 lg:grid-cols-[260px_minmax(0,1fr)]">
+      <div className="mx-auto grid w-full max-w-6xl grid-cols-[minmax(0,1fr)] gap-4 px-3 py-4 sm:gap-6 sm:px-4 sm:py-8 lg:grid-cols-[260px_minmax(0,1fr)]">
         <aside className="hidden lg:block">
           <div className="sticky top-8 rounded-2xl border bg-card">
             <OnboardingSidebar
@@ -294,8 +294,9 @@ function CreatePathPage() {
         </aside>
 
         {/* Mobile stepper: sticky horizontal chip row */}
-        <div className="sticky top-0 z-30 -mx-3 border-b bg-background/95 px-3 py-2 backdrop-blur lg:hidden">
+        <div className="sticky top-0 z-30 -mx-3 min-w-0 max-w-[calc(100%+1.5rem)] overflow-hidden border-b bg-background/95 px-3 py-2 backdrop-blur lg:hidden">
           <div className="flex gap-2 overflow-x-auto">
+
             {steps.map((s, i) => (
               <button
                 key={s.id}
