@@ -166,6 +166,7 @@ function RootComponent() {
     return (
       <QueryClientProvider client={queryClient}>
         <FxRatesLoader />
+        <ImpersonationBanner />
         <Outlet />
         <Toaster />
       </QueryClientProvider>
@@ -176,6 +177,7 @@ function RootComponent() {
     <QueryClientProvider client={queryClient}>
       <FxRatesLoader />
       <ProfileCompletionRedirector />
+      <ImpersonationBanner />
       <SiteHeader />
       <div className="min-w-0 max-w-full overflow-x-hidden pb-20 lg:pb-0">
         <Outlet />
@@ -186,4 +188,5 @@ function RootComponent() {
     </QueryClientProvider>
   );
 }
+
 
