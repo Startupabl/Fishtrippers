@@ -1,63 +1,48 @@
-## My Verifications — Step 2
+## Goal
 
-Build the verifications table, storage bucket, and the upload page.
+Add an admin-managed Verification column + review modal inside `Admin → Action Dashboard → Listing Applications`, and let admin approve/reject uploaded docs. The captain/guide's "My Verifications" page reflects the new status.
 
-### 1. Database
+## Changes
 
-New table `public.verifications`:
-- `id uuid pk default gen_random_uuid()`
-- `user_id uuid not null unique references auth.users on delete cascade`
-- `is_charter_owner boolean not null default false`
-- `id_url text`, `license_url text`, `insurance_url text`, `vessel_doc_url text` (storage paths, not public URLs)
-- `status text not null default 'Pending Verification' check (status in ('Pending Verification','Documents Uploaded','Verified','Rejected'))`
-- `created_at`, `updated_at` with update trigger
+### 1. Server functions — `src/lib/admin-verifications.functions.ts` (new)
+Admin-gated (`has_role(uid,'admin')`) handlers using `supabaseAdmin`:
+- `getVerificationForOwner({ owner_id })` → returns the verifications row for that user (or null).
+- `getAdminVerificationDocUrl({ user_id, doc_type })` → signed URL (60s) from the `verification-docs` private bucket so admin can view any user's uploaded files.
+- `setVerificationStatus({ user_id, status: 'Verified' | 'Rejected', note? })` → updates `verifications.status`. The existing `sync_operator_verification_status` trigger already syncs `operators.verification_status` (we'll extend it to map `Rejected` → `unverified` so the captain's checklist re-prompts; `Verified` → `verified`).
 
-Grants + RLS:
-- `GRANT SELECT, INSERT, UPDATE ON public.verifications TO authenticated; GRANT ALL TO service_role;`
-- Policies:
-  - User can select/insert/update their own row (`auth.uid() = user_id`)
-  - Admins can select/update all (`has_role(auth.uid(), 'admin')`)
+### 2. Admin Listings table — `src/routes/_admin/admin.queue.tsx`
+- Extend `listAdminJourneys` rows (in `src/lib/admin-listings.functions.ts`) to also join verification info per owner: `verification_status` ('Pending Verification' | 'Documents Uploaded' | 'Verified' | 'Rejected' | null) and `verification_user_id`.
+- Add new `<TableHead>Verification</TableHead>` between Submitted and Status.
+- Cell logic:
+  - No row OR status = 'Pending Verification' (no docs) → grey pill **"Not Submitted"**.
+  - status = 'Documents Uploaded' → button **"View Docs"** (amber) opens modal.
+  - status = 'Verified' → green pill **"Verified"** (still clickable to re-open modal).
+  - status = 'Rejected' → red pill **"Rejected"** (clickable).
 
-Keep the existing `operators.verification_status` column as the source for the "Verified" badge / Pending Action Items checklist. Add a trigger (or handle in the server fn) to sync: when `verifications.status` flips to `'Verified'`, set the user's `operators.verification_status = 'verified'`; when set back to anything else, set it to `'pending'` (if any docs uploaded) or `'unverified'`.
+### 3. Review modal — `src/components/admin/VerificationReviewDialog.tsx` (new)
+- Props: `ownerId`, `ownerName`, `open`, `onOpenChange`.
+- Loads the owner's verification row via `getVerificationForOwner`.
+- Lists the 4 doc slots (ID, License, Insurance, Vessel — last shown only if `is_charter_owner`). Each row: label, helper text, status ("Uploaded" / "Missing"), and **View** button that fetches a signed URL and opens it in a new tab.
+- Footer: **Approve** (green) and **Reject** (amber) buttons calling `setVerificationStatus`. Optional note textarea for Reject.
+- On success: toast + invalidate `["admin","queue","listings"]` queries so the column refreshes.
 
-### 2. Storage
+### 4. Captain/Guide "My Verifications" page
+Already reads `verifications.status` — once admin sets it to `Verified` / `Rejected`, the page reflects it. Add a small status banner at the top:
+- `Verified` → green "Your account is verified."
+- `Rejected` → red "Your documents were rejected — please re-upload."
+- `Documents Uploaded` → blue "Submitted — under review."
+- `Pending Verification` → muted "Upload your documents below."
 
-New **private** bucket `verification-docs` (created via the bucket tool).
-- Path convention: `{user_id}/{doc_type}.{ext}` so re-upload overwrites the same key (`upsert: true`).
-- RLS policies on `storage.objects`:
-  - Owner can `select/insert/update/delete` where `bucket_id = 'verification-docs' AND auth.uid()::text = (storage.foldername(name))[1]`
-  - Admins can `select` all rows in this bucket
-- Accept: PDF, JPG, PNG, max 10 MB (client-side validation).
-- Reads use short-lived signed URLs (60s), same pattern as `message-attachment-upload.ts`.
+When status is `Rejected`, allow re-upload (resets status to `Documents Uploaded` on next upload via existing `recomputeStatus`, which we'll adjust to clear `Rejected` when the user replaces a file).
 
-### 3. Server functions
+### 5. Migration
+- Update `recomputeStatus` logic in `upsertVerification` so a re-upload after `Rejected` returns to `Documents Uploaded` (currently it preserves `Rejected`). Pure code change, no SQL.
+- Extend trigger `sync_operator_verification_status`: map `Rejected` → `unverified` (so the dashboard "Pending Action Items" re-appears).
 
-New file `src/lib/verifications.functions.ts`:
-- `getMyVerification()` — `requireSupabaseAuth`; returns the user's row (or null).
-- `upsertVerification({ is_charter_owner, doc_type?, storage_path? })` — upsert row, set the matching `*_url` column, and recompute `status`:
-  - `'Documents Uploaded'` once all required docs present (id+license+insurance, plus vessel if `is_charter_owner`)
-  - else `'Pending Verification'`
-  - never overwrite `'Verified'` / `'Rejected'` from the user side
-- `getVerificationDocSignedUrl({ doc_type })` — owner or admin only.
+## Out of scope
+- Admin manually setting the listing status to "Action Required" — the existing Reject Listing flow already handles sending listings back to draft with a note; no new listing status is added.
 
-Client upload helper `src/lib/verification-upload.ts` mirroring existing upload helpers (validate, upload with `upsert: true`, return the storage path).
-
-### 4. UI — `src/routes/_authenticated/dashboard.verifications.tsx`
-
-Replace the current stub with the real page:
-
-- Header: **"Please upload the following to verify your account:"** + short sub-line.
-- Status pill at top showing current `status`.
-- Role row: switch / radio **"Are you a Charter Boat Owner?"** — persists immediately on toggle; controls whether the Vessel field is required and shown.
-- Four upload cards (Identity, License, Insurance, Vessel — Vessel hidden/optional unless charter owner is on):
-  - Title + "Required" badge
-  - Upload button (file picker). If a file exists: button label becomes **"Replace file"** and a green **"File uploaded"** indicator + "View" link (opens signed URL) appears; otherwise grey **"No file"** indicator.
-  - Muted helper text directly beneath the button:
-    - Identity: *"Passport, Driver's License, or Government ID."*
-    - License: *"State/Region fishing guide license or marine certificate."*
-    - Insurance: *"Commercial liability insurance certificate."*
-    - Vessel: *"Vessel registration or Certificate of Survey."*
-- Toasts on success/error, query invalidation on upload so Pending Action Items checklist on My Listing auto-clears when status reaches `'Verified'` (admin-driven, step 3 of overall plan).
-
-### Out of scope (next step)
-- Admin review screen to approve/reject submissions (flips status to `'Verified'`/`'Rejected'` and triggers the operator sync).
+## Files touched
+- New: `src/lib/admin-verifications.functions.ts`, `src/components/admin/VerificationReviewDialog.tsx`
+- Edit: `src/lib/admin-listings.functions.ts` (join verification fields), `src/routes/_admin/admin.queue.tsx` (column + modal wiring), `src/lib/verifications.functions.ts` (recompute on re-upload), `src/routes/_authenticated/dashboard.verifications.tsx` (status banner)
+- Migration: update `sync_operator_verification_status` trigger.

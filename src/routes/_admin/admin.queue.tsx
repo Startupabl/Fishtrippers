@@ -75,6 +75,7 @@ import {
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
 import { RejectListingDialog } from "@/components/admin/RejectListingDialog";
+import { VerificationReviewDialog } from "@/components/admin/VerificationReviewDialog";
 import { cn } from "@/lib/utils";
 
 const TAB_VALUES = ["listings", "inquiries", "flags", "cancellations"] as const;
@@ -320,6 +321,7 @@ function ListingsToApprove() {
   const archiveFn = useServerFn(archiveJourney);
   const qc = useQueryClient();
   const [rejectTarget, setRejectTarget] = useState<{ id: string; title: string } | null>(null);
+  const [verifyTarget, setVerifyTarget] = useState<{ ownerId: string; name: string } | null>(null);
 
   const queueQ = useQuery({
     queryKey: ["admin", "queue", "listings", "queue"],
@@ -383,16 +385,17 @@ function ListingsToApprove() {
               <TableHead>Title</TableHead>
               <TableHead>Captain</TableHead>
               <TableHead>Submitted</TableHead>
+              <TableHead>Verification</TableHead>
               <TableHead>Status</TableHead>
               <TableHead className="text-right">Actions</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
             {isLoading ? (
-              <LoadingRow colSpan={6} />
+              <LoadingRow colSpan={7} />
             ) : rows.length === 0 ? (
               <EmptyRow
-                colSpan={6}
+                colSpan={7}
                 title={
                   scope === "queue"
                     ? "No listings awaiting approval"
@@ -414,6 +417,43 @@ function ListingsToApprove() {
                     </TableCell>
                     <TableCell className="text-sm text-muted-foreground whitespace-nowrap">
                       {fmtDate(j.created_at)}
+                    </TableCell>
+                    <TableCell>
+                      {(() => {
+                        const vs = (j as any).verification_status as
+                          | "Pending Verification"
+                          | "Documents Uploaded"
+                          | "Verified"
+                          | "Rejected"
+                          | null;
+                        const ownerId = (j as any).verification_user_id as string;
+                        const ownerName = j.mentor_name ?? j.mentor_email ?? "Captain";
+                        if (!vs || vs === "Pending Verification") {
+                          return <StatusBadge tone="gray">Not Submitted</StatusBadge>;
+                        }
+                        if (vs === "Documents Uploaded") {
+                          return (
+                            <Button
+                              size="sm"
+                              variant="outline"
+                              className="h-7 px-2"
+                              onClick={() => setVerifyTarget({ ownerId, name: ownerName })}
+                            >
+                              View Docs
+                            </Button>
+                          );
+                        }
+                        const tone = vs === "Verified" ? "green" : "red";
+                        return (
+                          <button
+                            type="button"
+                            onClick={() => setVerifyTarget({ ownerId, name: ownerName })}
+                            className="cursor-pointer"
+                          >
+                            <StatusBadge tone={tone}>{vs}</StatusBadge>
+                          </button>
+                        );
+                      })()}
                     </TableCell>
                     <TableCell>
                       <StatusBadge
@@ -517,6 +557,14 @@ function ListingsToApprove() {
             reasonKey,
           });
         }}
+      />
+      <VerificationReviewDialog
+        open={!!verifyTarget}
+        onOpenChange={(open) => {
+          if (!open) setVerifyTarget(null);
+        }}
+        ownerId={verifyTarget?.ownerId ?? null}
+        ownerName={verifyTarget?.name ?? ""}
       />
     </ScopeTabs>
   );

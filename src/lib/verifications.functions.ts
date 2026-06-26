@@ -23,12 +23,14 @@ const DOC_COLUMN: Record<VerificationDocType, keyof VerificationRow> = {
   vessel: "vessel_doc_url",
 };
 
-function recomputeStatus(row: Pick<VerificationRow, "id_url" | "license_url" | "insurance_url" | "vessel_doc_url" | "is_charter_owner" | "status">): VerificationRow["status"] {
-  // Never overwrite admin-set terminal states from the user side
-  if (row.status === "Verified" || row.status === "Rejected") return row.status;
+function recomputeStatus(row: Pick<VerificationRow, "id_url" | "license_url" | "insurance_url" | "vessel_doc_url" | "is_charter_owner" | "status">, docReplaced: boolean): VerificationRow["status"] {
+  // Verified is terminal from user side (only admin can change it).
+  if (row.status === "Verified") return row.status;
   const required = [row.id_url, row.license_url, row.insurance_url];
   if (row.is_charter_owner) required.push(row.vessel_doc_url);
   const allPresent = required.every((v) => v != null && v !== "");
+  // If admin rejected, keep Rejected until the user re-uploads a doc.
+  if (row.status === "Rejected" && !docReplaced) return "Rejected";
   return allPresent ? "Documents Uploaded" : "Pending Verification";
 }
 
@@ -86,7 +88,7 @@ export const upsertVerification = createServerFn({ method: "POST" })
       vessel_doc_url: current.vessel_doc_url ?? null,
       is_charter_owner: current.is_charter_owner ?? false,
       status: (current.status as VerificationRow["status"]) ?? "Pending Verification",
-    });
+    }, !!(data.doc_type && data.storage_path));
 
     const payload = {
       user_id: userId,

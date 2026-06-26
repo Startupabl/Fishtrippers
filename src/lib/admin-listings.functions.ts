@@ -61,9 +61,29 @@ export const listAdminListings = createServerFn({ method: "POST" })
       );
     const profileMap = new Map((profiles ?? []).map((p) => [p.id, p]));
 
+    const { data: verifs } = await (supabaseAdmin.from("verifications") as any)
+      .select("user_id, status")
+      .in(
+        "user_id",
+        ownerIds.length
+          ? (ownerIds as string[])
+          : ["00000000-0000-0000-0000-000000000000"],
+      );
+    const verifMap = new Map(
+      ((verifs as Array<{ user_id: string; status: string }> | null) ?? []).map(
+        (v) => [v.user_id, v.status],
+      ),
+    );
+
     // Map operator rows into the row shape the admin listings table expects.
     return (rows ?? []).map((r: any) => {
       const p = profileMap.get(r.owner_id);
+      const verification_status = (verifMap.get(r.owner_id) ?? null) as
+        | "Pending Verification"
+        | "Documents Uploaded"
+        | "Verified"
+        | "Rejected"
+        | null;
       return {
         id: r.id as string,
         title: (r.display_name ?? "Untitled listing") as string,
@@ -87,6 +107,8 @@ export const listAdminListings = createServerFn({ method: "POST" })
           [p?.first_name, p?.last_name].filter(Boolean).join(" ") || null,
         mentor_stripe_connect_id: p?.stripe_connect_id ?? null,
         mentor_is_payout_ready: !!p?.is_payout_ready,
+        verification_status,
+        verification_user_id: r.owner_id as string,
       };
     });
   });
