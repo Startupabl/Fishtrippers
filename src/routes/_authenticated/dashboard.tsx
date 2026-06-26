@@ -14,6 +14,8 @@ import {
   BookOpen,
   CalendarDays,
   Calendar,
+  FileText,
+  ShieldCheck,
   Wallet,
 } from "lucide-react";
 import { DESIGN_SYSTEM } from "@/lib/brand";
