@@ -36,7 +36,7 @@ type Item = {
 };
 
 const aideItems: Item[] = [
-  { title: "Dashboard", to: "/dashboard", icon: LayoutDashboard, exact: true },
+  { title: "Hub", to: "/dashboard", icon: LayoutDashboard, exact: true },
   { title: "My Listing & Trips", to: "/dashboard/my-listing", icon: BookOpen },
   { title: "My Verifications", to: "/dashboard/verifications", icon: ShieldCheck },
   { title: "My Availability", to: "/dashboard/master-calendar", icon: CalendarDays },
@@ -47,7 +47,7 @@ const aideItems: Item[] = [
 
 
 const learnerItems: Item[] = [
-  { title: "Dashboard Home", to: "/dashboard/learner", icon: LayoutDashboard, exact: true },
+  { title: "My Trips Hub", to: "/dashboard/learner", icon: LayoutDashboard, exact: true },
   { title: "My Bookings", to: "/dashboard/learner/bookings", icon: Ship },
   { title: "Purchase History", to: "/dashboard/learner/purchases", icon: Receipt },
 ];
@@ -65,10 +65,10 @@ export function useWorkspaceMode(): { mode: WorkspaceMode; title: string } {
   const { titleCase: roleLabel } = useOperatorRoleLabel();
 
   if (!listingLoaded || !ordersLoaded) {
-    return { mode: "loading", title: "Workspace" };
+    return { mode: "loading", title: "Loading…" };
   }
-  if (hasListing && hasOrders) return { mode: "both", title: "My Dashboard" };
-  if (hasListing) return { mode: "aide", title: `${roleLabel} Workspace` };
+  if (hasListing && hasOrders) return { mode: "both", title: `${roleLabel}'s Hub` };
+  if (hasListing) return { mode: "aide", title: `${roleLabel}'s Hub` };
   if (hasOrders) return { mode: "learner", title: "Angler Hub" };
   return { mode: "none", title: "Get Started" };
 }
@@ -127,7 +127,7 @@ export function WorkspaceSidebar() {
         {mode === "loading" ? null : mode === "both" ? (
           <>
             <SidebarGroup>
-              <SidebarGroupLabel>{operatorLabel} Workspace</SidebarGroupLabel>
+              <SidebarGroupLabel>{operatorLabel}'s Hub</SidebarGroupLabel>
               <SidebarGroupContent>
                 <ItemsMenu items={aideItems} />
               </SidebarGroupContent>
