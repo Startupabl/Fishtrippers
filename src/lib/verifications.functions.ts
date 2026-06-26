@@ -88,7 +88,7 @@ export const upsertVerification = createServerFn({ method: "POST" })
       vessel_doc_url: current.vessel_doc_url ?? null,
       is_charter_owner: current.is_charter_owner ?? false,
       status: (current.status as VerificationRow["status"]) ?? "Pending Verification",
-    });
+    }, !!(data.doc_type && data.storage_path));
 
     const payload = {
       user_id: userId,
