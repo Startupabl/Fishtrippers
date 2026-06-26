@@ -157,7 +157,7 @@ function FxRatesLoader() {
 function CurrencyInit() {
   return (
     <>
-      <CurrencyInit />
+      <FxRatesLoader />
       <CurrencyBootstrapper />
     </>
   );
