@@ -728,7 +728,11 @@ export function TripFormDialog({ open, onOpenChange, initial }: Props) {
                     <div className="flex items-start justify-between gap-3">
                       <div>
                         <div className="font-medium">
-                          {isShared ? "Total if fully booked" : "Total Trip Price (Full Boat)"}
+                          {isShared
+                            ? "Total if fully booked"
+                            : isPrivateGuideTrip
+                              ? "Total Trip Price (Private Group)"
+                              : "Total Trip Price (Full Boat)"}
                         </div>
                         <div className="text-xs text-muted-foreground">
                           {isShared
@@ -737,7 +741,9 @@ export function TripFormDialog({ open, onOpenChange, initial }: Props) {
                               : `Assumes all ${form.seats_available ?? 0} seats are sold.`
                             : isPrivateCharter
                               ? `Flat rate for the entire boat (up to ${form.max_party_size ?? "N"} guests).`
-                              : `Assumes the trip is booked to your max party size of ${form.max_party_size} guests.`}
+                              : isPrivateGuideTrip
+                                ? `Flat rate for the entire group (up to ${form.max_party_size ?? "N"} anglers).`
+                                : `Assumes the trip is booked to your max party size of ${form.max_party_size} guests.`}
                         </div>
 
                       </div>
