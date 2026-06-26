@@ -67,6 +67,7 @@ import { Route as AuthenticatedSettingsProfileRouteImport } from './routes/_auth
 import { Route as AuthenticatedSettingsPayoutsRouteImport } from './routes/_authenticated/settings.payouts'
 import { Route as AuthenticatedSettingsBillingRouteImport } from './routes/_authenticated/settings.billing'
 import { Route as AuthenticatedOperatorPreviewRouteImport } from './routes/_authenticated/operator.preview'
+import { Route as AuthenticatedDashboardVerificationsRouteImport } from './routes/_authenticated/dashboard.verifications'
 import { Route as AuthenticatedDashboardUpcomingSessionsRouteImport } from './routes/_authenticated/dashboard.upcoming-sessions'
 import { Route as AuthenticatedDashboardMyOrdersRouteImport } from './routes/_authenticated/dashboard.my-orders'
 import { Route as AuthenticatedDashboardMyListingRouteImport } from './routes/_authenticated/dashboard.my-listing'
@@ -413,6 +414,12 @@ const AuthenticatedOperatorPreviewRoute =
     id: '/operator/preview',
     path: '/operator/preview',
     getParentRoute: () => AuthenticatedRoute,
+  } as any)
+const AuthenticatedDashboardVerificationsRoute =
+  AuthenticatedDashboardVerificationsRouteImport.update({
+    id: '/verifications',
+    path: '/verifications',
+    getParentRoute: () => AuthenticatedDashboardRoute,
   } as any)
 const AuthenticatedDashboardUpcomingSessionsRoute =
   AuthenticatedDashboardUpcomingSessionsRouteImport.update({
@@ -761,6 +768,7 @@ export interface FileRoutesByFullPath {
   '/dashboard/my-listing': typeof AuthenticatedDashboardMyListingRoute
   '/dashboard/my-orders': typeof AuthenticatedDashboardMyOrdersRoute
   '/dashboard/upcoming-sessions': typeof AuthenticatedDashboardUpcomingSessionsRoute
+  '/dashboard/verifications': typeof AuthenticatedDashboardVerificationsRoute
   '/operator/preview': typeof AuthenticatedOperatorPreviewRoute
   '/settings/billing': typeof AuthenticatedSettingsBillingRoute
   '/settings/payouts': typeof AuthenticatedSettingsPayoutsRoute
@@ -865,6 +873,7 @@ export interface FileRoutesByTo {
   '/dashboard/my-listing': typeof AuthenticatedDashboardMyListingRoute
   '/dashboard/my-orders': typeof AuthenticatedDashboardMyOrdersRoute
   '/dashboard/upcoming-sessions': typeof AuthenticatedDashboardUpcomingSessionsRoute
+  '/dashboard/verifications': typeof AuthenticatedDashboardVerificationsRoute
   '/operator/preview': typeof AuthenticatedOperatorPreviewRoute
   '/settings/billing': typeof AuthenticatedSettingsBillingRoute
   '/settings/payouts': typeof AuthenticatedSettingsPayoutsRoute
@@ -975,6 +984,7 @@ export interface FileRoutesById {
   '/_authenticated/dashboard/my-listing': typeof AuthenticatedDashboardMyListingRoute
   '/_authenticated/dashboard/my-orders': typeof AuthenticatedDashboardMyOrdersRoute
   '/_authenticated/dashboard/upcoming-sessions': typeof AuthenticatedDashboardUpcomingSessionsRoute
+  '/_authenticated/dashboard/verifications': typeof AuthenticatedDashboardVerificationsRoute
   '/_authenticated/operator/preview': typeof AuthenticatedOperatorPreviewRoute
   '/_authenticated/settings/billing': typeof AuthenticatedSettingsBillingRoute
   '/_authenticated/settings/payouts': typeof AuthenticatedSettingsPayoutsRoute
@@ -1084,6 +1094,7 @@ export interface FileRouteTypes {
     | '/dashboard/my-listing'
     | '/dashboard/my-orders'
     | '/dashboard/upcoming-sessions'
+    | '/dashboard/verifications'
     | '/operator/preview'
     | '/settings/billing'
     | '/settings/payouts'
@@ -1188,6 +1199,7 @@ export interface FileRouteTypes {
     | '/dashboard/my-listing'
     | '/dashboard/my-orders'
     | '/dashboard/upcoming-sessions'
+    | '/dashboard/verifications'
     | '/operator/preview'
     | '/settings/billing'
     | '/settings/payouts'
@@ -1297,6 +1309,7 @@ export interface FileRouteTypes {
     | '/_authenticated/dashboard/my-listing'
     | '/_authenticated/dashboard/my-orders'
     | '/_authenticated/dashboard/upcoming-sessions'
+    | '/_authenticated/dashboard/verifications'
     | '/_authenticated/operator/preview'
     | '/_authenticated/settings/billing'
     | '/_authenticated/settings/payouts'
@@ -1799,6 +1812,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedOperatorPreviewRouteImport
       parentRoute: typeof AuthenticatedRoute
     }
+    '/_authenticated/dashboard/verifications': {
+      id: '/_authenticated/dashboard/verifications'
+      path: '/verifications'
+      fullPath: '/dashboard/verifications'
+      preLoaderRoute: typeof AuthenticatedDashboardVerificationsRouteImport
+      parentRoute: typeof AuthenticatedDashboardRoute
+    }
     '/_authenticated/dashboard/upcoming-sessions': {
       id: '/_authenticated/dashboard/upcoming-sessions'
       path: '/upcoming-sessions'
@@ -2293,6 +2313,7 @@ interface AuthenticatedDashboardRouteChildren {
   AuthenticatedDashboardMyListingRoute: typeof AuthenticatedDashboardMyListingRoute
   AuthenticatedDashboardMyOrdersRoute: typeof AuthenticatedDashboardMyOrdersRoute
   AuthenticatedDashboardUpcomingSessionsRoute: typeof AuthenticatedDashboardUpcomingSessionsRoute
+  AuthenticatedDashboardVerificationsRoute: typeof AuthenticatedDashboardVerificationsRoute
   AuthenticatedDashboardListingsJourneyIdCouponsRoute: typeof AuthenticatedDashboardListingsJourneyIdCouponsRoute
   AuthenticatedDashboardListingsJourneyIdShowcaseRoute: typeof AuthenticatedDashboardListingsJourneyIdShowcaseRoute
 }
@@ -2318,6 +2339,8 @@ const AuthenticatedDashboardRouteChildren: AuthenticatedDashboardRouteChildren =
     AuthenticatedDashboardMyOrdersRoute: AuthenticatedDashboardMyOrdersRoute,
     AuthenticatedDashboardUpcomingSessionsRoute:
       AuthenticatedDashboardUpcomingSessionsRoute,
+    AuthenticatedDashboardVerificationsRoute:
+      AuthenticatedDashboardVerificationsRoute,
     AuthenticatedDashboardListingsJourneyIdCouponsRoute:
       AuthenticatedDashboardListingsJourneyIdCouponsRoute,
     AuthenticatedDashboardListingsJourneyIdShowcaseRoute:
@@ -2463,13 +2486,3 @@ const rootRouteChildren: RootRouteChildren = {
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
-
-import type { getRouter } from './router.tsx'
-import type { startInstance } from './start.ts'
-declare module '@tanstack/react-start' {
-  interface Register {
-    ssr: true
-    router: Awaited<ReturnType<typeof getRouter>>
-    config: Awaited<ReturnType<typeof startInstance.getOptions>>
-  }
-}

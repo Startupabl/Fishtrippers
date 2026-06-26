@@ -1111,6 +1111,7 @@ export type Database = {
           submitted_at: string | null
           target_species: string[]
           updated_at: string
+          verification_status: string
         }
         Insert: {
           about?: string | null
@@ -1153,6 +1154,7 @@ export type Database = {
           submitted_at?: string | null
           target_species?: string[]
           updated_at?: string
+          verification_status?: string
         }
         Update: {
           about?: string | null
@@ -1195,6 +1197,7 @@ export type Database = {
           submitted_at?: string | null
           target_species?: string[]
           updated_at?: string
+          verification_status?: string
         }
         Relationships: []
       }
