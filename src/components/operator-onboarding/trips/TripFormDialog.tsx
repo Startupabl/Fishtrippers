@@ -685,7 +685,9 @@ export function TripFormDialog({ open, onOpenChange, initial }: Props) {
                   />
                 </div>
                 <p className="text-xs text-muted-foreground">
-                  Charged for each extra guest beyond the first, up to your max party size.
+                  {isSharedCharter
+                    ? "Charged for each additional angler beyond the first, up to total seats available."
+                    : "Charged for each extra guest beyond the first, up to your max party size."}
                 </p>
               </div>
             )}
