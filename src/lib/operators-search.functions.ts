@@ -56,21 +56,6 @@ const searchSchema = z.object({
 
 const resolvePlacePublicSchema = z.object({ placeId: z.string().min(1) });
 
-function formatPrice(minor: number, currency: string): string {
-  const major = minor / 100;
-  try {
-    const formatted = new Intl.NumberFormat("en-US", {
-      style: "currency",
-      currency,
-      maximumFractionDigits: major % 1 === 0 ? 0 : 2,
-    }).format(major);
-    if (currency === "USD") return `From US ${formatted}`;
-    return `From ${formatted}`;
-  } catch {
-    return `From ${currency} ${major}`;
-  }
-}
-
 export const searchOperatorsServer = createServerFn({ method: "POST" })
   .inputValidator((d: z.input<typeof searchSchema>) => searchSchema.parse(d))
   .handler(async ({ data }) => {
