@@ -75,6 +75,7 @@ import {
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
 import { RejectListingDialog } from "@/components/admin/RejectListingDialog";
+import { VerificationReviewDialog } from "@/components/admin/VerificationReviewDialog";
 import { cn } from "@/lib/utils";
 
 const TAB_VALUES = ["listings", "inquiries", "flags", "cancellations"] as const;
