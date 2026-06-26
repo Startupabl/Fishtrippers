@@ -260,16 +260,21 @@ export function TripFormDialog({ open, onOpenChange, initial }: Props) {
   });
 
   const isShared = isSharedTripType(form.charter_type);
+  const isSharedCharter = form.charter_type === "shared_tour";
   const isPrivateCharter = form.charter_type === "private_charter";
-  const totalPreview = isShared
+  const totalPreview = isSharedCharter
     ? form.price_minor != null && form.seats_available && form.seats_available > 0
-      ? form.price_minor * form.seats_available
+      ? form.price_minor + Math.max(0, form.seats_available - 1) * (form.per_extra_minor ?? 0)
       : null
-    : isPrivateCharter
-      ? form.price_minor
-      : form.price_minor != null && form.max_party_size && form.max_party_size > 0
-        ? form.price_minor + Math.max(0, form.max_party_size - 1) * (form.per_extra_minor ?? 0)
-        : null;
+    : isShared
+      ? form.price_minor != null && form.seats_available && form.seats_available > 0
+        ? form.price_minor * form.seats_available
+        : null
+      : isPrivateCharter
+        ? form.price_minor
+        : form.price_minor != null && form.max_party_size && form.max_party_size > 0
+          ? form.price_minor + Math.max(0, form.max_party_size - 1) * (form.per_extra_minor ?? 0)
+          : null;
 
 
   return (
@@ -293,7 +298,9 @@ export function TripFormDialog({ open, onOpenChange, initial }: Props) {
                     key={opt.value}
                     type="button"
                     onClick={() => {
-                      if (isSharedTripType(opt.value) || opt.value === "private_charter") {
+                      const resetsExtra =
+                        opt.value === "small_group_trip" || opt.value === "private_charter";
+                      if (resetsExtra) {
                         setExtraInput("0");
                       }
                       setForm((f) => ({
@@ -301,7 +308,7 @@ export function TripFormDialog({ open, onOpenChange, initial }: Props) {
                         charter_type: opt.value,
                         ...(isSharedTripType(opt.value)
                           ? {
-                              per_extra_minor: 0,
+                              ...(opt.value === "small_group_trip" ? { per_extra_minor: 0 } : {}),
                               seats_available:
                                 f.seats_available ?? f.max_party_size ?? null,
                             }
@@ -499,11 +506,13 @@ export function TripFormDialog({ open, onOpenChange, initial }: Props) {
             <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
               <div className="space-y-2">
                 <Label htmlFor="trip-price">
-                  {isShared
-                    ? (isGuide ? "Price per Person" : "Price per Seat")
-                    : isPrivateCharter
-                      ? "Base Price (Entire Boat)"
-                      : "Base price (1st angler)"}
+                  {isSharedCharter
+                    ? "Base price (1st angler)"
+                    : isShared
+                      ? "Price per Person"
+                      : isPrivateCharter
+                        ? "Base Price (Entire Boat)"
+                        : "Base price (1st angler)"}
                 </Label>
                 <div className="relative">
                   <span className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-sm text-muted-foreground">
@@ -528,11 +537,13 @@ export function TripFormDialog({ open, onOpenChange, initial }: Props) {
                     placeholder={isShared ? "e.g. 220" : isPrivateCharter ? "e.g. 850" : "e.g. 650"}
                   />
                 </div>
-                {isShared ? (
+                {isSharedCharter ? (
                   <p className="text-xs text-muted-foreground">
-                    {isGuide
-                      ? "Enter the cost for an individual spot on this trip."
-                      : "Enter the cost for an individual seat on this trip."}
+                    Charged for the first angler on this shared trip.
+                  </p>
+                ) : isShared ? (
+                  <p className="text-xs text-muted-foreground">
+                    Enter the cost for an individual spot on this trip.
                   </p>
                 ) : isPrivateCharter ? (
                   <div className="space-y-0.5">
@@ -647,7 +658,7 @@ export function TripFormDialog({ open, onOpenChange, initial }: Props) {
                 The trip requires at least this many guests to run.
               </p>
             </div>
-            {!isShared && !isPrivateCharter && (
+            {(isSharedCharter || (!isShared && !isPrivateCharter)) && (
               <div className="space-y-2">
                 <Label htmlFor="trip-extra">Price per additional angler</Label>
                 <div className="relative">
@@ -674,7 +685,9 @@ export function TripFormDialog({ open, onOpenChange, initial }: Props) {
                   />
                 </div>
                 <p className="text-xs text-muted-foreground">
-                  Charged for each extra guest beyond the first, up to your max party size.
+                  {isSharedCharter
+                    ? "Charged for each additional angler beyond the first, up to total seats available."
+                    : "Charged for each extra guest beyond the first, up to your max party size."}
                 </p>
               </div>
             )}

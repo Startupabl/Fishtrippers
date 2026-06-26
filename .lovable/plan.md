@@ -1,27 +1,22 @@
-## Goal
+## Fix: Restore Shared Tour pricing inputs
 
-Make the trip pricing section in `TripFormDialog.tsx` react to **Private Charter** vs **Shared Tour** so charter captains enter one flat boat rate instead of a base-plus-additional split. Guides and shared trips stay unchanged.
+I incorrectly changed the **Shared Tour** pricing inputs while updating Private Charter. Shared Tour must keep its original two-price model.
 
-## Changes (single file: `src/components/operator-onboarding/trips/TripFormDialog.tsx`)
+### Changes to `src/components/operator-onboarding/trips/TripFormDialog.tsx`
 
-### 1. Pricing inputs (Private Charter only)
+**Shared Tour (charters) — restore original fields:**
+- Label: `Base price (1st angler)` (was wrongly changed to "Price per Seat")
+- Add back the **Price per additional angler** input (currently hidden for shared)
+- Keep **Total Seats Available** and **Minimum Seats to Sail (optional)** as-is
+- Helper text: "Charged for each additional angler beyond the first, up to total seats."
 
-- Rename the base price label from "Base price (1st angler)" to **"Base Price (Entire Boat)"**.
-- Helper text under the input: **"Total Trip Price (Private Boat)"** with subtext: *"The total trip price for booking this charter boat with a max party size of {max_party_size} guests."* — `{max_party_size}` is pulled live from `form.max_party_size` (fallback "your max" when empty).
-- Hide the "Price per additional angler" input entirely for Private Charter (already hidden today for shared; we extend the hide to all private-charter cases).
-- Guide "Private Trip" keeps the existing base + per-additional pair (only `private_charter` is affected, per the spec which references Charter ops).
+**Guides (small_group_trip) — unchanged:** keeps "Price per Person" / Total Spots / Min Spots.
 
-### 2. State / data handling
+**Private Charter — unchanged:** keeps single "Base Price (Entire Boat)" with helper subtext referencing max party size.
 
-- When switching to `private_charter`, force `per_extra_minor = 0` and clear the `extraInput` field so stale additional-angler data is never persisted.
-- Update the trip-type select handler (lines ~292-303) so the "private" branch zeroes `per_extra_minor` (today it only zeros it on the shared branch).
-- `price_minor` continues to be the saved field — it now represents the flat boat rate for Private Charter. No DB schema change needed; `per_extra_minor` stays 0 for these rows, so existing booking math (`price_minor + extras * per_extra_minor`) still resolves to the flat boat price.
+**Private (charter `private_charter` and guide `private_trip`) — unchanged:** still shows "Base price (1st angler)" + "Price per additional angler" for non-private-charter privates.
 
-### 3. Total preview
-
-- Update the "Total Trip Price (Full Boat)" preview block so for Private Charter it shows `price_minor` directly (no addition), with subtext: *"Flat rate for the entire boat (up to {max_party_size} guests)."* Shared/Guide-Private branches unchanged.
-
-## Out of scope
-
-- Database schema (no new `flat_boat_rate` column — `price_minor` already serves this role and avoids a migration + booking/search refactor across `operators-search.functions.ts`, `trip-bookings.functions.ts`, and `booking.checkout.tsx`).
-- Guide trip types, shared trip seat logic, and search-card pricing display.
+### Logic adjustment
+- Update the gate on the "Price per additional angler" block so it also renders for `shared_tour` (charters), not only non-shared/non-private-charter.
+- `totalPreview` for shared tour: `price_minor + (seats_available - 1) * per_extra_minor` when both are set.
+- Reset `per_extra_minor` to 0 only when switching to `private_charter` or guide `small_group_trip` (not when switching to charter `shared_tour`).
