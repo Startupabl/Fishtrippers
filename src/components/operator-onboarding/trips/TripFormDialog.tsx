@@ -647,7 +647,7 @@ export function TripFormDialog({ open, onOpenChange, initial }: Props) {
                 The trip requires at least this many guests to run.
               </p>
             </div>
-            {!isShared && (
+            {!isShared && !isPrivateCharter && (
               <div className="space-y-2">
                 <Label htmlFor="trip-extra">Price per additional angler</Label>
                 <div className="relative">
