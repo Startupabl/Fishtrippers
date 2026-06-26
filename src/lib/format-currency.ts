@@ -13,6 +13,8 @@ export function formatCurrency(
   const options: Intl.NumberFormatOptions = {
     style: "currency",
     currency: currencyCode,
+    minimumFractionDigits: 2,
+    maximumFractionDigits: 2,
   };
 
   try {
@@ -24,12 +26,8 @@ export function formatCurrency(
 
 /**
  * Convert a price from its source currency into the user-selected display
- * currency, then format. Use this in price-display sites that should respond
- * to the footer currency switcher. Call sites that must show a literal,
- * unconverted amount (e.g. the underlying mentor payout currency) should
- * keep using `formatCurrency` directly.
- *
- * Hook variant; subscribes to the store so swaps re-render.
+ * currency, then format. Hook variant; subscribes to the store so swaps
+ * re-render.
  */
 export function useFormattedPrice(
   minorUnits: number,

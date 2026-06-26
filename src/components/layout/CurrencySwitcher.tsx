@@ -1,5 +1,6 @@
 import { Check, ChevronDown } from "lucide-react";
 import { toast } from "sonner";
+import { useServerFn } from "@tanstack/react-start";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -7,18 +8,32 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { useCurrencyStore, type CurrencyCode } from "@/stores/useCurrencyStore";
-import { SUPPORTED_CURRENCIES, getCurrencyMeta } from "@/lib/currency";
+import { useCurrencies } from "@/hooks/useCurrencies";
+import { supabase } from "@/integrations/supabase/client";
+import { updateCurrencyPreference } from "@/lib/currency-preference.functions";
 
 export function CurrencySwitcher() {
   const currency = useCurrencyStore((s) => s.currency);
   const setCurrency = useCurrencyStore((s) => s.setCurrency);
-  const current = getCurrencyMeta(currency);
+  const { currencies } = useCurrencies();
+  const current = currencies.find((c) => c.code === currency) ?? currencies[0];
+  const savePref = useServerFn(updateCurrencyPreference);
 
-  function handlePick(code: CurrencyCode) {
+  async function handlePick(code: CurrencyCode) {
     if (code === currency) return;
-    setCurrency(code);
+    setCurrency(code, true);
     toast.success(`Showing prices in ${code}`);
+    try {
+      const { data } = await supabase.auth.getSession();
+      if (data.session?.user?.id) {
+        await savePref({ data: { currency: code } });
+      }
+    } catch {
+      /* non-blocking */
+    }
   }
+
+  if (!current) return null;
 
   return (
     <DropdownMenu>
@@ -34,8 +49,8 @@ export function CurrencySwitcher() {
           <ChevronDown className="size-3" />
         </button>
       </DropdownMenuTrigger>
-      <DropdownMenuContent align="end" className="min-w-48">
-        {SUPPORTED_CURRENCIES.map((c) => (
+      <DropdownMenuContent align="end" className="max-h-80 min-w-48 overflow-y-auto">
+        {currencies.map((c) => (
           <DropdownMenuItem
             key={c.code}
             onSelect={() => handlePick(c.code)}
@@ -45,7 +60,7 @@ export function CurrencySwitcher() {
               {c.flag}
             </span>
             <span className="font-medium text-foreground">{c.code}</span>
-            <span className="ml-2 text-muted-foreground">· {c.label}</span>
+            <span className="ml-2 text-muted-foreground">· {c.name}</span>
             {c.code === currency && (
               <Check className="ml-auto size-4 text-foreground" />
             )}
