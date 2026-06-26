@@ -10,10 +10,11 @@ import { useServerFn } from "@tanstack/react-start";
 import { useQuery } from "@tanstack/react-query";
 import { Card } from "@/components/ui/card";
 import {
-  AlertTriangle,
   BookOpen,
   CalendarDays,
   Calendar,
+  FileText,
+  ShieldCheck,
   Wallet,
 } from "lucide-react";
 import { DESIGN_SYSTEM } from "@/lib/brand";
@@ -127,11 +128,18 @@ function AideDashboardHome() {
             tint={`${YELLOW}33`}
           />
           <NavCard
+            to="/dashboard/verifications"
+            icon={<ShieldCheck className="size-5" />}
+            title="My Verifications"
+            desc="Upload your identity, license, and vessel documents."
+            tint={`${LEAF}33`}
+          />
+          <NavCard
             to="/dashboard/master-calendar"
             icon={<CalendarDays className="size-5" />}
-            title="Manage Availability"
+            title="My Availability"
             desc="Set your weekly availability and block-out dates."
-            tint={`${LEAF}33`}
+            tint={`${YELLOW}33`}
           />
         </div>
       </section>
@@ -150,11 +158,18 @@ function AideDashboardHome() {
             tint={`${YELLOW}33`}
           />
           <NavCard
+            to="/dashboard/manage-policies"
+            icon={<FileText className="size-5" />}
+            title="My Policies"
+            desc="Set cancellation and booking policies."
+            tint={`${LEAF}33`}
+          />
+          <NavCard
             to="/dashboard/earnings"
             icon={<Wallet className="size-5" />}
             title="My Earnings"
             desc="Review your revenue ledger and receipts."
-            tint={`${LEAF}33`}
+            tint={`${YELLOW}33`}
           />
         </div>
       </section>

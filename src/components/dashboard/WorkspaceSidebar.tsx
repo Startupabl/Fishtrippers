@@ -40,8 +40,8 @@ const aideItems: Item[] = [
   { title: "My Earnings", to: "/dashboard/earnings", icon: Wallet },
   { title: "My Listing", to: "/dashboard/my-listing", icon: BookOpen },
   { title: "My Verifications", to: "/dashboard/verifications", icon: ShieldCheck },
-  { title: "Manage Availability", to: "/dashboard/master-calendar", icon: CalendarDays },
-  { title: "Manage Policies", to: "/dashboard/manage-policies", icon: ShieldCheck },
+  { title: "My Availability", to: "/dashboard/master-calendar", icon: CalendarDays },
+  { title: "My Policies", to: "/dashboard/manage-policies", icon: ShieldCheck },
 ];
 
 
