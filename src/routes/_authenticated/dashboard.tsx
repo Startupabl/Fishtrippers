@@ -28,8 +28,6 @@ import { WorkspaceSidebar, useWorkspaceMode } from "@/components/dashboard/Works
 import { SiteFooter } from "@/components/layout/SiteFooter";
 
 const lora = { fontFamily: DESIGN_SYSTEM.fonts.serif };
-const LEAF = DESIGN_SYSTEM.colors.leafGreen;
-const YELLOW = DESIGN_SYSTEM.colors.sunnyYellow;
 
 export const Route = createFileRoute("/_authenticated/dashboard")({
   head: () => ({
@@ -114,62 +112,50 @@ function AideDashboardHome() {
         </div>
       </div>
 
-      {/* Row 1 — Studio */}
-      <section className="mt-10">
-        <h2 className="mb-3 text-xs font-semibold uppercase tracking-wide text-muted-foreground">
-          Studio
-        </h2>
+      {/* All dashboard cards in one grid */}
+      <section className="mt-8">
         <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
           <NavCard
             to="/dashboard/my-listing"
             icon={<BookOpen className="size-5" />}
-            title="My Listing & Trips"
+            title="My Listings & Trips"
             desc="View, edit, and manage your listing and trips."
-            tint={`${YELLOW}33`}
+            tint="#e5e7eb33"
           />
           <NavCard
             to="/dashboard/verifications"
             icon={<ShieldCheck className="size-5" />}
             title="My Verifications"
             desc="Upload your identity, license, and vessel documents."
-            tint={`${LEAF}33`}
+            tint="#e5e7eb33"
           />
           <NavCard
             to="/dashboard/master-calendar"
             icon={<CalendarDays className="size-5" />}
             title="My Availability"
             desc="Set your weekly availability and block-out dates."
-            tint={`${YELLOW}33`}
+            tint="#e5e7eb33"
           />
-        </div>
-      </section>
-
-      {/* Row 2 — Operations */}
-      <section className="mt-8">
-        <h2 className="mb-3 text-xs font-semibold uppercase tracking-wide text-muted-foreground">
-          Operations
-        </h2>
-        <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
           <NavCard
             to="/dashboard/upcoming-sessions"
             icon={<Calendar className="size-5" />}
             title="My Schedule"
             desc="Track your scheduled fishing trips."
-            tint={`${YELLOW}33`}
+            tint="#e5e7eb33"
           />
           <NavCard
             to="/dashboard/manage-policies"
             icon={<FileText className="size-5" />}
             title="My Policies"
             desc="Set cancellation and booking policies."
-            tint={`${LEAF}33`}
+            tint="#e5e7eb33"
           />
           <NavCard
             to="/dashboard/earnings"
             icon={<Wallet className="size-5" />}
             title="My Earnings"
             desc="Review your revenue ledger and receipts."
-            tint={`${YELLOW}33`}
+            tint="#e5e7eb33"
           />
         </div>
       </section>
