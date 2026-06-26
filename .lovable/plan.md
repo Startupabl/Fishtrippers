@@ -1,26 +1,19 @@
-## Restore "From" prefix on operator cards
+Update the Aide Dashboard home to show all six menu options as six cards organized into two columns, and align sidebar labels with the card titles.
 
-**File:** `src/components/listings/OperatorCard.tsx`
+Changes:
+1. `src/routes/_authenticated/dashboard.tsx`
+   - Reorganize `AideDashboardHome` cards into two columns:
+     - **Studio**: My Listing & Trips, My Verifications, My Availability
+     - **Operations**: My Schedule, My Policies, My Earnings
+   - Add two new `NavCard` entries:
+     - My Verifications → `/dashboard/verifications` (ShieldCheck icon)
+     - My Policies → `/dashboard/manage-policies` (FileText icon)
+   - Rename the existing "Manage Availability" card to "My Availability".
+   - Keep existing card styling (icons, tinted backgrounds, responsive grid).
 
-In the price block, prepend `From ` before the `<PriceLabel />` output so cards read:
-- `From $800.00 / entire boat`
-- `From $150.00 / angler`
-- `From $400.00 / private group`
+2. `src/components/dashboard/WorkspaceSidebar.tsx`
+   - Rename "Manage Availability" menu item to "My Availability".
+   - Rename "Manage Policies" menu item to "My Policies".
+   - No route changes; links remain `/dashboard/master-calendar` and `/dashboard/manage-policies`.
 
-## Confirm lowest-price logic
-
-Already implemented in `src/lib/operators-search.functions.ts` — the loop iterates all active trips and keeps the cheapest:
-
-```ts
-for (const t of candidates) {
-  const p = cardPriceFor(t);
-  ...
-  if (!cheapest || p < cheapest.price_minor) {
-    cheapest = { price_minor: p, currency: t.currency, is_shared, is_private_group };
-  }
-}
-```
-
-So in your example (full day $1,700 + half day $800 private charter), the card will show `From $800.00 / entire boat`. The suffix follows whichever trip wins on price. No change needed here — just verifying.
-
-**Note:** if a captain mixes a shared trip and a private trip on the same listing, the cheapest one's label wins (e.g. a $50/angler shared could outprice a $400/boat private and the card would say `From $50.00 / angler`). Let me know if you want same-type-only comparison instead.
+No database or backend changes required.
