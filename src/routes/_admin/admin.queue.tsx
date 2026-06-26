@@ -385,16 +385,17 @@ function ListingsToApprove() {
               <TableHead>Title</TableHead>
               <TableHead>Captain</TableHead>
               <TableHead>Submitted</TableHead>
+              <TableHead>Verification</TableHead>
               <TableHead>Status</TableHead>
               <TableHead className="text-right">Actions</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
             {isLoading ? (
-              <LoadingRow colSpan={6} />
+              <LoadingRow colSpan={7} />
             ) : rows.length === 0 ? (
               <EmptyRow
-                colSpan={6}
+                colSpan={7}
                 title={
                   scope === "queue"
                     ? "No listings awaiting approval"
