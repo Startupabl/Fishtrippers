@@ -260,16 +260,21 @@ export function TripFormDialog({ open, onOpenChange, initial }: Props) {
   });
 
   const isShared = isSharedTripType(form.charter_type);
+  const isSharedCharter = form.charter_type === "shared_tour";
   const isPrivateCharter = form.charter_type === "private_charter";
-  const totalPreview = isShared
+  const totalPreview = isSharedCharter
     ? form.price_minor != null && form.seats_available && form.seats_available > 0
-      ? form.price_minor * form.seats_available
+      ? form.price_minor + Math.max(0, form.seats_available - 1) * (form.per_extra_minor ?? 0)
       : null
-    : isPrivateCharter
-      ? form.price_minor
-      : form.price_minor != null && form.max_party_size && form.max_party_size > 0
-        ? form.price_minor + Math.max(0, form.max_party_size - 1) * (form.per_extra_minor ?? 0)
-        : null;
+    : isShared
+      ? form.price_minor != null && form.seats_available && form.seats_available > 0
+        ? form.price_minor * form.seats_available
+        : null
+      : isPrivateCharter
+        ? form.price_minor
+        : form.price_minor != null && form.max_party_size && form.max_party_size > 0
+          ? form.price_minor + Math.max(0, form.max_party_size - 1) * (form.per_extra_minor ?? 0)
+          : null;
 
 
   return (
