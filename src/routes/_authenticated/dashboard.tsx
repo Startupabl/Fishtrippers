@@ -10,7 +10,6 @@ import { useServerFn } from "@tanstack/react-start";
 import { useQuery } from "@tanstack/react-query";
 import { Card } from "@/components/ui/card";
 import {
-  AlertTriangle,
   BookOpen,
   CalendarDays,
   Calendar,
