@@ -674,7 +674,9 @@ export function TripFormDialog({ open, onOpenChange, initial }: Props) {
                 ) : (
                   <>
                     <div className="space-y-2">
-                      <Label htmlFor="trip-party">Max trip size</Label>
+                      <Label htmlFor="trip-party">
+                        {isPrivateGuideTrip ? "Max Group Size" : "Max trip size"}
+                      </Label>
                       <Input
                         id="trip-party"
                         type="number"
@@ -690,7 +692,9 @@ export function TripFormDialog({ open, onOpenChange, initial }: Props) {
                       />
                     </div>
                     <div className="space-y-2">
-                      <Label htmlFor="trip-min-party">Min trip size</Label>
+                      <Label htmlFor="trip-min-party">
+                        {isPrivateGuideTrip ? "Min Group Size" : "Min trip size"}
+                      </Label>
                       <Input
                         id="trip-min-party"
                         type="number"
@@ -705,7 +709,9 @@ export function TripFormDialog({ open, onOpenChange, initial }: Props) {
                         placeholder="e.g. 2"
                       />
                       <p className="text-xs text-muted-foreground">
-                        The trip requires at least this many guests to run.
+                        {isPrivateGuideTrip
+                          ? "The trip requires at least this many anglers to run."
+                          : "The trip requires at least this many guests to run."}
                       </p>
                     </div>
                   </>
