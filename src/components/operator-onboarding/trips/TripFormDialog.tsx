@@ -503,194 +503,204 @@ export function TripFormDialog({ open, onOpenChange, initial }: Props) {
             <h3 className="text-sm font-semibold uppercase tracking-wide text-muted-foreground">
               Pricing
             </h3>
-            <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
-              <div className="space-y-2">
-                <Label htmlFor="trip-price">
-                  {isSharedCharter
-                    ? "Base price (1st angler)"
-                    : isShared
-                      ? "Price per Person"
-                      : isPrivateCharter
-                        ? "Base Price (Entire Boat)"
-                        : "Base price (1st angler)"}
-                </Label>
-                <div className="relative">
-                  <span className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-sm text-muted-foreground">
-                    {captainCurrency}
-                  </span>
-                  <Input
-                    id="trip-price"
-                    type="number"
-                    inputMode="decimal"
-                    min={0}
-                    step="1"
-                    className="pl-14"
-                    value={priceInput}
-                    onChange={(e) => {
-                      setPriceInput(e.target.value);
-                      const n = Number(e.target.value);
-                      setForm({
-                        ...form,
-                        price_minor: Number.isFinite(n) ? Math.round(n * 100) : null,
-                      });
-                    }}
-                    placeholder={isShared ? "e.g. 220" : isPrivateCharter ? "e.g. 850" : "e.g. 650"}
-                  />
-                </div>
-                {isSharedCharter ? (
-                  <p className="text-xs text-muted-foreground">
-                    Charged for the first angler on this shared trip.
-                  </p>
-                ) : isShared ? (
-                  <p className="text-xs text-muted-foreground">
-                    Enter the cost for an individual spot on this trip.
-                  </p>
-                ) : isPrivateCharter ? (
-                  <div className="space-y-0.5">
-                    <p className="text-xs font-medium text-foreground">Total Trip Price (Private Boat)</p>
-                    <p className="text-xs text-muted-foreground">
-                      The total trip price for booking this charter boat with a max party size of {form.max_party_size ?? "N"} guests.
-                    </p>
-                  </div>
-                ) : null}
-              </div>
-              {isShared ? (
-                <div className="space-y-4">
-                  <div className="space-y-2">
-                    <Label htmlFor="trip-seats">
-                      {isGuide ? "Total Spots Available" : "Total Seats Available"}
-                    </Label>
+            <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+              {/* Column 1: Base price + additional angler price */}
+              <div className="space-y-4">
+                <div className="space-y-2">
+                  <Label htmlFor="trip-price">
+                    {isSharedCharter
+                      ? "Base price (1st angler)"
+                      : isShared
+                        ? "Price per Person"
+                        : isPrivateCharter
+                          ? "Base Price (Entire Boat)"
+                          : "Base price (1st angler)"}
+                  </Label>
+                  <div className="relative">
+                    <span className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-sm text-muted-foreground">
+                      {captainCurrency}
+                    </span>
                     <Input
-                      id="trip-seats"
+                      id="trip-price"
                       type="number"
-                      min={1}
-                      max={50}
+                      inputMode="decimal"
+                      min={0}
                       step="1"
-                      value={form.seats_available ?? ""}
+                      className="pl-14"
+                      value={priceInput}
                       onChange={(e) => {
-                        const n = parseInt(e.target.value, 10);
-                        setForm({ ...form, seats_available: Number.isFinite(n) ? n : null });
-                      }}
-                      placeholder="e.g. 6"
-                    />
-                    <p className="text-xs text-muted-foreground">
-                      {isGuide
-                        ? "Enter the maximum number of individual spots you can sell in total for this trip (e.g., 6)."
-                        : "Enter the maximum number of individual seats you can sell in total for this shared trip (e.g., 6)."}
-                    </p>
-                  </div>
-                  <div className="space-y-2">
-                    <Label htmlFor="trip-min-sail">
-                      {isGuide ? "Minimum Spots Required (optional)" : "Minimum Seats to Sail (optional)"}
-                    </Label>
-                    <Input
-                      id="trip-min-sail"
-                      type="number"
-                      min={1}
-                      max={form.seats_available ?? 50}
-                      step="1"
-                      value={form.min_seats_to_sail ?? ""}
-                      onChange={(e) => {
-                        const raw = e.target.value;
-                        if (raw === "") {
-                          setForm({ ...form, min_seats_to_sail: null });
-                          return;
-                        }
-                        const n = parseInt(raw, 10);
+                        setPriceInput(e.target.value);
+                        const n = Number(e.target.value);
                         setForm({
                           ...form,
-                          min_seats_to_sail: Number.isFinite(n) ? n : null,
+                          price_minor: Number.isFinite(n) ? Math.round(n * 100) : null,
                         });
                       }}
-                      placeholder="e.g. 3"
+                      placeholder={isShared ? "e.g. 220" : isPrivateCharter ? "e.g. 850" : "e.g. 650"}
                     />
-                    <p className="text-xs text-muted-foreground">
-                      If this number isn&apos;t reached 24 hours before the trip,
-                      we&apos;ll warn you on your dashboard so you can decide to
-                      cancel/refund or run it anyway. Leave blank to always run.
-                    </p>
-                    {form.min_seats_to_sail != null &&
-                      form.seats_available != null &&
-                      form.min_seats_to_sail > form.seats_available && (
-                        <p className="text-xs text-destructive">
-                          {isGuide
-                            ? `Minimum can't exceed total spots (${form.seats_available}).`
-                            : `Minimum can't exceed total seats (${form.seats_available}).`}
-                        </p>
-                      )}
                   </div>
+                  {isSharedCharter ? (
+                    <p className="text-xs text-muted-foreground">
+                      Charged for the first angler on this shared trip.
+                    </p>
+                  ) : isShared ? (
+                    <p className="text-xs text-muted-foreground">
+                      Enter the cost for an individual spot on this trip.
+                    </p>
+                  ) : isPrivateCharter ? (
+                    <div className="space-y-0.5">
+                      <p className="text-xs font-medium text-foreground">Total Trip Price (Private Boat)</p>
+                      <p className="text-xs text-muted-foreground">
+                        The total trip price for booking this charter boat with a max party size of {form.max_party_size ?? "N"} guests.
+                      </p>
+                    </div>
+                  ) : null}
                 </div>
-              ) : (
-                <div className="space-y-2">
-                  <Label htmlFor="trip-party">Max trip size</Label>
-                  <Input
-                    id="trip-party"
-                    type="number"
-                    min={1}
-                    max={50}
-                    step="1"
-                    value={form.max_party_size ?? ""}
-                    onChange={(e) => {
-                      const n = parseInt(e.target.value, 10);
-                      setForm({ ...form, max_party_size: Number.isFinite(n) ? n : null });
-                    }}
-                    placeholder="e.g. 6"
-                  />
-                </div>
-              )}
-            </div>
-            <div className="space-y-2">
-              <Label htmlFor="trip-min-party">Min trip size</Label>
-              <Input
-                id="trip-min-party"
-                type="number"
-                min={1}
-                max={50}
-                step="1"
-                value={form.min_party_size ?? ""}
-                onChange={(e) => {
-                  const n = parseInt(e.target.value, 10);
-                  setForm({ ...form, min_party_size: Number.isFinite(n) ? n : 1 });
-                }}
-                placeholder="e.g. 2"
-              />
-              <p className="text-xs text-muted-foreground">
-                The trip requires at least this many guests to run.
-              </p>
-            </div>
-            {(isSharedCharter || (!isShared && !isPrivateCharter)) && (
-              <div className="space-y-2">
-                <Label htmlFor="trip-extra">Price per additional angler</Label>
-                <div className="relative">
-                  <span className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-sm text-muted-foreground">
-                    {captainCurrency}
-                  </span>
-                  <Input
-                    id="trip-extra"
-                    type="number"
-                    inputMode="decimal"
-                    min={0}
-                    step="1"
-                    className="pl-14"
-                    value={extraInput}
-                    onChange={(e) => {
-                      setExtraInput(e.target.value);
-                      const n = Number(e.target.value);
-                      setForm({
-                        ...form,
-                        per_extra_minor: Number.isFinite(n) ? Math.round(n * 100) : 0,
-                      });
-                    }}
-                    placeholder="e.g. 75"
-                  />
-                </div>
-                <p className="text-xs text-muted-foreground">
-                  {isSharedCharter
-                    ? "Charged for each additional angler beyond the first, up to total seats available."
-                    : "Charged for each extra guest beyond the first, up to your max party size."}
-                </p>
+
+                {(isSharedCharter || (!isShared && !isPrivateCharter)) && (
+                  <div className="space-y-2">
+                    <Label htmlFor="trip-extra">Price per additional angler</Label>
+                    <div className="relative">
+                      <span className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-sm text-muted-foreground">
+                        {captainCurrency}
+                      </span>
+                      <Input
+                        id="trip-extra"
+                        type="number"
+                        inputMode="decimal"
+                        min={0}
+                        step="1"
+                        className="pl-14"
+                        value={extraInput}
+                        onChange={(e) => {
+                          setExtraInput(e.target.value);
+                          const n = Number(e.target.value);
+                          setForm({
+                            ...form,
+                            per_extra_minor: Number.isFinite(n) ? Math.round(n * 100) : 0,
+                          });
+                        }}
+                        placeholder="e.g. 75"
+                      />
+                    </div>
+                    <p className="text-xs text-muted-foreground">
+                      {isSharedCharter
+                        ? "Charged for each additional angler beyond the first, up to total seats available."
+                        : "Charged for each extra guest beyond the first, up to your max party size."}
+                    </p>
+                  </div>
+                )}
               </div>
-            )}
+
+              {/* Column 2: Capacity */}
+              <div className="space-y-4">
+                {isShared ? (
+                  <>
+                    <div className="space-y-2">
+                      <Label htmlFor="trip-seats">
+                        {isGuide ? "Total Spots Available" : "Total Seats Available"}
+                      </Label>
+                      <Input
+                        id="trip-seats"
+                        type="number"
+                        min={1}
+                        max={50}
+                        step="1"
+                        value={form.seats_available ?? ""}
+                        onChange={(e) => {
+                          const n = parseInt(e.target.value, 10);
+                          setForm({ ...form, seats_available: Number.isFinite(n) ? n : null });
+                        }}
+                        placeholder="e.g. 6"
+                      />
+                      <p className="text-xs text-muted-foreground">
+                        {isGuide
+                          ? "Enter the maximum number of individual spots you can sell in total for this trip (e.g., 6)."
+                          : "Enter the maximum number of individual seats you can sell in total for this shared trip (e.g., 6)."}
+                      </p>
+                    </div>
+                    <div className="space-y-2">
+                      <Label htmlFor="trip-min-sail">
+                        {isGuide ? "Minimum Spots Required (optional)" : "Minimum Seats to Sail (optional)"}
+                      </Label>
+                      <Input
+                        id="trip-min-sail"
+                        type="number"
+                        min={1}
+                        max={form.seats_available ?? 50}
+                        step="1"
+                        value={form.min_seats_to_sail ?? ""}
+                        onChange={(e) => {
+                          const raw = e.target.value;
+                          if (raw === "") {
+                            setForm({ ...form, min_seats_to_sail: null });
+                            return;
+                          }
+                          const n = parseInt(raw, 10);
+                          setForm({
+                            ...form,
+                            min_seats_to_sail: Number.isFinite(n) ? n : null,
+                          });
+                        }}
+                        placeholder="e.g. 3"
+                      />
+                      <p className="text-xs text-muted-foreground">
+                        If this number isn&apos;t reached 24 hours before the trip,
+                        we&apos;ll warn you on your dashboard so you can decide to
+                        cancel/refund or run it anyway. Leave blank to always run.
+                      </p>
+                      {form.min_seats_to_sail != null &&
+                        form.seats_available != null &&
+                        form.min_seats_to_sail > form.seats_available && (
+                          <p className="text-xs text-destructive">
+                            {isGuide
+                              ? `Minimum can't exceed total spots (${form.seats_available}).`
+                              : `Minimum can't exceed total seats (${form.seats_available}).`}
+                          </p>
+                        )}
+                    </div>
+                  </>
+                ) : (
+                  <>
+                    <div className="space-y-2">
+                      <Label htmlFor="trip-party">Max trip size</Label>
+                      <Input
+                        id="trip-party"
+                        type="number"
+                        min={1}
+                        max={50}
+                        step="1"
+                        value={form.max_party_size ?? ""}
+                        onChange={(e) => {
+                          const n = parseInt(e.target.value, 10);
+                          setForm({ ...form, max_party_size: Number.isFinite(n) ? n : null });
+                        }}
+                        placeholder="e.g. 6"
+                      />
+                    </div>
+                    <div className="space-y-2">
+                      <Label htmlFor="trip-min-party">Min trip size</Label>
+                      <Input
+                        id="trip-min-party"
+                        type="number"
+                        min={1}
+                        max={50}
+                        step="1"
+                        value={form.min_party_size ?? ""}
+                        onChange={(e) => {
+                          const n = parseInt(e.target.value, 10);
+                          setForm({ ...form, min_party_size: Number.isFinite(n) ? n : 1 });
+                        }}
+                        placeholder="e.g. 2"
+                      />
+                      <p className="text-xs text-muted-foreground">
+                        The trip requires at least this many guests to run.
+                      </p>
+                    </div>
+                  </>
+                )}
+              </div>
+            </div>
 
             {totalPreview != null && (() => {
               const depositMinor = Math.round(totalPreview * 0.1);
