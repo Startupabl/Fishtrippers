@@ -5,6 +5,7 @@ import {
   CalendarDays,
   Wallet,
   BookOpen,
+  FileText,
   Receipt,
   Plus,
   Search,
@@ -36,12 +37,12 @@ type Item = {
 
 const aideItems: Item[] = [
   { title: "Dashboard", to: "/dashboard", icon: LayoutDashboard, exact: true },
-  { title: "My Schedule", to: "/dashboard/upcoming-sessions", icon: Calendar },
-  { title: "My Earnings", to: "/dashboard/earnings", icon: Wallet },
-  { title: "My Listing", to: "/dashboard/my-listing", icon: BookOpen },
+  { title: "My Listing & Trips", to: "/dashboard/my-listing", icon: BookOpen },
   { title: "My Verifications", to: "/dashboard/verifications", icon: ShieldCheck },
   { title: "My Availability", to: "/dashboard/master-calendar", icon: CalendarDays },
-  { title: "My Policies", to: "/dashboard/manage-policies", icon: ShieldCheck },
+  { title: "My Schedule", to: "/dashboard/upcoming-sessions", icon: Calendar },
+  { title: "My Policies", to: "/dashboard/manage-policies", icon: FileText },
+  { title: "My Earnings", to: "/dashboard/earnings", icon: Wallet },
 ];
 
 
