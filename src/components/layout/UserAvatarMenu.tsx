@@ -142,7 +142,7 @@ export function UserAvatarMenuItems({
           <DropdownMenuItem asChild>
             <Link to="/admin" className="flex w-full cursor-pointer items-center gap-2 px-3 py-2">
               <ShieldCheck className="size-4" style={{ color: DESIGN_SYSTEM.colors.leafGreen }} />
-              Admin Dashboard
+              Admin Hub
             </Link>
           </DropdownMenuItem>
           <DropdownMenuSeparator />
