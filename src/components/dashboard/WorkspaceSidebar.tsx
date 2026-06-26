@@ -39,9 +39,11 @@ const aideItems: Item[] = [
   { title: "My Schedule", to: "/dashboard/upcoming-sessions", icon: Calendar },
   { title: "My Earnings", to: "/dashboard/earnings", icon: Wallet },
   { title: "My Listing", to: "/dashboard/my-listing", icon: BookOpen },
+  { title: "My Verifications", to: "/dashboard/verifications", icon: ShieldCheck },
   { title: "Manage Availability", to: "/dashboard/master-calendar", icon: CalendarDays },
   { title: "Manage Policies", to: "/dashboard/manage-policies", icon: ShieldCheck },
 ];
+
 
 const learnerItems: Item[] = [
   { title: "Dashboard Home", to: "/dashboard/learner", icon: LayoutDashboard, exact: true },
