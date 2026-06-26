@@ -157,7 +157,7 @@ function FxRatesLoader() {
 function CurrencyInit() {
   return (
     <>
-      <FxRatesLoader />
+      <CurrencyInit />
       <CurrencyBootstrapper />
     </>
   );
@@ -175,7 +175,7 @@ function RootComponent() {
   if (isAdminRoute) {
     return (
       <QueryClientProvider client={queryClient}>
-        <FxRatesLoader />
+        <CurrencyInit />
         <ImpersonationBanner />
         <Outlet />
         <Toaster />
@@ -185,7 +185,7 @@ function RootComponent() {
 
   return (
     <QueryClientProvider client={queryClient}>
-      <FxRatesLoader />
+      <CurrencyInit />
       <ProfileCompletionRedirector />
       <ImpersonationBanner />
       <SiteHeader />
