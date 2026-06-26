@@ -61,9 +61,29 @@ export const listAdminListings = createServerFn({ method: "POST" })
       );
     const profileMap = new Map((profiles ?? []).map((p) => [p.id, p]));
 
+    const { data: verifs } = await (supabaseAdmin.from("verifications") as any)
+      .select("user_id, status")
+      .in(
+        "user_id",
+        ownerIds.length
+          ? (ownerIds as string[])
+          : ["00000000-0000-0000-0000-000000000000"],
+      );
+    const verifMap = new Map(
+      ((verifs as Array<{ user_id: string; status: string }> | null) ?? []).map(
+        (v) => [v.user_id, v.status],
+      ),
+    );
+
     // Map operator rows into the row shape the admin listings table expects.
     return (rows ?? []).map((r: any) => {
       const p = profileMap.get(r.owner_id);
+      const verification_status = (verifMap.get(r.owner_id) ?? null) as
+        | "Pending Verification"
+        | "Documents Uploaded"
+        | "Verified"
+        | "Rejected"
+        | null;
       return {
         id: r.id as string,
         title: (r.display_name ?? "Untitled listing") as string,
