@@ -2,6 +2,12 @@ import { Link } from "@tanstack/react-router";
 import { ShieldCheck, MapPin, Zap, Star, Ship, Footprints, Sparkles, Info } from "lucide-react";
 import type { OperatorCardDTO } from "@/lib/operators-search.functions";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
+import { useFormattedPrice } from "@/lib/format-currency";
+import type { CurrencyCode } from "@/stores/useCurrencyStore";
+
+function PriceLabel({ minor, currency }: { minor: number; currency: string }) {
+  return <>{useFormattedPrice(minor, (currency?.toUpperCase() as CurrencyCode) || "USD")}</>;
+}
 
 export function OperatorCard({ operator }: { operator: OperatorCardDTO }) {
   const businessSlug = operator.slug ?? operator.id;
@@ -158,9 +164,9 @@ export function OperatorCard({ operator }: { operator: OperatorCardDTO }) {
           )}
 
           <div className="mt-3 flex items-end justify-end gap-2">
-            {operator.lowest_price_label ? (
+            {operator.lowest_price_minor != null && operator.lowest_price_currency ? (
               <span className="text-base font-bold text-emerald-700">
-                {operator.lowest_price_label}
+                <PriceLabel minor={operator.lowest_price_minor} currency={operator.lowest_price_currency} />
                 <span className="text-base font-bold text-emerald-700">
                   {operator.lowest_price_is_shared
                     ? " / angler"
