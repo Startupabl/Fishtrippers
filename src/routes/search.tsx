@@ -199,8 +199,8 @@ function SearchPage() {
 
   const locationLabel = [search.city, search.state].filter(Boolean).join(", ");
   const headerLabel = locationLabel
-    ? `${locationLabel}: ${results.length} fishing ${results.length === 1 ? "charter" : "charters"} available`
-    : `${results.length} fishing ${results.length === 1 ? "charter" : "charters"} available`;
+    ? `${locationLabel}: ${results.length} Charters & Guides Available`
+    : `${results.length} Charters & Guides Available`;
 
   return (
     <main className="mx-auto max-w-[1600px] px-4 md:px-6 lg:px-8 py-6">
