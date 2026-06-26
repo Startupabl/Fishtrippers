@@ -27,6 +27,7 @@ export type OperatorCardDTO = {
   rating: number | null;
   review_count: number | null;
   lowest_price_label: string | null; // e.g. "From US $200"
+  lowest_price_is_shared: boolean;
   trip_count: number;
 };
 
