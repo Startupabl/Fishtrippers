@@ -205,7 +205,9 @@ function TripCard({
                   </div>
                   <div className="space-y-0">
                     <div className="flex items-center justify-between py-2 text-sm">
-                      <span className="text-foreground/80">1 person</span>
+                      <span className="text-foreground/80">
+                        {isShared ? "1 person" : isPrivateGroup ? "1 Group" : "Entire Boat"}
+                      </span>
                       <span className="font-semibold text-foreground">
                         {formatCurrency(baseDisplay, display)}
                       </span>
@@ -233,10 +235,11 @@ function TripCard({
                     </div>
                   </div>
                   <p className="mt-3 text-xs text-muted-foreground">
-                    The base price is for 1 person.
-                    {perExtra > 0
-                      ? ` After that it's ${formatCurrency(extraDisplay, display)} per additional guest, per trip.`
-                      : ""}
+                    {isShared
+                      ? `The base price is for 1 person.${perExtra > 0 ? ` After that it's ${formatCurrency(extraDisplay, display)} per additional guest, per trip.` : ""}`
+                      : isPrivateGroup
+                        ? "The base price is for 1 group."
+                        : "The base price is for the entire boat."}
                   </p>
                   {minParty > 1 && (
                     <p className="mt-2 text-xs font-medium text-destructive">
