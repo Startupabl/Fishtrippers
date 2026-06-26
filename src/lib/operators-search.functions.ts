@@ -26,7 +26,8 @@ export type OperatorCardDTO = {
   verified: boolean;
   rating: number | null;
   review_count: number | null;
-  lowest_price_label: string | null; // e.g. "From US $200"
+  lowest_price_minor: number | null;
+  lowest_price_currency: string | null;
   lowest_price_is_shared: boolean;
   lowest_price_is_private_group: boolean;
   trip_count: number;
@@ -250,9 +251,8 @@ export const searchOperatorsServer = createServerFn({ method: "POST" })
         verified: true,
         rating: reviewAvg,
         review_count: reviewCount,
-        lowest_price_label: cheapest
-          ? formatPrice(cheapest.price_minor, cheapest.currency)
-          : null,
+        lowest_price_minor: cheapest?.price_minor ?? null,
+        lowest_price_currency: cheapest?.currency ?? null,
         lowest_price_is_shared: cheapest?.is_shared ?? false,
         lowest_price_is_private_group: cheapest?.is_private_group ?? false,
         trip_count: active.length > 0 ? active.length : trips.length,
