@@ -28,6 +28,7 @@ export type OperatorCardDTO = {
   review_count: number | null;
   lowest_price_label: string | null; // e.g. "From US $200"
   lowest_price_is_shared: boolean;
+  lowest_price_is_private_group: boolean;
   trip_count: number;
 };
 
