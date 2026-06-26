@@ -40,7 +40,7 @@ const aideItems: Item[] = [
   { title: "My Verifications", to: "/dashboard/verifications", icon: ShieldCheck },
   { title: "My Availability", to: "/dashboard/master-calendar", icon: CalendarDays },
   { title: "My Schedule", to: "/dashboard/upcoming-sessions", icon: Calendar },
-  { title: "My Policies", to: "/dashboard/manage-policies", icon: ShieldCheck },
+  { title: "My Policies", to: "/dashboard/manage-policies", icon: FileText },
   { title: "My Earnings", to: "/dashboard/earnings", icon: Wallet },
 ];
 
