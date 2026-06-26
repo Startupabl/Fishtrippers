@@ -1,27 +1,27 @@
-## Problem
+## Goal
 
-Two separate booking-type fields exist and they are out of sync:
+Make the trip pricing section in `TripFormDialog.tsx` react to **Private Charter** vs **Shared Tour** so charter captains enter one flat boat rate instead of a base-plus-additional split. Guides and shared trips stay unchanged.
 
-- `operators.booking_type` uses values `instant` / `inquiry` — this is what the search cards (`OperatorCard.tsx`) and the search filter read.
-- `trip_packages.booking_type` uses values `instant_book` / `request_to_book` — this is what the Manage Availability page (`dashboard.master-calendar.tsx`) toggles.
+## Changes (single file: `src/components/operator-onboarding/trips/TripFormDialog.tsx`)
 
-The "Switch all trips" mutation in `src/lib/host-availability.functions.ts` (`setAllTripsBookingType`) only updates `trip_packages`. The parent `operators.booking_type` is never updated, so the search cards keep showing whatever value was set at listing creation (Bespoke Trip / "inquiry").
+### 1. Pricing inputs (Private Charter only)
 
-That's why selecting Instant Book on Manage Availability has no visible effect on the cards.
+- Rename the base price label from "Base price (1st angler)" to **"Base Price (Entire Boat)"**.
+- Helper text under the input: **"Total Trip Price (Private Boat)"** with subtext: *"The total trip price for booking this charter boat with a max party size of {max_party_size} guests."* — `{max_party_size}` is pulled live from `form.max_party_size` (fallback "your max" when empty).
+- Hide the "Price per additional angler" input entirely for Private Charter (already hidden today for shared; we extend the hide to all private-charter cases).
+- Guide "Private Trip" keeps the existing base + per-additional pair (only `private_charter` is affected, per the spec which references Charter ops).
 
-## Fix
+### 2. State / data handling
 
-Update `setAllTripsBookingType` so that whenever it flips trip-level booking type, it also writes the matching value to `operators.booking_type` for the same operator:
+- When switching to `private_charter`, force `per_extra_minor = 0` and clear the `extraInput` field so stale additional-angler data is never persisted.
+- Update the trip-type select handler (lines ~292-303) so the "private" branch zeroes `per_extra_minor` (today it only zeros it on the shared branch).
+- `price_minor` continues to be the saved field — it now represents the flat boat rate for Private Charter. No DB schema change needed; `per_extra_minor` stays 0 for these rows, so existing booking math (`price_minor + extras * per_extra_minor`) still resolves to the flat boat price.
 
-- `instant_book` → operators.booking_type = `instant`
-- `request_to_book` → operators.booking_type = `inquiry`
+### 3. Total preview
 
-Both updates run in the same handler, scoped to the resolved `opId`. No schema change, no UI change, no change to search logic or the card.
-
-After this, toggling Instant Book on Manage Availability will immediately propagate to the search/feature cards.
+- Update the "Total Trip Price (Full Boat)" preview block so for Private Charter it shows `price_minor` directly (no addition), with subtext: *"Flat rate for the entire boat (up to {max_party_size} guests)."* Shared/Guide-Private branches unchanged.
 
 ## Out of scope
 
-- Not changing the two enum vocabularies (operators vs trip_packages) — only syncing them.
-- Not touching per-trip toggles elsewhere (none currently exist in the flow); if added later, the same sync should be applied.
-- Not changing the card copy ("Instant Book" / "Bespoke Trip" already correct in `OperatorCard.tsx`).
+- Database schema (no new `flat_boat_rate` column — `price_minor` already serves this role and avoids a migration + booking/search refactor across `operators-search.functions.ts`, `trip-bookings.functions.ts`, and `booking.checkout.tsx`).
+- Guide trip types, shared trip seat logic, and search-card pricing display.
