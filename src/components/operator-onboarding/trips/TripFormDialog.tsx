@@ -695,7 +695,9 @@ export function TripFormDialog({ open, onOpenChange, initial }: Props) {
                             ? isGuide
                               ? `Assumes all ${form.seats_available ?? 0} spots are sold.`
                               : `Assumes all ${form.seats_available ?? 0} seats are sold.`
-                            : `Assumes the trip is booked to your max party size of ${form.max_party_size} guests.`}
+                            : isPrivateCharter
+                              ? `Flat rate for the entire boat (up to ${form.max_party_size ?? "N"} guests).`
+                              : `Assumes the trip is booked to your max party size of ${form.max_party_size} guests.`}
                         </div>
 
                       </div>
