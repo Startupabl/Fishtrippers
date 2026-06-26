@@ -179,7 +179,7 @@ function TripCard({
               <div className="text-xl font-bold text-emerald-600">
                 {formatCurrency(baseDisplay, display)}
                 <span className="text-xl font-bold text-emerald-600">
-                  {isShared ? " / angler" : " / entire boat"}
+                  {isShared ? " / angler" : isPrivateGroup ? " / private group" : " / entire boat"}
                 </span>
               </div>
               <Popover>
