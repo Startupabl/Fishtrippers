@@ -254,6 +254,7 @@ export const searchOperatorsServer = createServerFn({ method: "POST" })
           ? formatPrice(cheapest.price_minor, cheapest.currency)
           : null,
         lowest_price_is_shared: cheapest?.is_shared ?? false,
+        lowest_price_is_private_group: cheapest?.is_private_group ?? false,
         trip_count: active.length > 0 ? active.length : trips.length,
       };
     });
