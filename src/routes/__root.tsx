@@ -15,6 +15,7 @@ import { SiteFooter } from "@/components/layout/SiteFooter";
 import { BottomNav } from "@/components/layout/BottomNav";
 import { useAuthListener } from "@/hooks/useAuthListener";
 import { useFxRates } from "@/hooks/useFxRates";
+import { CurrencyBootstrapper } from "@/components/layout/CurrencyBootstrapper";
 import { ProfileCompletionRedirector } from "@/components/auth/ProfileCompletionRedirector";
 import { ImpersonationBanner } from "@/components/admin/ImpersonationBanner";
 
@@ -151,6 +152,15 @@ function RootShell({ children }: { children: React.ReactNode }) {
 function FxRatesLoader() {
   useFxRates();
   return null;
+}
+
+function CurrencyInit() {
+  return (
+    <>
+      <FxRatesLoader />
+      <CurrencyBootstrapper />
+    </>
+  );
 }
 
 function RootComponent() {

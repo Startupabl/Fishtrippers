@@ -16,8 +16,7 @@ function PriceLabel({ minor, currency }: { minor: number; currency: string }) {
 
 function normalizeCurrencyCode(currency: string | null | undefined): CurrencyCode {
   const code = currency?.toUpperCase();
-  if (code === "EUR" || code === "GBP" || code === "CAD" || code === "AUD") return code;
-  return "USD";
+  return code && /^[A-Z]{3}$/.test(code) ? code : "USD";
 }
 
 export function OperatorCard({ operator }: { operator: OperatorCardDTO }) {

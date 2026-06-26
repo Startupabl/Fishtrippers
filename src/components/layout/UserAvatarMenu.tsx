@@ -21,7 +21,9 @@ import { useProfileStore } from "@/stores/useProfileStore";
 import { useHasActiveListing, useOperatorRoleLabel } from "@/hooks/useHasActiveListing";
 import { useHasLearnerOrders } from "@/hooks/useHasLearnerOrders";
 import { useCurrencyStore, type CurrencyCode } from "@/stores/useCurrencyStore";
-import { SUPPORTED_CURRENCIES, getCurrencyMeta } from "@/lib/currency";
+import { useCurrencies } from "@/hooks/useCurrencies";
+import { useServerFn } from "@tanstack/react-start";
+import { updateCurrencyPreference } from "@/lib/currency-preference.functions";
 import { DESIGN_SYSTEM } from "@/lib/brand";
 import { startNewMentorExpressListing } from "@/stores/useMentorExpressStore";
 import { useProfileGuard } from "@/components/onboarding/ProfileCompletionGuard";
@@ -217,13 +219,25 @@ export function UserAvatarMenuItems({
 function CurrencySubMenu() {
   const currency = useCurrencyStore((s) => s.currency);
   const setCurrency = useCurrencyStore((s) => s.setCurrency);
-  const current = getCurrencyMeta(currency);
+  const { currencies } = useCurrencies();
+  const current = currencies.find((c) => c.code === currency) ?? currencies[0];
+  const savePref = useServerFn(updateCurrencyPreference);
 
-  function handlePick(code: CurrencyCode) {
+  async function handlePick(code: CurrencyCode) {
     if (code === currency) return;
-    setCurrency(code);
+    setCurrency(code, true);
     toast.success(`Showing prices in ${code}`);
+    try {
+      const { data } = await supabase.auth.getSession();
+      if (data.session?.user?.id) {
+        await savePref({ data: { currency: code } });
+      }
+    } catch {
+      /* non-blocking */
+    }
   }
+
+  if (!current) return null;
 
   return (
     <DropdownMenuSub>
@@ -235,8 +249,8 @@ function CurrencySubMenu() {
           {current.code}
         </DropdownMenuShortcut>
       </DropdownMenuSubTrigger>
-      <DropdownMenuSubContent className="min-w-48">
-        {SUPPORTED_CURRENCIES.map((c) => (
+      <DropdownMenuSubContent className="max-h-80 min-w-48 overflow-y-auto">
+        {currencies.map((c) => (
           <DropdownMenuItem
             key={c.code}
             onSelect={() => handlePick(c.code)}
@@ -244,7 +258,7 @@ function CurrencySubMenu() {
           >
             <span aria-hidden className="mr-2">{c.flag}</span>
             <span className="font-medium text-foreground">{c.code}</span>
-            <span className="ml-2 text-muted-foreground">· {c.label}</span>
+            <span className="ml-2 text-muted-foreground">· {c.name}</span>
             {c.code === currency && <Check className="ml-auto size-4 text-foreground" />}
           </DropdownMenuItem>
         ))}
