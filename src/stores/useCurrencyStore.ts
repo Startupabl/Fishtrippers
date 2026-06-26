@@ -1,7 +1,9 @@
 import { create } from "zustand";
 import { persist, createJSONStorage } from "zustand/middleware";
 
-export type CurrencyCode = "USD" | "EUR" | "GBP" | "CAD" | "AUD";
+// Currency codes are dynamic (sourced from the `currencies` table). Kept as
+// a string alias so any code loaded at runtime is accepted.
+export type CurrencyCode = string;
 
 interface CurrencyState {
   currency: CurrencyCode;
@@ -31,12 +33,12 @@ export const useCurrencyStore = create<CurrencyState>()(
     }),
     {
       name: "currency-v1",
-      version: 2,
+      version: 3,
       migrate: (persisted: unknown) => {
         const base = (persisted as Partial<CurrencyState>) ?? {};
         return {
           currency: base.currency ?? "USD",
-          hasManualCurrency: base.hasManualCurrency ?? true,
+          hasManualCurrency: base.hasManualCurrency ?? false,
         } as CurrencyState;
       },
       storage: createJSONStorage(() =>

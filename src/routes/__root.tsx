@@ -15,6 +15,7 @@ import { SiteFooter } from "@/components/layout/SiteFooter";
 import { BottomNav } from "@/components/layout/BottomNav";
 import { useAuthListener } from "@/hooks/useAuthListener";
 import { useFxRates } from "@/hooks/useFxRates";
+import { CurrencyBootstrapper } from "@/components/layout/CurrencyBootstrapper";
 import { ProfileCompletionRedirector } from "@/components/auth/ProfileCompletionRedirector";
 import { ImpersonationBanner } from "@/components/admin/ImpersonationBanner";
 
@@ -153,6 +154,15 @@ function FxRatesLoader() {
   return null;
 }
 
+function CurrencyInit() {
+  return (
+    <>
+      <FxRatesLoader />
+      <CurrencyBootstrapper />
+    </>
+  );
+}
+
 function RootComponent() {
   const { queryClient } = Route.useRouteContext();
   useAuthListener();
@@ -165,7 +175,7 @@ function RootComponent() {
   if (isAdminRoute) {
     return (
       <QueryClientProvider client={queryClient}>
-        <FxRatesLoader />
+        <CurrencyInit />
         <ImpersonationBanner />
         <Outlet />
         <Toaster />
@@ -175,7 +185,7 @@ function RootComponent() {
 
   return (
     <QueryClientProvider client={queryClient}>
-      <FxRatesLoader />
+      <CurrencyInit />
       <ProfileCompletionRedirector />
       <ImpersonationBanner />
       <SiteHeader />

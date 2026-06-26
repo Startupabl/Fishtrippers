@@ -404,6 +404,36 @@ export type Database = {
         }
         Relationships: []
       }
+      currencies: {
+        Row: {
+          code: string
+          created_at: string
+          flag: string
+          name: string
+          sort_order: number
+          symbol: string
+          updated_at: string
+        }
+        Insert: {
+          code: string
+          created_at?: string
+          flag?: string
+          name: string
+          sort_order?: number
+          symbol: string
+          updated_at?: string
+        }
+        Update: {
+          code?: string
+          created_at?: string
+          flag?: string
+          name?: string
+          sort_order?: number
+          symbol?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       email_send_log: {
         Row: {
           created_at: string
@@ -1408,6 +1438,7 @@ export type Database = {
           city: string | null
           country: string | null
           created_at: string
+          currency_preference: string | null
           display_name: string | null
           email: string | null
           first_name: string | null
@@ -1440,6 +1471,7 @@ export type Database = {
           city?: string | null
           country?: string | null
           created_at?: string
+          currency_preference?: string | null
           display_name?: string | null
           email?: string | null
           first_name?: string | null
@@ -1472,6 +1504,7 @@ export type Database = {
           city?: string | null
           country?: string | null
           created_at?: string
+          currency_preference?: string | null
           display_name?: string | null
           email?: string | null
           first_name?: string | null
@@ -1495,7 +1528,15 @@ export type Database = {
           user_number_id?: string
           user_status?: Database["public"]["Enums"]["user_status_t"]
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "profiles_currency_preference_fkey"
+            columns: ["currency_preference"]
+            isOneToOne: false
+            referencedRelation: "currencies"
+            referencedColumns: ["code"]
+          },
+        ]
       }
       promo_codes: {
         Row: {
