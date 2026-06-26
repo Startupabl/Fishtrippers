@@ -177,6 +177,9 @@ function TripCard({
             <div className="flex items-center gap-1.5 whitespace-nowrap">
               <div className="text-xl font-bold text-emerald-600">
                 {formatCurrency(baseDisplay, display)}
+                <span className="text-xl font-bold text-emerald-600">
+                  {isShared ? " / angler" : " / entire boat"}
+                </span>
               </div>
               <Popover>
                 <PopoverTrigger asChild>
