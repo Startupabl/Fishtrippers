@@ -321,6 +321,7 @@ function ListingsToApprove() {
   const archiveFn = useServerFn(archiveJourney);
   const qc = useQueryClient();
   const [rejectTarget, setRejectTarget] = useState<{ id: string; title: string } | null>(null);
+  const [verifyTarget, setVerifyTarget] = useState<{ ownerId: string; name: string } | null>(null);
 
   const queueQ = useQuery({
     queryKey: ["admin", "queue", "listings", "queue"],
