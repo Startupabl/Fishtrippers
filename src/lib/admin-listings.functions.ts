@@ -107,6 +107,8 @@ export const listAdminListings = createServerFn({ method: "POST" })
           [p?.first_name, p?.last_name].filter(Boolean).join(" ") || null,
         mentor_stripe_connect_id: p?.stripe_connect_id ?? null,
         mentor_is_payout_ready: !!p?.is_payout_ready,
+        verification_status,
+        verification_user_id: r.owner_id as string,
       };
     });
   });
