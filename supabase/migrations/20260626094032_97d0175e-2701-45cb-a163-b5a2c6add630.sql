@@ -1,0 +1,1 @@
+UPDATE public.trip_packages SET per_extra_minor = 0 WHERE charter_type = 'private_trip' AND per_extra_minor <> 0;
