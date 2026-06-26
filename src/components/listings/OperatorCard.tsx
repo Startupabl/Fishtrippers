@@ -2,11 +2,22 @@ import { Link } from "@tanstack/react-router";
 import { ShieldCheck, MapPin, Zap, Star, Ship, Footprints, Sparkles, Info } from "lucide-react";
 import type { OperatorCardDTO } from "@/lib/operators-search.functions";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
-import { useFormattedPrice } from "@/lib/format-currency";
-import type { CurrencyCode } from "@/stores/useCurrencyStore";
+import { formatCurrency } from "@/lib/format-currency";
+import { convertMinor } from "@/lib/currency";
+import { useCurrencyStore, type CurrencyCode } from "@/stores/useCurrencyStore";
 
 function PriceLabel({ minor, currency }: { minor: number; currency: string }) {
-  return <>{useFormattedPrice(minor, (currency?.toUpperCase() as CurrencyCode) || "USD")}</>;
+  const displayCurrency = useCurrencyStore((s) => s.currency);
+  const sourceCurrency = normalizeCurrencyCode(currency);
+  const displayMinor = convertMinor(minor, sourceCurrency, displayCurrency);
+
+  return <>{formatCurrency(displayMinor, displayCurrency)}</>;
+}
+
+function normalizeCurrencyCode(currency: string | null | undefined): CurrencyCode {
+  const code = currency?.toUpperCase();
+  if (code === "EUR" || code === "GBP" || code === "CAD" || code === "AUD") return code;
+  return "USD";
 }
 
 export function OperatorCard({ operator }: { operator: OperatorCardDTO }) {
