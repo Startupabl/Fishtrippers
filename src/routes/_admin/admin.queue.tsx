@@ -558,6 +558,14 @@ function ListingsToApprove() {
           });
         }}
       />
+      <VerificationReviewDialog
+        open={!!verifyTarget}
+        onOpenChange={(open) => {
+          if (!open) setVerifyTarget(null);
+        }}
+        ownerId={verifyTarget?.ownerId ?? null}
+        ownerName={verifyTarget?.name ?? ""}
+      />
     </ScopeTabs>
   );
 }
