@@ -5,6 +5,7 @@ import {
   CalendarDays,
   Wallet,
   BookOpen,
+  FileText,
   Receipt,
   Plus,
   Search,
