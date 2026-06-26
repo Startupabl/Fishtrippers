@@ -298,7 +298,9 @@ export function TripFormDialog({ open, onOpenChange, initial }: Props) {
                     key={opt.value}
                     type="button"
                     onClick={() => {
-                      if (isSharedTripType(opt.value) || opt.value === "private_charter") {
+                      const resetsExtra =
+                        opt.value === "small_group_trip" || opt.value === "private_charter";
+                      if (resetsExtra) {
                         setExtraInput("0");
                       }
                       setForm((f) => ({
@@ -306,7 +308,7 @@ export function TripFormDialog({ open, onOpenChange, initial }: Props) {
                         charter_type: opt.value,
                         ...(isSharedTripType(opt.value)
                           ? {
-                              per_extra_minor: 0,
+                              ...(opt.value === "small_group_trip" ? { per_extra_minor: 0 } : {}),
                               seats_available:
                                 f.seats_available ?? f.max_party_size ?? null,
                             }
