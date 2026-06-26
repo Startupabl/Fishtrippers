@@ -301,7 +301,9 @@ export function TripFormDialog({ open, onOpenChange, initial }: Props) {
                     type="button"
                     onClick={() => {
                       const resetsExtra =
-                        opt.value === "small_group_trip" || opt.value === "private_charter";
+                        opt.value === "small_group_trip" ||
+                        opt.value === "private_charter" ||
+                        opt.value === "private_trip";
                       if (resetsExtra) {
                         setExtraInput("0");
                       }
@@ -314,7 +316,7 @@ export function TripFormDialog({ open, onOpenChange, initial }: Props) {
                               seats_available:
                                 f.seats_available ?? f.max_party_size ?? null,
                             }
-                          : opt.value === "private_charter"
+                          : opt.value === "private_charter" || opt.value === "private_trip"
                             ? { per_extra_minor: 0 }
                             : {}),
                       }));
