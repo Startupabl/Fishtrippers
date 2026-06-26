@@ -419,6 +419,43 @@ function ListingsToApprove() {
                       {fmtDate(j.created_at)}
                     </TableCell>
                     <TableCell>
+                      {(() => {
+                        const vs = (j as any).verification_status as
+                          | "Pending Verification"
+                          | "Documents Uploaded"
+                          | "Verified"
+                          | "Rejected"
+                          | null;
+                        const ownerId = (j as any).verification_user_id as string;
+                        const ownerName = j.mentor_name ?? j.mentor_email ?? "Captain";
+                        if (!vs || vs === "Pending Verification") {
+                          return <StatusBadge tone="gray">Not Submitted</StatusBadge>;
+                        }
+                        if (vs === "Documents Uploaded") {
+                          return (
+                            <Button
+                              size="sm"
+                              variant="outline"
+                              className="h-7 px-2"
+                              onClick={() => setVerifyTarget({ ownerId, name: ownerName })}
+                            >
+                              View Docs
+                            </Button>
+                          );
+                        }
+                        const tone = vs === "Verified" ? "green" : "red";
+                        return (
+                          <button
+                            type="button"
+                            onClick={() => setVerifyTarget({ ownerId, name: ownerName })}
+                            className="cursor-pointer"
+                          >
+                            <StatusBadge tone={tone}>{vs}</StatusBadge>
+                          </button>
+                        );
+                      })()}
+                    </TableCell>
+                    <TableCell>
                       <StatusBadge
                         tone={
                           mod === "approved"
