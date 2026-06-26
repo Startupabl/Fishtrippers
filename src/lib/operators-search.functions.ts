@@ -28,6 +28,7 @@ export type OperatorCardDTO = {
   review_count: number | null;
   lowest_price_label: string | null; // e.g. "From US $200"
   lowest_price_is_shared: boolean;
+  lowest_price_is_private_group: boolean;
   trip_count: number;
 };
 
@@ -194,14 +195,17 @@ export const searchOperatorsServer = createServerFn({ method: "POST" })
       // price for shared trips (price_minor already is per-person).
       const cardPriceFor = (t: { price_minor: number; per_extra_minor: number | null; charter_type: string | null }) => {
         if (isSharedTripType(t.charter_type as any)) return t.price_minor;
+        // Guide "private_trip" is a flat group price — use price_minor directly.
+        if (t.charter_type === "private_trip") return t.price_minor;
         return t.per_extra_minor && t.per_extra_minor > 0 ? t.per_extra_minor : t.price_minor;
       };
-      let cheapest: { price_minor: number; currency: string; is_shared: boolean } | null = null;
+      let cheapest: { price_minor: number; currency: string; is_shared: boolean; is_private_group: boolean } | null = null;
       for (const t of candidates) {
         const p = cardPriceFor(t);
         const isShared = isSharedTripType(t.charter_type as any);
+        const isPrivateGroup = t.charter_type === "private_trip";
         if (!cheapest || p < cheapest.price_minor) {
-          cheapest = { price_minor: p, currency: t.currency, is_shared: isShared };
+          cheapest = { price_minor: p, currency: t.currency, is_shared: isShared, is_private_group: isPrivateGroup };
         }
       }
 
@@ -250,6 +254,7 @@ export const searchOperatorsServer = createServerFn({ method: "POST" })
           ? formatPrice(cheapest.price_minor, cheapest.currency)
           : null,
         lowest_price_is_shared: cheapest?.is_shared ?? false,
+        lowest_price_is_private_group: cheapest?.is_private_group ?? false,
         trip_count: active.length > 0 ? active.length : trips.length,
       };
     });

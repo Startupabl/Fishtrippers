@@ -162,7 +162,11 @@ export function OperatorCard({ operator }: { operator: OperatorCardDTO }) {
               <span className="text-base font-bold text-emerald-700">
                 {operator.lowest_price_label}
                 <span className="text-base font-bold text-emerald-700">
-                  {operator.lowest_price_is_shared ? " / angler" : " / entire boat"}
+                  {operator.lowest_price_is_shared
+                    ? " / angler"
+                    : operator.lowest_price_is_private_group
+                      ? " / private group"
+                      : " / entire boat"}
                 </span>
               </span>
             ) : (

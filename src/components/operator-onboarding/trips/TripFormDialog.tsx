@@ -262,6 +262,8 @@ export function TripFormDialog({ open, onOpenChange, initial }: Props) {
   const isShared = isSharedTripType(form.charter_type);
   const isSharedCharter = form.charter_type === "shared_tour";
   const isPrivateCharter = form.charter_type === "private_charter";
+  const isPrivateGuideTrip = form.charter_type === "private_trip";
+  const isFlatGroupPrice = isPrivateCharter || isPrivateGuideTrip;
   const totalPreview = isSharedCharter
     ? form.price_minor != null && form.seats_available && form.seats_available > 0
       ? form.price_minor + Math.max(0, form.seats_available - 1) * (form.per_extra_minor ?? 0)
@@ -270,7 +272,7 @@ export function TripFormDialog({ open, onOpenChange, initial }: Props) {
       ? form.price_minor != null && form.seats_available && form.seats_available > 0
         ? form.price_minor * form.seats_available
         : null
-      : isPrivateCharter
+      : isFlatGroupPrice
         ? form.price_minor
         : form.price_minor != null && form.max_party_size && form.max_party_size > 0
           ? form.price_minor + Math.max(0, form.max_party_size - 1) * (form.per_extra_minor ?? 0)
@@ -299,7 +301,9 @@ export function TripFormDialog({ open, onOpenChange, initial }: Props) {
                     type="button"
                     onClick={() => {
                       const resetsExtra =
-                        opt.value === "small_group_trip" || opt.value === "private_charter";
+                        opt.value === "small_group_trip" ||
+                        opt.value === "private_charter" ||
+                        opt.value === "private_trip";
                       if (resetsExtra) {
                         setExtraInput("0");
                       }
@@ -312,7 +316,7 @@ export function TripFormDialog({ open, onOpenChange, initial }: Props) {
                               seats_available:
                                 f.seats_available ?? f.max_party_size ?? null,
                             }
-                          : opt.value === "private_charter"
+                          : opt.value === "private_charter" || opt.value === "private_trip"
                             ? { per_extra_minor: 0 }
                             : {}),
                       }));
@@ -514,7 +518,9 @@ export function TripFormDialog({ open, onOpenChange, initial }: Props) {
                         ? "Price per Person"
                         : isPrivateCharter
                           ? "Base Price (Entire Boat)"
-                          : "Base price (1st angler)"}
+                          : isPrivateGuideTrip
+                            ? "Base Price (Per Group)"
+                            : "Base price (1st angler)"}
                   </Label>
                   <div className="relative">
                     <span className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-sm text-muted-foreground">
@@ -536,7 +542,7 @@ export function TripFormDialog({ open, onOpenChange, initial }: Props) {
                           price_minor: Number.isFinite(n) ? Math.round(n * 100) : null,
                         });
                       }}
-                      placeholder={isShared ? "e.g. 220" : isPrivateCharter ? "e.g. 850" : "e.g. 650"}
+                      placeholder={isShared ? "e.g. 220" : isFlatGroupPrice ? "e.g. 850" : "e.g. 650"}
                     />
                   </div>
                   {isSharedCharter ? (
@@ -554,10 +560,17 @@ export function TripFormDialog({ open, onOpenChange, initial }: Props) {
                         The total trip price for booking this charter boat with a max party size of {form.max_party_size ?? "N"} guests.
                       </p>
                     </div>
+                  ) : isPrivateGuideTrip ? (
+                    <div className="space-y-0.5">
+                      <p className="text-xs font-medium text-foreground">Total Trip Price (Private Group)</p>
+                      <p className="text-xs text-muted-foreground">
+                        The total trip price for booking this private group with a max group size of {form.max_party_size ?? "N"} anglers.
+                      </p>
+                    </div>
                   ) : null}
                 </div>
 
-                {(isSharedCharter || (!isShared && !isPrivateCharter)) && (
+                {isSharedCharter && (
                   <div className="space-y-2">
                     <Label htmlFor="trip-extra">Price per additional angler</Label>
                     <div className="relative">
@@ -584,9 +597,7 @@ export function TripFormDialog({ open, onOpenChange, initial }: Props) {
                       />
                     </div>
                     <p className="text-xs text-muted-foreground">
-                      {isSharedCharter
-                        ? "Charged for each additional angler beyond the first, up to total seats available."
-                        : "Charged for each extra guest beyond the first, up to your max party size."}
+                      Charged for each additional angler beyond the first, up to total seats available.
                     </p>
                   </div>
                 )}
@@ -663,7 +674,9 @@ export function TripFormDialog({ open, onOpenChange, initial }: Props) {
                 ) : (
                   <>
                     <div className="space-y-2">
-                      <Label htmlFor="trip-party">Max trip size</Label>
+                      <Label htmlFor="trip-party">
+                        {isPrivateGuideTrip ? "Max Group Size" : "Max trip size"}
+                      </Label>
                       <Input
                         id="trip-party"
                         type="number"
@@ -679,7 +692,9 @@ export function TripFormDialog({ open, onOpenChange, initial }: Props) {
                       />
                     </div>
                     <div className="space-y-2">
-                      <Label htmlFor="trip-min-party">Min trip size</Label>
+                      <Label htmlFor="trip-min-party">
+                        {isPrivateGuideTrip ? "Min Group Size" : "Min trip size"}
+                      </Label>
                       <Input
                         id="trip-min-party"
                         type="number"
@@ -694,7 +709,9 @@ export function TripFormDialog({ open, onOpenChange, initial }: Props) {
                         placeholder="e.g. 2"
                       />
                       <p className="text-xs text-muted-foreground">
-                        The trip requires at least this many guests to run.
+                        {isPrivateGuideTrip
+                          ? "The trip requires at least this many anglers to run."
+                          : "The trip requires at least this many guests to run."}
                       </p>
                     </div>
                   </>
@@ -711,7 +728,11 @@ export function TripFormDialog({ open, onOpenChange, initial }: Props) {
                     <div className="flex items-start justify-between gap-3">
                       <div>
                         <div className="font-medium">
-                          {isShared ? "Total if fully booked" : "Total Trip Price (Full Boat)"}
+                          {isShared
+                            ? "Total if fully booked"
+                            : isPrivateGuideTrip
+                              ? "Total Trip Price (Private Group)"
+                              : "Total Trip Price (Full Boat)"}
                         </div>
                         <div className="text-xs text-muted-foreground">
                           {isShared
@@ -720,7 +741,9 @@ export function TripFormDialog({ open, onOpenChange, initial }: Props) {
                               : `Assumes all ${form.seats_available ?? 0} seats are sold.`
                             : isPrivateCharter
                               ? `Flat rate for the entire boat (up to ${form.max_party_size ?? "N"} guests).`
-                              : `Assumes the trip is booked to your max party size of ${form.max_party_size} guests.`}
+                              : isPrivateGuideTrip
+                                ? `Flat rate for the entire group (up to ${form.max_party_size ?? "N"} anglers).`
+                                : `Assumes the trip is booked to your max party size of ${form.max_party_size} guests.`}
                         </div>
 
                       </div>
