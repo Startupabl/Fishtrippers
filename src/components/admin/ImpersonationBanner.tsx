@@ -5,7 +5,7 @@ import { getImpersonationState, stopImpersonation } from "@/lib/impersonation";
 
 export function ImpersonationBanner() {
   const router = useRouter();
-  const [state, setState] = useState(() => getImpersonationState());
+  const [state, setState] = useState<ReturnType<typeof getImpersonationState>>(null);
   const [busy, setBusy] = useState(false);
 
   useEffect(() => {
