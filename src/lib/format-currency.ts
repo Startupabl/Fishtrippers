@@ -10,10 +10,16 @@ export function formatCurrency(
   locale: string = typeof navigator !== "undefined" ? navigator.language : "en-US",
 ): string {
   const value = minorUnits / 100;
-  return new Intl.NumberFormat(locale, {
+  const options: Intl.NumberFormatOptions = {
     style: "currency",
     currency: currencyCode,
-  }).format(value);
+  };
+
+  try {
+    return new Intl.NumberFormat(locale, options).format(value);
+  } catch {
+    return new Intl.NumberFormat("en-US", options).format(value);
+  }
 }
 
 /**
