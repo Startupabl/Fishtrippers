@@ -28,8 +28,6 @@ import { WorkspaceSidebar, useWorkspaceMode } from "@/components/dashboard/Works
 import { SiteFooter } from "@/components/layout/SiteFooter";
 
 const lora = { fontFamily: DESIGN_SYSTEM.fonts.serif };
-const LEAF = DESIGN_SYSTEM.colors.leafGreen;
-const YELLOW = DESIGN_SYSTEM.colors.sunnyYellow;
 
 export const Route = createFileRoute("/_authenticated/dashboard")({
   head: () => ({
