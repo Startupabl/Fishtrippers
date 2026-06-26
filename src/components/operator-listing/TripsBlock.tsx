@@ -524,13 +524,13 @@ export function TripsBlock({ trips, hostId, hostHasAvailability, ownerId }: Prop
         </div>
       ) : (
         <div className="space-y-3">
-          {trips.map((t, i) => (
+          {trips.map((t) => (
             <TripCard
               key={t.id}
               trip={t}
               hostId={hostId}
               hostHasAvailability={hostHasAvailability}
-              defaultOpen={i === 0}
+              defaultOpen={false}
             />
           ))}
         </div>
