@@ -506,11 +506,13 @@ export function TripFormDialog({ open, onOpenChange, initial }: Props) {
             <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
               <div className="space-y-2">
                 <Label htmlFor="trip-price">
-                  {isShared
-                    ? (isGuide ? "Price per Person" : "Price per Seat")
-                    : isPrivateCharter
-                      ? "Base Price (Entire Boat)"
-                      : "Base price (1st angler)"}
+                  {isSharedCharter
+                    ? "Base price (1st angler)"
+                    : isShared
+                      ? "Price per Person"
+                      : isPrivateCharter
+                        ? "Base Price (Entire Boat)"
+                        : "Base price (1st angler)"}
                 </Label>
                 <div className="relative">
                   <span className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-sm text-muted-foreground">
@@ -535,11 +537,13 @@ export function TripFormDialog({ open, onOpenChange, initial }: Props) {
                     placeholder={isShared ? "e.g. 220" : isPrivateCharter ? "e.g. 850" : "e.g. 650"}
                   />
                 </div>
-                {isShared ? (
+                {isSharedCharter ? (
                   <p className="text-xs text-muted-foreground">
-                    {isGuide
-                      ? "Enter the cost for an individual spot on this trip."
-                      : "Enter the cost for an individual seat on this trip."}
+                    Charged for the first angler on this shared trip.
+                  </p>
+                ) : isShared ? (
+                  <p className="text-xs text-muted-foreground">
+                    Enter the cost for an individual spot on this trip.
                   </p>
                 ) : isPrivateCharter ? (
                   <div className="space-y-0.5">
