@@ -2009,6 +2009,45 @@ export type Database = {
         }
         Relationships: []
       }
+      verifications: {
+        Row: {
+          created_at: string
+          id: string
+          id_url: string | null
+          insurance_url: string | null
+          is_charter_owner: boolean
+          license_url: string | null
+          status: string
+          updated_at: string
+          user_id: string
+          vessel_doc_url: string | null
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          id_url?: string | null
+          insurance_url?: string | null
+          is_charter_owner?: boolean
+          license_url?: string | null
+          status?: string
+          updated_at?: string
+          user_id: string
+          vessel_doc_url?: string | null
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          id_url?: string | null
+          insurance_url?: string | null
+          is_charter_owner?: boolean
+          license_url?: string | null
+          status?: string
+          updated_at?: string
+          user_id?: string
+          vessel_doc_url?: string | null
+        }
+        Relationships: []
+      }
       vessels: {
         Row: {
           boat_type_id: string | null
