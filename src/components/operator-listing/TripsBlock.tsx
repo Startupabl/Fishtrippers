@@ -98,6 +98,7 @@ function TripCard({
   const minParty = Math.max(1, trip.min_party_size ?? 1);
   const maxParty = Math.max(minParty, trip.max_party_size ?? 1);
   const isShared = isSharedTripType(trip.charter_type ?? null);
+  const isPrivateGroup = trip.charter_type === "private_trip";
   const seatsAvailable = trip.seats_available ?? 0;
   const capacity = isShared ? (seatsAvailable || maxParty) : maxParty;
   const charterLabel = TRIP_TYPE_LABELS[(trip.charter_type ?? "private_charter") as TripType];
