@@ -292,7 +292,10 @@ export function TripFormDialog({ open, onOpenChange, initial }: Props) {
                   <button
                     key={opt.value}
                     type="button"
-                    onClick={() =>
+                    onClick={() => {
+                      if (isSharedTripType(opt.value) || opt.value === "private_charter") {
+                        setExtraInput("0");
+                      }
                       setForm((f) => ({
                         ...f,
                         charter_type: opt.value,
@@ -302,9 +305,11 @@ export function TripFormDialog({ open, onOpenChange, initial }: Props) {
                               seats_available:
                                 f.seats_available ?? f.max_party_size ?? null,
                             }
-                          : {}),
-                      }))
-                    }
+                          : opt.value === "private_charter"
+                            ? { per_extra_minor: 0 }
+                            : {}),
+                      }));
+                    }}
                     className={`rounded-lg border p-4 text-left transition-colors ${
                       selected
                         ? "border-primary bg-background ring-2 ring-primary"
