@@ -268,28 +268,57 @@ function MyListingPage() {
       </div>
 
 
-      {showCalendarBanner ? (
-        <Card className="mt-4 rounded-2xl border-amber-200 bg-amber-50/60 p-4">
-          <div className="flex flex-wrap items-center justify-between gap-3">
-            <div className="flex items-start gap-3">
-              <div className="mt-0.5 flex h-9 w-9 items-center justify-center rounded-full bg-amber-100">
-                <CalendarDays className="size-4 text-amber-900" />
-              </div>
-              <div>
-                <p className="text-sm font-semibold text-amber-900">
-                  Action Required: Set up How Bookings Work
-                </p>
-                <p className="text-xs text-amber-900/80">
-                  Choose Instant Book or Request to Book and configure your calendar.
-                </p>
-              </div>
+      {(() => {
+        const needsAvailability = showCalendarBanner;
+        const needsVerification =
+          !!operator && (operator as any).verification_status !== "verified";
+        if (!needsAvailability && !needsVerification) return null;
+        return (
+          <Card className="mt-4 rounded-2xl border-amber-200 bg-amber-50/60 p-4">
+            <div className="mb-3">
+              <p className="text-sm font-semibold text-amber-900">
+                Pending Action Items
+              </p>
+              <p className="text-xs text-amber-900/80">
+                Complete these to go live and build trust.
+              </p>
             </div>
-            <Button asChild size="sm">
-              <Link to="/dashboard/master-calendar">Manage Availability</Link>
-            </Button>
-          </div>
-        </Card>
-      ) : null}
+            <ul className="space-y-2">
+              {needsAvailability ? (
+                <li className="flex items-start gap-2 text-sm text-amber-900">
+                  <AlertTriangle className="mt-0.5 size-4 shrink-0" />
+                  <span>
+                    Set your schedule and rates in{" "}
+                    <Link
+                      to="/dashboard/master-calendar"
+                      className="font-medium underline underline-offset-2"
+                    >
+                      Manage Availability
+                    </Link>
+                    .
+                  </span>
+                </li>
+              ) : null}
+              {needsVerification ? (
+                <li className="flex items-start gap-2 text-sm text-amber-900">
+                  <ShieldCheck className="mt-0.5 size-4 shrink-0" />
+                  <span>
+                    Upload your credentials in{" "}
+                    <Link
+                      to="/dashboard/verifications"
+                      className="font-medium underline underline-offset-2"
+                    >
+                      My Verifications
+                    </Link>{" "}
+                    to earn your Verified badge.
+                  </span>
+                </li>
+              ) : null}
+            </ul>
+          </Card>
+        );
+      })()}
+
 
       {undersold.length > 0 ? (
         <Card className="mt-4 rounded-2xl border-amber-200 bg-amber-50/60 p-4">
