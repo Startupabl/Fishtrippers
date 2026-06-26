@@ -251,8 +251,8 @@ function TripCard({
             </div>
 
           </div>
-          {/* Experience + capacity */}
-          {(envs.length > 0 || techs.length > 0 || capacity > 0) && (
+          {/* Experience + live availability (capacity duplicated in info popover) */}
+          {(envs.length > 0 || techs.length > 0 || (isShared && selectedDate && remainingSeats !== null)) && (
             <div className="mt-1 flex items-center justify-between gap-3">
               <p className="min-w-0 truncate text-sm text-muted-foreground">
                 {(envs.length > 0 || techs.length > 0)
@@ -262,24 +262,17 @@ function TripCard({
                     ].filter(Boolean).join(", ")}`
                   : ""}
               </p>
-              {capacity > 0 && (
-                isShared && selectedDate && remainingSeats !== null ? (
-                  remainingSeats <= 0 ? (
-                    <span className="whitespace-nowrap rounded-md bg-destructive/10 px-2 py-0.5 text-sm font-semibold text-destructive">
-                      Sold Out for this date
-                    </span>
-                  ) : (
-                    <p className="whitespace-nowrap text-sm font-bold text-emerald-700">
-                      {charterLabel}: {remainingSeats} spot{remainingSeats === 1 ? "" : "s"} left!
-                    </p>
-                  )
+              {isShared && selectedDate && remainingSeats !== null && (
+                remainingSeats <= 0 ? (
+                  <span className="whitespace-nowrap rounded-md bg-destructive/10 px-2 py-0.5 text-sm font-semibold text-destructive">
+                    Sold Out for this date
+                  </span>
                 ) : (
-                  <p className="whitespace-nowrap text-sm text-muted-foreground">
-                    {charterLabel}: Up to {capacity} guests
+                  <p className="whitespace-nowrap text-sm font-bold text-emerald-700">
+                    {charterLabel}: {remainingSeats} spot{remainingSeats === 1 ? "" : "s"} left!
                   </p>
                 )
               )}
-
             </div>
           )}
           {speciesPreview && (
@@ -319,10 +312,10 @@ function TripCard({
             {/* Trip Description */}
             {trip.description && (
               <div className="space-y-1">
-                <p className="text-sm font-semibold text-foreground">
+                <p className="text-base font-semibold text-foreground">
                   Trip Description:
                 </p>
-                <p className="whitespace-pre-line text-sm text-foreground/80">
+                <p className="whitespace-pre-line leading-relaxed text-foreground/90">
                   {trip.description}
                 </p>
               </div>
