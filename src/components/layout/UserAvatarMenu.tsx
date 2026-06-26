@@ -166,16 +166,16 @@ export function UserAvatarMenuItems({
         </DropdownMenuItem>
       )}
 
-      {/* Section 2 — Operator Zone */}
+      {/* Section 2 — Operator Hub */}
       <DropdownMenuSeparator />
       <DropdownMenuLabel className="px-3 pb-1 pt-2 text-xs font-semibold uppercase tracking-wide text-muted-foreground">
-        {hasListing ? `${roleLabel} Zone` : "Earn"}
+        {hasListing ? `${roleLabel}'s Hub` : "Earn"}
       </DropdownMenuLabel>
       {hasListing ? (
         <DropdownMenuItem asChild>
           <Link to="/dashboard" className="flex w-full cursor-pointer items-center gap-2 px-3 py-2">
             <LayoutDashboard className="size-4" style={{ color: DESIGN_SYSTEM.colors.leafGreen }} />
-            {roleLabel} Dashboard
+            {roleLabel}'s Hub
           </Link>
         </DropdownMenuItem>
       ) : (
