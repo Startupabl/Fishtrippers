@@ -312,10 +312,10 @@ function TripCard({
             {/* Trip Description */}
             {trip.description && (
               <div className="space-y-1">
-                <p className="text-sm font-semibold text-foreground">
+                <p className="text-base font-semibold text-foreground">
                   Trip Description:
                 </p>
-                <p className="whitespace-pre-line text-sm text-foreground/80">
+                <p className="whitespace-pre-line leading-relaxed text-foreground/90">
                   {trip.description}
                 </p>
               </div>
