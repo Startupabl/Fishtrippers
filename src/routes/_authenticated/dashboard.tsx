@@ -118,7 +118,7 @@ function AideDashboardHome() {
           <NavCard
             to="/dashboard/my-listing"
             icon={<BookOpen className="size-5" />}
-            title="My Listing & Trips"
+            title="My Listings & Trips"
             desc="View, edit, and manage your listing and trips."
             tint="#e5e7eb33"
           />
