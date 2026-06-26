@@ -176,7 +176,7 @@ export function OperatorCard({ operator }: { operator: OperatorCardDTO }) {
           <div className="mt-3 flex items-end justify-end gap-2">
             {operator.lowest_price_minor != null && operator.lowest_price_currency ? (
               <span className="text-base font-bold text-emerald-700">
-                <PriceLabel minor={operator.lowest_price_minor} currency={operator.lowest_price_currency} />
+                From <PriceLabel minor={operator.lowest_price_minor} currency={operator.lowest_price_currency} />
                 <span className="text-base font-bold text-emerald-700">
                   {operator.lowest_price_is_shared
                     ? " / angler"
