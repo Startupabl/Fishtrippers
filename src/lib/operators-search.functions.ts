@@ -196,11 +196,12 @@ export const searchOperatorsServer = createServerFn({ method: "POST" })
         if (isSharedTripType(t.charter_type as any)) return t.price_minor;
         return t.per_extra_minor && t.per_extra_minor > 0 ? t.per_extra_minor : t.price_minor;
       };
-      let cheapest: { price_minor: number; currency: string } | null = null;
+      let cheapest: { price_minor: number; currency: string; is_shared: boolean } | null = null;
       for (const t of candidates) {
         const p = cardPriceFor(t);
+        const isShared = isSharedTripType(t.charter_type as any);
         if (!cheapest || p < cheapest.price_minor) {
-          cheapest = { price_minor: p, currency: t.currency };
+          cheapest = { price_minor: p, currency: t.currency, is_shared: isShared };
         }
       }
 
