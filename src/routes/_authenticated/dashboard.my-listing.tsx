@@ -363,7 +363,6 @@ function MyListingPage() {
                 <TableHead>Status</TableHead>
                 <TableHead className="text-right">Bookings</TableHead>
                 <TableHead className="text-right">Earnings</TableHead>
-                <TableHead className="text-right">Strength</TableHead>
                 <TableHead className="text-right">Actions</TableHead>
               </TableRow>
             </TableHeader>
