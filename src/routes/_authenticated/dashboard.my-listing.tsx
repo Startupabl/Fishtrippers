@@ -126,11 +126,10 @@ function StatusBadge({
   );
 }
 
-function computeStrength(op: any, tripsCount: number) {
-  const hasCover = !!op?.cover_image_url;
-  const hasTrips = tripsCount > 0;
-  const score = 50 + (hasCover ? 20 : 0) + (hasTrips ? 30 : 0);
-  return { score, hasCover, hasTrips };
+function formatDurationHours(mins: number | null): string {
+  if (!mins) return "—";
+  const hours = Math.round(mins / 60);
+  return `${hours} hour${hours === 1 ? "" : "s"}`;
 }
 
 function MyListingPage() {
@@ -236,7 +235,6 @@ function MyListingPage() {
   }
 
   const op: any = operator;
-  const strength = computeStrength(op, trips.length);
 
   return (
     <div className="mx-auto w-full max-w-[1600px] px-4 md:px-6 lg:px-8 py-8 md:py-10">
@@ -365,7 +363,6 @@ function MyListingPage() {
                 <TableHead>Status</TableHead>
                 <TableHead className="text-right">Bookings</TableHead>
                 <TableHead className="text-right">Earnings</TableHead>
-                <TableHead className="text-right">Strength</TableHead>
                 <TableHead className="text-right">Actions</TableHead>
               </TableRow>
             </TableHeader>
@@ -408,9 +405,6 @@ function MyListingPage() {
                 <TableCell className="text-right text-sm tabular-nums">0</TableCell>
                 <TableCell className="text-right text-sm tabular-nums">
                   {formatCurrency(0, "USD")}
-                </TableCell>
-                <TableCell className="text-right text-sm tabular-nums">
-                  {strength.score}%
                 </TableCell>
                 <TableCell className="text-right">
                   <div className="flex justify-end gap-1">
@@ -528,18 +522,14 @@ function MyListingPage() {
               <TableHeader>
                 <TableRow>
                   <TableHead>Title</TableHead>
-                  <TableHead>Status</TableHead>
                   <TableHead>Start</TableHead>
                   <TableHead>Duration</TableHead>
-                  <TableHead>Party</TableHead>
                   <TableHead>Price</TableHead>
-                  <TableHead>Departure</TableHead>
                   <TableHead className="text-right">Actions</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
                 {trips.map((t: any) => {
-                  const perExtra = t.per_extra_minor ?? 0;
                   const startStr = t.start_time
                     ? String(t.start_time).slice(0, 5)
                     : "—";
@@ -547,39 +537,12 @@ function MyListingPage() {
                   return (
                   <TableRow key={t.id}>
                     <TableCell className="font-medium">{t.title}</TableCell>
-                    <TableCell>
-                      <span
-                        className={`inline-flex items-center rounded-full px-2 py-0.5 text-xs font-medium ${
-                          isActive
-                            ? "bg-emerald-100 text-emerald-800 dark:bg-emerald-900/40 dark:text-emerald-200"
-                            : "bg-muted text-muted-foreground"
-                        }`}
-                      >
-                        {isActive ? "Published" : "Draft"}
-                      </span>
-                    </TableCell>
                     <TableCell className="text-muted-foreground">{startStr}</TableCell>
-                    <TableCell>
-                      {t.duration_minutes ? `${t.duration_minutes} min` : "—"}
-                    </TableCell>
-                    <TableCell className="text-muted-foreground">
-                      {t.max_party_size ? `${t.min_party_size ?? 1}–${t.max_party_size}` : "—"}
-                      {perExtra > 0 && t.max_party_size ? (
-                        <span className="ml-1 text-xs">
-                          (+{formatCurrency(perExtra, t.currency ?? "USD")}/person)
-                        </span>
-                      ) : null}
-                    </TableCell>
+                    <TableCell>{formatDurationHours(t.duration_minutes)}</TableCell>
                     <TableCell>
                       {t.price_minor != null
                         ? formatCurrency(t.price_minor, t.currency ?? "USD")
                         : "—"}
-                      {perExtra > 0 ? (
-                        <span className="ml-1 text-xs text-muted-foreground">base</span>
-                      ) : null}
-                    </TableCell>
-                    <TableCell className="max-w-[280px] truncate text-muted-foreground">
-                      {t.departure_address ?? "—"}
                     </TableCell>
                     <TableCell className="text-right">
 
