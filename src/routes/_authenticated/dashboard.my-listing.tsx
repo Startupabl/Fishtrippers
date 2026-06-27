@@ -522,12 +522,9 @@ function MyListingPage() {
               <TableHeader>
                 <TableRow>
                   <TableHead>Title</TableHead>
-                  <TableHead>Status</TableHead>
                   <TableHead>Start</TableHead>
                   <TableHead>Duration</TableHead>
-                  <TableHead>Party</TableHead>
                   <TableHead>Price</TableHead>
-                  <TableHead>Departure</TableHead>
                   <TableHead className="text-right">Actions</TableHead>
                 </TableRow>
               </TableHeader>
