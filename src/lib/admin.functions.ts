@@ -742,7 +742,7 @@ export const getAdminUserDetail = createServerFn({ method: "POST" })
           .limit(50),
         supabaseAdmin
           .from("operators")
-          .select("id, display_name, slug, status, moderation_status, created_at, primary_category, listing_number")
+          .select("id, display_name, slug, status, moderation_status, created_at, primary_category, listing_number, business_type")
           .eq("owner_id", data.userId)
           .order("created_at", { ascending: false })
           .limit(50),
