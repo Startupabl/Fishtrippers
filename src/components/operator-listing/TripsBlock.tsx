@@ -132,9 +132,8 @@ function TripCard({
   const display = useCurrencyStore((s) => s.currency);
   const base = ((trip.currency || "USD").toUpperCase()) as CurrencyCode;
   const perExtra = trip.per_extra_minor ?? 0;
-  const totalMinorBase = isShared
-    ? trip.price_minor * Math.max(1, guests)
-    : trip.price_minor + perExtra * Math.max(0, guests - 1);
+  const totalMinorBase =
+    trip.price_minor + perExtra * Math.max(0, guests - 1);
   const depositMinorBase = Math.round(totalMinorBase * 0.1);
   const balanceMinorBase = totalMinorBase - depositMinorBase;
   const totalDisplay = convertMinor(totalMinorBase, base, display);
