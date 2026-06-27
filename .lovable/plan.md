@@ -1,30 +1,29 @@
-## Admin Users — Trips column + Angler role label
+## Goal
+Produce a single `migration.sql` file you can paste into the SQL editor of your new Supabase project to recreate the schema (tables, policies, functions, triggers, enums, storage buckets) from this project.
 
-### 1. `src/lib/admin.functions.ts` — `listAdminUsers`
-- Replace the `journeys` + `operators` fetch used for `listings_count` with:
-  - Fetch `operators` (`id, owner_id, business_type`) for the visible profile IDs (drop the journeys query — journeys are no longer surfaced).
-  - Fetch `trip_packages` (`operator_id`) for the collected operator IDs.
-- Build:
-  - `trips_count` per user = sum of trip_packages whose `operator_id` belongs to that user's operators.
-  - `operator_business_types: string[]` per user (e.g. `["charter"]`, `["guide"]`, or both) — used downstream for the role label.
-- Return shape changes:
-  - Remove `listings_count` and `payout_status` (payout column was already removed from the UI).
-  - Add `trips_count: number` and `operator_business_types: string[]`.
+## What I'll include
 
-### 2. `src/routes/_admin/admin.users.index.tsx`
-- Rename the "Listings" column header to "Trips".
-- Render `u.trips_count` in that cell.
-- Update the local `AdminUser` type: drop `listings_count`, add `trips_count` and `operator_business_types`.
+1. **Extensions** — `pgcrypto`, `unaccent`, `pgmq` (used by the email queue functions).
+2. **Enums / custom types** — `app_role`, `user_status_t`, and any other enums referenced by columns.
+3. **Tables (45)** — full `CREATE TABLE` for every table currently in `public`:
+   alert_templates, blocked_ips, boat_types, booking_slots, bookings, cancellation_disputes, categories, contact_messages, course_certificates, currencies, email_send_log, email_send_state, email_templates, email_unsubscribe_tokens, host_availability, inquiries, ip_history, journey_portfolio_flags, journeys, mentor_availability, message_threads, messages, newsletter_subscribers, operator_photos, operator_slug_history, operators, order_session_completions, orders, platform_settings, platform_stripe_secrets, profiles, promo_codes, reported_listings, reviews, site_pages, support_tickets, suppressed_emails, tag_category_links, tags, trip_packages, trip_sessions, user_alerts, user_favorites, user_roles, verifications, vessels — including defaults, constraints, foreign keys, and indexes.
+4. **GRANTs** — explicit grants to `anon`, `authenticated`, `service_role` per current policies.
+5. **RLS** — `ALTER TABLE ... ENABLE ROW LEVEL SECURITY` and every `CREATE POLICY` exactly as currently defined.
+6. **Database functions (~40)** — all the `public.*` functions (has_role, handle_new_user, slugify, generate_unique_*, sync_*, enqueue_email, etc.).
+7. **Triggers** — assign_*, sync_*, update_updated_at triggers on each table; plus `on_auth_user_created` / `on_auth_user_signed_in` / `on_auth_email_confirmed` triggers on `auth.users` (you'll need to run these as the Postgres superuser in the SQL editor).
+8. **Storage buckets** — `INSERT INTO storage.buckets` for: avatars, course-covers, listing-portfolio, category-images, message-attachments, verification-docs, plus their RLS policies on `storage.objects`.
+9. **Sequences** — e.g. `course_id_seq` used by `next_course_id_slug()`.
 
-### 3. `src/routes/_admin/admin.users.$userId.tsx`
-- Replace the `Roles` field (currently shows raw role strings like "learner, aide") with a computed `Role` field placed in the same slot directly below `Time Zone` (matches the user's "1st section below the time zone" instruction).
-- Logic:
-  - If the user has any owned operator → label = `Angler + Captain` when business_type is charter, `Angler + Guide` when guide, `Angler + Captain/Guide` when both (or unknown).
-  - Otherwise → `Angler`.
-  - Admins still get the existing "(Admin)" treatment elsewhere; this field only describes platform persona.
-- The server response for the detail view already exposes operators; if it doesn't carry `business_type`, extend the existing detail server fn to include it (no schema change).
+## What it will NOT include
+- **Data rows** — schema only. If you also need data (currencies, categories, email_templates, site_pages, alert_templates, platform_settings), tell me and I'll add `INSERT` statements at the end.
+- **Secrets / API keys** — you'll re-add `RESEND_API_KEY`, Google Maps keys, etc. on the new project.
+- **auth schema definitions** — Supabase provisions these automatically on a fresh project.
+- **Edge functions / cron jobs** — none configured here, but the email queue worker is invoked from `/api/public/hooks/cleanup-old-messages` and `/lovable/email/queue/process`; you'll re-wire those externally.
 
-### Technical notes
-- No DB migration. `trip_packages.operator_id` and `operators.business_type` already exist.
-- Sorting/search in the users table is unaffected (sort keys are `user_number_id` and `full_name`).
-- The "Roles" dt/dd block in the detail page is replaced in place — no new sections, no layout shifts.
+## Deliverable
+A single file `/mnt/documents/migration.sql` you can download and paste into the new project's SQL editor. Run it top-to-bottom in one go. I'll also print a short "post-migration checklist" (run `on_auth_*` triggers as superuser, recreate storage buckets if the IDs collide, set env vars).
+
+## Confirm before I generate
+
+1. **Seed data included?** (currencies, categories, email_templates, site_pages, alert_templates, platform_settings) — yes/no.
+2. **User data included?** (profiles, operators, journeys, bookings, orders, messages, etc.) — yes/no. If yes, I'll add it as a separate `data.sql` since it has FK ordering concerns and auth.users rows must be migrated separately via Supabase's user-migration endpoint.
