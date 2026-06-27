@@ -530,47 +530,18 @@ function MyListingPage() {
               </TableHeader>
               <TableBody>
                 {trips.map((t: any) => {
-                  const perExtra = t.per_extra_minor ?? 0;
                   const startStr = t.start_time
                     ? String(t.start_time).slice(0, 5)
                     : "—";
-                  const isActive = t.status === "active";
                   return (
                   <TableRow key={t.id}>
                     <TableCell className="font-medium">{t.title}</TableCell>
-                    <TableCell>
-                      <span
-                        className={`inline-flex items-center rounded-full px-2 py-0.5 text-xs font-medium ${
-                          isActive
-                            ? "bg-emerald-100 text-emerald-800 dark:bg-emerald-900/40 dark:text-emerald-200"
-                            : "bg-muted text-muted-foreground"
-                        }`}
-                      >
-                        {isActive ? "Published" : "Draft"}
-                      </span>
-                    </TableCell>
                     <TableCell className="text-muted-foreground">{startStr}</TableCell>
-                    <TableCell>
-                      {t.duration_minutes ? `${t.duration_minutes} min` : "—"}
-                    </TableCell>
-                    <TableCell className="text-muted-foreground">
-                      {t.max_party_size ? `${t.min_party_size ?? 1}–${t.max_party_size}` : "—"}
-                      {perExtra > 0 && t.max_party_size ? (
-                        <span className="ml-1 text-xs">
-                          (+{formatCurrency(perExtra, t.currency ?? "USD")}/person)
-                        </span>
-                      ) : null}
-                    </TableCell>
+                    <TableCell>{formatDurationHours(t.duration_minutes)}</TableCell>
                     <TableCell>
                       {t.price_minor != null
                         ? formatCurrency(t.price_minor, t.currency ?? "USD")
                         : "—"}
-                      {perExtra > 0 ? (
-                        <span className="ml-1 text-xs text-muted-foreground">base</span>
-                      ) : null}
-                    </TableCell>
-                    <TableCell className="max-w-[280px] truncate text-muted-foreground">
-                      {t.departure_address ?? "—"}
                     </TableCell>
                     <TableCell className="text-right">
 
