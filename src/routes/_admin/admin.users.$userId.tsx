@@ -242,9 +242,19 @@ function UserDetailPage() {
             <dd className="font-medium capitalize">{a.provider ?? "—"}</dd>
           </div>
           <div>
-            <dt className="text-xs text-muted-foreground">Roles</dt>
-            <dd className="font-medium">{data.roles.join(", ") || "—"}</dd>
+            <dt className="text-xs text-muted-foreground">Role</dt>
+            <dd className="font-medium">{(() => {
+              const types = data.operatorBusinessTypes ?? [];
+              if (!data.hasOperator || types.length === 0) return "Angler";
+              const hasCharter = types.includes("charter");
+              const hasGuide = types.includes("guide");
+              if (hasCharter && hasGuide) return "Angler + Captain/Guide";
+              if (hasCharter) return "Angler + Captain";
+              if (hasGuide) return "Angler + Guide";
+              return "Angler + Captain/Guide";
+            })()}</dd>
           </div>
+
         </dl>
       </section>
 
