@@ -153,9 +153,14 @@ function MyListingPage() {
 
 
   const fetchAvail = useServerFn(listMyHostAvailability);
+  const fetchVerification = useServerFn(getMyVerification);
   const availQ = useQuery({
     queryKey: ["my-host-availability"],
     queryFn: () => fetchAvail(),
+  });
+  const verificationQ = useQuery({
+    queryKey: ["my-verification"],
+    queryFn: () => fetchVerification(),
   });
 
   const fetchUndersold = useServerFn(listUndersoldSharedTrips);
