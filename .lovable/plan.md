@@ -1,24 +1,14 @@
-### Fix malformed storage.objects policy in migration.sql
+## Fix
 
-The user received this Supabase error while running `migration.sql`:
-```
-ERROR:  42601: syntax error at or near "%"
-LINE 5346: CREATE POLICY %I ON storage.objects FOR Admins delete category imagesdelete TO authenticated USING ...
-```
+The `pg_dump` header sets `search_path = ''`, so any unqualified reference to `app_role` or `has_role()` fails with "type does not exist". The earlier policies were correctly schema-qualified (`public.app_role`, `public.has_role`), but four storage policies at the end of `migration.sql` were not.
 
-A `storage.objects` policy was mangled during export. The `%I` placeholder and the policy name were inserted into the SQL statement incorrectly, producing an invalid mix of `FOR Admins delete category imagesdelete` instead of a proper `FOR DELETE` clause.
+Patch `/mnt/documents/migration.sql`:
 
-**What I will do:**
-1. Open `migration.sql` and locate the malformed policy around line 5346.
-2. Replace the broken line with a correct policy definition:
-   ```sql
-   CREATE POLICY "Admins delete category images" ON storage.objects FOR DELETE TO authenticated USING (((bucket_id = 'category-images'::text) AND has_role(auth.uid(), 'admin'::app_role)));
-   ```
-3. Search the rest of `migration.sql` for other occurrences of `%I` or similar malformed `storage.objects` policy syntax (e.g., `FOR Admins ... delete` or `FOR %I ...` patterns) and fix any matching lines.
-4. Verify the generated file still contains the rest of the schema intact (no accidental large deletions).
+- Line 5346 — `Admins delete category images`
+- Line 5348 — `Admins update category images`
+- Line 5350 — `Admins upload category images`
+- Line 5400 — `verification-docs owner read`
 
-**Out of scope:**
-- No database changes will be made via Supabase migration tools — this is a standalone export file.
-- No changes to application code or the live database.
+In each, replace `has_role(...)` with `public.has_role(...)` and `'admin'::app_role` with `'admin'::public.app_role`.
 
-**Result:** A clean `migration.sql` that can be imported into the user's new external Supabase project without the syntax error.
+Then re-export the file for download. No other changes required.
