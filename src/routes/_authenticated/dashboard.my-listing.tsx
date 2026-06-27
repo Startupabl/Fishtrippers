@@ -48,7 +48,7 @@ import {
 import { DESIGN_SYSTEM } from "@/lib/brand";
 import { getMyOperator } from "@/lib/operators.functions";
 import { listMyTrips, deleteTrip, setTripStatus, listUndersoldSharedTrips } from "@/lib/trips.functions";
-
+import { getMyVerification } from "@/lib/verifications.functions";
 import { listMyHostAvailability } from "@/lib/host-availability.functions";
 import {
   TripFormDialog,
@@ -153,9 +153,14 @@ function MyListingPage() {
 
 
   const fetchAvail = useServerFn(listMyHostAvailability);
+  const fetchVerification = useServerFn(getMyVerification);
   const availQ = useQuery({
     queryKey: ["my-host-availability"],
     queryFn: () => fetchAvail(),
+  });
+  const verificationQ = useQuery({
+    queryKey: ["my-verification"],
+    queryFn: () => fetchVerification(),
   });
 
   const fetchUndersold = useServerFn(listUndersoldSharedTrips);
@@ -268,8 +273,12 @@ function MyListingPage() {
 
       {(() => {
         const needsAvailability = showCalendarBanner;
+        const verification = verificationQ.data ?? null;
+        const hasUploadedDocs =
+          verification?.status === "Documents Uploaded" ||
+          verification?.status === "Verified";
         const needsVerification =
-          !!operator && (operator as any).verification_status !== "verified";
+          !!operator && (operator as any).verification_status !== "verified" && !hasUploadedDocs;
         if (!needsAvailability && !needsVerification) return null;
         return (
           <Card className="mt-4 rounded-2xl border-amber-200 bg-amber-50/60 p-4">
