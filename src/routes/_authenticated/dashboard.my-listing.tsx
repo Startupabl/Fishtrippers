@@ -126,11 +126,10 @@ function StatusBadge({
   );
 }
 
-function computeStrength(op: any, tripsCount: number) {
-  const hasCover = !!op?.cover_image_url;
-  const hasTrips = tripsCount > 0;
-  const score = 50 + (hasCover ? 20 : 0) + (hasTrips ? 30 : 0);
-  return { score, hasCover, hasTrips };
+function formatDurationHours(mins: number | null): string {
+  if (!mins) return "—";
+  const hours = Math.round(mins / 60);
+  return `${hours} hour${hours === 1 ? "" : "s"}`;
 }
 
 function MyListingPage() {
