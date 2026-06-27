@@ -139,7 +139,10 @@ function TripCard({
   const totalDisplay = convertMinor(totalMinorBase, base, display);
   const depositDisplay = convertMinor(depositMinorBase, base, display);
   const balanceDisplay = convertMinor(balanceMinorBase, base, display);
-  const baseDisplay = convertMinor(trip.price_minor, base, display);
+  const headlineMinor = isShared && perExtra > 0
+    ? Math.min(trip.price_minor, perExtra)
+    : trip.price_minor;
+  const baseDisplay = convertMinor(headlineMinor, base, display);
   const extraDisplay = convertMinor(perExtra, base, display);
 
   const envs = trip.environments ?? [];
@@ -176,7 +179,7 @@ function TripCard({
             </h3>
             <div className="flex items-center gap-1.5 whitespace-nowrap">
               <div className="text-xl font-bold text-emerald-600">
-                {formatCurrency(baseDisplay, display)}
+                {isShared ? "From " : ""}{formatCurrency(baseDisplay, display)}
                 <span className="text-xl font-bold text-emerald-600">
                   {isShared ? " / angler" : isPrivateGroup ? " / private group" : " / entire boat"}
                 </span>
