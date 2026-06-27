@@ -19,8 +19,9 @@ type AdminUser = {
   display_name: string | null;
   user_status: "unverified" | "verified" | "blocked" | "archived" | string;
   last_ip: string | null;
-  listings_count: number;
+  trips_count: number;
   bookings_count: number;
+
   user_number_id: string | null;
   full_name: string;
   full_name_is_fallback: boolean;
