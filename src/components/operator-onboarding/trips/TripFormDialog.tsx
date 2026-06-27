@@ -150,19 +150,24 @@ export function TripFormDialog({ open, onOpenChange, initial }: Props) {
       const next = initial ?? empty;
       // Inherit environments from profile when creating new (allow narrowing).
       // For new trips, default the trip-type pair to the operator's business type.
+      // Also prefill departure point from the saved default when available.
       const seeded: TripEditorState = next.id
         ? next
         : {
             ...next,
             environments: next.environments.length > 0 ? next.environments : captainEnvs,
             charter_type: defaultPrivateType,
+            departure_address: hasDefault ? defaultDeparture.address : next.departure_address,
+            departure_lat: hasDefault ? defaultDeparture.lat : next.departure_lat,
+            departure_lng: hasDefault ? defaultDeparture.lng : next.departure_lng,
+            departure_place_id: hasDefault ? defaultDeparture.place_id : next.departure_place_id,
           };
       setForm(seeded);
       setPriceInput(seeded.price_minor != null ? (seeded.price_minor / 100).toString() : "");
       setExtraInput(seeded.per_extra_minor != null ? (seeded.per_extra_minor / 100).toString() : "0");
       setSaveAsDefault(!hasDefault);
     }
-  }, [open, initial, hasDefault, captainEnvs, defaultPrivateType]);
+  }, [open, initial, hasDefault, captainEnvs, defaultPrivateType, defaultDeparture]);
 
   const mutation = useMutation({
     mutationFn: async () => {
