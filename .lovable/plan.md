@@ -1,19 +1,21 @@
-Update the Aide Dashboard home to show all six menu options as six cards organized into two columns, and align sidebar labels with the card titles.
+## Fix
 
-Changes:
-1. `src/routes/_authenticated/dashboard.tsx`
-   - Reorganize `AideDashboardHome` cards into two columns:
-     - **Studio**: My Listing & Trips, My Verifications, My Availability
-     - **Operations**: My Schedule, My Policies, My Earnings
-   - Add two new `NavCard` entries:
-     - My Verifications → `/dashboard/verifications` (ShieldCheck icon)
-     - My Policies → `/dashboard/manage-policies` (FileText icon)
-   - Rename the existing "Manage Availability" card to "My Availability".
-   - Keep existing card styling (icons, tinted backgrounds, responsive grid).
+In `src/components/operator-onboarding/trips/TripFormDialog.tsx`, the `useEffect` that seeds a new trip (lines 148–165) inherits environments but never pulls the saved default departure point from `useOperatorOnboardingStore`. So new trips always open with an empty address.
 
-2. `src/components/dashboard/WorkspaceSidebar.tsx`
-   - Rename "Manage Availability" menu item to "My Availability".
-   - Rename "Manage Policies" menu item to "My Policies".
-   - No route changes; links remain `/dashboard/master-calendar` and `/dashboard/manage-policies`.
+Update the new-trip seed block to also prefill departure fields from `defaultDeparture` when present:
 
-No database or backend changes required.
+```ts
+const seeded: TripEditorState = next.id
+  ? next
+  : {
+      ...next,
+      environments: next.environments.length > 0 ? next.environments : captainEnvs,
+      charter_type: defaultPrivateType,
+      departure_address: hasDefault ? defaultDeparture.address : next.departure_address,
+      departure_lat: hasDefault ? defaultDeparture.lat : next.departure_lat,
+      departure_lng: hasDefault ? defaultDeparture.lng : next.departure_lng,
+      departure_place_id: hasDefault ? defaultDeparture.place_id : next.departure_place_id,
+    };
+```
+
+Also add `defaultDeparture` to the effect's deps so it picks up after the saved default loads. No other files change.
