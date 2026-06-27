@@ -513,14 +513,12 @@ export const listAdminUsers = createServerFn({ method: "GET" })
       .order("created_at", { ascending: false })
       .limit(200);
     const ids = (profiles ?? []).map((p) => p.id);
-    const [{ data: roles }, { data: journeysList }, { data: operatorsList }, { data: bookingsList }] = await Promise.all([
+    const [{ data: roles }, { data: operatorsList }, { data: bookingsList }] = await Promise.all([
       supabaseAdmin.from("user_roles").select("user_id, role").in("user_id", ids),
-      supabaseAdmin.from("journeys").select("mentor_id").in("mentor_id", ids),
       supabaseAdmin
         .from("operators")
-        .select("owner_id, status")
-        .in("owner_id", ids)
-        .in("status", ["draft", "published"]),
+        .select("id, owner_id, business_type")
+        .in("owner_id", ids),
       supabaseAdmin.from("bookings").select("learner_id").in("learner_id", ids),
     ]);
     const roleMap = new Map<string, string[]>();
@@ -529,38 +527,49 @@ export const listAdminUsers = createServerFn({ method: "GET" })
       arr.push(r.role);
       roleMap.set(r.user_id, arr);
     }
-    const listingsCount = new Map<string, number>();
-    for (const j of journeysList ?? []) {
-      listingsCount.set(j.mentor_id, (listingsCount.get(j.mentor_id) ?? 0) + 1);
+    const operatorIdToOwner = new Map<string, string>();
+    const businessTypesByUser = new Map<string, Set<string>>();
+    for (const o of (operatorsList ?? []) as Array<{ id: string; owner_id: string; business_type: string | null }>) {
+      operatorIdToOwner.set(o.id, o.owner_id);
+      if (o.business_type) {
+        const s = businessTypesByUser.get(o.owner_id) ?? new Set<string>();
+        s.add(o.business_type);
+        businessTypesByUser.set(o.owner_id, s);
+      }
     }
-    for (const o of operatorsList ?? []) {
-      listingsCount.set((o as any).owner_id, (listingsCount.get((o as any).owner_id) ?? 0) + 1);
+    const operatorIds = Array.from(operatorIdToOwner.keys());
+    const tripsCount = new Map<string, number>();
+    if (operatorIds.length) {
+      const { data: trips } = await supabaseAdmin
+        .from("trip_packages")
+        .select("operator_id")
+        .in("operator_id", operatorIds);
+      for (const t of (trips ?? []) as Array<{ operator_id: string }>) {
+        const owner = operatorIdToOwner.get(t.operator_id);
+        if (!owner) continue;
+        tripsCount.set(owner, (tripsCount.get(owner) ?? 0) + 1);
+      }
     }
     const bookingsCount = new Map<string, number>();
     for (const b of bookingsList ?? []) {
       bookingsCount.set(b.learner_id, (bookingsCount.get(b.learner_id) ?? 0) + 1);
     }
     return (profiles ?? []).map((p) => {
-      const lc = listingsCount.get(p.id) ?? 0;
-      const payout_status: "connected" | "pending" | "none" = p.stripe_connect_id
-        ? "connected"
-        : lc > 0
-        ? "pending"
-        : "none";
       const composed = [p.first_name, p.last_name].filter(Boolean).join(" ").trim();
       const full_name = composed || p.email || "—";
       const full_name_is_fallback = !composed;
       return {
         ...p,
         roles: roleMap.get(p.id) ?? [],
-        listings_count: lc,
+        trips_count: tripsCount.get(p.id) ?? 0,
+        operator_business_types: Array.from(businessTypesByUser.get(p.id) ?? []),
         bookings_count: bookingsCount.get(p.id) ?? 0,
-        payout_status,
         full_name,
         full_name_is_fallback,
       };
     });
   });
+
 
 export const confirmUser = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
@@ -733,7 +742,7 @@ export const getAdminUserDetail = createServerFn({ method: "POST" })
           .limit(50),
         supabaseAdmin
           .from("operators")
-          .select("id, display_name, slug, status, moderation_status, created_at, primary_category, listing_number")
+          .select("id, display_name, slug, status, moderation_status, created_at, primary_category, listing_number, business_type")
           .eq("owner_id", data.userId)
           .order("created_at", { ascending: false })
           .limit(50),
@@ -768,18 +777,29 @@ export const getAdminUserDetail = createServerFn({ method: "POST" })
       courseTitleMap = new Map((courses ?? []).map((c) => [c.id, c.title]));
     }
 
+    const operatorBusinessTypes = Array.from(
+      new Set(
+        ((operatorRows ?? []) as Array<{ business_type: string | null }>)
+          .map((o) => o.business_type)
+          .filter((b): b is string => !!b),
+      ),
+    );
+
     return {
       profile,
       auth: authInfo,
       roles: (roles ?? []).map((r) => r.role),
       ipHistory: ipRows ?? [],
       listings: [...operatorListings, ...(journeys ?? [])],
+      operatorBusinessTypes,
+      hasOperator: (operatorRows ?? []).length > 0,
       bookings: (bookings ?? []).map((b) => ({
         ...b,
         course_title: b.course_id ? courseTitleMap.get(b.course_id) ?? null : null,
       })),
     };
   });
+
 
 export const impersonateUser = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])

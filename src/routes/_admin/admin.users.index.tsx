@@ -19,8 +19,9 @@ type AdminUser = {
   display_name: string | null;
   user_status: "unverified" | "verified" | "blocked" | "archived" | string;
   last_ip: string | null;
-  listings_count: number;
+  trips_count: number;
   bookings_count: number;
+
   user_number_id: string | null;
   full_name: string;
   full_name_is_fallback: boolean;
@@ -192,7 +193,7 @@ function UsersPage() {
               </th>
               <th className="px-2 py-2 font-semibold">Email</th>
               <th className="px-2 py-2 font-semibold">IP</th>
-              <th className="px-2 py-2 font-semibold">Listings</th>
+              <th className="px-2 py-2 font-semibold">Trips</th>
               <th className="px-2 py-2 font-semibold">Bookings</th>
               <th className="px-2 py-2 text-right font-semibold">Manage</th>
             </tr>
@@ -272,7 +273,7 @@ function UsersPage() {
                       )}
                     </span>
                   </td>
-                  <td className="whitespace-nowrap px-2 py-1.5 tabular-nums">{u.listings_count}</td>
+                  <td className="whitespace-nowrap px-2 py-1.5 tabular-nums">{u.trips_count}</td>
                   <td className="whitespace-nowrap px-2 py-1.5 tabular-nums">{u.bookings_count}</td>
                   <td className="whitespace-nowrap px-2 py-1.5 text-right">
                     <span className="inline-flex items-center justify-end gap-1">

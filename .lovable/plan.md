@@ -1,18 +1,30 @@
-## Goal
-For shared trips (Shared Charters / Small Group Trips) where the per-extra-angler price is lower than the 1st-angler price, surface the lower per-extra price as the "From" headline on operator cards and as the trip-card headline on the listing page.
+## Admin Users — Trips column + Angler role label
 
-## Changes
+### 1. `src/lib/admin.functions.ts` — `listAdminUsers`
+- Replace the `journeys` + `operators` fetch used for `listings_count` with:
+  - Fetch `operators` (`id, owner_id, business_type`) for the visible profile IDs (drop the journeys query — journeys are no longer surfaced).
+  - Fetch `trip_packages` (`operator_id`) for the collected operator IDs.
+- Build:
+  - `trips_count` per user = sum of trip_packages whose `operator_id` belongs to that user's operators.
+  - `operator_business_types: string[]` per user (e.g. `["charter"]`, `["guide"]`, or both) — used downstream for the role label.
+- Return shape changes:
+  - Remove `listings_count` and `payout_status` (payout column was already removed from the UI).
+  - Add `trips_count: number` and `operator_business_types: string[]`.
 
-### 1. `src/lib/operators-search.functions.ts` (cards on search & featured)
-In `cardPriceFor`, the shared branch currently returns `price_minor` (1st angler). Update it to return `min(price_minor, per_extra_minor)` when `per_extra_minor > 0`. Private charter and private_trip logic stays untouched.
+### 2. `src/routes/_admin/admin.users.index.tsx`
+- Rename the "Listings" column header to "Trips".
+- Render `u.trips_count` in that cell.
+- Update the local `AdminUser` type: drop `listings_count`, add `trips_count` and `operator_business_types`.
 
-Result: Blue Ocean Charters ($400 / $200) → card shows `From $200.00 / angler`.
+### 3. `src/routes/_admin/admin.users.$userId.tsx`
+- Replace the `Roles` field (currently shows raw role strings like "learner, aide") with a computed `Role` field placed in the same slot directly below `Time Zone` (matches the user's "1st section below the time zone" instruction).
+- Logic:
+  - If the user has any owned operator → label = `Angler + Captain` when business_type is charter, `Angler + Guide` when guide, `Angler + Captain/Guide` when both (or unknown).
+  - Otherwise → `Angler`.
+  - Admins still get the existing "(Admin)" treatment elsewhere; this field only describes platform persona.
+- The server response for the detail view already exposes operators; if it doesn't carry `business_type`, extend the existing detail server fn to include it (no schema change).
 
-### 2. `src/components/operator-listing/TripsBlock.tsx` (per-trip headline on listing page)
-The shared-trip headline currently renders `formatCurrency(baseDisplay)` (= `price_minor`). Change the headline value for shared trips to `min(price_minor, per_extra_minor>0 ? per_extra_minor : price_minor)` and prefix with `From ` so it's clear it's the lowest per-angler price. Private Charter / Private Group headlines remain `entire boat` / `private group` with their flat price.
-
-The booking math (`totalMinorBase = price_minor + perExtra * (guests-1)`), the Info popover breakdown (1st angler base + each additional), deposit, and balance all remain unchanged — only the headline label changes.
-
-### Out of scope
-- `ListingCard.tsx` (legacy lesson-paths fixtures, not charter operators) — not touched.
-- Booking totals, deposits, popover breakdown — unchanged.
+### Technical notes
+- No DB migration. `trip_packages.operator_id` and `operators.business_type` already exist.
+- Sorting/search in the users table is unaffected (sort keys are `user_number_id` and `full_name`).
+- The "Roles" dt/dd block in the detail page is replaced in place — no new sections, no layout shifts.
