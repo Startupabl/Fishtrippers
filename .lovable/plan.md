@@ -1,36 +1,18 @@
-## Problem
+## Goal
+For shared trips (Shared Charters / Small Group Trips) where the per-extra-angler price is lower than the 1st-angler price, surface the lower per-extra price as the "From" headline on operator cards and as the trip-card headline on the listing page.
 
-In `src/components/operator-listing/TripsBlock.tsx`, the shared-trip total is computed as:
+## Changes
 
-```ts
-const totalMinorBase = isShared
-  ? trip.price_minor * Math.max(1, guests)            // BUG
-  : trip.price_minor + perExtra * Math.max(0, guests - 1);
-```
+### 1. `src/lib/operators-search.functions.ts` (cards on search & featured)
+In `cardPriceFor`, the shared branch currently returns `price_minor` (1st angler). Update it to return `min(price_minor, per_extra_minor)` when `per_extra_minor > 0`. Private charter and private_trip logic stays untouched.
 
-For Blue Ocean Charters (shared, $400 first / $200 each additional), 3 guests resolves to $400 × 3 = $1,200 instead of $400 + $200 × 2 = $800. The "Due Now to Book" (10% deposit) and remaining balance inherit the wrong total.
+Result: Blue Ocean Charters ($400 / $200) → card shows `From $200.00 / angler`.
 
-## Fix
+### 2. `src/components/operator-listing/TripsBlock.tsx` (per-trip headline on listing page)
+The shared-trip headline currently renders `formatCurrency(baseDisplay)` (= `price_minor`). Change the headline value for shared trips to `min(price_minor, per_extra_minor>0 ? per_extra_minor : price_minor)` and prefix with `From ` so it's clear it's the lowest per-angler price. Private Charter / Private Group headlines remain `entire boat` / `private group` with their flat price.
 
-Use the same first-angler + per-extra formula for shared trips as for private:
+The booking math (`totalMinorBase = price_minor + perExtra * (guests-1)`), the Info popover breakdown (1st angler base + each additional), deposit, and balance all remain unchanged — only the headline label changes.
 
-```ts
-const totalMinorBase = trip.price_minor + perExtra * Math.max(0, guests - 1);
-```
-
-This applies to all three branches (shared, private charter, private group). Private charter/private group already have `per_extra_minor = 0`, so their totals stay equal to `price_minor` (flat) — no regression. Shared trips now correctly bill 1st angler at base + each additional at the captain's per-extra rate.
-
-Deposit (10%) and remaining balance derive from this total automatically, so they will also become correct.
-
-## Scope
-
-- File touched: `src/components/operator-listing/TripsBlock.tsx` only.
-- No changes to card pricing, search results, checkout server logic, or DB.
-- No change to the price-details popover copy (still shows "1 person / +1 additional person" for shared).
-
-## Verification
-
-After the edit:
-1. Open Blue Ocean Charters listing, expand the shared trip, set guests = 3 → Total Trip Cost shows $800, Due Now shows $80.
-2. Switch to a Private Charter trip with `per_extra = 0` → Total stays at flat boat price regardless of guest count (unchanged behavior).
-3. Switch to a Private Group (guide) trip → same flat-group behavior preserved.
+### Out of scope
+- `ListingCard.tsx` (legacy lesson-paths fixtures, not charter operators) — not touched.
+- Booking totals, deposits, popover breakdown — unchanged.

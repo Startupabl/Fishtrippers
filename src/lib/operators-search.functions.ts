@@ -180,7 +180,11 @@ export const searchOperatorsServer = createServerFn({ method: "POST" })
       // (falls back to price_minor when per_extra is unset), or per-person
       // price for shared trips (price_minor already is per-person).
       const cardPriceFor = (t: { price_minor: number; per_extra_minor: number | null; charter_type: string | null }) => {
-        if (isSharedTripType(t.charter_type as any)) return t.price_minor;
+        if (isSharedTripType(t.charter_type as any)) {
+          return t.per_extra_minor && t.per_extra_minor > 0
+            ? Math.min(t.price_minor, t.per_extra_minor)
+            : t.price_minor;
+        }
         // Guide "private_trip" is a flat group price — use price_minor directly.
         if (t.charter_type === "private_trip") return t.price_minor;
         return t.per_extra_minor && t.per_extra_minor > 0 ? t.per_extra_minor : t.price_minor;
