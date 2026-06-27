@@ -49,7 +49,7 @@ import { DESIGN_SYSTEM } from "@/lib/brand";
 import { getMyOperator } from "@/lib/operators.functions";
 import { listMyTrips, deleteTrip, setTripStatus, listUndersoldSharedTrips } from "@/lib/trips.functions";
 
-import { listMyHostAvailability } from "@/lib/host-availability.functions";
+import { getMyVerification } from "@/lib/verifications.functions";
 import {
   TripFormDialog,
   type TripEditorState,
