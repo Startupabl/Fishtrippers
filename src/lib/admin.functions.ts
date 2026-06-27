@@ -777,18 +777,29 @@ export const getAdminUserDetail = createServerFn({ method: "POST" })
       courseTitleMap = new Map((courses ?? []).map((c) => [c.id, c.title]));
     }
 
+    const operatorBusinessTypes = Array.from(
+      new Set(
+        ((operatorRows ?? []) as Array<{ business_type: string | null }>)
+          .map((o) => o.business_type)
+          .filter((b): b is string => !!b),
+      ),
+    );
+
     return {
       profile,
       auth: authInfo,
       roles: (roles ?? []).map((r) => r.role),
       ipHistory: ipRows ?? [],
       listings: [...operatorListings, ...(journeys ?? [])],
+      operatorBusinessTypes,
+      hasOperator: (operatorRows ?? []).length > 0,
       bookings: (bookings ?? []).map((b) => ({
         ...b,
         course_title: b.course_id ? courseTitleMap.get(b.course_id) ?? null : null,
       })),
     };
   });
+
 
 export const impersonateUser = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
