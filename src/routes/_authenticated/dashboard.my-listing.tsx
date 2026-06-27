@@ -406,9 +406,6 @@ function MyListingPage() {
                 <TableCell className="text-right text-sm tabular-nums">
                   {formatCurrency(0, "USD")}
                 </TableCell>
-                <TableCell className="text-right text-sm tabular-nums">
-                  {strength.score}%
-                </TableCell>
                 <TableCell className="text-right">
                   <div className="flex justify-end gap-1">
                     <Button
