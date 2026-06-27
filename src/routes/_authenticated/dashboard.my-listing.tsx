@@ -533,6 +533,7 @@ function MyListingPage() {
                   const startStr = t.start_time
                     ? String(t.start_time).slice(0, 5)
                     : "—";
+                  const isActive = t.status === "active";
                   return (
                   <TableRow key={t.id}>
                     <TableCell className="font-medium">{t.title}</TableCell>
